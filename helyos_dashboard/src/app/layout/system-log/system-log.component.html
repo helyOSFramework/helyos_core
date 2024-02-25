@@ -1,0 +1,76 @@
+
+<div class="row" style="padding: 0px 24px; justify-content:space-between">
+    <h1>System Logs</h1>
+</div>
+
+<div class="row" style="align-items:flex-end">
+    <fieldset class="form-group col-xl-3">
+        <label>Work process id</label>
+        <input type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId" />
+    </fieldset>
+
+    <fieldset class="form-group col-xl-4">
+        <label>Agent UUID</label>
+        <input type="text" class="form-control" [(ngModel)]="filterAgentUuid" name="filterAgentUuid" />
+    </fieldset>
+
+    <fieldset class="form-group col-xl-4">
+        <label>Origin</label>
+        <select class="form-control" [(ngModel)]="filterOrigin" name="filterOrigin">
+            <option value="agent">agent</option>
+            <option value="microservice">microservice</option>
+            <option value="helyos_core">helyOS</option>
+            <option value="all">all</option>
+        </select>
+    </fieldset>
+
+
+    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary" (click)="filterList(0)" type="submit">APPLY</button>
+
+</div>
+
+
+
+<div class="card mb-3">
+    <div class="card-header" style="display: flex; justify-content: space-between;">
+        <div style="display: flex;">
+            <div class="clickable" (click)="filterList(0)">
+                <span class="reload">&#x21bb;</span>
+                <span> RELOAD  </span>
+            </div>
+            <div>
+                <input   id="autoReload" type="checkbox" style=" margin-right: 10px;"            
+                [(ngModel)]="autoReload" name="autoReload" />
+                <label > Auto Reload </label> 
+            </div>
+        </div>
+
+        <div>
+            <span  class="clickable" (click)="filterList(-1)" > &#8810; previous </span>
+             | {{page}} |
+            <span class="clickable" (click)="filterList(1)" >next &#8811;</span>
+        </div>
+    </div>
+
+    <div class="card-body table-responsive ">
+        <table class="table table-hover ">
+            <thead>
+                <tr>
+                    <th width="150"> Timestamp </th>
+                    <th width="100">#proc-id</th>
+                    <th>Message</th>
+                    <th>Agent</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of logs" (click)="getItem(item.id)" [title]="item.enabled ? '' : 'Service is disabled'" class="consoleTheme">
+                    <th class="datetime-column" scope="row">{{item.createdAt | date:'dd.MM.yy HH:mm:ss' }}</th>
+                    <td  class="wproc-column">{{item.wprocId}}</td>
+                    <td [ngClass]="{'error-row':item.logType === 'error', 'warn-row':item.logType === 'warn'}">{{item.msg}}</td>
+                    <td  class="agent-column">{{item.agentUuid}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

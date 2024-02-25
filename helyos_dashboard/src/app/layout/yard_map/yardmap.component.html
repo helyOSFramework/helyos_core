@@ -1,0 +1,156 @@
+<div class="row" style="padding: 0 14px; justify-content:space-between">
+    <h1>Yard Map Objects </h1>
+    <div style="text-align: right; margin-bottom: 6px;">
+        <button  class="btn btn-lg btn-outline-dark"  (click)="openDocs()" >
+                  Documentation
+        </button>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+       Select the Yard
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Yard Type</th>
+                    <th>Data format</th>
+                    <th>Lat</th>
+                    <th>Lon</th>
+                    <th>Alt</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of yardmap" (click)="getYardItem(item.id)"
+                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    <th scope="row">{{item.name}}</th>
+                    <td>{{item.yardType}}</td>
+                    <td>{{item.dataFormat}}</td>
+                    <td>{{item.lat}}</td>
+                    <td>{{item.lon}}</td>
+                    <td>{{item.alt}}</td>
+                    <td>{{item.source}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<ng-container *ngIf="selectedItem">
+
+    <div style="margin-top: 32px;" class="card mb-3">
+        <div class="card-header" style="display: flex; justify-content: space-between;">
+            <div>
+                <h4 style="margin: 0px"> Map Objects </h4>
+            </div>
+
+            <div class="clickable" (click)="filterObjList(0)">
+                <span class="reload">&#x21bb;</span>
+                <span> RELOAD  </span>
+            </div>
+
+            <div>
+                <span  class="clickable" (click)="filterObjList(-1)" > &#8810; previous </span>
+                 | {{page}} |
+                <span class="clickable" (click)="filterObjList(1)" >next &#8811;</span>
+            </div>
+        </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-left: 16px;" >
+
+        <div>
+            <span>Filter by type: </span>
+            <input style="width: 120px;" type="text"  (input)="debouncingFilterText($event)">
+        </div>
+
+        <div>
+            <button class="btn btn-danger" style="margin: 10px 6px 0px;"  [disabled]="disableUploadButton" (click)="fileInput.click()">Overwrite all objects</button>
+            <button class="btn btn-secondary" style="margin: 10px 6px 0px;" (click)="downloadYardData()">Download all objects</button>
+            <button class="btn btn-primary" style="margin: 10px 6px 0px;" (click)="addObjectItem()">Add new object</button> 
+        </div>
+
+    </div>
+    <div style="width: 100%;" class="card-body table-responsive">
+        <table class="mapobjects-table table table-hover">
+            <thead>
+                <tr>
+                    <th style="width:20px">ID</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Data Format</th>
+                    <th>Data (JSON)</th>
+                    <th>Metadata (JSON)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let item of mapObjects" >
+                <tr (click)="getObjectItem(item.id)"
+                    [ngClass]="{selectedHighlight: item.id==selectedObjectItem?.id}">
+
+                    <th  style="width:20px">{{item.id}}</th>
+
+                    <td>
+                        <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.type}} </span>
+                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.type"> </span>
+                    </td>
+
+
+                    <td>
+                        <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.name}} </span>
+                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.name"> </span>
+                    </td>
+
+                    <td>
+                        <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.dataFormat}} </span>
+                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.dataFormat"> </span>
+                    </td>
+
+
+                    <td>
+                        <div  style="max-height: 20px; width:350px; overflow: hidden;" *ngIf="item.id!==selectedObjectItem?.id"> {{item.data}} </div>
+                        <span>
+                            <textarea *ngIf="item.id==selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.data"></textarea> 
+                        </span>
+                    </td>
+                    <td>
+                        <div  style="max-height: 20px; width:350px; overflow: hidden;" *ngIf="item.id!==selectedObjectItem?.id"> {{item.metadata}} </div>
+                        <span>
+                            <textarea *ngIf="item.id==selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.metadata"></textarea> 
+                        </span>
+                    </td>
+
+                </tr>
+
+                <tr  *ngIf="item.id==selectedObjectItem?.id">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <div style="display:inline-table; width:300px" >
+                            <button (click)="saveObjectItem(selectedObjectItem.id)"> SAVE </button>
+                            <button (click)="deleteObjectItem(selectedObjectItem.id)"> DELETE </button>              
+                        </div>
+                    </td>
+                </tr>
+
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+</ng-container>
+
+
+<input
+  style="display: none" extensions=".json"
+  type="file" (change)="onFileChanged($event)"
+  #fileInput>

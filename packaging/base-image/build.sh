@@ -1,0 +1,1 @@
+docker build -t helyosframework/helyos_core_base:2.0.0 .

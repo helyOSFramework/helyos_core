@@ -1,0 +1,30 @@
+.selectedHighlight {
+    background-color: #ced4da;
+}
+
+.detail-container{
+    border-radius: 10px;
+    border: solid 0.5px lightgray;
+    padding: 20px;
+    margin: 0 5%;
+}
+
+th, td {
+    text-align: center;
+}
+
+
+.click-to-add {
+    cursor: pointer;
+    align-self: center; margin: 0 3px;
+    background-color: lightgray;
+    border: solid 0.1px gray;
+    padding: 2px;
+}
+
+
+
+.clickable {
+    cursor: pointer;
+    width: 300px;
+}

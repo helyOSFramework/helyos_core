@@ -1,0 +1,26 @@
+.file-upload {
+    display: none;
+  }
+
+
+.thumbnailContainer {
+
+  align-items: flex-start;
+  height: inherit;
+  margin-left: 14px;
+  display: flex;
+  flex-direction: column;
+  img {
+      margin: 3px;
+      height: 100%;
+  }
+}
+
+.clickable {
+    cursor: pointer;
+    width: 300px;
+}
+
+.field-group {
+  border: solid 0.5px rgba(0, 0, 0, 0.125); border-radius: 10px; padding: 18px; margin-bottom: 30px;
+}

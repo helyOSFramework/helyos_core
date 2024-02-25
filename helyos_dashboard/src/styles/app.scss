@@ -1,0 +1,53 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'bootstrap/bootstrap';
+@import 'spinner';
+@import 'utils';
+@import 'rtl';
+@import 'responsive';
+
+@media print {
+    .breadcrumb {
+        display: none !important;
+    }
+}
+
+.nav-divider {
+    @include nav-divider;
+}
+
+
+
+tr {
+    max-width: 100px;
+}
+
+
+.td {
+    max-width: 100px;
+}
+
+.selectedHighlight {
+    background-color: #ced4da;
+}
+
+.detail-container{
+    border-radius: 10px;
+    border: solid 0.5px lightgray;
+    padding: 20px;
+    margin: 10px 5%;
+}
+
+.map {
+    height: 100%;
+    padding: 0;
+  }
+
+  .click-show{
+    cursor: pointer;
+    color:blue;
+}
+
+.clickable {
+    cursor: pointer;
+    width: 300px;
+}

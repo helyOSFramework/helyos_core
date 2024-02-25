@@ -1,0 +1,43 @@
+{
+  "name": "helyos-core",
+  "private": true,
+  "version": "2.0.4",
+  "description": "helyOS core",
+  "repository": "",
+  "author": {
+    "name": "Carlos Viol Barbosa",
+    "url": "https://helyosframework.org/"
+  },
+  "bin": "src/main.js",
+  "license": "Adapted Apache-2.0",
+  "main": "src/main.js",
+  "devDependencies": {
+    "jest": "^27.3.1",
+    "nock": "^13.1.4" 
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "cookie": "0.3.1",
+    "events": "^3.0.0",
+    "express": "4.17.1",
+    "node-rtsp-stream": "0.0.8",
+    "pg": "^8.7.3",
+    "postgraphile": "^4.7.0",
+    "postgraphile-plugin-connection-filter": "^2.0.0",
+    "querystring": "0.2.0",
+    "redoc-cli": "^0.13.19",
+    "request": "2.83.0",
+    "socket.io": "4.6.1",
+    "superagent": "^5.2.2",
+    "typescript": "2.1.5",
+    "util": "^0.11.1",
+    "uuid": "^8.3.1"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "bash src/test/test.sh",
+    "make_map_api_doc": "redoc-cli bundle -o docs/map_api.html docs/helyos_map_services.json",
+    "make_path_api_doc": "redoc-cli bundle -o docs/path_api.html docs/helyos_path_planner_services.json",
+    "test:watch": "npm run test -- --watch"
+  }
+}

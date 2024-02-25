@@ -1,0 +1,132 @@
+<div class="row" style="padding: 0 14px; justify-content:space-between">
+    <h1>Yards </h1>
+    <div style="text-align: right; margin-bottom: 6px;">
+        <button  class="btn btn-lg btn-outline-dark"  (click)="openDocs()" >
+                  Documentation
+        </button>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header" style="display:flex; justify-content:space-between">
+        <div>Yards</div>
+        <div class="clickable" (click)="list()">
+            <span class="reload">&#x21bb;</span>
+            <span> RELOAD  </span>
+        </div>
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>UID</th>
+                    <th>Yard Type</th>
+                    <th>Name</th>
+                    <th>Lat</th>
+                    <th>Lon</th>
+                    <th>Alt</th>
+                    <th>Map data</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of yards" (click)="getItem(item.id)"
+                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    <td>{{item.id}}</td>
+                    <td>{{item.uid}}</td>
+                    <th scope="row">{{item.yardType}}</th>
+                    <td>{{item.name}}</td>
+                    <td>{{item.lat}}</td>
+                    <td>{{item.lon}}</td>
+                    <td>{{item.alt}}</td>
+                    <td title="arbritrary JSON data">{{item.mapData}}</td>
+                    <td>{{item.source}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div style="text-align: right; margin-bottom: 10px;">
+    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+    <button class="btn btn-danger" [disabled]="!selectedItem" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
+</div>
+
+
+ 
+<section class="detail-container " *ngIf="selectedItem" >
+
+        <h4>{{selectedItem.name}}</h4>
+
+        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
+            <div class="row">
+                <fieldset class="form-group col-xl-6">
+                    <label>Name</label>
+                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+                </fieldset>
+
+
+                <fieldset class="form-group col-xl-3">
+                    <label> UID </label>
+                    <input class="form-control" [(ngModel)]="selectedItem.uid" name="uid"
+                    placeholder="IVI001" />
+                </fieldset>
+
+                <fieldset class="form-group col-xl-3">
+                    <label> Yard type</label>
+                    <input class="form-control" [(ngModel)]="selectedItem.yardType" name="yardType"
+                    placeholder="logistic_yard" />
+                </fieldset>
+
+            </div>
+
+
+            <div class="row" >
+
+                <fieldset class="form-group col-xl-4">
+                    <label>Latitude</label>
+                    <input type="number" class="form-control" [(ngModel)]="selectedItem.lat"  name="lat"
+                    placeholder="50.232" />
+                </fieldset>
+                <fieldset class="form-group col-xl-4">
+                    <label>Longitude</label>
+                    <input type="number" class="form-control" [(ngModel)]="selectedItem.lon"  name="lon"
+                    placeholder="13.344" />
+                </fieldset>
+                <fieldset  class="form-group col-xl-4">
+                    <label>Altitude</label>
+                    <input type="number" class="form-control" [(ngModel)]="selectedItem.alt"  name="alt"
+                    placeholder="0" />
+                </fieldset>
+
+
+            </div>
+
+            <div class="row" >
+
+                <fieldset class="form-group col-xl-4">
+                    <label>Data format</label>
+                    <input type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
+                    placeholder="e.g. GeoJson-7946" />
+                </fieldset>
+
+            </div>
+
+
+            <div class="row" >
+                <fieldset class="form-group col-xl-12">
+                    <label> Map data (arbritrary JSON data) </label>
+                    <textarea class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"
+                    ></textarea>
+                </fieldset>
+            </div>
+
+
+            <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
+            <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
+
+        </form>
+
+</section>

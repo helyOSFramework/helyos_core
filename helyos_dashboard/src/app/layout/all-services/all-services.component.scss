@@ -1,0 +1,36 @@
+.selectedHighlight {
+    background-color: #ced4da;
+    border-left: solid 1px;
+}
+
+.service-detail-container{
+    border-radius: 10px;
+    border: solid 0.5px lightgray;
+    padding: 20px;
+    margin: 0 5%;
+}
+
+p {
+    line-height: 1.3; 
+}
+
+.disable-row {
+    color: gray !important;
+}
+
+.click-show{
+    cursor: pointer;
+    color:blue;
+}
+
+.assignment-row {
+    background-color:  rgba(154, 195, 246,0.6);
+}
+
+.mapserver-row {
+    background-color: rgba(197, 224, 180, 0.6);
+}
+
+.storage-row {
+    background-color: rgba(230, 230, 230, 0.6);
+}

@@ -1,0 +1,27 @@
+
+
+
+  
+
+
+ .mapobjects-table th:first-child,
+       .mapobjects-table td:first-child {
+         width: 10px;
+   }
+
+       // .mapobjects-table th:nth-child(2),
+        //.mapobjects-table td:nth-child(2) {
+        //    width: 20px;
+       // }
+
+        //.mapobjects-table th:not(:first-child):not(:nth-child(2)),
+        //.mapobjects-table td:not(:first-child):not(:nth-child(2)) {
+         //   width: 40px;
+       // }
+
+
+
+
+// Path: helyos_core/dashboard/src/app/layout/yard_map/yardmap.component.html
+// fix the width of mapobjects table columns to 20px, 30px, 30px :
+

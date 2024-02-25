@@ -1,0 +1,426 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Map Services API",
+    "version": "1.0",
+    "license": {
+      "name": "MIT"
+    },
+    "description": "HelyOS communicates (makes requests) to Map microservices using this API. External services must folow these definitions to be compatible with helyOS.\n\n## Services\n* map:  Updates map objects in yard.\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/map": {
+      "post": {
+        "summary": "Request map update",
+        "operationId": "post-assignment",
+        "responses": {
+          "201": {
+            "description": "For time demanding calculations, the output should be just a token that will be used later to poll the final result.\nFor quick calculations (few seconds), the service can return the result as described in the response of /map/{request_id}.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "request_id"
+                  ]
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "request_id": "asdfghjkl0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Create a request for map update.\nThe `context` contains the current state of map and tools. Results of previous calculations are found in `context.dependences` . \n\nSpecific work process information goes in `request`. No data structure is pre-defined for this object. \n\nThe response is the request number id. helyOS will periodically poll the results using this number until the calculations or data retrieval is ready.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "type": "object",
+                    "description": "This object is originated in the user interface."
+                  },
+                  "config": {
+                    "type": "object"
+                  },
+                  "context": {
+                    "$ref": "#/components/schemas/HelyOSContext"
+                  }
+                },
+                "required": [
+                  "request",
+                  "context"
+                ]
+              },
+              "examples": {}
+            }
+          },
+          "description": "Request for path planning."
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "user_id"
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/map/{request_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "request_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Get map data result",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "`result.update` completely updates the map objects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "minLength": 1,
+                      "enum": [
+                        "ready",
+                        "failed",
+                        "pending",
+                        "canceled"
+                      ]
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "update": {
+                          "$ref": "#/components/schemas/MapModel"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "request_id",
+                    "status"
+                  ]
+                },
+                "examples": {
+                  "Example using geo-json": {
+                    "value": {
+                      "request_id": "string",
+                      "status": "ready",
+                      "result": {
+                        "update": {
+                          "id": "string",
+                          "origin": {
+                            "long": 13.735888504238131,
+                            "lat": 51.02717609817974,
+                            "alt": 0
+                          },
+                          "map_objects": [
+                            {
+                              "id": 0,
+                              "data": {
+                                "type": "Polygon",
+                                "Coordinates": [
+                                  [
+                                    [
+                                      30,
+                                      10
+                                    ],
+                                    [
+                                      10,
+                                      10
+                                    ],
+                                    [
+                                      10,
+                                      0
+                                    ],
+                                    [
+                                      20,
+                                      40
+                                    ]
+                                  ]
+                                ]
+                              },
+                              "data_format": "GeOJSON",
+                              "type": "obstacle",
+                              "metadata": {
+                                "velocity": null
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              },
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "operationId": "get-assignment-id",
+        "description": "Get information about a job request selected by the request id.\n",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "user_id"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Cancel request for map update",
+        "operationId": "delete-trajectory-user_id-request_id",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "user_id": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "user_id"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ToolModel": {
+        "title": "ToolModel",
+        "type": "object",
+        "description": "Agent Model",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sensors": {
+            "type": "object"
+          },
+          "pose": {
+            "$ref": "./helyos_path_planner_services.json#/components/schemas/PoseModel"
+          },
+          "geometry": {
+            "type": "object"
+          }
+        }
+      },
+      "MapModel": {
+        "description": "",
+        "type": "object",
+        "x-examples": {},
+        "title": "",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "map or yard id."
+          },
+          "origin": {
+            "type": "object",
+            "description": "Origin (0,0) of local helyOS map in WGS84 long/lat",
+            "required": [
+              "long",
+              "lat"
+            ],
+            "properties": {
+              "long": {
+                "type": "number",
+                "example": 13.735888504238131
+              },
+              "lat": {
+                "type": "number",
+                "example": 51.02717609817974
+              },
+              "alt": {
+                "type": "number"
+              }
+            }
+          },
+          "map_objects": {
+            "description": "map objects.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapObject"
+            }
+          }
+        },
+        "required": [
+          "origin",
+          "map_objects"
+        ]
+      },
+      "MapObject": {
+        "title": "MapObject",
+        "type": "object",
+        "description": "Flexible data format for maps. ",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "data": {
+            "type": "object",
+            "description": "arbitrary data structure."
+          },
+          "data_format": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "HelyOSContext": {
+        "title": "HelyOSContext",
+        "type": "object",
+        "properties": {
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolModel"
+            }
+          },
+          "map": {
+            "$ref": "#/components/schemas/MapModel"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "UID": {
+                  "type": "string"
+                },
+                "output": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "x-api-key": {
+        "name": "x-api-key",
+        "type": "apiKey",
+        "in": "header"
+      }
+    },
+    "responses": {
+      "retrieve-request": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "result": {
+                  "type": [
+                    "null",
+                    "object"
+                  ]
+                },
+                "results": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "required": [
+                "request_id",
+                "status"
+              ]
+            }
+          }
+        },
+        "headers": {
+          "header-0": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
