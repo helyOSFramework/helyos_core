@@ -9,17 +9,17 @@
     "url": "https://helyosframework.org/"
   },
   "bin": "src/main.js",
-  "license": "Adapted Apache-2.0",
+  "license": "Modified Apache-2.0",
   "main": "src/main.js",
   "devDependencies": {
-    "jest": "^27.3.1",
-    "nock": "^13.1.4" 
+    "jest": "^27.3.1"
   },
   "dependencies": {
     "amqplib": "^0.10.3",
     "cookie": "0.3.1",
     "events": "^3.0.0",
     "express": "4.17.1",
+    "nock": "^13.1.4",
     "node-rtsp-stream": "0.0.8",
     "pg": "^8.7.3",
     "postgraphile": "^4.7.0",
@@ -29,9 +29,8 @@
     "request": "2.83.0",
     "socket.io": "4.6.1",
     "superagent": "^5.2.2",
-    "typescript": "2.1.5",
     "util": "^0.11.1",
-    "uuid": "^8.3.1"
+    "uuid": "^9.0.1"
   },
   "scripts": {
     "start": "node src/main.js",

@@ -1,6 +1,9 @@
-// Services imports
+// This module is responsible for sending messages to agents.
+// It also contains functions to send instant actions to agents, such as reserving, releasing and cancel agents for work processes.
+
 var rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 var databaseServices = require('../../services/database/database_services.js');
+const { saveLogData } = require('../systemlog.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
 const REFRESH_ONLNE_TIME_PERIOD = 10;
@@ -86,8 +89,17 @@ async function sendCustomInstantActionToAgent(agentId, commandStr) {
 }
 
  
-// Agent does whatever it needs to get ready for a mission
-// and then updates status ("READY") and resources or wp_clearance fields.
+
+/**
+ * sendGetReadyForWorkProcessRequest
+ * @param {number[]} agentIdList The list of agents to be reserved for the work process
+ * @param {number} wpId Work process id.
+ * @returns 
+ * @description
+ * This function sends an instant action to the agents to reserve them for a work process.
+ * Agent does whatever it needs to get ready for a mission and then updates status ("READY").
+ */
+
 async function sendGetReadyForWorkProcessRequest(agentIdList, wpId) {
     const agents = await databaseServices.agents.list_in('id',agentIdList);
     const msgs = {};
@@ -184,6 +196,10 @@ function sendEncriptedMsgToAgent(agentId, message, reason='assignment') {
     console.log(`send message to agent ${agentId} via rabbitmq:`, reason);
     return databaseServices.agents.get_byId(agentId)
            .then(agent => {
+            if (!agent) {
+                saveLogData('helyos_core', null, 'error', `Msg ${reason} Agent ${agentId} not found in database`);
+                return;
+            }
             let exchange = rabbitMQServices.AGENTS_DL_EXCHANGE; 
 
             if (BACKWARD_COMPATIBILITY)

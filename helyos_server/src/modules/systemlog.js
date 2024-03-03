@@ -1,9 +1,14 @@
+// This module is used to collect logs and save then in the database.
+
 const databaseServices = require('../services/database/database_services.js')
 
 
 function saveLogData(origin, metadata, logType, log_msg, eventType='' ) {
     let new_log_instance;
     let wproc_id = null;
+    if (typeof log_msg !== 'string') {
+        log_msg = JSON.stringify(log_msg);
+    }
 
     switch (origin) {
         case 'microservice':

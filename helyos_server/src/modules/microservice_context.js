@@ -1,15 +1,13 @@
 const databaseServices = require('../services/database/database_services.js');
 
-/*
-
+/**
+* generateFullYardContext
+**
 helyOS automatically send the yard state to external services as a context.
 generateFullYardContext() gathers all data relative to the yard.
 This data may not be used for all type of services. For this,
 filterContext() filters the generated context data according to the requirements of the requested service.
-
 */
-
-//@Todo create Context Model Class
 function generateFullYardContext(yardId){
 	const context = {
 					map: new Object(),

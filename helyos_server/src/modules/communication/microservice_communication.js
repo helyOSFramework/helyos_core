@@ -7,6 +7,75 @@ const SERVICE_STATUS = require('../data_models.js').SERVICE_STATUS;
 // EXTERNAL SERVICE COMMUNICATION
 // ----------------------------------------------------------------------------
 
+
+/** 
+** processMicroserviceRequest
+** @param {number} servRequestId - The id of the service request to be processed.
+** @returns {Promise}
+** @description
+** This function processes the service request, by dispatching it and analyzing its status and response data.
+*/
+const processMicroserviceRequest = (servRequestId) => { 
+
+    databaseServices.service_requests.get_byId(servRequestId)
+    .then((servRequest) => {
+        if (!servRequest) { // @TODO Better handle this error as process failed.
+            const e = `service request not found id=${servRequestId}`;
+            saveLogData('microservice', null, 'error', e ); 
+            throw Error(e);  
+        } 
+
+        const serviceRequestPatch = { fetched: true, processed: false, response: null, status: SERVICE_STATUS.PENDING};
+        let useRequestDataAsResponse = false;
+        let jobQueueId = null;
+
+        getExtServiceAccessData(servRequest.service_type)
+        .then(accessData => {
+            useRequestDataAsResponse = accessData.isDummy;
+            if (useRequestDataAsResponse) {
+                return Promise.resolve({requestId:null, ...servRequest.request||{}});
+           } else{
+                return webServices.sendRequestToService(accessData.url, accessData.apiKey, servRequest.request, servRequest.context, servRequest.config);
+            }
+        })
+        .then(servResponse => {
+            if (!servResponse) {
+                const e = 'Microservice response is empty';
+                saveLogData('microservice', servRequest, 'error', e );
+                throw Error(e);
+            } 
+            const service_dispatched_at = new Date();
+            const defaultStatus = SERVICE_STATUS.PENDING;
+            jobQueueId = servResponse.request_id;
+            
+            saveLogData('microservice', servRequest, 'success', 'request dispatched' );
+            return databaseServices.service_requests.update('id', servRequestId, {service_queue_id: jobQueueId, status:defaultStatus, dispatched_at: service_dispatched_at})
+                   .then(() => saveServiceResponse(servRequestId, servResponse, defaultStatus));
+        })
+        .catch(e => {
+            const servResponse = e.data;
+            saveLogData('microservice', servRequest, 'error', e );
+            return databaseServices.service_requests.update('id', servRequestId, { fetched: false, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+        });
+    })
+    .catch(e => {
+        const msg = `database access: request id=${servRequestId} ${e}`;
+        const servResponse = '{"result":{}}';
+        saveLogData('microservice', null, 'error', msg ); 
+        databaseServices.service_requests.update('id', servRequestId, { fetched: true, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+    });
+}
+
+
+
+/** 
+** getExtServiceAccessData
+** @param {string} serviceType - The type of the external service, as defined by the developer.
+** @returns {Promise}
+** @description
+** This function returns the access data for the external service, as url, apiKey and config.
+** It also returns a flag to indicate if the service is a dummy service.
+*/
 const getExtServiceAccessData = (serviceType) => {
 
     return databaseServices.services.select({service_type: serviceType, enabled: true})
@@ -20,65 +89,6 @@ const getExtServiceAccessData = (serviceType) => {
 
     })
 
-}
-
-
-
-const processServiceRequest = (requestId) => { 
-
-    databaseServices.service_requests.get_byId(requestId)
-    .then((servRequest) => {
-        if (!servRequest) { // @TODO Better handle this error as process failed.
-            const e = `service request not found id=${requestId}`;
-            saveLogData('microservice', null, 'error', e ); 
-            throw Error(e);  
-        } 
-
-        const serviceRequestPatch = { fetched: true, processed: false, response: null, status: SERVICE_STATUS.PENDING};
-        let useRequestDataAsResponse = false;
-        let jobQueueId = null;
-
-        getExtServiceAccessData(servRequest.service_type)
-        .then(accessData => {
-            useRequestDataAsResponse = accessData.isDummy;
-            if (!useRequestDataAsResponse) {
-                serviceRequestPatch['status'] = SERVICE_STATUS.PENDING;
-                return webServices.sendRequestToService(accessData.url, accessData.apiKey, servRequest.request, servRequest.context, servRequest.config);
-            } else{
-                serviceRequestPatch['status'] = SERVICE_STATUS.READY;
-                serviceRequestPatch['response'] =  servRequest.request;
-                serviceRequestPatch['processed'] = true;
-                return Promise.resolve({request_id: null});
-            }
-        })
-        .then(servResponse => {
-            if (!servResponse) {
-                const e = 'Microservice response is empty';
-                saveLogData('microservice', servRequest, 'error', e );
-                throw Error(e);
-            } 
-            const service_dispatched_at = new Date();
-            jobQueueId = servResponse.request_id;
-
-            if (useRequestDataAsResponse) {
-              return databaseServices.service_requests.update('id', requestId, {service_queue_id: jobQueueId, ...serviceRequestPatch});
-            }
-            saveLogData('microservice', servRequest, 'success', 'request dispatched' );
-            return databaseServices.service_requests.update('id', requestId, {service_queue_id: jobQueueId, status:SERVICE_STATUS.PENDING, dispatched_at: service_dispatched_at})
-                   .then(() => saveServiceResponse(requestId, servResponse, SERVICE_STATUS.PENDING));
-        })
-        .catch(e => {
-            const servResponse = e.data;
-            saveLogData('microservice', servRequest, 'error', e );
-            return databaseServices.service_requests.update('id', requestId, { fetched: false, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
-        });
-    })
-    .catch(e => {
-        const msg = `database access: request id=${requestId} ${e}`;
-        const servResponse = '{"result":{}}';
-        saveLogData('microservice', null, 'error', msg ); 
-        databaseServices.service_requests.update('id', requestId, { fetched: true, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
-    });
 }
 
 
@@ -98,6 +108,6 @@ const saveServiceResponse = (requestId, servResponse, defaultStatus) => {
 }
 
 
-module.exports.processServiceRequest = processServiceRequest;
+module.exports.processMicroserviceRequest = processMicroserviceRequest;
 module.exports.getExtServiceAccessData = getExtServiceAccessData;
 module.exports.saveServiceResponse = saveServiceResponse;

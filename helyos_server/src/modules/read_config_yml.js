@@ -1,3 +1,5 @@
+// This module is responsible for parsing the microservice and mission YML files and populating the database with the parsed data.
+
 const databaseServices = require('../services/database/database_services.js');
 const fs = require('fs');
 const yaml = require('js-yaml');

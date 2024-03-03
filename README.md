@@ -40,19 +40,20 @@
 ## About The Project
 
 helyOS Core is a microservice and assignment orchestrator for mission-controlled agents. 
-It is part of the helyOS framework, a software framework developed by Fraunhofer Institute for Transportation and Infrastructure Systems (IVI) for autonomous driving applications in delimited areas.
+It is part of the helyOS, a software framework developed by Fraunhofer Institute for Transportation and Infrastructure Systems (IVI) for autonomous driving applications in delimited areas.
 
-This repository contains the server source code which includes, GraphQl server, the microservice and assignments orchestrators, the database schema, and the dashboard web app used to configure helyOS Core. The helyOS Core is licensed under a [modified version of Apache License 2.0](./LICENSE.txt).
+This repository contains the server source code which includes, GraphQl server, the microservice and assignments orchestrators, the database schema, and the dashboard web app used to configure helyOS Core. 
+The helyOS Core is licensed under a [modified version of Apache License 2.0](./LICENSE.txt).
 
 ## Features
 
-- **Microservice Orchestration:** Efficiently synchronize microservices with assignment dispatches.
 - **Mission Request Processing:** Handle mission requests through HTTP.
-- **GraphQL Integration:** Employ GraphQL for a flexible application interfacing.
+- **Microservice Orchestration:** Efficiently synchronize microservices with assignment dispatches.
 - **Admin Dashboard:** Accessible web application for defining missions and agent registration.
+- **GraphQL Integration:** Employ GraphQL for a flexible application interfacing.
 - **Push Notifications:** Real-time notifications facilitated via WebSockets.
 - **RabbitMQ Account Management:** Automated configuration and maintenance of accounts within the RabbitMQ server.
-- **Agent Dataflow Monitoring:** Monitor and manage the data flow of agents within the RabbitMQ server environment.
+- **Agent Monitoring:** Monitor and manage the data flow of agents within the RabbitMQ server environment.
 
 
 ## Built With
@@ -65,8 +66,8 @@ This repository contains the server source code which includes, GraphQl server, 
 
 ## Demo
 
-Check out the [Autotruck](https://github.com/FraunhoferIVI/helyOS-demo-logistics-center) repository for a demonstration of the helyOS Core in action. 
-This demo showcases the use of  helyOS Core in the integrations of logistics center application.
+Check out the [Autotruck](https://github.com/helyOSFramework/logistics-center-demo) repository for a demonstration of the helyOS Core in action. 
+This demo showcases the use of helyOS Core in the integration of logistics center application.
 
 ## Tutorials and Documentation 
 
@@ -112,7 +113,7 @@ in the terminal:
 
 
 ```bash
-    docker-compose run --rm name_of_helyos_service "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
+    docker-compose run --rm name_of_helyos_client_app "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
 ```
 
 Note that when migrating to a new database schema, it is crucial to assess how these changes will impact the application. 

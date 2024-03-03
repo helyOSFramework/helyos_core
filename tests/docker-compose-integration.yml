@@ -1,0 +1,147 @@
+version: '3.5'
+services:
+
+  integration_test:
+    image: node:18
+    working_dir: /app
+    command: ["npm", "run", "test"]
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=test
+    networks:
+      - control-tower-net
+    depends_on:
+      - local_postgres
+      - local_rabbitmq
+      - helyos_core
+
+
+
+# ----------------- Control Tower Database and Message Broker -----------------
+
+    local_postgres:
+        image: postgres:13
+        ports:
+            - "5432:5432"
+
+        environment:
+            POSTGRES_HOST_AUTH_METHOD: "trust"
+            POSTGRES_USER: helyos_db_admin
+            POSTGRES_PASSWORD: helyos_secret
+        networks:
+            - control-tower-net
+
+
+
+    local_rabbitmq:
+        image:  rabbitmq:3-management
+        hostname: local_rabbitmq
+
+        ports: 
+            - 5672:5672          
+            - 15672:15672        
+
+        networks:
+            - control-tower-net
+
+# ----------------- HelyOS Core -----------------
+
+    helyos_core:
+        image: helyosframework/helyos_core
+
+        ports:
+            - 5002:5002  # Websocket
+            - 5000:5000  # GraphQL
+            - 8080:8080  # HelyOS Dashboard
+
+
+        volumes:
+            - ./settings/config:/etc/helyos/config/
+            - ./settings/db_initial_data/:/etc/helyos/db_initial_data/
+            - ./settings/rsa_keys/helyos_private.key:/etc/helyos/.ssl_keys/helyos_private.key:ro
+            - ./settings/rsa_keys/helyos_public.key:/etc/helyos/.ssl_keys/helyos_public.key:ro
+            - ./fixtures/mock01_microservice.js:/etc/helyos/fixtures/mock_microservice.js
+
+        environment: # Check the documentation for more details: https://helyos-manual.readthedocs.io/en/latest/2-helyos-configuration/getting-started.html#helyos-settings
+            # DATABASE 
+            - PGUSER=helyos_db_admin 
+            - PGPASSWORD=helyos_secret
+            - PGHOST=local_postgres 
+            - PGDATABASE=smartfarm_db 
+            - PGPORT=5432
+            
+            # GRAPHQL VARIABLES
+            - GQLPORT=5000
+
+            # RABBITMQ 
+            - RBMQ_HOST=local_rabbitmq 
+            - RBMQ_PORT=5672
+            - RBMQ_API_PORT=15672
+            - RBMQ_SSL=False
+            - RBMQ_API_SSL=False 
+
+            # RBMQ ACCOUNTS
+            - CREATE_RBMQ_ACCOUNTS=True
+            - RBMQ_ADMIN_USERNAME=helyos_rbmq_admin # set if CREATE_RBMQ_ACCOUNTS is True
+            - RBMQ_ADMIN_PASSWORD=helyos_secret # set if CREATE_RBMQ_ACCOUNTS is True
+            - AGENT_AUTO_REGISTER_TOKEN=0001-0002-0003-0000-0004
+
+            # HelyOS SETTINGS
+            - RUN_MODE=test  # test | production | migration
+            - MESSAGE_RATE_LIMIT=50 
+            - MESSAGE_UPDATE_LIMIT=20
+            
+
+
+        networks:
+            - control-tower-net
+
+        depends_on:
+            - local_postgres
+            - local_rabbitmq
+
+
+
+# ----------------- A Simple Truck Simulator -----------------
+
+    agent_simulator_1:
+        image: helyosframework/helyos_agent_slim_simulator:0.7.5
+
+            
+        environment:
+
+            # AGENT ID
+            - UUID=Ab34069fc5-fdgs-434b-b87e-f19c5435113 
+            - ASSIGNMENT_FORMAT=trajectory  # fixed | trajectory | straight_to_destination | trucktrix-path 
+            - NAME=MY_TRACTOR
+            - X0=-28000
+            - Y0=29000
+            - ORIENTATION=0.329
+            - VELOCITY=1.8 
+            - VEHICLE_PARTS=2
+            - YARD_UID=1
+            - UPDATE_RATE=10
+
+            # RABBITMQ 
+            - RBMQ_HOST=local_rabbitmq 
+            - RBMQ_PORT=5672
+            # - RBMQ_USERNAME= using REGISTRATION_TOKEN instead
+            # - RBMQ_PASSWORD= using REGISTRATION_TOKEN instead
+            - REGISTRATION_TOKEN=0001-0002-0003-0000-0004
+
+        networks:
+            - control-tower-net   
+
+        depends_on:
+            - helyos_core
+            - local_rabbitmq     
+
+        command: ["python", "main.py"]
+
+
+networks:
+    control-tower-net:
+       external: false
+
+

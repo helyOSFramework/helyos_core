@@ -6,9 +6,10 @@ var http = require('http');
 const {saveLogData} = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
+const SOCKET_PORT = process.env.SOCKET_PORT || 5002
 
 const conf = {
-    port: 5002,
+    port: SOCKET_PORT,
     socketIo: {
         path: '',
         serveClient: false,

@@ -9,6 +9,8 @@ const databaseServices = require('../../services/database/database_services.js')
 
 
 async function createAssignment(workProcess, servResponse, serviceRequest){
+	console.log("servResponse")
+	console.log(servResponse)
 
 	const agentIds = workProcess.agent_ids;
 	const serviceRequestId = serviceRequest?  serviceRequest.id:null
@@ -27,21 +29,29 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 
 		for (let index = 0; index < results.length; index++) {
 			const result = results[index];
-
-			// Get agent id. Assigments are identified either by tool_id or agent_id or agent_uuid
 			let agent_id = result.agent_id;
 			if (result.agent_uuid) {
 				agent_id = await databaseServices.agents.getIds([result.agent_uuid]).then(ids=>ids[0]);
 			}
-			if (result.tool_id) {    //Deprecated
-				agent_id = result.tool_id;
+			
+			let hasAgent;
+			if (!agent_id) {
+				hasAgent = false;
+			} else {
+				hasAgent = await databaseServices.agents.get_byId(agent_id).then(agent=>agent);
 			}
-			//
+
+			if (!hasAgent) {
+				saveLogData('helyos_core', null, 'error', `Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
+				throw new Error(`Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
+			}
 
 			if (!agentIds.includes(parseInt(agent_id))){
-				saveLogData('helyos_core', null, 'error', `agent_id ${agent_id} not found in work_process ${workProcess.id} agent_ids. In future versions, this will block the mission.`);
+				saveLogData('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids. In future versions, this will block the mission.`);
 			}
 
+
+			console.log()
 
 
 			assigmentInputs.push({
