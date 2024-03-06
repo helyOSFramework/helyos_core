@@ -42,9 +42,9 @@ HELYOS_REPLICA = HELYOS_REPLICA === 'true';
 // See the file microservice_mocks.js for more details.
 const MOCK_SERVICES = process.env.MOCK_SERVICES;
 if (MOCK_SERVICES === 'True'){
-    console.log = function() {};
-    require('./test/microservice_mocks').overridePathPlannerCalls();
-    require('./test/microservice_mocks').overrideMapServerCalls();
+    // console.log = function() {};
+    require('./microservice_mocks.js').overridePathPlannerCalls();
+    require('./microservice_mocks.js').overrideMapServerCalls();
 }
 
 

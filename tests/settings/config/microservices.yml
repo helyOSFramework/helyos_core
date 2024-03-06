@@ -1,0 +1,60 @@
+version: '2.0'
+
+services:
+
+    my_path_planner:
+      is_dummy: false
+      domain: "Assignment planner"  # Assignment planner | Map Server | Storage server
+      type: "drive"
+      url: http://my_path_planner:9002/api/
+      enable: true
+      apikey: "CN783V9SygdG0deHgfesdfsaeNuCqwbm"
+      timeout: 6
+      
+      context:
+        map_data: true
+        all_agents_data: false
+        mission_agents_data: true
+        
+      config: >
+            {"plan-directions": "all_directions",
+              "output_format" :"trajectory"}
+
+
+
+    maploader:
+      domain: "Map server"  # Assignment planner | Map server | Storage server
+      type: "map"
+      url: http://my_map_server:9002/api/
+      enable: true
+      apikey: "ABy40lwSsdfafasdBiCbvU2hVEeY7t"
+      timeout: 180
+      
+      context:
+        map_data: true
+        all_agents_data: false
+        mission_agents_data: false
+
+
+
+    my_dummy_planner:
+      domain: "Assignment planner"  # Assignment planner | Map Server | Storage server
+      is_dummy: true
+      description: "This is a dummy assignment planner; it means that the assignmment will be calculated on the external application."
+      type: "drive_dummy"
+      url: "not_used"
+      enable: true
+      apikey: "not_used"
+      timeout: 2
+      
+      context:
+        map_data: false
+        all_agents_data: false
+        mission_agents_data: true
+        
+      config: >
+            {"plan-directions": "all_directions",
+              "output_format" :"trajectory"}
+
+
+

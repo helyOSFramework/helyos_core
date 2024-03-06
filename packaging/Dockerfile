@@ -38,6 +38,9 @@ COPY  helyos_server/package.json  /usr/local/helyos_core/helyos_server/package.j
 COPY  helyos_server/package-lock.json  /usr/local/helyos_core/helyos_server/package-lock.json
 RUN npm install 
 
+# SET ENVIRONMENT VARIABLE with the default path for node_modules
+ENV NODE_PATH=/usr/local/helyos_core/helyos_server/node_modules
+
 COPY helyos_database/ /usr/local/helyos_core/helyos_database
 RUN dos2unix /usr/local/helyos_core/helyos_database/db_commands/migrate.sh
 RUN chmod +x /usr/local/helyos_core/helyos_database/db_commands/migrate.sh

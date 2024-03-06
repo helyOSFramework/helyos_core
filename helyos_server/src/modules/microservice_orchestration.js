@@ -46,7 +46,7 @@ ensureCorrectDummyRequestFormat = (service, request, agentIds) => {
 			saveLogData('helyos_core', null, 'warn', `${service.name} is received a wrong request format, helyOS will try to fix it.`);
 			const fixed_req = {request_id: null,
 							   status: 'complete',
-							   results: agentIds.map(id =>({agent_id: id, result: {...request}})) 
+							   results: agentIds.map(id =>({agent_id: id, assignment: {...request}})) 
 							  }
 			return fixed_req;
 		}

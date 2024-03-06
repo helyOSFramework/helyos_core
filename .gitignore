@@ -4,7 +4,7 @@
 /tmp
 /out-tsc
 dist
-
+node_modules
 .vscode
 # dependencies
 /node_modules

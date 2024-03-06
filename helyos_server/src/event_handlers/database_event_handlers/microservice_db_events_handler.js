@@ -12,7 +12,8 @@ const databaseServices = require('../../services/database/database_services.js')
 const extServiceCommunication = require('../../modules/communication/microservice_communication.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
-const {SERVICE_STATUS, MISSION_STATUS} = require('../../modules/data_models')
+const {SERVICE_STATUS, MISSION_STATUS} = require('../../modules/data_models');
+const { saveLogData } = require('../../modules/systemlog.js');
 
 // Callbacks to database changes
 function processMicroserviceEvents(msg) {
@@ -30,7 +31,7 @@ function processMicroserviceEvents(msg) {
                 if(service_request_status == SERVICE_STATUS.READY_FOR_SERVICE){
                     bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                     service_request_id = payload['id'];
-                    extServiceCommunication.processServiceRequest(service_request_id);
+                    extServiceCommunication.processMicroserviceRequest(service_request_id);
                 }
                 break;
 
@@ -43,7 +44,7 @@ function processMicroserviceEvents(msg) {
                         service_request_id = payload['id'];
                         databaseServices.service_requests.update_byId(service_request_id, {status: SERVICE_STATUS.DISPATCHING_SERVICE})
                         .then(() => blMicroservice.updateRequestContext(service_request_id))
-                        .then(() => extServiceCommunication.processServiceRequest(service_request_id)); // Current service status: ready_for_service => pending
+                        .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id)); // Current service status: ready_for_service => pending
                         break;			
                 
                     case  SERVICE_STATUS.READY:
@@ -51,7 +52,11 @@ function processMicroserviceEvents(msg) {
                             bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                             microResp.processMicroserviceResponse(payload)
                             .then(() => blMicroservice.wrapUpMicroserviceCall(payload))
-                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)); // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                            .catch(err => {
+                                databaseServices.service_requests.update_byId(payload['id'], {status: SERVICE_STATUS.FAILED});
+                                saveLogData('microservice', payload, 'error', err.msg);
+                            });
                         } else {
                             blMicroservice.wrapUpMicroserviceCall(payload)
                             .then(() => blMicroservice.activateNextServicesInPipeline(payload)); // Next service status: not_ready_for_service => wait_dependencies or ready_for_service

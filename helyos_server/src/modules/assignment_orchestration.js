@@ -39,7 +39,7 @@ function activateNextAssignmentInPipeline(partialAssignment) {
 async function updateAssignmentContext(assigmentId) {
 	const assignment = await databaseServices.assignments.get_byId(assigmentId);
 	// Assignment dependencies
-	const dependencies = await generateAssignmentDependencies(assignment.nextAssignments);
+	const dependencies = await generateAssignmentDependencies(assignment);
 	
 	const context = {'dependencies': dependencies};
 	if(!assignment.context) { assignment.context = {}; }
@@ -55,7 +55,8 @@ function cancelWorkProcessAssignmentsAndRequests(id){
 
 function dispatchAssignmentToAgent(partialAssignment) {
 	return databaseServices.assignments.get_byId(partialAssignment.id)
-	.then(assignment => agentComm.sendAssignmentToExecuteInAgent(assignment));
+	.then(assignment => agentComm.sendAssignmentToExecuteInAgent(assignment))
+	.catch(err => databaseServices.assignments.update_byId(partialAssignment.id, {status: ASSIGNMENT_STATUS.FAILED}));
 }
 
 
