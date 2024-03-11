@@ -12,9 +12,13 @@ class HelyOSClientApplication {
         this.helyosService =  new HelyosServices(this.url, {socketPort:sockerPort, gqlPort:graphqlPort});;
     }
 
-    async login(username, password) {
-        await this.helyosService.login(username, password);  
-        return this.helyosService.connect();
+    login(username, password) {
+        return this.helyosService.login(username, password).then(() => this.helyosService.connect());
+    }
+
+
+    logout() {
+        return this.helyosService.logout().finally(() => this.helyosService.socket.disconnect());
     }
 
     _waitStatus(checkValuePromise, id, status) {

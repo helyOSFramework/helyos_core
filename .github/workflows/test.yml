@@ -20,7 +20,7 @@ jobs:
     - name: Build Docker image
       run: |
         cd packaging
-        docker build --platform=linux/amd64 --no-cache -f ./Dockerfile -t helyosframework/helyos_core:test ..
+        docker build --platform=linux/amd64  -f ./Dockerfile -t helyosframework/helyos_core:test ..
 
     - name: Install dependencies
       run: |

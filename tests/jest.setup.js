@@ -1,5 +1,6 @@
 const { GenericContainer, Wait,  Network } = require('testcontainers');
 const path = require('path');
+const { get } = require('http');
 // Containers
 let postgresContainer;
 let rabbitmqContainer;
@@ -10,7 +11,22 @@ let network;
 let helyosApplication;
 let rabbitMQClient;
 
-setHelyOSClientInstance = async (helyosContainer) => {
+global.getHelyOSClientInstance= async () => {
+    if(helyosApplication) {
+        return helyosApplication;
+    }
+    return await setHelyOSClientInstance();
+}
+
+global.getRabbitMQClientInstance = async () => {
+    if(rabbitMQClient) {
+        return rabbitMQClient;
+    }
+    return await setRabbitMQClientInstance();
+}
+
+
+const setHelyOSClientInstance = async (helyosContainer) => {
   if (helyosContainer) {
     process.env.GRAPHQL_PORT = helyosContainer.getMappedPort(5000);
     process.env.SOCKET_PORT = helyosContainer.getMappedPort(5002);
@@ -22,7 +38,7 @@ setHelyOSClientInstance = async (helyosContainer) => {
 }
 
 
-setRabbitMQClientInstance = async (rabbitmqContainer) => {
+const setRabbitMQClientInstance = async (rabbitmqContainer) => {
     if (rabbitmqContainer) {
       process.env.RBMQ_HOST =  rabbitmqContainer.getHost();
       process.env.RBMQ_PORT =  rabbitmqContainer.getMappedPort(5672);
@@ -144,7 +160,7 @@ beforeAll(async () => {
       await helyosApplication.waitAgentStatus(1, 'free');
 
       await helyosApplication.createAssistantAgent('ASSISTANT_AGENT');
-      rabbitMQClient = await setRabbitMQClientInstance(rabbitmqContainer);
+      rabbitMQClient = await setRabbitMQClientInstance(rabbitmqContainer); 
 
 });
 
@@ -152,9 +168,9 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await helyosApplication.dumpLogsToFile(process.env.TEST_NUMBER);
-
+  await helyosApplication.logout();
   await rabbitMQClient.close();
-    
+
   await Promise.all([
     postgresContainer.stop(),
     rabbitmqContainer.stop(),
