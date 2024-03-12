@@ -1,4 +1,5 @@
 // Credit: Nicolas Gallagher and SUIT CSS.
+@use "sass:math";
 
 .embed-responsive {
   position: relative;
@@ -47,6 +48,6 @@
 
 .embed-responsive-1by1 {
   &::before {
-    padding-top: percentage(1 / 1);
+    padding-top: math.div(1 , 1);
   }
 }
