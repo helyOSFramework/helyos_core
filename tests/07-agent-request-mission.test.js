@@ -11,7 +11,7 @@ let helyosApplication, rabbitMQClient;
 
 describe('07 Agent Request Mission',   () =>  {
 
-    it('Agent request a mission and other Agent is reserved', async () => {
+    it('One Agent requests the mission and another Agent is reserved', async () => {
         helyosApplication = await getHelyOSClientInstance();
         rabbitMQClient = await getRabbitMQClientInstance();
 

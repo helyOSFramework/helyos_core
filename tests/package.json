@@ -9,6 +9,6 @@
     "testcontainers": "^10.7.2"
   },
   "scripts": {
-    "test": "jest --runInBand"
+    "test": "jest --runInBand --verbose"
   }
 }
