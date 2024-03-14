@@ -2,7 +2,7 @@
 // Released under MIT and copyright 2014 Waybury.
 // https://useiconic.com/open
 
-
+@use "sass:math";
 // Checkboxes and radios
 //
 // Base class takes care of all the key behavioral aspects.
@@ -62,7 +62,7 @@
   // Background-color and (when enabled) gradient
   &::before {
     position: absolute;
-    top: (($line-height-base - $custom-control-indicator-size) / 2);
+    top: math.div(($line-height-base - $custom-control-indicator-size) , 2);
     left: 0;
     display: block;
     width: $custom-control-indicator-size;
@@ -77,7 +77,7 @@
   // Foreground (icon)
   &::after {
     position: absolute;
-    top: (($line-height-base - $custom-control-indicator-size) / 2);
+    top: math.div(($line-height-base - $custom-control-indicator-size) , 2);
     left: 0;
     display: block;
     width: $custom-control-indicator-size;
