@@ -6,7 +6,7 @@ var databaseServices = require('../../services/database/database_services.js');
 const { saveLogData } = require('../systemlog.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
-const REFRESH_ONLNE_TIME_PERIOD = 10;
+const REFRESH_ONLNE_TIME_PERIOD = 5;
 
 let POSITION_MARGIN;
 if (process.env.POSITION_MARGIN)
