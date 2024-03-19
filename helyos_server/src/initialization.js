@@ -7,7 +7,7 @@ const microserviceWatcher = require('./event_handlers/microservice_event_watcher
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
 
-const MAX_TIME_WITHOUT_UPDATE = 20;
+const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10;
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { AGENTS_UL_EXCHANGE, AGENTS_DL_EXCHANGE, ANONYMOUS_EXCHANGE, AGENT_MQTT_EXCHANGE } =  require('./services/message_broker/rabbitMQ_services.js');
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
@@ -25,7 +25,7 @@ HELYOS_REPLICA = HELYOS_REPLICA === 'True';
 
 
 const initWatchers = () => {
-    agentComm.watchWhoIsOnline(MAX_TIME_WITHOUT_UPDATE);
+    agentComm.watchWhoIsOnline(AGENT_IDLE_TIME_OFFLINE);
     microserviceWatcher.initWatcher();
 };
 
