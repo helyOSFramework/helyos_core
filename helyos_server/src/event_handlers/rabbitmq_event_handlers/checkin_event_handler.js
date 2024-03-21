@@ -48,7 +48,6 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                                         id: yard.id,
                                         uid: yard.uid
                                         },
-                                    yard_map: {origin:{lat: yard.lat, lon: yard.lon, alt: yard.alt}}, // compatible with agent core vs <= 1.5.13
                                     message: "check-in successful",
                                     rbmq_username: agent.rbmq_username,
                                     rbmq_encrypted_password: agent.rbmq_encrypted_password,
