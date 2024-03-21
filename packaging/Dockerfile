@@ -5,14 +5,14 @@ FROM node:18 AS build
 WORKDIR /usr/src/app
 COPY helyos_dashboard/package.json /usr/src/app/package.json
 COPY helyos_dashboard/package-lock.json /usr/src/app/package-lock.json
-RUN npm install
+RUN npm set fetch-retry-maxtimeout 600000 && npm install --timeout=600000
 COPY helyos_dashboard/ /usr/src/app
 RUN npm run build --prod
 
 
 
 # Second stage
-FROM helyosframework/helyos_core_base:2.0.0
+FROM helyosframework/helyos_core_base:2.0.1
 
 # ------------------- building the backend services -----------------------------
 
@@ -36,7 +36,7 @@ COPY LICENSE.txt /usr/local/helyos_core/LICENSE.txt
 WORKDIR /usr/local/helyos_core/helyos_server/
 COPY  helyos_server/package.json  /usr/local/helyos_core/helyos_server/package.json
 COPY  helyos_server/package-lock.json  /usr/local/helyos_core/helyos_server/package-lock.json
-RUN npm install 
+RUN npm set fetch-retry-maxtimeout 600000 && npm install --timeout=600000
 
 # SET ENVIRONMENT VARIABLE with the default path for node_modules
 ENV NODE_PATH=/usr/local/helyos_core/helyos_server/node_modules
