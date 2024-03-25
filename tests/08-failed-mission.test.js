@@ -23,7 +23,7 @@ describe('08 Test Failed Mission',   () =>  {
         expect(result).toEqual(true);
     });
 
-    it(' Agent has wrong format, it should fail', async () => {
+    it('Assignment is sent with wrong format, it should fail at the agent', async () => {
         const result = await helyosApplication.waitAssignmentStatus(1, 'failed');
         expect(result).toEqual(true);
     });
