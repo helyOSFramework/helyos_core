@@ -1,5 +1,5 @@
 // Services imports
-const { AGENT_STATUS } = require('../../modules/data_models.js');
+const { AGENT_STATUS, ASSIGNMENT_STATUS, MISSION_STATUS } = require('../../modules/data_models.js');
 const { saveLogData } = require('../../modules/systemlog.js');
 const databaseServices = require('../../services/database/database_services.js')
 
@@ -47,7 +47,8 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 			}
 
 			if (!agentIds.includes(parseInt(agent_id))){
-				saveLogData('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids. In future versions, this will block the mission.`);
+				saveLogData('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids.`+
+				` In future versions, this will block the mission execution.`);
 			}
 
 
@@ -64,7 +65,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				data: JSON.stringify(result.result || result.assignment)});
 		}
 			
-	} else {  // keep compatibility: in old versions of external services, one assigment is sent to all toolIds.
+	} else {  // keep compatibility: in old versions of external services, one assigment is sent to all agent Ids.
 		let data; 
 		if(servResponse.result) {
 			data = JSON.stringify(servResponse.result);
@@ -96,13 +97,15 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 					const previousArrayIdxs = dispatch_order[order-1];
 					const assgmtDBIdxs = assgmtArrayIdxs.map(i => parseInt(insertedPromiseIds[i]) );
 					const previousDBIdxs = previousArrayIdxs.map(i => parseInt(insertedPromiseIds[i]));
-					const statusPrecedent = (order-1) === 0 ?  'to_dispatch' : 'not_ready_to_dispatch';
-					const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'next_assignments': assgmtDBIdxs, status: statusPrecedent}));
+					const statusPrecedent = (order-1) === 0 ?  ASSIGNMENT_STATUS.TO_DISPATCH : 'not_ready_to_dispatch';
+					const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'next_assignments': assgmtDBIdxs,
+																															 'status': statusPrecedent }
+																														));
 					const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'depend_on_assignments':previousDBIdxs}));
 					updatePromises = updatePromises.concat([...updateDependentAssignments, ...updatePrecedentAssignments]);
 				}
 			} else {
-				updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: 'to_dispatch'}));
+				updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: ASSIGNMENT_STATUS.TO_DISPATCH}));
 			}
 
 			Promise.all(updatePromises)
@@ -110,7 +113,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				assigmentInputs.forEach( input => 
 					databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})
 					.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY}))
-					.then(() =>  databaseServices.work_processes.update('id', workProcess.id, {status:'executing'}))
+					.then(() =>  databaseServices.work_processes.update('id', workProcess.id, {status: MISSION_STATUS.EXECUTING}))
 				);
 			})
 

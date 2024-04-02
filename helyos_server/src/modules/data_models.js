@@ -99,7 +99,8 @@ const ASSIGNMENT_STATUS = {
     FAILED: 'failed',
     ABORTED: 'aborted',
     CANCELING: 'canceling',
-    CANCELED: 'canceled'
+    CANCELED: 'canceled',
+    WAIT_DEPENDENICIES:'wait_dependencies'
 
 }
 

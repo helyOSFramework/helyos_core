@@ -21,9 +21,9 @@ function activateNextAssignmentInPipeline(partialAssignment) {
 			const updatingPromises = nextAssignments.filter(a => a.status!=ASSIGNMENT_STATUS.CANCELED).map(nexAssignment => {
 
 					if (nexAssignment.depend_on_assignments.length === 0) {
-						nexAssignment.status = 'to_dispatch';
+						nexAssignment.status = ASSIGNMENT_STATUS.TO_DISPATCH;
 					} else {
-						nexAssignment.status = 'wait_dependencies';
+						nexAssignment.status = ASSIGNMENT_STATUS.WAIT_DEPENDENICIES;
 					}
 		
 					return databaseServices.assignments.update_byId(nexAssignment.id, nexAssignment);
