@@ -26,11 +26,19 @@ class HelyOSClientApplication {
             let tries = 1;
             const maxTries = 20;
             const watcher = setInterval( async () => {
-                const result = await checkValuePromise(id);
+                let result;
+                try {
+                    result = await checkValuePromise(id);
+                } catch (error) {
+                    console.log(`Status for ${id} not yet available. Retrying...`);
+                    result = {check: false, value: null};
+                }
+
                 if (result['check']){
                     clearInterval(watcher);
                     resolve(true);
                 } 
+       
                 tries += 1;
                 if (tries > maxTries){
                     console.log(`Max tries reached for ${id} with status ${result['value']}`);
@@ -84,14 +92,20 @@ class HelyOSClientApplication {
             return this.helyosService.workProcess.get(id)
                   .then(serv => ({check: serv.status === status, value: serv.status}))
                   .catch(err => ({check: false, value: null}));
-
         }
   
         return this._waitStatus(checkValue, id, status);
-
     }
 
-
+    waitMissionQueueStatus(id, status) {
+        const checkValue = (id) => {
+            return this.helyosService.missionQueue.get(id)
+                  .then(serv => ({check: serv.status === status, value: serv.status}))
+                  .catch(err => ({check: false, value: null}));
+        }
+  
+        return this._waitStatus(checkValue, id, status);
+    }
 
     createNewMission(missionType = 'driving') {
         return this.helyosService.workProcess.create({
@@ -102,6 +116,35 @@ class HelyOSClientApplication {
             status: 'dispatched',            // status = 'draft' will save the mission but no dispatch it.
         });
     }
+
+    createMissionForQueue(missionType = 'driving', queueId = null, runOrder = 1) {
+        return this.helyosService.workProcess.create({
+            agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 
+            yardId: 1,       // the yard where the agent has checked in.
+            workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
+            data: { "foo:": "bar", agent_id:1  },        // this data format depends on the microservice.
+            status: 'draft',            // status = 'draft' will save the mission but no dispatch it.
+            runOrder: runOrder,
+            missionQueueId: queueId
+        });
+    }
+
+
+    createNewQueue() {
+        return this.helyosService.missionQueue.create({ 
+            name: 'test_queue',
+            description: 'test_queue',
+            status: 'stopped'
+        }).then(queue => queue.id);
+    }
+
+
+    startQueue(queueId) {
+        return this.helyosService.missionQueue.patch({id: queueId, status: 'run'});
+    }
+
+
+
 
     createMapUpdate() {
         return this.helyosService.workProcess.create({
@@ -118,11 +161,11 @@ class HelyOSClientApplication {
     }
 
 
-    createMissionWithAssignment() {
+    createMissionWithAssignmentData() {
         return this.helyosService.workProcess.create({
             agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 
             yardId: 1,       // the yard where the agent has checked in.
-            workProcessTypeName: "app_driving",  // name of the mission recipe as defined in helyOS dashboard
+            workProcessTypeName: "driving_assignment_data_from_app",  // name of the mission recipe as defined in helyOS dashboard
             status: 'dispatched',                // status = 'draft' will save the mission but no dispatch it.
             data: {
                 "status": "ready",
@@ -130,7 +173,7 @@ class HelyOSClientApplication {
                     {   "agent_uuid": "Ab34069fc5-fdgs-434b-b87e-f19c5435113", 
                         "assignment": {'operation':'driving',
                                         trajectory: [
-                                        {"x": 0 ,  "y":0,    "orientations":[0, 0 ], time: null},
+                                        {"x": 0 ,  "y":0,   "orientations":[0, 0 ], time: null},
                                         {"x": 10 , "y":20,  "orientations":[1000, 0 ], time: null},
                                         {"x": 20 , "y":40,  "orientations":[2000, 0 ], time: null},
                                         {"x": 30 , "y":60,  "orientations":[3000, 0 ], time: null},

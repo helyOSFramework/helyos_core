@@ -11,6 +11,7 @@ const blAssignm = require('../../modules/assignment_orchestration.js');
 const blMicroservice = require('../../modules/microservice_orchestration.js');
 const databaseServices = require('../../services/database/database_services.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
+const { MISSION_QUEUE_STATUS, MISSION_STATUS } = require('../../modules/data_models.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
@@ -27,13 +28,13 @@ function processRunListEvents(msg) {
                 status = payload['status'];
 
 
-                if(status == 'run') {
+                if(status == MISSION_QUEUE_STATUS.RUN) {
                     databaseServices.work_processes.select({mission_queue_id:queueId, status:'draft'}, [],'run_order ASC')
                     .then((missionList) => {
                         if (missionList.length) {
                             const nextMission = missionList[0];
-                            databaseServices.mission_queue.update_byId(queueId, {status:'running'})
-                            .then( () => databaseServices.work_processes.update_byId(nextMission.id, {status: 'dispatched'}));
+                            databaseServices.mission_queue.update_byId(queueId, {status:MISSION_QUEUE_STATUS.RUNNING})
+                            .then( () => databaseServices.work_processes.update_byId(nextMission.id, {status: MISSION_STATUS.DISPATCHED}));
                         }
                     });
                 }
@@ -47,24 +48,24 @@ function processRunListEvents(msg) {
                 status = payload['status'];
 
 
-                if(status == 'run') {
+                if(status == MISSION_QUEUE_STATUS.RUN) {
                     databaseServices.work_processes.select({mission_queue_id:queueId, status:'draft'},[], 'run_order ASC')
                     .then((missionList) => {
                         if (missionList.length) {
                             const nextMission = missionList[0];
-                            databaseServices.mission_queue.update_byId(queueId, {status:'running'})
-                            .then( () => databaseServices.work_processes.update_byId(nextMission.id, {status: 'dispatched'}));
+                            databaseServices.mission_queue.update_byId(queueId, {status: MISSION_QUEUE_STATUS.RUNNING})
+                            .then( () => databaseServices.work_processes.update_byId(nextMission.id, {status: MISSION_STATUS.DISPATCHED}));
                         }
                     });
                 }
 
-                if(status == 'cancel') {
-                    databaseServices.work_processes.select({mission_queue_id:queueId, status:'executing'},[], 'run_order ASC')
+                if(status ==  MISSION_QUEUE_STATUS.CANCEL) {
+                    databaseServices.work_processes.select({mission_queue_id:queueId, status:MISSION_STATUS.EXECUTING},[], 'run_order ASC')
                     .then((missionList) => {
                         if (missionList.length) {
-                            databaseServices.mission_queue.update_byId(queueId, {status:'stopped'})
+                            databaseServices.mission_queue.update_byId(queueId, {status: MISSION_QUEUE_STATUS.STOPPED})
                             .then( () => 
-                            missionList.forEach(m=>databaseServices.work_processes.update_byId(m.id, {status: 'canceling'})));
+                                    missionList.forEach(m=>databaseServices.work_processes.update_byId(m.id, {status: 'canceling'})));
                         }
                     });
                 }

@@ -56,9 +56,9 @@ missions:
           override_config: "{}"
 
 
-  app_driving:
+  driving_assignment_data_from_app:
     maxagents: 1
-    description: "drive from a to b, calculation is performed in the external application"
+    description: "No real microservice is called, the assignement data is already in the input request."
     settings: >
           {"interface": "webbrowser",
             "auth" :"required"}  
