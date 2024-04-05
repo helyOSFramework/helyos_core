@@ -56,6 +56,7 @@ export class AgentAssignmentsComponent implements OnInit {
             this.selectedItem = r;   
             this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4) as any;
             this.selectedItem['context'] = JSON.stringify(r['context'], undefined, 4) as any;
+            this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4) as any;
 
         })
 
@@ -65,7 +66,7 @@ export class AgentAssignmentsComponent implements OnInit {
         if (confirm(`Canceling an assigment may disrupt the current mission, ` +
                      `resulting in an inconsistent state. It is advisable to cancel the mission instead. ` +
                      `Press OK to continue.`)){ 
-            this.editItem(item, "cancelling");
+            this.editItem(item, "canceling");
         }
     }
 
@@ -89,6 +90,16 @@ export class AgentAssignmentsComponent implements OnInit {
                 patch['context'] = JSON.parse(item['context']);
             } catch (error) {
                 alert('error: Context is not a valid JSON.');
+                return;
+            }
+        }
+
+
+        if (item['result']) {
+            try {
+                patch['result'] = JSON.parse(item['result']);
+            } catch (error) {
+                alert('error: Result Data is not a valid JSON.');
                 return;
             }
         }

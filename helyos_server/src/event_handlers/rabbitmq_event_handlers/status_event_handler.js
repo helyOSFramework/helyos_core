@@ -67,13 +67,13 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
         inMemDB.flush('agents', 'uuid', databaseServices.agents, bufferPeriod);
         
         if (objMsg.body.assignment){
-            updateAgentMission(objMsg.body.assignment,  uuid);
+            return updateAgentMission(objMsg.body.assignment, uuid);
         }
 
     } catch (error) {
         console.error(error);
         databaseServices.agents.update('uuid', uuid, {status:objMsg.body.status});
-        updateAgentMission(objMsg.body.wp_clearance,  uuid);
+        return updateAgentMission(objMsg.body.wp_clearance, uuid);
 
     }
 }

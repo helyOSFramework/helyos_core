@@ -18,7 +18,7 @@ class HelyOSClientApplication {
 
 
     logout() {
-        return this.helyosService.logout().finally(() => this.helyosService.socket.disconnect());
+        return this.helyosService.logout();
     }
 
     _waitStatus(checkValuePromise, id, status) {

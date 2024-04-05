@@ -258,7 +258,11 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
                     case AGENT_STATE_QUEUE:
                         if (objMsg.obj.body.status) {
-                            updateState(objMsg.obj, uuid, 0);
+                            updateState(objMsg.obj, uuid, 0)
+                            .catch(e => {
+                                const msg = e.msg? e.msg : e;
+                                saveLogData('agent', objMsg.obj, 'error', `agent state update=${msg}`);
+                            });
                         } else {
                             saveLogData('agent', {}, 'error', "state update message does not contain agent status.");
                         }
