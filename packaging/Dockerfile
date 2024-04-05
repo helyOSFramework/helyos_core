@@ -5,7 +5,7 @@ FROM node:18 AS build
 WORKDIR /usr/src/app
 COPY helyos_dashboard/package.json /usr/src/app/package.json
 COPY helyos_dashboard/package-lock.json /usr/src/app/package-lock.json
-RUN npm set fetch-retry-maxtimeout 600000 && npm ci 
+RUN npm set fetch-retry-maxtimeout 900000 && npm ci 
 COPY helyos_dashboard/ /usr/src/app
 RUN npm run build --prod
 
