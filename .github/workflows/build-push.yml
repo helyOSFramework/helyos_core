@@ -33,5 +33,5 @@ jobs:
           push: true
           tags: |
             helyosframework/helyos_core:${{ env.RELEASE_VERSION }}
-          platforms: linux/amd64,linux/arm/v7,linux/arm64 # Bug https://github.com/nodejs/docker-node/issues/1335
+          platforms: linux/amd64,linux/arm/v7 # Bug https://github.com/nodejs/docker-node/issues/1335
 
