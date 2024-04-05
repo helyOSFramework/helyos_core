@@ -9,7 +9,6 @@
  * helyOS core requests the change from FREE to READY with a `reserve` instant action, and from READY to FREE with a `release` instant action.
  * PENDING => TIMEOUT
  *
- * 
  */
 const AGENT_STATUS = {
     NOT_AUTOMAT: 'not_automatable', 
@@ -34,7 +33,6 @@ const AGENT_STATUS = {
  * helyOS core is responsible for the transitions:
  * PENDING => TIMEOUT
  *
- * 
  */
 const SERVICE_STATUS = {
     NOT_READY: 'not_ready_for_service', 
@@ -58,7 +56,6 @@ const SERVICE_STATUS = {
  * helyOS core is responsible for the transitions:
  * ASSIGNMENTS_COMPLETED => SUCCEEDED
  *
- * 
  */
 const MISSION_STATUS = {
     DRAFT: 'draft', 
@@ -88,7 +85,6 @@ const MISSION_STATUS = {
  * SUCCEEDED => COMPLETED
  * CANCELING => CANCELED
  *
- * 
  */
 const ASSIGNMENT_STATUS = {
     TO_DISPATCH: 'to_dispatch', 
@@ -99,8 +95,25 @@ const ASSIGNMENT_STATUS = {
     FAILED: 'failed',
     ABORTED: 'aborted',
     CANCELING: 'canceling',
-    CANCELED: 'canceled'
+    CANCELED: 'canceled',
+    WAIT_DEPENDENICIES:'wait_dependencies'
 
+}
+
+
+/**
+ * Defines  mission queue statuses.
+ * @enum {string}
+ * 
+ * Usual cycle:
+ * RUN => RUNNING => STOPPED
+ * helyOS core is responsible for the transitions.
+ **/
+const MISSION_QUEUE_STATUS = {
+    RUN: 'run',
+    RUNNING: 'running',
+    STOPPED: 'stopped',
+    CANCEL: 'cancel'
 }
 
 const UNCOMPLETE_ASSIGNM_STATUSES = ['to_dispatch', 'not_ready_to_dispatch', 'wait_dependencies',  'executing', 'active'];
@@ -115,3 +128,4 @@ module.exports.ASSIGNMENT_STATUS = ASSIGNMENT_STATUS;
 module.exports.UNCOMPLETE_ASSIGNM_STATUSES = UNCOMPLETE_ASSIGNM_STATUSES;
 module.exports.UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH = UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH;
 module.exports.UNCOMPLETE_ASSIGNM_AFTER_DISPATCH = UNCOMPLETE_ASSIGNM_AFTER_DISPATCH;
+module.exports.MISSION_QUEUE_STATUS = MISSION_QUEUE_STATUS;

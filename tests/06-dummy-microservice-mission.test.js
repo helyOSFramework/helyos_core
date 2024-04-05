@@ -13,7 +13,7 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
 
     it('Agent is reserved', async () => {
         helyosApplication = await getHelyOSClientInstance();
-        await helyosApplication.createMissionWithAssignment();
+        await helyosApplication.createMissionWithAssignmentData();
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
         expect(result).toEqual(true);
     });

@@ -41,7 +41,6 @@ function generateFullYardContext(yardId){
 			}
 		}
 		context.agents = agents;
-		// context.tools = agents; //Deprecated
 		return context;
 	});
 }
@@ -60,7 +59,6 @@ const filterContext = (context, filter) => {
 			filteredContext.agents = context.agents.filter(t =>  filter.agent_ids.some(id => id == t.id));
 		}
 	}
-	filteredContext.tools = filteredContext.agents; //Deprecated
     return filteredContext;
 }
 

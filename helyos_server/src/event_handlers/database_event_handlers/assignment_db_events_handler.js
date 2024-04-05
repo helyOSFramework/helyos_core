@@ -26,7 +26,7 @@ function processAssignmentEvents(msg) {
                 if(assignment_status == ASSIGNMENT_STATUS.SUCCEEDED){
                     databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.COMPLETED})
                     .then(() =>  {
-                        blAssignm.assignmentEnd(payload['id'], payload['work_process_id']);
+                        blAssignm.assignmentUpdatesMissionStatus(payload['id'], payload['work_process_id']);
                         blAssignm.activateNextAssignmentInPipeline(payload); // Next assignment status: not_ready_for_dispatch => wait_dependencies/to_dispatch
                     });
                 }
@@ -35,7 +35,7 @@ function processAssignmentEvents(msg) {
                     .then(() => databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.CANCELED}));
                 }
                 if(assignment_status == ASSIGNMENT_STATUS.CANCELED || assignment_status == 'cancelled'){
-                    blAssignm.assignmentEnd(payload['id'], payload['work_process_id']);
+                    blAssignm.assignmentUpdatesMissionStatus(payload['id'], payload['work_process_id']);
                     blAssignm.activateNextAssignmentInPipeline(payload);
                 }
                 if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){

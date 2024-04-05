@@ -5,7 +5,7 @@
 const databaseServices = require('../services/database/database_services.js');
 const { generateAssignmentDependencies } = require('./assignment_context.js');
 const agentComm = require('./communication/agent_communication.js');
-const { ASSIGNMENT_STATUS, MISSION_STATUS } = require('./data_models.js');
+const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS } = require('./data_models.js');
 
 
 // ----------------------------------------------------------------------------
@@ -21,9 +21,9 @@ function activateNextAssignmentInPipeline(partialAssignment) {
 			const updatingPromises = nextAssignments.filter(a => a.status!=ASSIGNMENT_STATUS.CANCELED).map(nexAssignment => {
 
 					if (nexAssignment.depend_on_assignments.length === 0) {
-						nexAssignment.status = 'to_dispatch';
+						nexAssignment.status = ASSIGNMENT_STATUS.TO_DISPATCH;
 					} else {
-						nexAssignment.status = 'wait_dependencies';
+						nexAssignment.status = ASSIGNMENT_STATUS.WAIT_DEPENDENICIES;
 					}
 		
 					return databaseServices.assignments.update_byId(nexAssignment.id, nexAssignment);
@@ -66,35 +66,42 @@ function cancelAssignmentByAgent(partialAssignment){
 	});
 }
 
+/**
+ * Release agents reserved by the work process and trigger the next work process in the run list
+ * @param {number} workProcessId - The work process id
+ */
+async function onWorkProcessEnd(workProcessId){
+	// Release agents that received the assignments
+	const wpAssignments= await databaseServices.assignments.get('work_process_id', workProcessId, ['id','agent_id', 'work_process_id']);
+	const assmAgentIds = wpAssignments.map(assm => assm.agent_id);
 
-function onWorkProcessEnd(workProcessId){
-	// Release agents connected to the work process assignments
-	databaseServices.assignments.get('work_process_id', workProcessId, ['id','agent_id', 'work_process_id'])
-	.then((assmList)=>assmList.forEach(assm =>agentComm.sendReleaseFromWorkProcessRequest(assm.agent_id, assm.work_process_id)));
+ 	// Release agents that were reserved by the work process
+	const wproc = await databaseServices.work_processes.get_byId(workProcessId, ['agent_ids', 'mission_queue_id', 'status']);
+	const wprocAgentIds = wproc.agent_ids? wproc.agent_ids : [];
 
-	databaseServices.work_processes.get_byId(workProcessId, ['agent_ids', 'mission_queue_id', 'status'])
-		.then((wproc) => {
-			// Release agents connected directly to the work process 
-			const agentsList = wproc.agent_ids;
-			if (agentsList) {agentsList.forEach(agentId => agentComm.sendReleaseFromWorkProcessRequest(agentId, workProcessId))}; 
+	// Combine the two lists and remove duplicates.
+	const agentsList = [...new Set([...assmAgentIds, ...wprocAgentIds])];
 
-			// Trigger the next work process in the run list
-			if(wproc.mission_queue_id) {
-				if (wproc.status === MISSION_STATUS.SUCCEEDED) {
-					databaseServices.work_processes.select({mission_queue_id:wproc.mission_queue_id, status: MISSION_STATUS.DRAFT}, [], 'run_order')
-					.then(nextWorkProcesses => {
-							if (nextWorkProcesses.length) {
-								databaseServices.work_processes.update_byId(nextWorkProcesses[0].id, {status:MISSION_STATUS.DISPATCHED}); 
-							} else {
-								databaseServices.mission_queue.update_byId(wproc.mission_queue_id, {status:'stopped'})
-							}
-					});
-				}
-			}
-	});
+	// Release all agents related to the work process
+	agentsList.forEach(async agentId => await agentComm.sendReleaseFromWorkProcessRequest(agentId, workProcessId));
+
+	// For Mission queues, trigger the next work process in the run list
+	if(wproc.mission_queue_id) {
+		if (wproc.status === MISSION_STATUS.SUCCEEDED) {
+			databaseServices.work_processes.select({mission_queue_id:wproc.mission_queue_id, status: MISSION_STATUS.DRAFT}, [], 'run_order')
+			.then(nextWorkProcesses => {
+					if (nextWorkProcesses.length) {
+						databaseServices.work_processes.update_byId(nextWorkProcesses[0].id, {status:MISSION_STATUS.DISPATCHED}); 
+					} else {
+						databaseServices.mission_queue.update_byId(wproc.mission_queue_id, {status: MISSION_QUEUE_STATUS.STOPPED});
+					}
+			});
+		}
+	}
+
 }
 
-async function assignmentEnd(id, wprocId) {
+async function assignmentUpdatesMissionStatus(id, wprocId) {
 	const remaingServiceRequests = await databaseServices.service_requests.select({ work_process_id: wprocId, processed: false }, ['id']);
 	if (remaingServiceRequests.length === 0) {
 		const uncompleteAssgms = await databaseServices.searchAllRelatedUncompletedAssignments(id);
@@ -106,7 +113,7 @@ async function assignmentEnd(id, wprocId) {
 
 
 module.exports.cancelWorkProcessAssignmentsAndRequests = cancelWorkProcessAssignmentsAndRequests;
-module.exports.assignmentEnd = assignmentEnd;
+module.exports.assignmentUpdatesMissionStatus = assignmentUpdatesMissionStatus;
 module.exports.dispatchAssignmentToAgent = dispatchAssignmentToAgent;
 module.exports.cancelAssignmentByAgent = cancelAssignmentByAgent;
 module.exports.onWorkProcessEnd = onWorkProcessEnd;
