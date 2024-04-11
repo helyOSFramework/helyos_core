@@ -65,7 +65,7 @@ function processRunListEvents(msg) {
                         if (missionList.length) {
                             databaseServices.mission_queue.update_byId(queueId, {status: MISSION_QUEUE_STATUS.STOPPED})
                             .then( () => 
-                                    missionList.forEach(m=>databaseServices.work_processes.update_byId(m.id, {status: 'canceling'})));
+                                    missionList.forEach(m=>databaseServices.work_processes.update_byId(m.id, {status: MISSION_STATUS.CANCELING})));
                         }
                     });
                 }
