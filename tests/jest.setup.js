@@ -131,7 +131,7 @@ beforeAll(async () => {
       await wait5seconds();
 
 
-    agentSimulatorContainer = await new GenericContainer('helyosframework/helyos_agent_slim_simulator:0.7.5')
+    agentSimulatorContainer = await new GenericContainer('helyosframework/helyos_agent_slim_simulator:0.7.7')
       .withEnvironment({
         'UUID': 'Ab34069fc5-fdgs-434b-b87e-f19c5435113',
         'ASSIGNMENT_FORMAT': 'trajectory',
