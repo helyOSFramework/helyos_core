@@ -11,7 +11,7 @@ const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_hand
 const { deleteConnections } = require('../services/message_broker/rabbitMQ_access_layer.js');
 
 const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || undefined;
-const AGENT_REGISTRATION_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
+const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
 const MESSAGE_RATE_LIMIT = process.env.MESSAGE_RATE_LIMIT || 150;
 const MESSAGE_UPDATE_LIMIT = process.env.MESSAGE_UPDATE_LIMIT || 20;
 const {MISSION_STATUS } = require('../modules/data_models.js');
