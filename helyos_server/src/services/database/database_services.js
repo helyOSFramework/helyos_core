@@ -8,7 +8,8 @@ const { DatabaseLayer, AgentDataLayer, Client,
 	cancelAllAssignments_byWPId,
 	searchAllRelatedUncompletedAssignments, 
 	getUncompletedAssignments_byWPId,
-	updateAgentsConnectionStatus} = require('./postg_access_layer');
+	updateAgentsConnectionStatus,
+	killQueriesOlderThan} = require('./postg_access_layer');
 
 // Singleton database client
 const mainClient =  new Client();
@@ -117,7 +118,10 @@ module.exports.cancelAllAssignments_byWPId = (wpId) => cancelAllAssignments_byWP
 																					wpId, 
 																					UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH,
 																					UNCOMPLETE_ASSIGNM_AFTER_DISPATCH);
-																					
+
+
+																				
+module.exports.killQueriesOlderThan = (n_secs) => killQueriesOlderThan(mainClient, n_secs);																					
 module.exports.cancelAllRequestToMicroservices_byWPId = (wpId) => cancelAllRequestToMicroservices_byWPId(mainClient, wpId);
 module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(mainClient, 
 																											assId, 

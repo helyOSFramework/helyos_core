@@ -169,10 +169,7 @@ class DatabaseLayer {
 			queryText = 'UPDATE ' + this.table + ' SET ' + colNames + ' = ' + valueMasks + '  WHERE ' + name + ' = ' + filterMask + ' ';
 		}
 		return this.client.query(queryText, colValues)
-			.then((res) => patch)
-			.catch(e => {
-				console.log(e);
-			})
+			.then((res) => patch);
 	}
 
 
@@ -222,13 +219,13 @@ class DatabaseLayer {
 	
 	updateMany(patchArray, index) {
 	//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
-		const queriePromises = patchArray.map(patch => {
+		const promisseList = patchArray.map(patch => {
 			delete patch.time_stamp;
 			if (Object.keys(patch).length < 2) return Promise.resolve({});
 			else return this.update(index, patch[index], patch).catch(r => ({ error: r, failedIndex: patch[index] }));
 		});
 
-		return Promise.all(queriePromises);
+		return Promise.all(promisseList);
 
 		// return this.client.query('BEGIN').then(()=>Promise.all(queriePromises))
 		// 		   .then((r)=>this.client.query('COMMIT').then(()=>r))
@@ -434,6 +431,12 @@ class AgentDataLayer extends DatabaseLayer {
 }
 
 
+const killQueriesOlderThan = (client, mlSeconds) => {
+	const queryText = `SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE now() - query_start > interval '${mlSeconds} ms' AND pid <> pg_backend_pid();`;
+	return client.query(queryText).then((result) => result.rowCount);
+}
+
+
 const updateAgentsConnectionStatus = (client, n_secs) => {
 	const strSeconds = ` INTERVAL '${n_secs} seconds'`;
 	const sqlString1 = `UPDATE public.agents SET connection_status = $1 WHERE (connection_status = $2) and (last_message_time <  (now() - ${strSeconds}));`;
@@ -532,7 +535,7 @@ module.exports.AgentDataLayer = AgentDataLayer;
 module.exports.Client = Client;
 module.exports.wait_database_value = wait_database_value;
 module.exports.wait_database_query = wait_database_query;
-
+module.exports.killQueriesOlderThan = killQueriesOlderThan;
 
 
 module.exports.updateAgentsConnectionStatus = updateAgentsConnectionStatus;
