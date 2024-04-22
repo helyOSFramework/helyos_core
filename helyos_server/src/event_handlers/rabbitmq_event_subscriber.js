@@ -10,8 +10,8 @@ const {saveLogData} = require('../modules/systemlog.js');
 const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_handler');
 const { deleteConnections } = require('../services/message_broker/rabbitMQ_access_layer.js');
 
-const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || '0000-0000-0000-0000-0000';
-const AGENT_REGISTRATION_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
+const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
+const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
 const MESSAGE_RATE_LIMIT = process.env.MESSAGE_RATE_LIMIT || 150;
 const MESSAGE_UPDATE_LIMIT = process.env.MESSAGE_UPDATE_LIMIT || 20;
 const {MISSION_STATUS } = require('../modules/data_models.js');
@@ -117,6 +117,34 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
 }
 
 
+function validateAnonymousCheckin(registeredAgent, checkinData) {
+
+    const errorMsg = registeredAgent? `Agent registered, logged as anonymous` : `Agent not registered, logged as anonymous`;
+    const errorCode = registeredAgent? 'AGENT-403' : 'AGENT-404';
+
+    if (!checkinData['registration_token'] ) {
+        throw ({
+            msg: `${errorMsg}, No "registration_token" provided by agent during check-in.`,
+            code: errorCode
+        });
+    }
+
+    if (!AGENT_REGISTRATION_TOKEN) {
+        throw ({
+            msg:`${errorMsg}, AGENT_REGISTRATION_TOKEN was not set in this helyOS server.`, 
+            code: errorCode
+        });
+    }
+
+    if (checkinData['registration_token'] !== AGENT_REGISTRATION_TOKEN) {
+        throw ({
+            msg:`${errorMsg}, Agent's registration_token is invalid`, 
+            code: errorCode
+        });
+    }   
+}
+
+
 // agentDataRetriver is used to retrieve data from the database or mem-database.
 const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
                          'allow_anonymous_checkin', 'public_key', 'verify_signature'];
@@ -184,18 +212,20 @@ function handleBrokerMessages(channelOrQueue, message)   {
         if (channelOrQueue == CHECK_IN_QUEUE) {
             let checkinData = objMsg.obj.body? objMsg.obj.body : objMsg.obj; // compatibility for agent versions < 2.0
 
-            // SPECIAL CASE: CHECK-IN IS USED FOR CREATING REGISTRATION OR CHANGING REGISTRATION
-            if ( !registeredAgent && checkinData['registration_token'] !== AGENT_REGISTRATION_TOKEN) {
-                throw ({msg:`Agent is not registered; ${uuid} and registration token is invalid`, code: 'AGENT-404'});
-            }   
-            if (registeredAgent &&  isAnonymousConnection ) {
-                registeredAgent = await agentDataRetriever.getData(uuid, 'uuid', true);
-                if(!registeredAgent['allow_anonymous_checkin']){
-                    throw ({msg:`Anonymous check-in is not enabled for this agent.; ${uuid}`, code: 'AGENT-403'});
+            if (!registeredAgent){
+                validateAnonymousCheckin(registeredAgent, checkinData);
+
+            } else {
+                if (isAnonymousConnection) {
+                        registeredAgent = await agentDataRetriever.getData(uuid, 'uuid', true);
+                        if(!registeredAgent['allow_anonymous_checkin']){
+                            throw ({msg:`Anonymous check-in is not enabled for this agent.; ${uuid}`, code: 'AGENT-403'});
+                        }
+                        validateAnonymousCheckin(registeredAgent, checkinData);
                 }
             }
             
-            saveLogData('agent', objMsg.obj, 'normal', `agent trying to check in ${message.content.toString()}`);
+            saveLogData('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
                     .then(( ) =>  saveLogData('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
