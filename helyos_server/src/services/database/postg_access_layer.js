@@ -11,14 +11,24 @@ const { Client } = require('pg');
  * @returns 
  */
 const parseConditions = (conditions) => {
-	let names = [], values = [], masks = [];
-	let null_conditions = [];
-	if (!conditions || Object.keys(conditions).length == 0) {
-		return this.list();
-	}
+    let names = [], values = [], masks = [];
+    let null_conditions = [], in_conditions = [];
+    if (!conditions || Object.keys(conditions).length == 0) {
+        return this.list();
+    }
 
 	Object.keys(conditions).forEach((key, idx) => {
-		if (conditions[key] === null) {
+		if (key.endsWith('__in')) {
+			if (!Array.isArray(conditions[key])) {
+				throw new Error(`Invalid value for ${key}. Expected an array.`);
+			}
+            // Check if the array contains only numbers
+            if (conditions[key].every(Number.isFinite)) {
+                in_conditions.push(`AND ${key.slice(0, -4)} IN (${conditions[key].join(",")}) `);
+            } else {
+                in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
+            }
+		} else if (conditions[key] === null) {
 			null_conditions.push(`AND ${key} IS NULL `);
 		} else {
 			names.push(key);
@@ -27,14 +37,13 @@ const parseConditions = (conditions) => {
 		}
 	});
 
-	names = names.join(',');
-	masks = masks.join(',');
-	null_conditions = null_conditions.join(' ');
+    names = names.join(',');
+    masks = masks.join(',');
+    null_conditions = null_conditions.join(' ');
+    in_conditions = in_conditions.join(' ');
 
-	return { names, values, masks, null_conditions };
-
+    return { names, values, masks, null_conditions, in_conditions };
 }
-
 
 class DatabaseLayer {
 
@@ -117,7 +126,7 @@ class DatabaseLayer {
 		else
 			selColNames = items.join(',');
 
-		const {names, values, masks, null_conditions} = parseConditions(conditions);
+		const {names, values, masks, null_conditions, in_conditions} = parseConditions(conditions);
 		const colNames = names, colValues = values, valueMasks = masks;
 
 		if (orderBy)
@@ -181,7 +190,7 @@ class DatabaseLayer {
 			return Promise.resolve({})
 		}
 
-		const {names, values, masks, null_conditions} = parseConditions(conditions);
+		const {names, values, masks, null_conditions, in_conditions} = parseConditions(conditions);
 		const condColNames = names, condColValues = values, condValueMasks = masks;	
 
 		let colNames = [], colValues = condColValues, valueMasks = [];
@@ -206,9 +215,9 @@ class DatabaseLayer {
 
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'UPDATE ' +  this.table + ' SET ' + patchString + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions ;
+			queryText = 'UPDATE ' +  this.table + ' SET ' + patchString + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions + in_conditions ;
 		} else {
-			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + '  WHERE ' + condColNames + ' = ' + condValueMasks + null_conditions;
+			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + '  WHERE ' + condColNames + ' = ' + condValueMasks + null_conditions + in_conditions;
 		}
 
 		return this.client.query(queryText, colValues)

@@ -5,7 +5,8 @@
 const databaseServices = require('../services/database/database_services.js');
 const { generateAssignmentDependencies } = require('./assignment_context.js');
 const agentComm = require('./communication/agent_communication.js');
-const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS } = require('./data_models.js');
+const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, UNCOMPLETE_MISSION_STATUS } = require('./data_models.js');
+const { saveLogData } = require('./systemlog.js');
 
 
 // ----------------------------------------------------------------------------
@@ -70,11 +71,13 @@ function cancelAssignmentByAgent(partialAssignment){
  * Release agents reserved by the work process and trigger the next work process in the run list
  * @param {number} workProcessId - The work process id
  */
-async function onWorkProcessEnd(workProcessId){
+async function onWorkProcessEnd(workProcessId, reason){
+
+	saveLogData('helyos_core', {wproc_id:workProcessId},'warning', 'Work process ending: ' + reason);
+
 	// Release agents that received the assignments
 	const wpAssignments= await databaseServices.assignments.get('work_process_id', workProcessId, ['id','agent_id', 'work_process_id']);
-	const assmAgentIds = wpAssignments.map(assm => assm.agent_id);
-
+	const assmAgentIds = wpAssignments.map(assm => parseInt(assm.agent_id));
  	// Release agents that were reserved by the work process
 	const wproc = await databaseServices.work_processes.get_byId(workProcessId, ['agent_ids', 'mission_queue_id', 'status']);
 	const wprocAgentIds = wproc.agent_ids? wproc.agent_ids : [];
@@ -106,7 +109,12 @@ async function assignmentUpdatesMissionStatus(id, wprocId) {
 	if (remaingServiceRequests.length === 0) {
 		const uncompleteAssgms = await databaseServices.searchAllRelatedUncompletedAssignments(id);
 		if (uncompleteAssgms.length == 0) {
-			await databaseServices.work_processes.update_byId(wprocId, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
+			await databaseServices.work_process_service_plan.get_byId(wprocId, ['status'])
+			.then( wproc => {
+				if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
+					return databaseServices.work_processes.update_byId(wprocId, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
+				}
+			});
 		}
 	}
 }
