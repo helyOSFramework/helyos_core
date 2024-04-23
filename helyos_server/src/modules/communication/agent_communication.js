@@ -137,6 +137,7 @@ async function sendReleaseFromWorkProcessRequest(agentId, wpId) {
 
     });
     sendEncriptedMsgToAgent(agentId, msg, 'release');
+    saveLogData('helyos_core', null, 'info', `Release agent ${agentId} from work process ${wpId}`); 
 }
 
 

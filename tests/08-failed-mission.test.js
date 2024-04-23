@@ -29,7 +29,7 @@ describe('08 Test Failed Mission',   () =>  {
     });
 
     it('Assignment is failed -> Mission is marked as assignment_failed', async () => {
-        const result = await helyosApplication.waitMissionStatus(1, 'assignment_failed');
+        const result = await helyosApplication.waitMissionStatus(1, 'failed');
         expect(result).toEqual(true);
     });
 

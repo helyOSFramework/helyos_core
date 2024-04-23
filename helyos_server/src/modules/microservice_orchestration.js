@@ -6,7 +6,7 @@
 const databaseServices = require('../services/database/database_services.js');
 const agentComm = require('./communication/agent_communication');
 const systemlog = require('./systemlog');
-const {SERVICE_STATUS, MISSION_STATUS} = require('./data_models');
+const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS} = require('./data_models');
 const {generateFullYardContext, generateMicroserviceDependencies} = require('./microservice_context');
 const {filterContext} = require('./microservice_context');
 const saveLogData = systemlog.saveLogData;
@@ -213,7 +213,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 	const workProcess = await databaseServices.work_processes.get_byId(partialWorkProcess.id);
 	if (!workProcess.work_process_type_name) {
 		saveLogData('microservice', {work_process_id: workProcess.id}, 'error', `work process type not found`);
-		return databaseServices.work_processes.update_byId(workProcess.id, {'status': 'failed'});
+		return databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 	}
 
 	let agentsListIds = workProcess['agent_ids'];
@@ -228,7 +228,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		if (agents.length !== agentsListIds.length) {
 			const errMsg = `Some agents in the work process ${workProcess.id} were not found in the database.`;
 			saveLogData('microservice', {work_process_id: workProcess.id}, 'error', errMsg);
-			return databaseServices.work_processes.update_byId(workProcess.id, {'status': 'failed'});
+			return databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 		}
 	}
 	
@@ -242,7 +242,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		} else {
 			workProcess.data =  { _settings: _settings }
 		}
-		await databaseServices.work_processes.update_byId(workProcess.id, {status: 'preparing resources', 'data': workProcess.data});					
+		await databaseServices.work_processes.update_byId(workProcess.id, {status: MISSION_STATUS.PREPARING, 'data': workProcess.data});					
 	}
 	//
 		
@@ -261,7 +261,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 				} catch (error) {
 					saveLogData('agent', logMetadata, 'error', `expected free=${error}`);
-					databaseServices.work_processes.update_byId(workProcess.id, {'status': 'failed'});
+					databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 					console.log(error);
 					return;
 				}
@@ -292,7 +292,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				} catch (error) {
 					const logMetadata = {wproc_id: workProcess.id};
 					saveLogData('agent', logMetadata, 'error', `expected status ready: ${error}`);					
-					databaseServices.work_processes.update_byId(workProcess.id, {'status': 'failed'});
+					databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 					console.log(error);
 					return;
 				}
@@ -348,7 +348,14 @@ function wrapUpMicroserviceCall(partialServiceRequest) {
 			}
 
 			if (uncompleteAssgms.length === 0) {
-				return databaseServices.work_processes.update_byId(partialServiceRequest.work_process_id, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED });
+
+				return databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status'])
+				.then( wproc => {
+					if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
+						return databaseServices.work_processes.update_byId(partialServiceRequest.work_process_id, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
+					}
+				});
+
 			} else {
 				return Promise.resolve(true); // Do nothing and wait for the assignment conclusion to mark the workprocess completed.
 			}

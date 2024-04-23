@@ -87,7 +87,7 @@ export class DispatchProcessesComponent implements OnInit {
 
     cancelMission(itemId) {
         if (confirm("Cancel all assignments that belong to this mission?")) {
-            this.editItem(itemId, 'cancelling');
+            this.editItem(itemId, 'canceling');
         }
     }
 

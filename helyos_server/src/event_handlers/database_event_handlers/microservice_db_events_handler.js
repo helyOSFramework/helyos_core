@@ -55,7 +55,7 @@ function processMicroserviceEvents(msg) {
                             .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
                             .catch(err => {
                                 databaseServices.service_requests.update_byId(payload['id'], {status: SERVICE_STATUS.FAILED});
-                                saveLogData('microservice', payload, 'error', err.msg);
+                                saveLogData('microservice', payload, 'error', err.message);
                             });
                         } else {
                             blMicroservice.wrapUpMicroserviceCall(payload)
