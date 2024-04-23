@@ -31,7 +31,7 @@ To run the tests for the Helyos Core module, you will need to have Node.js insta
     helyos system logs produced during each test can be found in the folder `tests/logs`.
 
 
-    If you encounter any issues starting the containers, please refer to the TestContainers [documentation](https://testcontainers.com/) for instructions on how to set
+    If you encounter any issues starting the containers, try the command `docker network prune`. Please refer to the TestContainers [documentation](https://testcontainers.com/) for instructions on how to set
     TestContainers to inteface with your Docker client.
 
 6. After running the tests, you will see the test results in the terminal or command prompt.

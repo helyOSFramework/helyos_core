@@ -109,7 +109,7 @@ async function assignmentUpdatesMissionStatus(id, wprocId) {
 	if (remaingServiceRequests.length === 0) {
 		const uncompleteAssgms = await databaseServices.searchAllRelatedUncompletedAssignments(id);
 		if (uncompleteAssgms.length == 0) {
-			await databaseServices.work_process_service_plan.get_byId(wprocId, ['status'])
+			await databaseServices.work_processes.get_byId(wprocId, ['status'])
 			.then( wproc => {
 				if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
 					return databaseServices.work_processes.update_byId(wprocId, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});

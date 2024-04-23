@@ -100,7 +100,7 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                 const message = JSON.stringify({
                     type: 'checkin',
                     body: {
-                        message: err.msg,
+                        message: err.message,
                         response_code: err.code
                     },
                     _version: MESSAGE_VERSION
