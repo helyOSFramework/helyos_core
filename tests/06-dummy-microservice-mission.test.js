@@ -11,7 +11,7 @@ let helyosApplication;
 
 describe('06 Test Mission Calculated By Ext. App',   () =>  {
 
-    it('Agent is reserved', async () => {
+    it('External app creates a mission with one embedded assignment and agent is reserved', async () => {
         helyosApplication = await getHelyOSClientInstance();
         await helyosApplication.createMissionWithAssignmentData();
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
@@ -19,8 +19,7 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
     });
 
 
-
-    it('Microservice is ready', async () => {
+    it('Dummy Microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
         expect(result).toEqual(true);
     });
@@ -31,7 +30,7 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
         expect(result.length).toEqual(1);
     });
 
-    it('The Microservice response.results is equal the request.results', async () => {
+    it('For Dummy Microservice, response.results is equal the request.results', async () => {
         const servRequest = await helyosApplication.helyosService.serviceRequests.get(1);
         expect(JSON.stringify(servRequest.response.results)).toEqual(JSON.stringify(servRequest.request.results));
     });
@@ -42,7 +41,7 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
         expect(result).toEqual(true);
     });
 
-    it('Mission produces one assignment', async () => {
+    it('Mission produced one assignment', async () => {
         const result = await helyosApplication.listAssignments();
         expect(result.length).toEqual(1);
     });

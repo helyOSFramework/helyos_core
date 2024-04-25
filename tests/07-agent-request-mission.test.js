@@ -30,7 +30,7 @@ describe('07 Agent Request Mission',   () =>  {
         expect(result.length).toEqual(1);
     });
 
-    it('Microservice is result is pending', async () => {
+    it('Microservice result is pending', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'pending');
         expect(result).toEqual(true);
     });

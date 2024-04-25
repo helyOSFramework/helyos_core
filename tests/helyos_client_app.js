@@ -144,8 +144,6 @@ class HelyOSClientApplication {
     }
 
 
-
-
     createMapUpdate() {
         return this.helyosService.workProcess.create({
             agentUuids: [],   //  is the agent uuid. 
@@ -212,7 +210,9 @@ class HelyOSClientApplication {
         return this.helyosService.serviceRequests.list({});
     }
 
-
+    getAgentRelatedLogs(uuid){
+        return this.helyosService.systemLogs.list({agentUuid: uuid});
+    }
 
     dumpLogsToFile(testNunber=1){
         return this.helyosService.systemLogs.list({})

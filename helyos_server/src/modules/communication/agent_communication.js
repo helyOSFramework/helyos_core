@@ -64,6 +64,7 @@ async function cancelAssignmentInAgent(assignment) {
                            };
 
     sendEncriptedMsgToAgent(assignment.agent_id, JSON.stringify(assignment_obj), 'instantActions');
+    saveLogData('agent', {uuid: uuids[0]}, 'info', `Sending cancel signal to agent for the work process ${assignment.work_process_id}`);
 
 }
 
@@ -118,7 +119,10 @@ async function sendGetReadyForWorkProcessRequest(agentIdList, wpId) {
     });
     
 
-    return Promise.all(agentIdList.map(agentId => sendEncriptedMsgToAgent(agentId, msgs[agentId], 'reserve')));
+    return Promise.all(agents.map(agent => {   
+        sendEncriptedMsgToAgent(agent.id, msgs[agent.id], 'reserve');
+        saveLogData('agent', {uuid: agent.uuid}, 'info', `Sending reserve signal to agent ${agent.id} for the work process ${wpId}`);
+    }));
 }
 
 async function sendReleaseFromWorkProcessRequest(agentId, wpId) {
@@ -137,7 +141,7 @@ async function sendReleaseFromWorkProcessRequest(agentId, wpId) {
 
     });
     sendEncriptedMsgToAgent(agentId, msg, 'release');
-    saveLogData('helyos_core', null, 'info', `Release agent ${agentId} from work process ${wpId}`); 
+    saveLogData('agent', {uuid: uuids[0]}, 'info', `Sending release signal to agent ${agentId} for the work process ${wpId}`); 
 }
 
 
