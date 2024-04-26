@@ -50,7 +50,7 @@ async function queryDataBase(uuid, objMsg, msgProps) {
         switch (objMsg.body['mutation']) {
 
             case 'createMapObjects':       
-                response = await databaseServices.mapObjects.createMany(objMsg.body['data'])
+                response = await databaseServices.mapObjects.insertMany(objMsg.body['data'])
                 .then( async (newIds) => {
                     console.log(r);
                     const newObjects = await databaseServices.mapObjects.list_in(newIds);

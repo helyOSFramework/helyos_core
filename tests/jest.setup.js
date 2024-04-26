@@ -71,6 +71,11 @@ beforeAll(async () => {
             'POSTGRES_PASSWORD': 'helyos_secret'
       })
       .withNetwork(network)
+      // .withLogConsumer(stream => {
+      // stream.on("data", line => console.log(line));
+      // stream.on("err", line => console.error(line));
+      // stream.on("end", () => console.log("Stream closed"));
+      // })
       .start();
 
 

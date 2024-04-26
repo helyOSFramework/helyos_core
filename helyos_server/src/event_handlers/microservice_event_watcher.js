@@ -9,12 +9,12 @@ const { isRequestReadyForService } = require('../modules/microservice_orchestrat
 
 
 const waitForServicesResults = () => {
- databaseServices.service_requests.select({status: SERVICE_STATUS.PENDING})
+ return databaseServices.service_requests.select({status: SERVICE_STATUS.PENDING})
  .then((pendingServices) => { 
      
-    pendingServices.forEach((serviceReq) => {
+    const promises = pendingServices.map((serviceReq) => { 
 
-        extServCommunication.getExtServiceAccessData(serviceReq.service_type)
+        return extServCommunication.getExtServiceAccessData(serviceReq.service_type)  
         .then( accessData => webServices.getServiceResponse(accessData.url, accessData.apiKey, serviceReq.service_queue_id))
         .then((servResponse) => {
             const now = new Date();
@@ -34,11 +34,14 @@ const waitForServicesResults = () => {
                 
                 if ((now - serviceReq.dispatched_at)/1000 > serviceReq.result_timeout) {
                     servResponse = '{"result":{}, "error": "timeout"}';
-                    saveLogData('microservice', serviceReq, 'error',  "timeout to collect result");
-                    return databaseServices.service_requests.update('id', serviceReq.id, { fetched: false, 
-                                                                                           processed: false,
-                                                                                           response: servResponse,
-                                                                                           status: SERVICE_STATUS.TIMEOUT });
+                    saveLogData('microservice', serviceReq, 'error',  `timeout to collect result: ${serviceReq.result_timeout} `);
+
+
+                    return databaseServices.service_requests.updateByConditions({ id: serviceReq.id, status: SERVICE_STATUS.PENDING }, 
+                                                                                                        { fetched: false, 
+                                                                                                        processed: false,
+                                                                                                        response: servResponse,
+                                                                                                        status: SERVICE_STATUS.TIMEOUT });
                 }
             } else {
                 return extServCommunication.saveServiceResponse(serviceReq.id, servResponse, SERVICE_STATUS.FAILED) // default satus is failed. if service is ok, it will be updated.
@@ -49,13 +52,15 @@ const waitForServicesResults = () => {
             const msg = `service not accessible: service "${serviceReq.service_type}": ${e}`;
             saveLogData('microservice', serviceReq, 'error', msg ); 
             servResponse = '{"result":{}}';
-            databaseServices.service_requests.update('id', serviceReq.id, { fetched: false,
+            return databaseServices.service_requests.update('id', serviceReq.id, { fetched: false,
                                                                             processed: true,
                                                                             response: servResponse,
                                                                             status:  SERVICE_STATUS.FAILED });
         });    
 
     });
+
+    return Promise.all(promises);
     
 });
 
@@ -64,7 +69,7 @@ const waitForServicesResults = () => {
 
 const sendRequestToCancelServices = () => {
 
-    databaseServices.service_requests.select({status:'canceled', processed: false})
+    databaseServices.service_requests.select({status:SERVICE_STATUS.CANCELED, processed: false})
     .then((runningServices) => { 
         
         runningServices.forEach((serviceReq) => {
@@ -72,20 +77,21 @@ const sendRequestToCancelServices = () => {
             .then( accessData => webServices.cancelService(accessData.url, accessData.apiKey, serviceReq.service_queue_id))
             .then((servResponse) => {
                 servResponse = {status:'canceled',result:{}};
-                saveLogData('microservice', serviceReq, 'normal',  `job is ${servResponse.status}`);
-                databaseServices.service_requests.update_byId(serviceReq.id, { fetched: true,
+                saveLogData('microservice', serviceReq, 'normal',  `Canceling signal sent to microservice: job is ${servResponse.status}`);
+                return databaseServices.service_requests.updateByConditions({id: serviceReq.id, processed: false, status: SERVICE_STATUS.CANCELED},
+                                                                            { fetched: true,
                                                                                processed: true,
-                                                                               response: servResponse,
-                                                                               status: 'canceled'});
+                                                                               response: servResponse
+                                                                            });
             })
             .catch(e => {
                 const msg = `database not accessible: service request type=${serviceReq.service_type}: ${e}`;
                 saveLogData('microservice', serviceReq, 'error', msg ); 
                 servResponse = '{"result":{}}';
-                databaseServices.service_requests.update_byId(serviceReq.id, { fetched: false,
+                return databaseServices.service_requests.update_byId(serviceReq.id, { fetched: false,
                                                                                processed: true,
                                                                                response: servResponse,
-                                                                               status: 'failed' });
+                                                                               status:  SERVICE_STATUS.FAILED });
             });    
    
        });
@@ -102,8 +108,8 @@ const waitForServicesDependencies = (conditions={}) =>  {
         allAwaitingServices.forEach(
         async(waitingServReq) => {
             if (await isRequestReadyForService(waitingServReq)) {
-               databaseServices.service_requests.updateByConditions({'id':waitingServReq.id, 'status': 'wait_dependencies'},
-                                                                    { status: 'ready_for_service' });
+               databaseServices.service_requests.updateByConditions({'id':waitingServReq.id, 'status':  SERVICE_STATUS.WAIT_DEPENDENCIES},
+                                                                    { status:  SERVICE_STATUS.READY_FOR_SERVICE });
              } else {
             // @TODO: create waiting time and log each 5 secs.
             //    const msg = `service ${waitingServReq.service_type} at step ${waitingServReq.step} is waiting for dependencies.`;
@@ -133,7 +139,8 @@ const waitForAssigmentsDependencies =() => {
                                   .filter(el => !completed_wp_assignments.includes(el)); 
 
             if (remain_dependencies.length === 0) {
-               databaseServices.assignments.updateByConditions({'id':assignment.id, 'status':'wait_dependencies'}, { status: 'to_dispatch' });
+               databaseServices.assignments.updateByConditions({'id':assignment.id, 'status':SERVICE_STATUS.WAIT_DEPENDENCIES},
+                                                               { status: 'to_dispatch' });
              } else {
             //   @TODO: create waiting time and log each 5 secs.
             //    const msg = `assignment ${assignment.id}  is waiting for dependencies`;

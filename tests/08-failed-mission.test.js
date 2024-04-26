@@ -41,9 +41,11 @@ describe('08 Test Failed Mission',   () =>  {
     it('Check Reserve/Release sent to the agent', async () => {
         const logs = await helyosApplication.getAgentRelatedLogs('Ab34069fc5-fdgs-434b-b87e-f19c5435113');
         const reservationsSent = logs.filter(log => log.msg.includes('Sending reserve')).length;
+        const cancelationsSent = logs.filter(log => log.msg.includes('Sending cancel')).length;
         const releasesSent = logs.filter(log => log.msg.includes('Sending release')).length;
 
         expect(reservationsSent).toEqual(1);
+        expect(cancelationsSent).toEqual(0);
         expect(releasesSent).toEqual(1);
     });  
 

@@ -4,8 +4,6 @@
 
 const { UNCOMPLETE_ASSIGNM_STATUSES, UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH, UNCOMPLETE_ASSIGNM_AFTER_DISPATCH } = require('../../modules/data_models');
 const { DatabaseLayer, AgentDataLayer, Client, 
-	cancelAllRequestToMicroservices_byWPId, 
-	cancelAllAssignments_byWPId,
 	searchAllRelatedUncompletedAssignments, 
 	getUncompletedAssignments_byWPId,
 	updateAgentsConnectionStatus} = require('./postg_access_layer');
@@ -112,13 +110,7 @@ module.exports.updateAgentsConnectionStatus = (n_secs) => updateAgentsConnection
 module.exports.getUncompletedAssignments_byWPId = (wpId) => getUncompletedAssignments_byWPId(mainClient, 
 																							 wpId,
 																							 UNCOMPLETE_ASSIGNM_STATUSES);
-
-module.exports.cancelAllAssignments_byWPId = (wpId) => cancelAllAssignments_byWPId(mainClient, 
-																					wpId, 
-																					UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH,
-																					UNCOMPLETE_ASSIGNM_AFTER_DISPATCH);
 																					
-module.exports.cancelAllRequestToMicroservices_byWPId = (wpId) => cancelAllRequestToMicroservices_byWPId(mainClient, wpId);
 module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(mainClient, 
 																											assId, 
 																											UNCOMPLETE_ASSIGNM_STATUSES);

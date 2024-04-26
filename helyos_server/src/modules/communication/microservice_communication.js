@@ -17,11 +17,11 @@ const SERVICE_STATUS = require('../data_models.js').SERVICE_STATUS;
 */
 const processMicroserviceRequest = (servRequestId) => { 
 
-    databaseServices.service_requests.get_byId(servRequestId)
-    .then((servRequest) => {
+    databaseServices.service_requests.select({id: servRequestId, status: SERVICE_STATUS.DISPATCHING_SERVICE})
+    .then((servRequests) => {
+        const servRequest = servRequests[0];
         if (!servRequest) { // @TODO Better handle this error as process failed.
-            const e = `service request not found id=${servRequestId}`;
-            saveLogData('microservice', null, 'error', e ); 
+            const e = `service request not found or canceled. id=${servRequestId}`;
             throw Error(e);  
         } 
 
@@ -29,7 +29,7 @@ const processMicroserviceRequest = (servRequestId) => {
         let useRequestDataAsResponse = false;
         let jobQueueId = null;
 
-        getExtServiceAccessData(servRequest.service_type)
+        return getExtServiceAccessData(servRequest.service_type)
         .then(accessData => {
             useRequestDataAsResponse = accessData.isDummy;
             if (useRequestDataAsResponse) {
@@ -49,20 +49,34 @@ const processMicroserviceRequest = (servRequestId) => {
             jobQueueId = servResponse.request_id;
             
             saveLogData('microservice', servRequest, 'success', 'request dispatched' );
-            return databaseServices.service_requests.update('id', servRequestId, {service_queue_id: jobQueueId, status:defaultStatus, dispatched_at: service_dispatched_at})
-                   .then(() => saveServiceResponse(servRequestId, servResponse, defaultStatus));
+            return databaseServices.service_requests.updateByConditions( {'id': servRequestId, 'status':SERVICE_STATUS.DISPATCHING_SERVICE },
+                                                                         {service_queue_id: jobQueueId, status:defaultStatus, dispatched_at: service_dispatched_at})
+                   .then((numUpdates) => {
+                        const _status = numUpdates == 0 ? SERVICE_STATUS.CANCELED : defaultStatus;
+                        return saveServiceResponse(servRequestId, servResponse, _status);
+                    });
         })
         .catch(e => {
             const servResponse = e.data;
             saveLogData('microservice', servRequest, 'error', e );
-            return databaseServices.service_requests.update('id', servRequestId, { fetched: false, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+            return databaseServices.service_requests.updateByConditions({   'id': servRequestId, 
+                                                                            'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
+                                                                                            SERVICE_STATUS.WAIT_DEPENDENCIES,
+                                                                                            SERVICE_STATUS.PENDING] },
+                                                                            { fetched: true, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
         });
+
+
     })
     .catch(e => {
         const msg = `database access: request id=${servRequestId} ${e}`;
         const servResponse = '{"result":{}}';
         saveLogData('microservice', null, 'error', msg ); 
-        databaseServices.service_requests.update('id', servRequestId, { fetched: true, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+        return databaseServices.service_requests.updateByConditions({'id': servRequestId, 
+                                                                    'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
+                                                                                    SERVICE_STATUS.WAIT_DEPENDENCIES,
+                                                                                    SERVICE_STATUS.PENDING] },
+                                                                     { fetched: false, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
     });
 }
 
@@ -102,9 +116,13 @@ const saveServiceResponse = (requestId, servResponse, defaultStatus) => {
         if(servResponse.status && servResponse.status == SERVICE_STATUS.FAILED) status = SERVICE_STATUS.FAILED;
         if(servResponse.status && servResponse.status == SERVICE_STATUS.READY) status = SERVICE_STATUS.READY;
 
-        return databaseServices.service_requests.update_byId(requestId, { fetched: true, processed: true, response: servResponse,
-                                                             status: status, result_at: now})
-                                                            .then(() => status);
+        return databaseServices.service_requests.updateByConditions({'id': requestId, 
+                                                                     'status__in': [SERVICE_STATUS.DISPATCHING_SERVICE,
+                                                                                    SERVICE_STATUS.WAIT_DEPENDENCIES,
+                                                                                    SERVICE_STATUS.PENDING]},
+                                                                    { fetched: true, processed: true, response: servResponse,
+                                                                       status: status, result_at: now})
+                                                .then(() => status);
 }
 
 

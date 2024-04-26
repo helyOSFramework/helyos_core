@@ -126,7 +126,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 								'wait_dependencies_assignments': servStep.wait_dependencies_assignments,
 								'__request_order': servStep.request_order,
 								'__depends_on_steps': servStep.depends_on_steps,
-								'status' : 'ready_for_service',
+								'status' : SERVICE_STATUS.READY_FOR_SERVICE,
 								'request': _request,
 								'require_agents_data': serviceByType[servStep.service_type]['require_agents_data'],
 								'require_mission_agents_data': serviceByType[servStep.service_type]['require_mission_agents_data'],
@@ -139,7 +139,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 					
 					// COMMENT: If request_order is null or zero, the request will be held. ATM there is no mechanism to release it.
 					if (!servStep.request_order || (servStep.depends_on_steps && servStep.depends_on_steps.length)) {
-						extendedRequest['status'] = 'not_ready_for_service';
+						extendedRequest['status'] = SERVICE_STATUS.NOT_READY;
 					}
 					return extendedRequest;
 			});
@@ -316,7 +316,11 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 					req['request'] = JSON.stringify(req['request']); // postgress known issue: json column only saves arrays if inputed as string.
 					databaseServices.service_requests.insert({...req, response: null,  fetched: false, processed: false});
 				});
-				databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.CALCULATING});
+				databaseServices.work_processes.updateByConditions(
+					{'id': workProcess['id'], 'status__in':[MISSION_STATUS.PREPARING,
+															MISSION_STATUS.DISPATCHED,
+															MISSION_STATUS.EXECUTING]},
+					{'status': MISSION_STATUS.CALCULATING});
 		})
 	)
 	.catch( e => {
@@ -352,7 +356,13 @@ function wrapUpMicroserviceCall(partialServiceRequest) {
 				return databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status'])
 				.then( wproc => {
 					if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
-						return databaseServices.work_processes.update_byId(partialServiceRequest.work_process_id, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
+						return databaseServices.work_processes.updateByConditions({ id: partialServiceRequest.work_process_id, 
+																					status__in: [   
+																						MISSION_STATUS.PREPARING,
+																						MISSION_STATUS.CALCULATING,
+																						MISSION_STATUS.EXECUTING
+																					]},
+																				 { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
 					}
 				});
 
@@ -394,36 +404,37 @@ function updateRequestData(serviceResponses, nextServRequest) {
 
 
 
-function activateNextServicesInPipeline(partialServiceRequest) {
-	if (!partialServiceRequest.next_request_to_dispatch_uid) { return Promise.resolve(0) };
+async function activateNextServicesInPipeline(partialServiceRequest) {
+	// If there is no next request to dispatch, return.
+	if (!partialServiceRequest.next_request_to_dispatch_uid) { 
+		return Promise.resolve(0) 
+	};
+	// Check if mission is still in progress.
+	const workProcessStatus = await databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status']);
+	if (![MISSION_STATUS.PREPARING, MISSION_STATUS.EXECUTING, MISSION_STATUS.CALCULATING].includes(workProcessStatus.status)) {
+		return Promise.resolve(0);
+	}
 
-	saveLogData('helyos_core', null, 'normal', `activate Next Services In Pipeline`);
+	saveLogData('helyos_core', null, 'normal', `activate Next Services In Pipeline, workprocess status is ${workProcessStatus.status}`);
 
-	databaseServices.service_requests.get_byId(partialServiceRequest.id)
-		.then(serviceRequest => {
-			databaseServices.service_requests.list_in('request_uid', serviceRequest.next_request_to_dispatch_uids)
-				.then(nextRequests => {
-					const updatingPromises = nextRequests.map(nextServRequest => {
-						if (nextServRequest.status !== SERVICE_STATUS.NOT_READY) { return Promise.resolve(0); }
+	const serviceRequest = await databaseServices.service_requests.get_byId(partialServiceRequest.id);
+	const nextRequests = await databaseServices.service_requests.list_in('request_uid', serviceRequest.next_request_to_dispatch_uids);
 
-						return isRequestReadyForService(nextServRequest)
-							.then(isReadyForService => {
-								if (isReadyForService) {
-									nextServRequest.status = SERVICE_STATUS.READY_FOR_SERVICE;
-								} else {
-									nextServRequest.status = SERVICE_STATUS.WAIT_DEPENDENICIES;
-								}
-								return databaseServices.service_requests.update('request_uid', serviceRequest.next_request_to_dispatch_uid, nextServRequest);
-							});
+	const updatingPromises = nextRequests.map(async nextServRequest => {
+		if (nextServRequest.status !== SERVICE_STATUS.NOT_READY) { return Promise.resolve(0); }
 
-					});
+		const isReadyForService = await isRequestReadyForService(nextServRequest);
+		if (isReadyForService) {
+			nextServRequest.status = SERVICE_STATUS.READY_FOR_SERVICE;
+		} else {
+			nextServRequest.status = SERVICE_STATUS.WAIT_DEPENDENCIES;
+		}
+		return databaseServices.service_requests.update('request_uid', serviceRequest.next_request_to_dispatch_uid, nextServRequest);
+	});
 
-					return Promise.all(updatingPromises);
-
-				});
-		})
-
+	await Promise.all(updatingPromises);
 }
+
 
 async function updateRequestContext(servRequestId) {
 	const serviceRequest = await databaseServices.service_requests.get_byId(servRequestId);
@@ -440,7 +451,8 @@ async function updateRequestContext(servRequestId) {
 	const context = { ...yardContext, 'dependencies': dependencies };
 	context['orchestration'] = { 'current_step': serviceRequest['step'], 'next_step': serviceRequest['next_step'] };
 	if (serviceRequest.context) { serviceRequest.context = {} }
-	return databaseServices.service_requests.update_byId(serviceRequest.id, { request: requestData, context: { ...serviceRequest.context, ...context } });
+	return databaseServices.service_requests.updateByConditions({'id':serviceRequest.id, status: SERVICE_STATUS.DISPATCHING_SERVICE},
+																{ request: requestData, context: { ...serviceRequest.context, ...context } });
 }
 
 

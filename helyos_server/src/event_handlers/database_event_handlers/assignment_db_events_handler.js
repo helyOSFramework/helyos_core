@@ -46,7 +46,13 @@ function processAssignmentEvents(msg) {
 
                 if(assignment_status == ASSIGNMENT_STATUS.FAILED ||  assignment_status == ASSIGNMENT_STATUS.ABORTED || assignment_status == ASSIGNMENT_STATUS.REJECTED){
                     saveLogData('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status}`);
-                    databaseServices.work_processes.update_byId(payload['work_process_id'], {status:MISSION_STATUS.ASSIGNMENT_FAILED});
+
+                    databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
+                                                                        status__in: [   MISSION_STATUS.PREPARING,
+                                                                                        MISSION_STATUS.CALCULATING,
+                                                                                        MISSION_STATUS.EXECUTING
+                                                                                    ]},
+                                                                        {status: MISSION_STATUS.ASSIGNMENT_FAILED});
                 }
 
                 break;

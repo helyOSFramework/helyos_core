@@ -85,26 +85,30 @@ function processWorkProcessEvents(msg) {
 
                     case 'cancelling':
                         databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.CANCELED})
-                        .then(() => {
-                            blAssignm.cancelWorkProcessAssignmentsAndRequests(payload['id']);	
-                            blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus);
-                        });
+                        .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
+                        .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
+                        .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus));
                         break;
 
                     case MISSION_STATUS.CANCELING:
                         databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.CANCELED})
-                        .then(() => {
-                            blAssignm.cancelWorkProcessAssignmentsAndRequests(payload['id']);	
-                            blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus);
-                        });
+                        .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
+                        .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
+                        .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus));
                         break;
 
                     case MISSION_STATUS.ASSIGNMENT_FAILED:
                         databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
-                        .then(() => {
-                            blAssignm.cancelWorkProcessAssignmentsAndRequests(payload['id']);	
-                            blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus);
-                        });
+                        .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
+                        .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
+                        .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus));
+                        break;
+
+                    case MISSION_STATUS.PLANNING_FAILED:
+                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
+                        .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
+                        .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
+                        .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus));
                         break;
 
                     case MISSION_STATUS.ASSIGNMENTS_COMPLETED:
@@ -113,14 +117,9 @@ function processWorkProcessEvents(msg) {
                             let w_process_status = r.length? MISSION_STATUS.CANCELED : MISSION_STATUS.SUCCEEDED;
                             databaseServices.work_processes.update_byId(payload['id'], {status:w_process_status})
                             .then(()=>blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus));
-                        })
-
+                        });
                         break;
 
-                    case MISSION_STATUS.PLANNING_FAILED:
-                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED});
-                        blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus);
-                        break;
                         
                     default:
                         break;

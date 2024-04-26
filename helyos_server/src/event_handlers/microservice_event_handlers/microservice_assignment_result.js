@@ -113,7 +113,11 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				assigmentInputs.forEach( input => 
 					databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})
 					.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY}))
-					.then(() =>  databaseServices.work_processes.update('id', workProcess.id, {status: MISSION_STATUS.EXECUTING}))
+					.then(() =>  databaseServices.work_processes.updateByConditions(
+						{'id': workProcess.id, 'status__in': [ MISSION_STATUS.DISPATCHED,
+															   MISSION_STATUS.EXECUTING,
+															   MISSION_STATUS.PREPARING]},
+						{status: MISSION_STATUS.EXECUTING}))
 				);
 			})
 

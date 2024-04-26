@@ -28,7 +28,7 @@ const AGENT_STATUS = {
  * @enum {string}
  * 
  * Usual cycle:
- * NOT_READY => WAIT_DEPENDENICIES => READY_FOR_SERVICE => PENDING => READY
+ * NOT_READY => WAIT_DEPENDENCIES => READY_FOR_SERVICE => PENDING => READY
  * 
  * helyOS core is responsible for the transitions:
  * PENDING => TIMEOUT
@@ -42,7 +42,7 @@ const SERVICE_STATUS = {
     TIMEOUT: 'time-out',
     CANCELED: 'canceled',
     READY: 'ready',
-    WAIT_DEPENDENICIES:'wait_dependencies',
+    WAIT_DEPENDENCIES:'wait_dependencies',
     DISPATCHING_SERVICE: 'dispatching_service',
 }
 
@@ -96,8 +96,9 @@ const ASSIGNMENT_STATUS = {
     ABORTED: 'aborted',
     CANCELING: 'canceling',
     CANCELED: 'canceled',
-    WAIT_DEPENDENICIES:'wait_dependencies'
-
+    WAIT_DEPENDENCIES:'wait_dependencies',
+    NOT_READY_TO_DISPATCH: 'not_ready_to_dispatch',
+    ACTIVE: 'active'
 }
 
 

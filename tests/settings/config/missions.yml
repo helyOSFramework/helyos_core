@@ -54,6 +54,7 @@ missions:
           request_order: 2
           apply_result: true
           override_config: "{}"
+          dependencies: '["A"]'
 
 
   driving_assignment_data_from_app:

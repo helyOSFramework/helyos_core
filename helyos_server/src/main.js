@@ -125,6 +125,7 @@ const postGraphileOptions = {
     retryOnInitFail: true,
     jwtPgTypeIdentifier: "public.jwt_token",
     enableCors: true,
+    disableQueryLog: true,
 // showErrorStack: "json",
 // dynamicJson: true,
 // ignoreRBAC: false,

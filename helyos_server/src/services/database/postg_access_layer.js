@@ -193,14 +193,14 @@ class DatabaseLayer {
 		const {names, values, masks, null_conditions, in_conditions} = parseConditions(conditions);
 		const condColNames = names, condColValues = values, condValueMasks = masks;	
 
-		let colNames = [], colValues = condColValues, valueMasks = [];
+		let colNames = [], colValues = [...condColValues], valueMasks = [];
 		delete patch['id'];
 
 		console.log('colValues', colValues);
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
 			colValues.push(patch[key]);
-			valueMasks.push('$' + (idx + values.length ));
+			valueMasks.push('$' + (idx + 1 + condColValues.length));
 		});
 
 		colNames = colNames.join(',');
@@ -221,10 +221,10 @@ class DatabaseLayer {
 		}
 
 		return this.client.query(queryText, colValues)
-			.then((res) => patch)
-			.catch(e => {
-				console.log(e);
-			});
+				.then((res) => res.rowCount)
+				.catch(e => {
+					console.log(e);
+				});
 	}
 
 
@@ -258,8 +258,7 @@ class DatabaseLayer {
 
 
 
-	createMany(dataArray) {
-
+	insertMany(dataArray) {
 		if (dataArray.length === 0) { return Promise.resolve([]) };
 
 		// Collect all unique column names across all objects
@@ -271,13 +270,13 @@ class DatabaseLayer {
 		});
 
 		const insertValues = [];
-		dataArray.forEach((data, i) => {
-				const values = Array.from(columnNames).map((col) => {
-					if (data[col]===undefined) return 'default';
-					if (Array.isArray(data[col])) return JSON.stringify(data[col]);
-					return data[col];
-				});	
-				insertValues.push(...values);
+		dataArray.forEach((data) => {
+			const values = Array.from(columnNames).map((col) => {
+				if (data[col] === undefined) return null;
+				if (Array.isArray(data[col])) return JSON.stringify(data[col]);
+				return data[col];
+			});
+			insertValues.push(values);
 		});
 
 		// Construct the SQL query
@@ -290,9 +289,9 @@ class DatabaseLayer {
 		}).join(',\n')}
 		RETURNING id
 		`;
-
-		const queryValues = valuesArray.flat();
-
+	
+		const queryValues = insertValues.flat();
+	
 		return this.client.query(queryText, queryValues);
 
 	}
@@ -465,21 +464,6 @@ const searchAllRelatedUncompletedAssignments = (client, assId, uncompletedAssgmS
 }
 
 
-const cancelAllAssignments_byWPId = (client, wpId, statusBeforeDispatch, statusAfterDispatch) => {
-	const cancelBeforeDispatch = client.query('UPDATE public.assignments SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4, $5)', ['canceled', wpId, ...statusBeforeDispatch]);
-	const setToBeCanceledAfterDispatch = client.query('UPDATE public.assignments SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4)', ['canceling', wpId, ...statusAfterDispatch]);
-	return Promise.all([cancelBeforeDispatch, setToBeCanceledAfterDispatch]);
-}
-
-
-const cancelAllRequestToMicroservices_byWPId = (client, wpId) => {
-	const cancelBeforeDispatch = client.query('UPDATE public.service_requests SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4)', ['canceled', wpId, 'ready_for_service', 'wait_dependencies']);
-	const cancelAfterDispatch = client.query('UPDATE public.service_requests SET status = $1, canceled = TRUE WHERE work_process_id = $2 AND status = $3', ['canceled', wpId, 'pending']);
-	return Promise.all([cancelBeforeDispatch, cancelAfterDispatch]);
-}
-
-
-
 
 const wait_database_value = (dataLayerInstance, id, field, value, maxTries, debug = false) => {
 	const { log } = require('console');
@@ -547,5 +531,3 @@ module.exports.wait_database_query = wait_database_query;
 module.exports.updateAgentsConnectionStatus = updateAgentsConnectionStatus;
 module.exports.getUncompletedAssignments_byWPId = getUncompletedAssignments_byWPId;
 module.exports.searchAllRelatedUncompletedAssignments = searchAllRelatedUncompletedAssignments;
-module.exports.cancelAllAssignments_byWPId = cancelAllAssignments_byWPId;
-module.exports.cancelAllRequestToMicroservices_byWPId = cancelAllRequestToMicroservices_byWPId;

@@ -5,7 +5,7 @@
 const databaseServices = require('../services/database/database_services.js');
 const { generateAssignmentDependencies } = require('./assignment_context.js');
 const agentComm = require('./communication/agent_communication.js');
-const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, UNCOMPLETE_MISSION_STATUS } = require('./data_models.js');
+const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, SERVICE_STATUS, UNCOMPLETE_MISSION_STATUS } = require('./data_models.js');
 const { saveLogData } = require('./systemlog.js');
 
 
@@ -24,7 +24,7 @@ function activateNextAssignmentInPipeline(partialAssignment) {
 					if (nexAssignment.depend_on_assignments.length === 0) {
 						nexAssignment.status = ASSIGNMENT_STATUS.TO_DISPATCH;
 					} else {
-						nexAssignment.status = ASSIGNMENT_STATUS.WAIT_DEPENDENICIES;
+						nexAssignment.status = ASSIGNMENT_STATUS.WAIT_DEPENDENCIES;
 					}
 		
 					return databaseServices.assignments.update_byId(nexAssignment.id, nexAssignment);
@@ -48,11 +48,30 @@ async function updateAssignmentContext(assigmentId) {
 };
 
 
-function cancelWorkProcessAssignmentsAndRequests(id){
-	databaseServices.cancelAllAssignments_byWPId(id);
-	databaseServices.cancelAllRequestToMicroservices_byWPId(id);
+function cancelWorkProcessAssignments(id){
+	return databaseServices.assignments.updateByConditions(
+		{ work_process_id: id, status__in: [ASSIGNMENT_STATUS.TO_DISPATCH,
+											ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH,
+											ASSIGNMENT_STATUS.WAIT_DEPENDENCIES] },
+		{ status: ASSIGNMENT_STATUS.CANCELED }
+	).then(() => databaseServices.assignments.updateByConditions(
+		{ work_process_id: id, status__in: [ASSIGNMENT_STATUS.EXECUTING,
+											ASSIGNMENT_STATUS.ACTIVE] },	
+		{ status: ASSIGNMENT_STATUS.CANCELING } // The agent will be notified to cancel the assignment
+	));
 }
 
+
+function cancelRequestsToMicroservicesByWPId(id){
+	return databaseServices.service_requests.updateByConditions(
+		{ work_process_id: id, status__in: [SERVICE_STATUS.NOT_READY,
+											SERVICE_STATUS.READY_FOR_SERVICE,
+											SERVICE_STATUS.DISPATCHING_SERVICE,
+											SERVICE_STATUS.WAIT_DEPENDENCIES,
+											SERVICE_STATUS.PENDING]},
+		{status: SERVICE_STATUS.CANCELED}
+	).then((n) => saveLogData('helyos_core', {wproc_id:id},'warning', `${n} services canceled`) );
+}
 
 function dispatchAssignmentToAgent(partialAssignment) {
 	return databaseServices.assignments.get_byId(partialAssignment.id)
@@ -120,11 +139,11 @@ async function assignmentUpdatesMissionStatus(id, wprocId) {
 }
 
 
-module.exports.cancelWorkProcessAssignmentsAndRequests = cancelWorkProcessAssignmentsAndRequests;
+module.exports.cancelWorkProcessAssignments = cancelWorkProcessAssignments;
 module.exports.assignmentUpdatesMissionStatus = assignmentUpdatesMissionStatus;
 module.exports.dispatchAssignmentToAgent = dispatchAssignmentToAgent;
 module.exports.cancelAssignmentByAgent = cancelAssignmentByAgent;
 module.exports.onWorkProcessEnd = onWorkProcessEnd;
 module.exports.activateNextAssignmentInPipeline = activateNextAssignmentInPipeline;
 module.exports.updateAssignmentContext = updateAssignmentContext;
-
+module.exports.cancelRequestsToMicroservicesByWPId = cancelRequestsToMicroservicesByWPId;

@@ -4,6 +4,7 @@
 var rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 var databaseServices = require('../../services/database/database_services.js');
 const { saveLogData } = require('../systemlog.js');
+const { MISSION_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
 const REFRESH_ONLNE_TIME_PERIOD = 5;
@@ -177,7 +178,19 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
             enlapsedTime = enlapsedTime + timeStep;
             console.log('Waiting agent status. Time:', enlapsedTime);
             const promiseArray = agentIds.map(agentId => checkAgentClearence(parseInt(agentId)));
-            Promise.all(promiseArray).then( values => {
+
+            const promises = databaseServices.work_processes.get_byId(wpId, ['status'])
+                            .then(wp => {    
+                                if (wp && [MISSION_STATUS.CANCELED, MISSION_STATUS.FAILED].includes(wp.status)) return 'WORK_PROCESS_TERMINATED';
+                                else return Promise.all(promiseArray);
+                            });
+
+            promises.then( values => {
+
+                if (values == 'WORK_PROCESS_TERMINATED') {
+                    clearInterval(watcher);
+                    reject(new Error(`Work process was terminated ${wpId}`));
+                }
 
                 if (values.every(value => value != null)) {
                     clearInterval(watcher);

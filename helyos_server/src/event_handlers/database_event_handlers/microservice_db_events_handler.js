@@ -28,21 +28,40 @@ function processMicroserviceEvents(msg) {
              
             case 'service_requests_insertion':
                 service_request_status = payload['status'];
-                if(service_request_status == SERVICE_STATUS.READY_FOR_SERVICE){
+                if(service_request_status == SERVICE_STATUS.READY_FOR_SERVICE) {
                     bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                     service_request_id = payload['id'];
-                    extServiceCommunication.processMicroserviceRequest(service_request_id);
+
+
+                    databaseServices.work_processes.get_byId(payload['work_process_id'], ['status'])
+                    .then(work_process => {
+                        if ([MISSION_STATUS.FAILED, MISSION_STATUS.CANCELING,
+                            MISSION_STATUS.CANCELED, MISSION_STATUS.PLANNING_FAILED].includes(work_process.status)) {
+                            return databaseServices.service_requests.update_byId(service_request_id, {status: SERVICE_STATUS.CANCELED});
+                        }
+                    
+                        return databaseServices.service_requests.updateByConditions({
+                                    id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE}, 
+                                    { status: SERVICE_STATUS.DISPATCHING_SERVICE })
+                                .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id));
+                    }); 
                 }
+
+
                 break;
 
 
             case 'service_requests_update':
                 service_request_status = payload['status'];
+        
                 switch (service_request_status) {
+
                     case SERVICE_STATUS.READY_FOR_SERVICE:
                         bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                         service_request_id = payload['id'];
-                        databaseServices.service_requests.update_byId(service_request_id, {status: SERVICE_STATUS.DISPATCHING_SERVICE})
+                        databaseServices.service_requests.updateByConditions({
+                            id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE},
+                            {status: SERVICE_STATUS.DISPATCHING_SERVICE})
                         .then(() => blMicroservice.updateRequestContext(service_request_id))
                         .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id)); // Current service status: ready_for_service => pending
                         break;			
@@ -65,13 +84,24 @@ function processMicroserviceEvents(msg) {
                         break;
 
                     case SERVICE_STATUS.FAILED:
-                         databaseServices.work_processes.update('id', payload['work_process_id'], {status:MISSION_STATUS.PLANNING_FAILED});
+                        databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
+                                                                            status__in: [   MISSION_STATUS.PREPARING,
+                                                                                            MISSION_STATUS.CALCULATING,
+                                                                                            MISSION_STATUS.EXECUTING
+                                                                                        ]},
+                                                                          {status: MISSION_STATUS.PLANNING_FAILED});
                         break;
 
 
                     case SERVICE_STATUS.TIMEOUT:
                         databaseServices.service_requests.update_byId(payload['id'], {status: SERVICE_STATUS.CANCELED});
-                        databaseServices.work_processes.update('id', payload['work_process_id'], {status:MISSION_STATUS.PLANNING_FAILED});
+                        databaseServices.work_processes.get_byId(payload['work_process_id'], ['status']);
+                        databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
+                                                                            status__in: [   MISSION_STATUS.PREPARING,
+                                                                                            MISSION_STATUS.CALCULATING,
+                                                                                            MISSION_STATUS.EXECUTING
+                                                                                        ]},
+                                                                          {status: MISSION_STATUS.PLANNING_FAILED});
                         break;
 
                     default:
