@@ -13,7 +13,7 @@ const extServiceCommunication = require('../../modules/communication/microservic
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 const {SERVICE_STATUS, MISSION_STATUS} = require('../../modules/data_models');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 
 // Callbacks to database changes
 function processMicroserviceEvents(msg) {
@@ -74,7 +74,7 @@ function processMicroserviceEvents(msg) {
                             .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
                             .catch(err => {
                                 databaseServices.service_requests.update_byId(payload['id'], {status: SERVICE_STATUS.FAILED});
-                                saveLogData('microservice', payload, 'error', err.message);
+                                logData.addLog('microservice', payload, 'error', err.message);
                             });
                         } else {
                             blMicroservice.wrapUpMicroserviceCall(payload)

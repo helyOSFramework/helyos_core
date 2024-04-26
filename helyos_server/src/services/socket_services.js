@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 var socket_io = require('socket.io');
 var http = require('http');
-const {saveLogData} = require('../modules/systemlog.js');
+const { logData} = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002
@@ -24,7 +24,7 @@ io = socket_io(webSocketServer, conf.socketIo);
 
 const unauthorizeClient = (socket) => {
     console.log('Client disconnected id', socket.id);
-    saveLogData('helyos_core', null, 'warn',
+    logData.addLog('helyos_core', null, 'warn',
     `Client application tried to connect to websocket ${socket.id} with invalid token`);
     socket.emit('unauthorized', 'Invalid token');
     socket.disconnect(true);
@@ -52,7 +52,7 @@ io.sockets.on('connection', function (socket) {
         return;
     }
 
-    saveLogData('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
+    logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
     console.log('Client connected id', socket.id);
 
     // Join room

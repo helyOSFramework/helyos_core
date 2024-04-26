@@ -6,7 +6,7 @@ const databaseServices = require('../services/database/database_services.js');
 const { generateAssignmentDependencies } = require('./assignment_context.js');
 const agentComm = require('./communication/agent_communication.js');
 const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, SERVICE_STATUS, UNCOMPLETE_MISSION_STATUS } = require('./data_models.js');
-const { saveLogData } = require('./systemlog.js');
+const { logData } = require('./systemlog.js');
 
 
 // ----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ function cancelRequestsToMicroservicesByWPId(id){
 											SERVICE_STATUS.WAIT_DEPENDENCIES,
 											SERVICE_STATUS.PENDING]},
 		{status: SERVICE_STATUS.CANCELED}
-	).then((n) => saveLogData('helyos_core', {wproc_id:id},'warning', `${n} services canceled`) );
+	).then((n) => logData.addLog('helyos_core', {wproc_id:id},'warning', `${n} services canceled`) );
 }
 
 function dispatchAssignmentToAgent(partialAssignment) {
@@ -92,7 +92,7 @@ function cancelAssignmentByAgent(partialAssignment){
  */
 async function onWorkProcessEnd(workProcessId, reason){
 
-	saveLogData('helyos_core', {wproc_id:workProcessId},'warning', 'Work process ending: ' + reason);
+	logData.addLog('helyos_core', {wproc_id:workProcessId},'warning', 'Work process ending: ' + reason);
 
 	// Release agents that received the assignments
 	const wpAssignments= await databaseServices.assignments.get('work_process_id', workProcessId, ['id','agent_id', 'work_process_id']);

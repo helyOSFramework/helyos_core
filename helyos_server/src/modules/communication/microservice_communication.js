@@ -1,7 +1,6 @@
 databaseServices = require('../../services/database/database_services.js');
 webServices = require('../../services/microservice_services.js');
-const systemlog = require('../systemlog.js');
-const saveLogData = systemlog.saveLogData;
+const {logData} = require('../systemlog.js');
 const SERVICE_STATUS = require('../data_models.js').SERVICE_STATUS;
 // ----------------------------------------------------------------------------
 // EXTERNAL SERVICE COMMUNICATION
@@ -41,14 +40,14 @@ const processMicroserviceRequest = (servRequestId) => {
         .then(servResponse => {
             if (!servResponse) {
                 const e = 'Microservice response is empty';
-                saveLogData('microservice', servRequest, 'error', e );
+                logData.addLog('microservice', servRequest, 'error', e );
                 throw Error(e);
             } 
             const service_dispatched_at = new Date();
             const defaultStatus = SERVICE_STATUS.PENDING;
             jobQueueId = servResponse.request_id;
             
-            saveLogData('microservice', servRequest, 'success', 'request dispatched' );
+            logData.addLog('microservice', servRequest, 'success', 'request dispatched' );
             return databaseServices.service_requests.updateByConditions( {'id': servRequestId, 'status':SERVICE_STATUS.DISPATCHING_SERVICE },
                                                                          {service_queue_id: jobQueueId, status:defaultStatus, dispatched_at: service_dispatched_at})
                    .then((numUpdates) => {
@@ -58,7 +57,7 @@ const processMicroserviceRequest = (servRequestId) => {
         })
         .catch(e => {
             const servResponse = e.data;
-            saveLogData('microservice', servRequest, 'error', e );
+            logData.addLog('microservice', servRequest, 'error', e );
             return databaseServices.service_requests.updateByConditions({   'id': servRequestId, 
                                                                             'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                             SERVICE_STATUS.WAIT_DEPENDENCIES,
@@ -71,7 +70,7 @@ const processMicroserviceRequest = (servRequestId) => {
     .catch(e => {
         const msg = `database access: request id=${servRequestId} ${e}`;
         const servResponse = '{"result":{}}';
-        saveLogData('microservice', null, 'error', msg ); 
+        logData.addLog('microservice', null, 'error', msg ); 
         return databaseServices.service_requests.updateByConditions({'id': servRequestId, 
                                                                     'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                     SERVICE_STATUS.WAIT_DEPENDENCIES,

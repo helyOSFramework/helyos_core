@@ -1,9 +1,60 @@
 // This module is used to collect logs and save then in the database.
 
 const databaseServices = require('../services/database/database_services.js')
+const LOG_OUTPUT = process.env.LOG_OUTPUT || 'database';
 
 
-function saveLogData(origin, metadata, logType, log_msg, eventType='' ) {
+/** 
+ * Class that gather 10 log messsage and insert than with a single INSERT query to the database.
+ * @class
+ * @param {string} origin - The origin of the log message. It can be 'microservice', 'helyos_core' or 'agent'.
+ * @param {object} metadata - The metadata of the log message. It can be the request object, the agent object or the assignment object.
+ * @param {string} logType - The type of the log message. It can be 'info', 'warning' or 'error'.
+ * 
+ * @param {string} log_msg - The log message.
+ * @param {string} eventType - The event type of the log message. It can be 'request', 'response', 'error', 'info', 'warning' or 'success'.
+ * 
+ * 
+    */
+
+class LogData {
+    constructor(number_of_logs=10) {
+        this.number_of_logs = number_of_logs;
+        this.logs = [];
+        this._periodicallySaveLogs();
+    
+    }
+
+    addLog(origin, metadata, logType, log_msg, eventType='') {
+        let new_log_instance = parseLogData(origin, metadata, logType, log_msg, eventType);
+        if (LOG_OUTPUT === 'database') {
+            this.logs.push(new_log_instance);
+            if (this.logs.length >= this.number_of_logs) {
+                this.saveLogs();
+            }
+        } else {
+            console.log(new_log_instance);
+        }
+    }
+
+    saveLogs(force=false) {
+        if (this.logs.length && (this.logs.length > 0 || force)) {
+            databaseServices.sysLogs.insertMany(this.logs)
+            .catch(err => {console.error(err) });
+            this.logs = [];
+        }
+    }
+
+    _periodicallySaveLogs() {
+        setInterval(() => {
+            this.saveLogs(true);
+        }, 1000);
+    }
+}
+
+
+
+function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
     let new_log_instance;
     let wproc_id = null;
     if (typeof log_msg !== 'string') {
@@ -93,11 +144,12 @@ function saveLogData(origin, metadata, logType, log_msg, eventType='' ) {
             break;
     }
 
-    databaseServices.sysLogs.insert(new_log_instance);
-    console.log(new_log_instance)
+    return new_log_instance;
 
 }
 
+const logData = new LogData();
 
 
-module.exports.saveLogData = saveLogData;
+module.exports.parseLogData = parseLogData;
+module.exports.logData = logData;

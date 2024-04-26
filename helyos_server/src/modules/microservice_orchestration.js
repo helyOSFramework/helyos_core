@@ -5,11 +5,10 @@
 
 const databaseServices = require('../services/database/database_services.js');
 const agentComm = require('./communication/agent_communication');
-const systemlog = require('./systemlog');
+const {logData} = require('./systemlog');
 const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS} = require('./data_models');
 const {generateFullYardContext, generateMicroserviceDependencies} = require('./microservice_context');
 const {filterContext} = require('./microservice_context');
-const saveLogData = systemlog.saveLogData;
 const { v4: uuidv4 } = require('uuid');
 const WAIT_AGENT_STATUS_PERIOD = parseInt(process.env.WAIT_AGENT_STATUS_PERIOD || '20')*1000;
 
@@ -43,7 +42,7 @@ ensureCorrectDummyRequestFormat = (service, request, agentIds) => {
 			(request.results[0].result || request.results[0].assignment) ){ // Correct format, do nothing:
 			return {...request};
 		} else { // Incorrect format? fix it:
-			saveLogData('helyos_core', null, 'warn', `${service.name} is received a wrong request format, helyOS will try to fix it.`);
+			logData.addLog('helyos_core', null, 'warn', `${service.name} is received a wrong request format, helyOS will try to fix it.`);
 			const fixed_req = {request_id: null,
 							   status: 'complete',
 							   results: agentIds.map(id =>({agent_id: id, assignment: {...request}})) 
@@ -91,7 +90,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 			workProcessDefinition = query[0];
 			if (!workProcessDefinition){
 				const msg = `mission type is not defined: ${processType}`;
-				saveLogData('helyos_core', {wproc_id:wproc_id}, 'error', msg);
+				logData.addLog('helyos_core', {wproc_id:wproc_id}, 'error', msg);
 				throw Error(msg)
 			} 
 			return databaseServices.work_process_service_plan.get('work_process_type_id', workProcessDefinition.id, [], 'step');
@@ -105,7 +104,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 			const servicePlanToRequestsMap = orderedSteps.map( servStep => {
 					if (!serviceByType[servStep.service_type]){
 						const errMsg = `${servStep.service_type} microservice not found. Is it enabled?`;
-						saveLogData('microservice', servStep, 'error', errMsg); 
+						logData.addLog('microservice', servStep, 'error', errMsg); 
 						throw new Error(errMsg);
 					}
 
@@ -212,7 +211,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 	const workProcess = await databaseServices.work_processes.get_byId(partialWorkProcess.id);
 	if (!workProcess.work_process_type_name) {
-		saveLogData('microservice', {work_process_id: workProcess.id}, 'error', `work process type not found`);
+		logData.addLog('microservice', {work_process_id: workProcess.id}, 'error', `work process type not found`);
 		return databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 	}
 
@@ -227,7 +226,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		const agents = await databaseServices.agents.list_in('id', agentsListIds);
 		if (agents.length !== agentsListIds.length) {
 			const errMsg = `Some agents in the work process ${workProcess.id} were not found in the database.`;
-			saveLogData('microservice', {work_process_id: workProcess.id}, 'error', errMsg);
+			logData.addLog('microservice', {work_process_id: workProcess.id}, 'error', errMsg);
 			return databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 		}
 	}
@@ -253,14 +252,14 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 			// Waiting agents to be "FREE"
 				try {
-					saveLogData('agent', logMetadata, 'normal', `waiting agent to be free`);	
+					logData.addLog('agent', logMetadata, 'normal', `waiting agent to be free`);	
 					agentResponse = await agentComm.waitAgentStatusForWorkProcess(agentsListIds, 'FREE', null, WAIT_AGENT_STATUS_PERIOD)
 					.catch( e => {throw e});
 					agentsListIds.forEach(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: null}));
-					saveLogData('agent', logMetadata, 'normal', `agent is free`);	
+					logData.addLog('agent', logMetadata, 'normal', `agent is free`);	
 
 				} catch (error) {
-					saveLogData('agent', logMetadata, 'error', `expected free=${error}`);
+					logData.addLog('agent', logMetadata, 'error', `expected free=${error}`);
 					databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 					console.log(error);
 					return;
@@ -270,7 +269,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				await agentComm.sendGetReadyForWorkProcessRequest(agentsListIds, workProcess.id);
 				missionAgents.forEach( agent => {
 					logMetadata['uuid'] = agent.uuid;
-					saveLogData('agent', logMetadata, 'normal', `requesting agent to be ready`);	
+					logData.addLog('agent', logMetadata, 'normal', `requesting agent to be ready`);	
 				});
 
 			//  Waiting agents to acknowledge to be "READY"
@@ -278,7 +277,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				try {
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
-						saveLogData('agent', logMetadata, 'normal', `waiting agent to be ready`);	
+						logData.addLog('agent', logMetadata, 'normal', `waiting agent to be ready`);	
 					});
 					agentResponse = await agentComm.waitAgentStatusForWorkProcess(waitReadyAcknListIds, 'READY', workProcess.id,WAIT_AGENT_STATUS_PERIOD)
 					.catch( e => {throw e});
@@ -286,12 +285,12 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
-						saveLogData('agent', logMetadata, 'normal', `agent is ready`);	
+						logData.addLog('agent', logMetadata, 'normal', `agent is ready`);	
 					});
 
 				} catch (error) {
 					const logMetadata = {wproc_id: workProcess.id};
-					saveLogData('agent', logMetadata, 'error', `expected status ready: ${error}`);					
+					logData.addLog('agent', logMetadata, 'error', `expected status ready: ${error}`);					
 					databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
 					console.log(error);
 					return;
@@ -396,7 +395,7 @@ function updateRequestData(serviceResponses, nextServRequest) {
 		return nextServRequest.request;
 	}
 	if (newRequest.length > 1) {
-		saveLogData('microservices', {}, 'error', 'two microservices are trying to change the request data of successive microservice.');
+		logData.addLog('microservices', {}, 'error', 'two microservices are trying to change the request data of successive microservice.');
 	}
 
 	return newRequest[0].orchestration.next_step_request[nextServRequest.step];
@@ -415,7 +414,7 @@ async function activateNextServicesInPipeline(partialServiceRequest) {
 		return Promise.resolve(0);
 	}
 
-	saveLogData('helyos_core', null, 'normal', `activate Next Services In Pipeline, workprocess status is ${workProcessStatus.status}`);
+	logData.addLog('helyos_core', null, 'normal', `activate Next Services In Pipeline, workprocess status is ${workProcessStatus.status}`);
 
 	const serviceRequest = await databaseServices.service_requests.get_byId(partialServiceRequest.id);
 	const nextRequests = await databaseServices.service_requests.list_in('request_uid', serviceRequest.next_request_to_dispatch_uids);

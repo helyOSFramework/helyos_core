@@ -1,5 +1,5 @@
 const util = require('util');
-const {saveLogData} = require('./modules/systemlog.js');
+const { logData} = require('./modules/systemlog.js');
 const rbmqServices = require('./services/message_broker/rabbitMQ_services.js'); 
 const databaseServices = require('./services/database/database_services.js');
 const agentComm = require('./modules/communication/agent_communication.js');
@@ -102,14 +102,14 @@ This recursive routine checks if the set admin account is valid and try to creat
 */
 function initializeRabbitMQAccounts() {
     if(CREATE_RBMQ_ACCOUNTS!=='True'){ return Promise.resolve(null)}
-    saveLogData('helyos_core', null, 'warn', 'Trying connecting using admin account...' );
+    logData.addLog('helyos_core', null, 'warn', 'Trying connecting using admin account...' );
     return rbmqServices.connect_as_admin_and_create_accounts()
             .catch(e => {
-                saveLogData('helyos_core', null, 'warn', 'Trying guest account...' );
+                logData.addLog('helyos_core', null, 'warn', 'Trying guest account...' );
                 rbmqServices.connect_as_guest_and_create_admin()
                 .catch (e => {               
                             console.warn("\nWaiting AMQP server connection stabilize to create accounts...\n\n");
-                            saveLogData('helyos_core', null, 'warn', 'Waiting AMQP server stabilize to create accounts and connect...' );
+                            logData.addLog('helyos_core', null, 'warn', 'Waiting AMQP server stabilize to create accounts and connect...' );
                             console.warn(e);
                 });
                 const promiseSetTimeout = util.promisify(setTimeout);

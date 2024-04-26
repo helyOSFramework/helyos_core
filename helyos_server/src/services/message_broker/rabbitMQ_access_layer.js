@@ -1,5 +1,5 @@
 
-const {saveLogData} = require('../../modules/systemlog.js');
+const { logData} = require('../../modules/systemlog.js');
 // ----------------------------------------------------------------------------
 // RabbitMQ interface layer
 // ----------------------------------------------------------------------------
@@ -38,7 +38,7 @@ const create_rbmq_admin = (username, password, tags) =>
 
         .catch((e)=>  {
             console.error(e);
-            saveLogData('helyos_core', null, 'warn', `RabbitmMQ admin already created?/n${e.code}` );
+            logData.addLog('helyos_core', null, 'warn', `RabbitmMQ admin already created?/n${e.code}` );
         });
         
 
@@ -48,7 +48,7 @@ const createUser = (username, password, tags) =>  !username? Promise.resolve(nul
         .send({'username': username,  'password':password ,tags: tags})
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
-        .catch( e => {  saveLogData('helyos_core', null, 'error', `CREATE ACCOUNT RMBTMQ: ${e}` );
+        .catch( e => {  logData.addLog('helyos_core', null, 'error', `CREATE ACCOUNT RMBTMQ: ${e}` );
                         throw e; 
         });
         
@@ -57,7 +57,7 @@ const removeUser = (username) =>  !username? Promise.resolve(null) :
         .delete(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/users/${username}`)
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
-        .catch( e => {  saveLogData('helyos_core', null, 'error', `DELETE ACCOUNT RMBTMQ: ${e}` );
+        .catch( e => {  logData.addLog('helyos_core', null, 'error', `DELETE ACCOUNT RMBTMQ: ${e}` );
                         throw e;
         });
 
@@ -68,7 +68,7 @@ const add_rbmq_user_vhost = (username) =>  !username? Promise.resolve(null) :
         .send({"configure":".*","write":".*","read":".*"})
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
-        .catch( e => {  saveLogData('helyos_core', null, 'error', `VHOST PERMISSION: ${e}` );
+        .catch( e => {  logData.addLog('helyos_core', null, 'error', `VHOST PERMISSION: ${e}` );
                 throw e; 
         });
 
@@ -78,13 +78,13 @@ const listConnections = (username) =>  !username? Promise.resolve(null) :
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
         .then(r => r.body)
-        .catch( e => {  saveLogData('helyos_core', null, 'error', `VHOST PERMISSION: ${e}` );
+        .catch( e => {  logData.addLog('helyos_core', null, 'error', `VHOST PERMISSION: ${e}` );
                 throw e; 
         });
 
 
 const deleteConnections = (username) =>  {
-                saveLogData('helyos_core', null, 'warn', `helyos remove agent connections: ${username}`);
+                logData.addLog('helyos_core', null, 'warn', `helyos remove agent connections: ${username}`);
 
                 return !username? Promise.resolve(null) :
                 requestXHTTP
@@ -92,7 +92,7 @@ const deleteConnections = (username) =>  {
                 .set( {'content-type': 'application/json', 'X-Reason':'exceed update rate' }).ca(RBMQ_CERTIFICATE)
                 .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
                 .then(r => r.body)
-                .catch( e => {  saveLogData('helyos_core', null, 'error', `RabbitMQ: ${e}` );
+                .catch( e => {  logData.addLog('helyos_core', null, 'error', `RabbitMQ: ${e}` );
                         throw e; 
                 });
         }
@@ -105,7 +105,7 @@ const update_guest_account_permissions = (username) => !username? Promise.resolv
         .send({"configure":`^${guestPermissions}`,"write":guestPermissions,"read":guestPermissions})
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
-        .catch( e => {  saveLogData('helyos_core', null, 'error', `SETTING ANONYMOUS PERMISSIONS: ${e}` );
+        .catch( e => {  logData.addLog('helyos_core', null, 'error', `SETTING ANONYMOUS PERMISSIONS: ${e}` );
         throw e; 
 });
 

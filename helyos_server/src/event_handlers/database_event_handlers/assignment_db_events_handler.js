@@ -9,7 +9,7 @@
 const blAssignm = require('../../modules/assignment_orchestration.js')
 const databaseServices = require('../../services/database/database_services.js')
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const {ASSIGNMENT_STATUS, MISSION_STATUS} = require('../../modules/data_models.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
@@ -45,7 +45,7 @@ function processAssignmentEvents(msg) {
                 }
 
                 if(assignment_status == ASSIGNMENT_STATUS.FAILED ||  assignment_status == ASSIGNMENT_STATUS.ABORTED || assignment_status == ASSIGNMENT_STATUS.REJECTED){
-                    saveLogData('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status}`);
+                    logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status}`);
 
                     databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
                                                                         status__in: [   MISSION_STATUS.PREPARING,

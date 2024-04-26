@@ -1,6 +1,6 @@
 
 const databaseServices = require('../../services/database/database_services.js');
-const {saveLogData} = require('../..//modules/systemlog');
+const { logData} = require('../..//modules/systemlog');
 const { inMemDB } = require('../../services/in_mem_database/mem_database_service.js');
 /* Update the assignmnet if it is not already marked as 'completed' or 'succeeded' */
 /* The data is updated in the assignment table and in the agent table (under work process clearance) */
@@ -23,7 +23,7 @@ function updateAgentMission(assignment, uuid=null) {
                 .then(agents => {
                     if (!uuid) return;
                     if (agents.length == 0) { 
-                        saveLogData('agent', {uuid}, 'error', "agent does not exist");
+                        logData.addLog('agent', {uuid}, 'error', "agent does not exist");
                         return;
                     }
 
@@ -35,7 +35,7 @@ function updateAgentMission(assignment, uuid=null) {
         
             } else {
                 if (assignment_update.status!=='succeeded' && assignment_update.status !=='completed') {
-                    saveLogData('agent', {'uuid':uuid}, 'warning', `agent is trying to change an assignment that is already completed`);
+                    logData.addLog('agent', {'uuid':uuid}, 'warning', `agent is trying to change an assignment that is already completed`);
                 }
             }
         });

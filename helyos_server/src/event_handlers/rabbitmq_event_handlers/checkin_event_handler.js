@@ -6,7 +6,7 @@ const {inMemDB} = require('../../services/in_mem_database/mem_database_service')
 
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const { AGENT_STATUS } = require('../../modules/data_models.js');
 const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
 const RBMQ_CERTIFICATE = RBMQ_SSL? fs.readFileSync('/etc/helyos/.ssl_keys/ca_certificate.pem', 'utf-8'):null;
@@ -167,7 +167,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     }
 
     if (!checkingYard){
-        saveLogData('agent', {uuid}, 'error', `agent failed to check in; yard uid is missing`);
+        logData.addLog('agent', {uuid}, 'error', `agent failed to check in; yard uid is missing`);
         throw ({msg:`agent failed to check in; yard uid is missing;']}`, code: 'YARD-400'});
     }
     const yardId = await isYardUIdRegistered(checkingYard.toString());
@@ -196,7 +196,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     agentUpdate['message_channel'] = replyTo || uuid;
 
     if ('public_key' in checkinData){
-        saveLogData('agent', {uuid}, 'normal', `agent public key updated`);
+        logData.addLog('agent', {uuid}, 'normal', `agent public key updated`);
         agentUpdate['public_key'] = checkinData.public_key;
     }
 

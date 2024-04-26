@@ -11,7 +11,7 @@
 
 
 const webSocketCommunicaton = require('../modules/communication/web_socket_communication.js');
-const { saveLogData } = require('../modules/systemlog');
+const { logData } = require('../modules/systemlog');
 const { processInstantActionEvents } = require('./database_event_handlers/instant_actions_db_events_handler.js');
 const {processWorkProcessEvents} = require('./database_event_handlers/workprocess_db_events_handler.js');
 const {processAssignmentEvents} = require('./database_event_handlers/assignment_db_events_handler.js');
@@ -44,17 +44,17 @@ function handleDatabaseMessages(client) {
                 bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 inMemDB.delete('agents','uuid', payload['uuid']);
                 removeAgentRbmqAccount(payload);
-                saveLogData('agent', payload, 'normal', `agent deleted`);
+                logData.addLog('agent', payload, 'normal', `agent deleted`);
                 break;
 
             case 'change_agent_status':
                 bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
-                saveLogData('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
+                logData.addLog('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
                 break;
 
 
             case 'new_rabbitmq_account':
-                saveLogData('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
+                logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
                 createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
                 break;
 

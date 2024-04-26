@@ -3,7 +3,7 @@
 const socketService = require('../../services/socket_services.js');
 const utils = require('../../modules/utils.js');
 const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
-const { saveLogData } = require('../systemlog.js');
+const { logData } = require('../systemlog.js');
 const PERIOD = 100;
 
 // Buffer Notifications to avoid flooding front-end with messages
@@ -28,7 +28,7 @@ class BufferNotifications {
     _get_latest_updated_data() {
         for (const key in inMemDB.agents) { 
             if(inMemDB.agents[key].id == null) {
-                saveLogData('agent', {uuid:key}, 'error', `MemDB error, id not registered`);
+                logData.addLog('agent', {uuid:key}, 'error', `MemDB error, id not registered`);
                 console.log('MemDB error, id not registered');
                 continue; 
             }

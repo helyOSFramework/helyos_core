@@ -13,7 +13,7 @@ const blMicroservice = require('../../modules/microservice_orchestration');
 const databaseServices = require('../../services/database/database_services.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const {MISSION_STATUS, ASSIGNMENT_STATUS } = require('../../modules/data_models.js');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
@@ -57,14 +57,14 @@ function processWorkProcessEvents(msg) {
                     .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload)))
                     .catch(err => {
                         console.log(err);
-                        saveLogData('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
                     });
             
                 else {
                     prepareWPData.then()
                     .catch(err => {
                         console.log(err);
-                        saveLogData('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
                     });
                 }
                                         
