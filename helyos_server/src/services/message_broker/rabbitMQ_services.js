@@ -1,4 +1,4 @@
-const {saveLogData} = require('../../modules/systemlog.js');
+const { logData} = require('../../modules/systemlog.js');
 // ----------------------------------------------------------------------------
 // RabbitMQ client setup
 // ----------------------------------------------------------------------------
@@ -103,9 +103,9 @@ const createAccounts = () =>  rbmqAccessLayer.createUser(RBMQ_USERNAME,RBMQ_PASS
                         .then(() => rbmqAccessLayer.createUser('anonymous','anonymous', [""] ))
                         .then(() => rbmqAccessLayer.add_rbmq_user_vhost('anonymous'))
                         .then(() => rbmqAccessLayer.update_guest_account_permissions('anonymous'))
-                        .then(() => saveLogData('helyos_core', null, 'warn', 'RabbitmMQ helyOS account is set.' ))
+                        .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitmMQ helyOS account is set.' ))
                         .catch((error) => {
-                        saveLogData('helyos_core', null, 'error', `RMBTMQ ERROR: ${error}` );
+                        logData.addLog('helyos_core', null, 'error', `RMBTMQ ERROR: ${error}` );
                         console.log(error, "helyos_core user already created?");});
 
 
@@ -114,7 +114,7 @@ const connect_as_admin_and_create_accounts = () => rbmqAccessLayer.connect(urlOb
                                 console.log("=========================");
                                 console.log("Creating  user helyos_core in AMQP server\n", urlObj().hostname );
                                 console.log("=========================");
-                                saveLogData('helyos_core', null, 'warn', 'Connected to AMQP, creating accounts...' );
+                                logData.addLog('helyos_core', null, 'warn', 'Connected to AMQP, creating accounts...' );
                                 return createAccounts();
                             });
 
@@ -142,9 +142,9 @@ function connectAndOpenChannel(options={}) {
                 console.log("=========================");
                 console.log("Connected to AMQP server\n", urlObj().hostname );
                 console.log("=========================");
-                saveLogData('helyos_core', null, 'warn', 'Connected to AMQP server.' );
+                logData.addLog('helyos_core', null, 'warn', 'Connected to AMQP server.' );
                 conn.on('error', (err) => {
-                        saveLogData('helyos_core', null, 'warn', 'RabbitMQ connection interrupted. Recovering...' );
+                        logData.addLog('helyos_core', null, 'warn', 'RabbitMQ connection interrupted. Recovering...' );
                         console.error("====================RABITMQ CONNECTION LOST =============");
                         console.error(err);
                         console.error("=========================================================");

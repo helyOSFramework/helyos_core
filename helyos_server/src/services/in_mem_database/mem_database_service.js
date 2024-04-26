@@ -3,7 +3,7 @@
 ** Copyright 2022,  Fraunhofer-Institut für Verkehrs- und Infrastruktursysteme IVI.
 */
 
-const { saveLogData } = require("../../modules/systemlog");
+const { logData } = require("../../modules/systemlog");
 
 /**
  * In-memory database class for storing and manipulating data.
@@ -133,7 +133,7 @@ class InMemDB {
             this.timeoutCounterStartTime = new Date();
         }
         if (new Date() - this.timeoutCounterStartTime > 10000) {
-            saveLogData('helyos_core', null, 'error', `${e.message}: ${this.lostUpdates} updates in the last 10 seconds. Pending updates:${this.penddingPromises}. timeout: ${this.updateTimeout/1000} secs`);
+            logData.addLog('helyos_core', null, 'error', `${e.message}: ${this.lostUpdates} updates in the last 10 seconds. Pending updates:${this.penddingPromises}. timeout: ${this.updateTimeout/1000} secs`);
             this.lostUpdates = 0;
             this.timeoutCounterStartTime = new Date();
         }
@@ -154,14 +154,14 @@ class InMemDB {
     _dynamicallyChooseTimeout() {
         if (this.penddingPromises > (this.limitFlushSizeForLongTimeout + 1)){
             if (this.updateTimeout === this.longTimeout) {
-                saveLogData('helyos_core', null, 'warn', `Reduce update timeout.`);
+                logData.addLog('helyos_core', null, 'warn', `Reduce update timeout.`);
                 this.updateTimeout = this.shortTimeout;
             }
         } 
         
         if (this.penddingPromises < (this.limitFlushSizeForLongTimeout - 1)){
             if (this.updateTimeout === this.shortTimeout) {
-                saveLogData('helyos_core', null, 'warn', `Increase update timeout.`);
+                logData.addLog('helyos_core', null, 'warn', `Increase update timeout.`);
                 this.updateTimeout = this.longTimeout;
             }
         }
@@ -212,7 +212,7 @@ class InMemDB {
                                         r.forEach(e => { 
                                             if (e.failedIndex) {
                                                 // delete this[tableName][e.failedIndex];
-                                                saveLogData('helyos_core', null, 'error', `Database updated: ${tableName} ${e.failedIndex}`);
+                                                logData.addLog('helyos_core', null, 'error', `Database updated: ${tableName} ${e.failedIndex}`);
                                         }})
                                     });
             

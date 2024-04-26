@@ -3,7 +3,7 @@ const InMemorySensorTable = {};
 const databaseServices = require('../../services/database/database_services');
 const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
@@ -136,13 +136,13 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
 async function connectFollowersToLeader (leaderUUID, followerUUIDs) {
     databaseServices.connectAgents(leaderUUID, followerUUIDs)
     .then((newConnectionIds) => {
-        saveLogData('agent', {uuid: leaderUUID}, 'normal', `new connected followers # : ${newConnectionIds}` );
+        logData.addLog('agent', {uuid: leaderUUID}, 'normal', `new connected followers # : ${newConnectionIds}` );
         // Allow follower agents to be updated by the leader agent user account.
         const followerPatchs = followerUUIDs.map( uuid => ({uuid, rbmq_username: leaderUUID}));
         return databaseServices.agents.updateMany(followerPatchs,'uuid');
     })
     .catch( e => {
-        saveLogData('agent', {uuid: leaderUUID}, 'error', `lead-follower connection: ${e}` );
+        logData.addLog('agent', {uuid: leaderUUID}, 'error', `lead-follower connection: ${e}` );
     })
 }
 

@@ -4,8 +4,7 @@
 
 const databaseServices = require('../../services/database/database_services.js');
 const agentComm = require('../../modules/communication/agent_communication.js');
-const systemlog = require('../../modules/systemlog.js');
-const saveLogData = systemlog.saveLogData;
+const {logData} = require('../../modules/systemlog.js');
 
 
 
@@ -33,8 +32,8 @@ async function processInstantActionEvents(msg) {
                 if (agentId) {
                     agentComm.sendCustomInstantActionToAgent(agentId, payload['command']);
                 }
-                const logData = {...payload, agentId: agentId, agentUuid: agentUuid};
-                saveLogData('agent', logData, 'normal', `send custom instant action to agent`);	
+                const log = {...payload, agentId: agentId, agentUuid: agentUuid};
+                logData.addLog('agent', log, 'normal', `send custom instant action to agent`);	
 
                 break;
 

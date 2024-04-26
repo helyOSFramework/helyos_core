@@ -3,7 +3,7 @@
 
 var rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 var databaseServices = require('../../services/database/database_services.js');
-const { saveLogData } = require('../systemlog.js');
+const { logData } = require('../systemlog.js');
 const { MISSION_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
@@ -65,7 +65,7 @@ async function cancelAssignmentInAgent(assignment) {
                            };
 
     sendEncriptedMsgToAgent(assignment.agent_id, JSON.stringify(assignment_obj), 'instantActions');
-    saveLogData('agent', {uuid: uuids[0]}, 'info', `Sending cancel signal to agent for the work process ${assignment.work_process_id}`);
+    logData.addLog('agent', {uuid: uuids[0]}, 'info', `Sending cancel signal to agent for the work process ${assignment.work_process_id}`);
 
 }
 
@@ -122,7 +122,7 @@ async function sendGetReadyForWorkProcessRequest(agentIdList, wpId) {
 
     return Promise.all(agents.map(agent => {   
         sendEncriptedMsgToAgent(agent.id, msgs[agent.id], 'reserve');
-        saveLogData('agent', {uuid: agent.uuid}, 'info', `Sending reserve signal to agent ${agent.id} for the work process ${wpId}`);
+        logData.addLog('agent', {uuid: agent.uuid}, 'info', `Sending reserve signal to agent ${agent.id} for the work process ${wpId}`);
     }));
 }
 
@@ -142,7 +142,7 @@ async function sendReleaseFromWorkProcessRequest(agentId, wpId) {
 
     });
     sendEncriptedMsgToAgent(agentId, msg, 'release');
-    saveLogData('agent', {uuid: uuids[0]}, 'info', `Sending release signal to agent ${agentId} for the work process ${wpId}`); 
+    logData.addLog('agent', {uuid: uuids[0]}, 'info', `Sending release signal to agent ${agentId} for the work process ${wpId}`); 
 }
 
 
@@ -215,7 +215,7 @@ function sendEncriptedMsgToAgent(agentId, message, reason='assignment') {
     return databaseServices.agents.get_byId(agentId)
            .then(agent => {
             if (!agent) {
-                saveLogData('helyos_core', null, 'error', `Msg ${reason} Agent ${agentId} not found in database`);
+                logData.addLog('helyos_core', null, 'error', `Msg ${reason} Agent ${agentId} not found in database`);
                 return;
             }
             let exchange = rabbitMQServices.AGENTS_DL_EXCHANGE; 

@@ -3,7 +3,7 @@
 const databaseServices = require('../services/database/database_services.js');
 const fs = require('fs');
 const yaml = require('js-yaml');
-const { saveLogData } = require('./systemlog.js');
+const { logData } = require('./systemlog.js');
 const lookup = require('./utils.js').lookup;
 
 
@@ -34,13 +34,13 @@ const registerManyMicroservices = (servicesYmlPath) => {
             // errors are individualy handled. 
             .catch((error) => {
                 console.error(error);
-                saveLogData('helyos_core', null, 'error', `Parsing microservice YML file: ${service.name}` );
+                logData.addLog('helyos_core', null, 'error', `Parsing microservice YML file: ${service.name}` );
             });
         });
         return true;
     }catch (error) {
         console.error('non-critical error', error);
-        saveLogData('helyos_core', null, 'error', `Parsing microservice YML file: ${error}` );
+        logData.addLog('helyos_core', null, 'error', `Parsing microservice YML file: ${error}` );
 
         return null;
     }
@@ -76,14 +76,14 @@ const registerMissions = (missionsYmlPath) => {
             // errors are individualy handled. 
             .catch((error) => {
                 const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
-                saveLogData('helyos_core', null, 'error', `Parsing mission YML file: ${wprocess.name} ${errorStr}` );
+                logData.addLog('helyos_core', null, 'error', `Parsing mission YML file: ${wprocess.name} ${errorStr}` );
             });
         });
 
         return true;
     } catch (error) {
         console.error('non-critical error', error);
-        saveLogData('helyos_core', null, 'error', `Parsing mission YML file: ${error}` );
+        logData.addLog('helyos_core', null, 'error', `Parsing mission YML file: ${error}` );
 
         return null;
     }

@@ -6,7 +6,7 @@ const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handle
 const {yardAutoUpdate} = require('./rabbitmq_event_handlers/yard_update_event_handler');
 const {agentCheckIn} = require('./rabbitmq_event_handlers/checkin_event_handler');
 const {updateState} = require('./rabbitmq_event_handlers/status_event_handler');
-const {saveLogData} = require('../modules/systemlog.js');
+const { logData} = require('../modules/systemlog.js');
 const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_handler');
 const { deleteConnections } = require('../services/message_broker/rabbitMQ_access_layer.js');
 
@@ -62,7 +62,7 @@ function identifyMessageSender(objMsg, routingKey) {
                 throw Error(`UUID code is not present in the routing-key, topic or message`);
             }
         } catch (error) {
-            saveLogData('agent', objMsg, 'warn', `error in parsing the UUID from routing-key: ${routingKey}`);
+            logData.addLog('agent', objMsg, 'warn', `error in parsing the UUID from routing-key: ${routingKey}`);
             throw ({msg:`UUID code is not present in the routing-key, topic or message`, code: 'AGENT-400'});
         }
     }
@@ -92,7 +92,7 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                             console.log(`Agent ${uuid} is using the leader account ${possibleLeaderUUID}`);
                             inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
                         } else { // OK, we did our best to validate you and you will be disconnected.
-                            saveLogData('agent', {uuid}, 'error', `Agent disconnected: RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`)
+                            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`)
                             deleteConnections(agentAccount);
                             inMemDB.delete('agents', 'uuid', uuid);
                             inMemDB.delete('agents', 'uuid', agentAccount);
@@ -182,7 +182,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
     try {
         objMsg = parseMessage(content);
     } catch (error) {
-        saveLogData('agent', {}, 'error', `agent message to ${routingKey} is not a valid JSON`);
+        logData.addLog('agent', {}, 'error', `agent message to ${routingKey} is not a valid JSON`);
         return;
     }
 
@@ -225,13 +225,13 @@ function handleBrokerMessages(channelOrQueue, message)   {
                 }
             }
             
-            saveLogData('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
+            logData.addLog('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then(( ) =>  saveLogData('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
+                    .then(( ) =>  logData.addLog('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
                     .catch( err => {
                         console.log('checkin:', err);
-                        saveLogData('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
+                        logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                     });
         }
 
@@ -245,12 +245,12 @@ function handleBrokerMessages(channelOrQueue, message)   {
         let closeConnection = false;
         
         if (avgRates.avgMsgPerSecond > MESSAGE_RATE_LIMIT ) {
-            saveLogData('agent', {uuid}, 'error', `Agent disconnected: high number of messages per second: ${avgRates.avgMsgPerSecond}. LIMIT: ${MESSAGE_RATE_LIMIT}.`);
+            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: high number of messages per second: ${avgRates.avgMsgPerSecond}. LIMIT: ${MESSAGE_RATE_LIMIT}.`);
             closeConnection = true;
         }
 
         if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
-            saveLogData('agent', {uuid}, 'error', `Agent disconnected: high db updates per second. Check the publish
+            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: high db updates per second. Check the publish
                                                  rate for agent.{uuid}.update, agent.{uuid}.state, agent.{uuid}.database_req routes`);
             closeConnection = true;
         }
@@ -271,7 +271,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
                         if (objMsg.obj.body){
                             return queryDataBase(uuid, objMsg.obj, msgProps);
                         } else {
-                            saveLogData('agent', objMsg.obj, 'error', `agent data rquest: input body not found`);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent data rquest: input body not found`);
                         }
                     break;
                     
@@ -279,10 +279,10 @@ function handleBrokerMessages(channelOrQueue, message)   {
                         if (objMsg.obj.body){
                             const newWProc = {status: MISSION_STATUS.DISPATCHED};
                             databaseServices.work_processes.insert({...objMsg.obj.body, ...newWProc})
-                            .then((wpId) => saveLogData('agent', {...objMsg.obj.body, work_process_id: wpId}, 'normal', `agent created a mission: ${wpId}`))
-                            .catch(e => saveLogData('agent', objMsg.obj, 'error', `agent create mission=${e}`));
+                            .then((wpId) => logData.addLog('agent', {...objMsg.obj.body, work_process_id: wpId}, 'normal', `agent created a mission: ${wpId}`))
+                            .catch(e => logData.addLog('agent', objMsg.obj, 'error', `agent create mission=${e}`));
                         } else {
-                            saveLogData('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
                         }
                     break;
 
@@ -291,10 +291,10 @@ function handleBrokerMessages(channelOrQueue, message)   {
                             updateState(objMsg.obj, uuid, 0)
                             .catch(e => {
                                 const msg = e.msg? e.msg : e;
-                                saveLogData('agent', objMsg.obj, 'error', `agent state update=${msg}`);
+                                logData.addLog('agent', objMsg.obj, 'error', `agent state update=${msg}`);
                             });
                         } else {
-                            saveLogData('agent', {}, 'error', "state update message does not contain agent status.");
+                            logData.addLog('agent', {}, 'error', "state update message does not contain agent status.");
                         }
                     break;
 
@@ -324,7 +324,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
             console.log(error);
         }  
     })().catch(error => {
-        saveLogData('agent', {uuid}, 'error',  JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        logData.addLog('agent', {uuid}, 'error',  JSON.stringify(error, Object.getOwnPropertyNames(error)));
     });
 };
 

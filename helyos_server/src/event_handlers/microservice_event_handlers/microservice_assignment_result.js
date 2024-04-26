@@ -1,6 +1,6 @@
 // Services imports
 const { AGENT_STATUS, ASSIGNMENT_STATUS, MISSION_STATUS } = require('../../modules/data_models.js');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const databaseServices = require('../../services/database/database_services.js')
 
 // ----------------------------------------------------------------------------
@@ -42,12 +42,12 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 			}
 
 			if (!hasAgent) {
-				saveLogData('helyos_core', null, 'error', `Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
+				logData.addLog('helyos_core', null, 'error', `Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
 				throw new Error(`Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
 			}
 
 			if (!agentIds.includes(parseInt(agent_id))){
-				saveLogData('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids.`+
+				logData.addLog('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids.`+
 				` In future versions, this will block the mission execution.`);
 			}
 
@@ -115,7 +115,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 					.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY}))
 					.then(() =>  databaseServices.work_processes.updateByConditions(
 						{'id': workProcess.id, 'status__in': [ MISSION_STATUS.DISPATCHED,
-															   MISSION_STATUS.EXECUTING,
+															   MISSION_STATUS.CALCULATING,
 															   MISSION_STATUS.PREPARING]},
 						{status: MISSION_STATUS.EXECUTING}))
 				);
