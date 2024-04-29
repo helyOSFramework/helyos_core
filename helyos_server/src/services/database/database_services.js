@@ -8,15 +8,25 @@ const { DatabaseLayer, AgentDataLayer, Client,
 	getUncompletedAssignments_byWPId,
 	updateAgentsConnectionStatus, setDBTimeout} = require('./postg_access_layer');
 
-// Singleton database client
-const mainClient =  new Client();
 
-const connectToDB = async (mainClient) => {
-    await mainClient.connect();
+const connectToDB = async (_client, statementTimeout = 0) => {
+	await _client.connect();
 	console.log("CREATE DATABASE CLIENT CONNECTION");
+	if (statementTimeout > 0) {
+		await _client.query(`SET statement_timeout = ${statementTimeout}`);
+		console.log(`Statement timeout set to ${statementTimeout} milliseconds`);
+	}
 }
 
+
+// Singleton database clients
+const mainClient =  new Client();
+const shortTimeClient = new Client();
+const pgNotifications = new Client();
+
 connectToDB(mainClient); // async
+connectToDB(shortTimeClient, 1000); // async
+connectToDB(pgNotifications); // async
 
 
 const getNewClient = () => {
@@ -26,7 +36,7 @@ const getNewClient = () => {
 
 
 
-const agents = new AgentDataLayer(mainClient);
+const agents = new AgentDataLayer(mainClient, shortTimeClient);
 
 
 /**
@@ -87,10 +97,10 @@ const agents_interconnections = new DatabaseLayer(mainClient, 'public.agents_int
 
 module.exports.connectToDB = connectToDB;
 module.exports.client = mainClient;
+module.exports.pgNotifications = pgNotifications;
 module.exports.getNewClient = getNewClient;
 
 module.exports.map = map;
-module.exports.tools = agents; // Deprecated. Dependency with upadate in-memory database
 module.exports.agents = agents;
 module.exports.agents_interconnections = agents_interconnections;
 module.exports.targets = targets;
@@ -110,8 +120,8 @@ module.exports.updateAgentsConnectionStatus = (n_secs) => updateAgentsConnection
 module.exports.getUncompletedAssignments_byWPId = (wpId) => getUncompletedAssignments_byWPId(mainClient, 
 																							 wpId,
 																							 UNCOMPLETE_ASSIGNM_STATUSES);
-module.exports.setDBTimeout = (n_secs) => setDBTimeout(mainClient, n_secs);																					
-module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(mainClient, 
+module.exports.setDBTimeout = (n_secs) => setDBTimeout(shortTimeClient, n_secs);																					
+module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(shortTimeClient, 
 																											assId, 
 																											UNCOMPLETE_ASSIGNM_STATUSES);
 

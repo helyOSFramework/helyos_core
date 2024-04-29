@@ -4,33 +4,71 @@
 */
 
 const { logData } = require("../../modules/systemlog");
+const { setDBTimeout } = require("../database/database_services");
+
+MAX_PENDING_UPDATES = 20;
+SHORT_TIMEOUT = Math.round(parseInt(process.env.DB_BUFFER_TIME || 1000)/2);
+LONG_TIMEOUT = SHORT_TIMEOUT * MAX_PENDING_UPDATES;
+
 
 /**
  * In-memory database class for storing and manipulating data.
+ * This class is used to store and manipulate data in memory.
+ * 
+ *  The input parameters are:
+ * - longTimeout: The long timeout period (in milliseconds) for the database update.
+ * - shortTimeout: The short timeout period (in milliseconds) for the database update.
+ * - limitWaitingFlushes: The upper limit for the number of pending updates that triggers the long timeout.
+ * 
+ * shortTimeout and longTimeout are used to dynamically adjust the update timeout (this.updateTimeout) based on the number of pending promisses updates. 
+ * 
+ * If the number of pending promisses is too big, the update timeout is reduced to shortTimeout. 
+ * The smaller timeout causes the the database update promises to expire which will reduce the number of pending promisses, decresing the system load.
+ * Therefore, we are accepting to lose some updates in order to avoid the system to be blocked.
+ * 
+ * If the number of pending promisses is small, the update timeout is increased to longTimeout.
+ * Such that the database has enough time to process all updates.
+ * 
+ * 
  */
 class InMemDB {
-    lastFlushTime = new Date();
-    lostUpdates = 0;
-    timeoutCounterStartTime = null;
-    limitFlushSize = 1000; // System is blocked; all updates will be destroyed.
-    longTimeout = 3000;
-    shortTimeout = 500; //  Chosen to be smaller than the set desired update period.
-    limitFlushSizeForLongTimeout = 20;
-    penddingPromises = 0;
-
-    constructor() {
-        if (InMemDB.instance){ 
+/**
+ * Constructor for the InMemDB class.
+ * 
+ * @param {number} longTimeout - The long timeout period (in milliseconds) for the database update.
+ * @param {number} shortTimeout - The short timeout period (in milliseconds) for the database update.
+ * @param {number} limitWaitingFlushes - The upper limit for the number of pending updates that triggers the long timeout.
+ * 
+ * @returns {InMemDB} An instance of the InMemDB class.
+ * 
+ */
+    constructor(longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
+        if (InMemDB.instance) {
             return InMemDB.instance;
         }
-        InMemDB.instance = this;
+        
         this.agents = {};
-        this.map_objects = {};
         this.agents_buffer = {};
-        this.map_objects_buffer = {};
         this.agents_stats = {};
+
+        this.map_objects = {};
+        this.map_objects_buffer = {};
         this.map_objects_stats = {};
+
+        this.longTimeout = longTimeout;
+        this.shortTimeout = shortTimeout;
+        this.limitWaitingFlushes = limitWaitingFlushes;
+
+        this.pendingPromises = 0;
+        this.lostUpdates = 0;
+
+        this.timeoutCounterStartTime = null;
         this.updateTimeout = this.longTimeout;
+        this.lastFlushTime = new Date();
+        InMemDB.instance = this;       
+
     }
+
 
     /**
      * Inserts data into the specified table.
@@ -39,19 +77,141 @@ class InMemDB {
      * @param {DatabaseService} dbService - The database service instance.
      * @returns {Promise} A promise that resolves with the inserted data.
      */
-    insert(tableName, index, data) {
-        return this[table][r[index]] = data;
+    insert(tableName, indexName, data) {
+        return this[tableName][data[indexName]] = data;
     }
 
 
     /**
      * Updates data in the specified table based on the provided timestamp.
      * @param {string} tableName - The name of the table.
+     * @param {string} indexName - The name of the table index.
      * @param {Object} data - The updated data.
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    updateBuffer(tableName,index, data, timeStamp) {
+    update(tableName,indexName, data, timeStamp, statsLabel='buffered') {
+        const table = this[tableName];
+        const tableStats = this[`${tableName}_stats`];
+        let instance = table[data[indexName]];
+        let statsData = tableStats[data[indexName]];
+
+        // Create Instance
+        if (!instance) { 
+            table[data[indexName]] = {};
+            instance = table[data[indexName]];
+            instance['last_message_time'] = 0;
+        }
+
+        // Create Stats
+        if (!statsData ){
+            tableStats[data[indexName]] = { msgPerSecond: new UpdateStats(),
+                                            updtPerSecond: new UpdateStats(), 
+                                            errorPerSecond: new UpdateStats(10)
+                                           };
+            statsData = tableStats[data[indexName]];
+        }
+
+        // Update Instance if the message is newer
+        if (instance['last_message_time'] < timeStamp || statsLabel === 'realtime'){ 
+            Object.assign(instance, data);
+            instance['last_message_time'] = timeStamp;
+            this.updateBuffer(tableName,indexName, data, timeStamp);
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Deletes data from the specified table.
+     * @param {string} table - The name of the table.
+     * @param {string} dataId - The ID of the data to be deleted.
+     * @param {Object} dbService - The database service object.
+     * @returns {Promise} A promise that resolves with a status code.
+     */
+    delete(tableName, indexName, dataId) {
+        const tableStatsName = `${tableName}_stats`;
+        const tableBufferName = `${tableName}_buffer`;
+        delete this[tableName][dataId];
+        delete this[tableStatsName][dataId];
+        delete this[tableBufferName][dataId];
+    }
+
+
+    /**
+     * Flushes the specified table to the database.
+     * @param {string} table - The name of the table to be flushed.
+     * @param {string} indexName - The name of the table index.
+     * @param {Object} dbService - The database service object.
+     * @param {number} maxAge - The maximum age of data to be flushed (optional, defaults to 0).
+     * @returns {Promise} A promise that resolves after the flush operation completes.
+     */
+    flush(tableName, indexName, dbService, maxAge = 0){
+        const now = new Date();
+        const tableBufferName = `${tableName}_buffer`;
+        const tableStatsName = `${tableName}_stats`;
+        const useShortTimeOutClient = maxAge > 0;
+
+
+        // Damaging control: if the number of pending promisses is too big, reduce the update timeout and accept the losts.
+        this._dynamicallyChooseTimeout();
+
+        if ((now - this.lastFlushTime) < maxAge) { 
+            return Promise.resolve(); // Do not flush if the data is too new.
+        }
+        
+        this.lastFlushTime = new Date();
+        const objArray = Object.keys(this[tableBufferName])
+                            .map(key => { 
+                                const msgPerSecond = this[tableStatsName][key]['msgPerSecond'].countsPerSecond;
+                                this[tableName][key].msg_per_sec = msgPerSecond;
+                                this[tableBufferName][key].msg_per_sec = msgPerSecond;
+
+                                this[tableStatsName][key].updtPerSecond.countMessage();
+                                const updtPerSecond = this[tableStatsName][key].updtPerSecond.countsPerSecond;
+                                this[tableName][key]['updt_per_sec'] = updtPerSecond;
+                                this[tableBufferName][key]['updt_per_sec'] = updtPerSecond;
+                                if (tableName !== 'agents') {
+                                    delete this[tableName][key]['last_message_time'];
+                                    delete this[tableBufferName][key]['_leaderAgents'];
+                                }
+                                return this[tableBufferName][key];
+                            });
+
+        this[tableBufferName] = {};   
+        
+        const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
+                                        .then((r) => {
+                                            if (r && r.length) {     
+                                                const failedIndexes = r.filter(e => e && e.failedIndex);
+                                                if (failedIndexes.length) {
+                                                    this._catch_update_errors(failedIndexes.length);
+                                                    failedIndexes.forEach(e => {
+                                                        console.log(`Update failed on ${tableName} / ${e.failedIndex}`);
+                                                        // delete this[tableName][e.failedIndex];
+                                                    });
+                                                }
+                                            }
+                                        })
+                                        .catch(e => {
+                                            logData.addLog('helyos_core', null, 'error', `Database update timeout error: ${e.message}`);
+                                        });
+
+
+        return this.dispatchUpdatePromise(promiseTrigger, objArray.length);                            
+    }
+
+
+     /**
+     * Updates data in the specified table based on the provided timestamp.
+     * @param {string} tableName - The name of the table.
+     * @param {Object} data - The updated data.
+     * @param {number} timeStamp - The timestamp of the updated data.
+     * @returns {Promise} A promise that resolves with a status code.
+     */
+     updateBuffer(tableName,index, data, timeStamp) {
         const tableBufferName = `${tableName}_buffer`;
         const tableBuffer = this[tableBufferName];
         let instance = tableBuffer[data[index]];
@@ -67,162 +227,17 @@ class InMemDB {
         instance['last_message_time'] = timeStamp;
     }
 
-
-    /**
-     * Updates data in the specified table based on the provided timestamp.
-     * @param {string} tableName - The name of the table.
-     * @param {Object} data - The updated data.
-     * @param {number} timeStamp - The timestamp of the updated data.
-     * @returns {Promise} A promise that resolves with a status code.
-     */
-    update(tableName,index, data, timeStamp, statsLabel='buffered') {
-        const table = this[tableName];
-        const tableStats = this[`${tableName}_stats`];
-        let instance = table[data[index]];
-        let statsData = tableStats[data[index]];
-
-        // Create Instances
-        if (!instance) { 
-            table[data[index]] = {};
-            instance = table[data[index]];
-            instance['last_message_time'] = 0;
-        }
-
-        if (!statsData ){
-            tableStats[data[index]]={'msgPerSecond': new UpdateStats(), 'updtPerSecond': new UpdateStats(), 'errorPerSecond': new UpdateStats(10)};
-            statsData = tableStats[data[index]];
-        }
-
-
-        if (instance['last_message_time'] < timeStamp || statsLabel === 'realtime'){ 
-            Object.assign(instance, data);
-            instance['last_message_time'] = timeStamp;
-            this.updateBuffer(tableName,index, data, timeStamp);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Deletes data from the specified table.
-     * @param {string} table - The name of the table.
-     * @param {string} dataId - The ID of the data to be deleted.
-     * @param {Object} dbService - The database service object.
-     * @returns {Promise} A promise that resolves with a status code.
-     */
-    delete(tableName, index, dataId) {
-        const tableStatsName = `${tableName}_stats`;
-        const tableBufferName = `${tableName}_buffer`;
-        delete this[tableName][dataId];
-        delete this[tableStatsName][dataId];
-        delete this[tableBufferName][dataId];
-    }
-
-    _timeoutWrapper(promise) {
-            return Promise.race([
-              promise,
-              new Promise((_, reject) =>
-                setTimeout(() => {
-                    reject(new Error("Promise timeout"))
-                }, this.updateTimeout)
-              ),
-            ]);
-    }
-
-
-    _catch_update_errors(e) {
-        this.lostUpdates += 1;
-        if (this.lostUpdates === 1) {
-            this.timeoutCounterStartTime = new Date();
-        }
-        if (new Date() - this.timeoutCounterStartTime > 10000) {
-            logData.addLog('helyos_core', null, 'error', `${e.message}: ${this.lostUpdates} updates in the last 10 seconds. Pending updates:${this.penddingPromises}. timeout: ${this.updateTimeout/1000} secs`);
-            this.lostUpdates = 0;
-            this.timeoutCounterStartTime = new Date();
-        }
-    }
-
-    dispatchUpdatePromise(promiseTrigger) {
-        this.penddingPromises++;
-        return promiseTrigger()
-               .catch( e => {
-                this._catch_update_errors(e);
-                })
-                .finally(() => {
-                            this.penddingPromises--;
-                });
-
-    }
-
-    _dynamicallyChooseTimeout() {
-        if (this.penddingPromises > (this.limitFlushSizeForLongTimeout + 1)){
-            if (this.updateTimeout === this.longTimeout) {
-                logData.addLog('helyos_core', null, 'warn', `Reduce update timeout.`);
-                this.updateTimeout = this.shortTimeout;
-            }
-        } 
-        
-        if (this.penddingPromises < (this.limitFlushSizeForLongTimeout - 1)){
-            if (this.updateTimeout === this.shortTimeout) {
-                logData.addLog('helyos_core', null, 'warn', `Increase update timeout.`);
-                this.updateTimeout = this.longTimeout;
-            }
-        }
-    }
-
-    /**
-     * Flushes the specified table to the database.
-     * @param {string} table - The name of the table to be flushed.
-     * @param {Object} dbService - The database service object.
-     * @param {number} maxAge - The maximum age of data to be flushed (optional, defaults to 0).
-     * @returns {Promise} A promise that resolves after the flush operation completes.
-     */
-    flush(tableName, index, dbService, maxAge = 0){
-        const now = new Date();
-        const tableBufferName = `${tableName}_buffer`;
-        const tableStatsName = `${tableName}_stats`;
-
-
-        // Damaging control: if the number of pending promisses is too big, reduce the update timeout and accept the losts.
-        this._dynamicallyChooseTimeout();
-
-        if ((now - this.lastFlushTime) < maxAge) { 
+   
+    dispatchUpdatePromise(promiseTrigger, numberUpdates=1) {
+        if (this.pendingPromises > this.limitWaitingFlushes) {
+            this.lostUpdates += numberUpdates;
             return Promise.resolve();
         }
-        
-        this.lastFlushTime = new Date();
-        const objArray = Object.keys(this[tableBufferName])
-                            .map(key => { 
-                                const msgPerSecond = this[tableStatsName][key]['msgPerSecond'].countsPerSecond;
-                                this[tableName][key]['msg_per_sec'] = msgPerSecond;
-                                this[tableBufferName][key]['msg_per_sec'] = msgPerSecond;
+        this.pendingPromises++;
 
-                                this[tableStatsName][key]['updtPerSecond'].countMessage();
-                                const updtPerSecond = this[tableStatsName][key]['updtPerSecond'].countsPerSecond;
-                                this[tableName][key]['updt_per_sec'] = updtPerSecond;
-                                this[tableBufferName][key]['updt_per_sec'] = updtPerSecond;
-                                if (tableName !== 'agents') {
-                                    delete this[tableName][key]['last_message_time'];
-                                    delete this[tableBufferName][key]['_leaderAgents'];
-                                }
-                                return this[tableBufferName][key];
-                            });
+        return promiseTrigger()
+                .finally(() => this.pendingPromises-- );
 
-        this[tableBufferName] = {};   
-        
-        const promiseTrigger = () => this._timeoutWrapper(dbService.updateMany(objArray, index)) 
-                                    .then((r) => {
-                                        r.forEach(e => { 
-                                            if (e.failedIndex) {
-                                                // delete this[tableName][e.failedIndex];
-                                                logData.addLog('helyos_core', null, 'error', `Database updated error: ${tableName} ${e.failedIndex}`);
-                                        }})
-                                    })
-                                    .catch(e => {logData.addLog('helyos_core', null, 'error', `InMemDB flush error: ${e.message}`)});
-            
-
-        return this.dispatchUpdatePromise(promiseTrigger);                            
     }
 
 
@@ -246,6 +261,41 @@ class InMemDB {
             avgUpdtPerSecond = (sum / updtPerSecondH.length);
         }
         return {avgMsgPerSecond, avgUpdtPerSecond};
+    }
+
+
+    _catch_update_errors(n=1) {
+        if (this.lostUpdates === 0) {
+            this.timeoutCounterStartTime = new Date();
+        }
+
+        this.lostUpdates += n;
+
+        if (new Date() - this.timeoutCounterStartTime > 10000) {
+            if (this.updateTimeout === this.shortTimeout)                 
+                logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. Timeout for this connection was reduced to ${this.shortTimeout} milliseconds to avoid system blockage.`);
+            logData.addLog('helyos_core', null, 'error',
+             `${this.lostUpdates} database updates lost. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs`);
+            this.lostUpdates = 0;
+            this.timeoutCounterStartTime = new Date();
+        }
+    }
+
+
+    _dynamicallyChooseTimeout() {
+        if (this.pendingPromises > this.limitWaitingFlushes){
+            if (this.updateTimeout === this.longTimeout) {
+                this.updateTimeout = this.shortTimeout;
+                setDBTimeout(this.updateTimeout);
+            }
+        } 
+        
+        if (this.pendingPromises < Math.round(this.limitWaitingFlushes/2)){
+            if (this.updateTimeout === this.shortTimeout) {
+                this.updateTimeout = this.longTimeout;
+                setDBTimeout(this.updateTimeout);
+            }
+        }
     }
 
 }
@@ -347,7 +397,7 @@ class UpdateStats {
 
 
 // Singleton instance of the in-memory database.
-const inMemDB = new InMemDB();
+const inMemDB = new InMemDB(LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
 
 module.exports.inMemDB = inMemDB;
 module.exports.DataRetriever = DataRetriever;
