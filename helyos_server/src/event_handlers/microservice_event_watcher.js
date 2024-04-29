@@ -69,10 +69,10 @@ const waitForServicesResults = () => {
 
 const sendRequestToCancelServices = () => {
 
-    databaseServices.service_requests.select({status:SERVICE_STATUS.CANCELED, processed: false})
+    return databaseServices.service_requests.select({status:SERVICE_STATUS.CANCELED, processed: false})
     .then((runningServices) => { 
         
-        runningServices.forEach((serviceReq) => {
+        const promises = runningServices.map((serviceReq) => {
             extServCommunication.getExtServiceAccessData(serviceReq.service_type)
             .then( accessData => webServices.cancelService(accessData.url, accessData.apiKey, serviceReq.service_queue_id))
             .then((servResponse) => {
@@ -94,8 +94,9 @@ const sendRequestToCancelServices = () => {
                                                                                status:  SERVICE_STATUS.FAILED });
             });    
    
-       });
-       
+        });
+
+        return Promise.all(promises);
    });
    
 }
@@ -103,20 +104,21 @@ const sendRequestToCancelServices = () => {
 const waitForServicesDependencies = (conditions={}) =>  {
     // when first service get ready it changes the status of dependents to "wait_dependencies"
     // here we just wait to switch wait_dependencies => ready_for_service
-    databaseServices.service_requests.select({status:'wait_dependencies', ...conditions})
+    return databaseServices.service_requests.select({status:'wait_dependencies', ...conditions})
     .then( (allAwaitingServices) => { 
-        allAwaitingServices.forEach(
+        const promises = allAwaitingServices.map(
         async(waitingServReq) => {
             if (await isRequestReadyForService(waitingServReq)) {
-               databaseServices.service_requests.updateByConditions({'id':waitingServReq.id, 'status':  SERVICE_STATUS.WAIT_DEPENDENCIES},
+               return databaseServices.service_requests.updateByConditions({'id':waitingServReq.id, 'status':  SERVICE_STATUS.WAIT_DEPENDENCIES},
                                                                     { status:  SERVICE_STATUS.READY_FOR_SERVICE });
              } else {
             // @TODO: create waiting time and log each 5 secs.
             //    const msg = `service ${waitingServReq.service_type} at step ${waitingServReq.step} is waiting for dependencies.`;
             //    logData.addLog('microservice', waitingServReq, 'warn', msg ); 
             }
-       });
-   });
+        });
+        return Promise.all(promises);
+    });
 
 }
 
@@ -125,9 +127,9 @@ const waitForAssigmentsDependencies =() => {
     // when first assighment get ready it changes the status of dependents to "wait_dependencies"
     // here we just wait to switch wait_dependencies => to_dispatch
     
-    databaseServices.assignments.select({status:'wait_dependencies'})
+    return databaseServices.assignments.select({status:'wait_dependencies'})
     .then((allAwaitingAssignments) => { 
-        allAwaitingAssignments.forEach(
+        const promises = allAwaitingAssignments.map(
         async (assignment) => {
 
             let completed_wp_assignments = await databaseServices.assignments.select(
@@ -139,7 +141,7 @@ const waitForAssigmentsDependencies =() => {
                                   .filter(el => !completed_wp_assignments.includes(el)); 
 
             if (remain_dependencies.length === 0) {
-               databaseServices.assignments.updateByConditions({'id':assignment.id, 'status':SERVICE_STATUS.WAIT_DEPENDENCIES},
+               return databaseServices.assignments.updateByConditions({'id':assignment.id, 'status':SERVICE_STATUS.WAIT_DEPENDENCIES},
                                                                { status: 'to_dispatch' });
              } else {
             //   @TODO: create waiting time and log each 5 secs.
@@ -147,7 +149,9 @@ const waitForAssigmentsDependencies =() => {
             //    logData.addLog('agent',  assignment, 'warn', msg ); 
 
             }
-       });
+        });
+
+        return Promise.all(promises);
    });
 
 }
@@ -155,10 +159,17 @@ const waitForAssigmentsDependencies =() => {
 function initWatcher () {
 
             const watcher = setInterval(() => {
-                            sendRequestToCancelServices();
-                            waitForServicesResults();
-                            waitForServicesDependencies();
-                            waitForAssigmentsDependencies(); 
+                            sendRequestToCancelServices()
+                                .catch(error => console.error('Error in sendRequestToCancelServices:', error));
+
+                            waitForServicesResults()
+                                .catch(error => console.error('Error in waitForServicesResults:', error));
+
+                            waitForServicesDependencies()
+                                .catch(error => console.error('Error in waitForServicesDependencies:', error));
+
+                            waitForAssigmentsDependencies()
+                                .catch(error => console.error('Error in waitForAssigmentsDependencies:', error));
                             // waitForStartTimeToProcessWorkProcess(); @TODO
                         }, 1000);
 

@@ -6,7 +6,7 @@ const { UNCOMPLETE_ASSIGNM_STATUSES, UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH, UNCOMPL
 const { DatabaseLayer, AgentDataLayer, Client, 
 	searchAllRelatedUncompletedAssignments, 
 	getUncompletedAssignments_byWPId,
-	updateAgentsConnectionStatus} = require('./postg_access_layer');
+	updateAgentsConnectionStatus, setDBTimeout} = require('./postg_access_layer');
 
 // Singleton database client
 const mainClient =  new Client();
@@ -110,7 +110,7 @@ module.exports.updateAgentsConnectionStatus = (n_secs) => updateAgentsConnection
 module.exports.getUncompletedAssignments_byWPId = (wpId) => getUncompletedAssignments_byWPId(mainClient, 
 																							 wpId,
 																							 UNCOMPLETE_ASSIGNM_STATUSES);
-																					
+module.exports.setDBTimeout = (n_secs) => setDBTimeout(mainClient, n_secs);																					
 module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(mainClient, 
 																											assId, 
 																											UNCOMPLETE_ASSIGNM_STATUSES);

@@ -27,8 +27,10 @@ function generateFullYardContext(yardId){
 	})
 	.then((map_objects) => {
 			context.map.map_objects = map_objects;
-			agentFields = ['id', 'uuid', 'agent_class', 'agent_type', 'connection_status', 'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
-							'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z','unit', 'orientations', 'sensors', 'resources']
+			agentFields = ['id', 'uuid', 'agent_class', 'agent_type', 'connection_status',
+							 'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
+							'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z','unit',
+							 'orientations', 'sensors', 'resources']
 			return  databaseServices.agents.get('yard_id', yardId,agentFields, null, ['interconnections']); // return selected fields plus the interconnected tools
 	})
 	.then((agents) => {	

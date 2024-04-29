@@ -107,7 +107,7 @@ const update_guest_account_permissions = (username) => !username? Promise.resolv
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
         .catch( e => {  logData.addLog('helyos_core', null, 'error', `SETTING ANONYMOUS PERMISSIONS: ${e}` );
         throw e; 
-});
+        });
 
 
 const connect = amqp.connect;

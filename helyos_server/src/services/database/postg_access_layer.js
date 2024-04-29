@@ -142,11 +142,7 @@ class DatabaseLayer {
 			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions + orderByStr;
 		}
 		return this.client.query(queryText, colValues)
-			.then((res) => res['rows'])
-			.catch(e => {
-				console.log(e);
-				throw Error(e);
-			});
+			.then((res) => res['rows']);
 	}
 
 
@@ -178,10 +174,7 @@ class DatabaseLayer {
 			queryText = 'UPDATE ' + this.table + ' SET ' + colNames + ' = ' + valueMasks + '  WHERE ' + name + ' = ' + filterMask + ' ';
 		}
 		return this.client.query(queryText, colValues)
-			.then((res) => patch)
-			.catch(e => {
-				console.log(e);
-			})
+			.then((res) => patch);
 	}
 
 
@@ -221,23 +214,20 @@ class DatabaseLayer {
 		}
 
 		return this.client.query(queryText, colValues)
-				.then((res) => res.rowCount)
-				.catch(e => {
-					console.log(e);
-				});
+		       .then((res) => res.rowCount);
 	}
 
 
 	
 	updateMany(patchArray, index) {
 	//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
-		const queriePromises = patchArray.map(patch => {
+		const promisseList = patchArray.map(patch => {
 			delete patch.time_stamp;
 			if (Object.keys(patch).length < 2) return Promise.resolve({});
 			else return this.update(index, patch[index], patch).catch(r => ({ error: r, failedIndex: patch[index] }));
 		});
 
-		return Promise.all(queriePromises);
+		return Promise.all(promisseList);
 
 		// return this.client.query('BEGIN').then(()=>Promise.all(queriePromises))
 		// 		   .then((r)=>this.client.query('COMMIT').then(()=>r))
@@ -441,6 +431,10 @@ class AgentDataLayer extends DatabaseLayer {
 
 }
 
+const setDBTimeout = (client, mlSeconds) => {
+	const queryText = `SET statement_timeout = '${mlSeconds}'`;
+	return client.query(queryText);
+}
 
 const updateAgentsConnectionStatus = (client, n_secs) => {
 	const strSeconds = ` INTERVAL '${n_secs} seconds'`;
@@ -448,7 +442,7 @@ const updateAgentsConnectionStatus = (client, n_secs) => {
 	const sqlString2 = `UPDATE public.agents SET connection_status = $1, msg_per_sec = 0 WHERE (connection_status = $2) and (last_message_time >=  (now() - ${strSeconds}));`;
 	const onlineToOffline = client.query(sqlString1, ['offline', 'online']);
 	const offlineToOnline = client.query(sqlString2, ['online', 'offline']);
-	return Promise.all([onlineToOffline, offlineToOnline]);
+	return Promise.allSettled([onlineToOffline, offlineToOnline]);
 }
 
 
@@ -525,8 +519,7 @@ module.exports.AgentDataLayer = AgentDataLayer;
 module.exports.Client = Client;
 module.exports.wait_database_value = wait_database_value;
 module.exports.wait_database_query = wait_database_query;
-
-
+module.exports.setDBTimeout = setDBTimeout;
 
 module.exports.updateAgentsConnectionStatus = updateAgentsConnectionStatus;
 module.exports.getUncompletedAssignments_byWPId = getUncompletedAssignments_byWPId;

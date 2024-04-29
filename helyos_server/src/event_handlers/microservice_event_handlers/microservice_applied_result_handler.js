@@ -1,7 +1,8 @@
 // Services imports
 const databaseServices = require('../../services/database/database_services.js')
 const MapResponseHandler = require('./microservice_map_result')
-const pathplannerResponseHandler = require('./microservice_assignment_result.js')
+const pathplannerResponseHandler = require('./microservice_assignment_result.js');
+const { logData } = require('../../modules/systemlog.js');
 
 
 async function processMicroserviceResponse(partialServiceRequest){
@@ -42,7 +43,8 @@ async function processMicroserviceResponse(partialServiceRequest){
 	default:
 		console.log("!!! service class is not supported yet !!!", serviceClass );
 	}
-	return Promise.all(resultPromises);
+	return Promise.all(resultPromises)
+		   .catch(err => logData.addLog('microservice', serviceRequest, 'error', `processMicroserviceResponse ${err.message}`));
 }
 
 

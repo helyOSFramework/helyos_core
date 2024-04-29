@@ -17,6 +17,7 @@ const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 // Subscribe to database changes
 function processAssignmentEvents(msg) {
     let payload = JSON.parse(msg.payload);
+    let assignment_status;
 
     switch (msg.channel) {
             case 'assignments_status_update':
@@ -28,20 +29,25 @@ function processAssignmentEvents(msg) {
                     .then(() =>  {
                         blAssignm.assignmentUpdatesMissionStatus(payload['id'], payload['work_process_id']);
                         blAssignm.activateNextAssignmentInPipeline(payload); // Next assignment status: not_ready_for_dispatch => wait_dependencies/to_dispatch
-                    });
+                    })
+                    .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`));
                 }
                 if(assignment_status == ASSIGNMENT_STATUS.CANCELING || assignment_status == 'cancelling'){
                     blAssignm.cancelAssignmentByAgent(payload)
-                    .then(() => databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.CANCELED}));
+                    .then(() => databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.CANCELED}))
+                    .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`));
                 }
                 if(assignment_status == ASSIGNMENT_STATUS.CANCELED || assignment_status == 'cancelled'){
-                    blAssignm.assignmentUpdatesMissionStatus(payload['id'], payload['work_process_id']);
-                    blAssignm.activateNextAssignmentInPipeline(payload);
+                    blAssignm.assignmentUpdatesMissionStatus(payload['id'], payload['work_process_id'])
+                    .then(() => blAssignm.activateNextAssignmentInPipeline(payload)
+                    .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`)));
                 }
                 if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){
                     blAssignm.updateAssignmentContext(payload['id'])
                     .then(()=> blAssignm.dispatchAssignmentToAgent(payload))
-                    .then(() => databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.EXECUTING, start_time_stamp: new Date()}));
+                    .then(() => databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.EXECUTING, start_time_stamp: new Date()}))
+                    .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`));
+
                 }
 
                 if(assignment_status == ASSIGNMENT_STATUS.FAILED ||  assignment_status == ASSIGNMENT_STATUS.ABORTED || assignment_status == ASSIGNMENT_STATUS.REJECTED){
@@ -52,7 +58,9 @@ function processAssignmentEvents(msg) {
                                                                                         MISSION_STATUS.CALCULATING,
                                                                                         MISSION_STATUS.EXECUTING
                                                                                     ]},
-                                                                        {status: MISSION_STATUS.ASSIGNMENT_FAILED});
+                                                                        {status: MISSION_STATUS.ASSIGNMENT_FAILED})
+                                                    .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`));
+                                                    
                 }
 
                 break;
@@ -64,6 +72,7 @@ function processAssignmentEvents(msg) {
                     if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){
                         blAssignm.dispatchAssignmentToAgent(payload);
                         databaseServices.assignments.update('id', payload['id'], {status:ASSIGNMENT_STATUS.EXECUTING})
+                        .catch(err => logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status} ${err.message}`));
                     }
                 }
                 break;
