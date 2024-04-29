@@ -43,7 +43,7 @@ For example, an assistant can manage the traffic by issuing commands to control 
                     <td>{{item.name}}</td>
                     <td>{{item.uuid}}</td>
 
-                    <td [ngClass]="{'bg-danger': item.msgPerSec > 30}" title="Optimal: 10Hz." >
+                    <td [ngClass]="{'bg-danger': (item.msgPerSec > 30 && item.connectionStatus === 'online')}" title="Optimal: 10Hz." >
                         {{item.msgPerSec | number:'1.2-2' }}
                     </td> 
                     <td [ngClass]="{'bg-danger': item.updtPerSec > 5}"  title="Optimal: < 2 Hz" >

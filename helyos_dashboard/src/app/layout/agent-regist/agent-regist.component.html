@@ -47,10 +47,10 @@
                     <td>{{item.uuid}}</td>
                     <td>{{item.protocol}}</td>
 
-                    <td [ngClass]="{'bg-danger': item.msgPerSec > 30}" title="Optimal: 10Hz." >
+                    <td [ngClass]="{'bg-danger': (item.msgPerSec > 30 && item.connectionStatus === 'online')}" title="Optimal: 10Hz." >
                         {{item.msgPerSec | number:'1.2-2' }}
                     </td> 
-                    <td [ngClass]="{'bg-danger': item.updtPerSec > 5}"  title="Optimal: < 2 Hz" >
+                    <td [ngClass]="{'bg-danger': (item.updtPerSec > 5 && item.connectionStatus === 'online')}"  title="Optimal: < 2 Hz" >
                         {{item.updtPerSec | number:'1.2-2' }}
                     </td> 
                     <td>{{item.yardId}}</td>
