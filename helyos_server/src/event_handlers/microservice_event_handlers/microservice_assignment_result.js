@@ -110,7 +110,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 
 			Promise.all(updatePromises)
 			.then(()=>{
-				assigmentInputs.forEach( input => 
+				const statusUpdatePromises = assigmentInputs.map( input => 
 					databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})
 					.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY}))
 					.then(() =>  databaseServices.work_processes.updateByConditions(
@@ -119,9 +119,11 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 															   MISSION_STATUS.PREPARING]},
 						{status: MISSION_STATUS.EXECUTING}))
 				);
+				return Promise.all(statusUpdatePromises);
 			})
 
-	});
+	})
+	.catch(err => logData.addLog('helyos_core', null, 'error', `createAssignment ${err.message}`));
 
 }
 

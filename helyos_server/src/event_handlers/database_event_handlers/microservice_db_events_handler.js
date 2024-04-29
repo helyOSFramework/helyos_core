@@ -44,7 +44,8 @@ function processMicroserviceEvents(msg) {
                                     id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE}, 
                                     { status: SERVICE_STATUS.DISPATCHING_SERVICE })
                                 .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id));
-                    }); 
+                    })
+                    .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_insertion ${err.message}`));
                 }
 
 
@@ -63,7 +64,9 @@ function processMicroserviceEvents(msg) {
                             id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE},
                             {status: SERVICE_STATUS.DISPATCHING_SERVICE})
                         .then(() => blMicroservice.updateRequestContext(service_request_id))
-                        .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id)); // Current service status: ready_for_service => pending
+                        .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id)) // Current service status: ready_for_service => pending
+                        .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err.message}`));
+
                         break;			
                 
                     case  SERVICE_STATUS.READY:
@@ -78,7 +81,9 @@ function processMicroserviceEvents(msg) {
                             });
                         } else {
                             blMicroservice.wrapUpMicroserviceCall(payload)
-                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)); // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                            .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err.message}`));
+
                         }
 
                         break;
@@ -89,19 +94,22 @@ function processMicroserviceEvents(msg) {
                                                                                             MISSION_STATUS.CALCULATING,
                                                                                             MISSION_STATUS.EXECUTING
                                                                                         ]},
-                                                                          {status: MISSION_STATUS.PLANNING_FAILED});
+                                                                          {status: MISSION_STATUS.PLANNING_FAILED})
+                                                        .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err.message}`));
+                                                        
                         break;
 
 
                     case SERVICE_STATUS.TIMEOUT:
                         databaseServices.service_requests.update_byId(payload['id'], {status: SERVICE_STATUS.CANCELED});
-                        databaseServices.work_processes.get_byId(payload['work_process_id'], ['status']);
                         databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
                                                                             status__in: [   MISSION_STATUS.PREPARING,
                                                                                             MISSION_STATUS.CALCULATING,
                                                                                             MISSION_STATUS.EXECUTING
                                                                                         ]},
-                                                                          {status: MISSION_STATUS.PLANNING_FAILED});
+                                                                          {status: MISSION_STATUS.PLANNING_FAILED})
+                                                        .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err.message}`));
+    
                         break;
 
                     default:

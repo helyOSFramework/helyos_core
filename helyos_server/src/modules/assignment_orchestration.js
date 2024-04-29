@@ -15,9 +15,9 @@ const { logData } = require('./systemlog.js');
 
 function activateNextAssignmentInPipeline(partialAssignment) {
 
-	databaseServices.assignments.get_byId(partialAssignment.id)
+	return databaseServices.assignments.get_byId(partialAssignment.id)
 	.then( finishedAssignment => {
-		databaseServices.assignments.list_in('id', finishedAssignment.next_assignments)
+		return databaseServices.assignments.list_in('id', finishedAssignment.next_assignments)
 		.then(nextAssignments => {
 			const updatingPromises = nextAssignments.filter(a => a.status!=ASSIGNMENT_STATUS.CANCELED).map(nexAssignment => {
 

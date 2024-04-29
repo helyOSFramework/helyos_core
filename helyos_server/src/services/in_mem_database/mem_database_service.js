@@ -19,6 +19,10 @@ class InMemDB {
     penddingPromises = 0;
 
     constructor() {
+        if (InMemDB.instance){ 
+            return InMemDB.instance;
+        }
+        InMemDB.instance = this;
         this.agents = {};
         this.map_objects = {};
         this.agents_buffer = {};
@@ -212,9 +216,10 @@ class InMemDB {
                                         r.forEach(e => { 
                                             if (e.failedIndex) {
                                                 // delete this[tableName][e.failedIndex];
-                                                logData.addLog('helyos_core', null, 'error', `Database updated: ${tableName} ${e.failedIndex}`);
+                                                logData.addLog('helyos_core', null, 'error', `Database updated error: ${tableName} ${e.failedIndex}`);
                                         }})
-                                    });
+                                    })
+                                    .catch(e => {logData.addLog('helyos_core', null, 'error', `InMemDB flush error: ${e.message}`)});
             
 
         return this.dispatchUpdatePromise(promiseTrigger);                            

@@ -308,18 +308,21 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 	.then((context) => createServiceRequestsForWorkProcessType(workProcess['work_process_type_name'], workProcess['data'], agentsListIds, workProcess['id'])
 		.then( requestList => {
 
-				requestList.forEach(req => {
+				const insertPromisses = requestList.map(req => {
 					req['work_process_id'] =  workProcess['id'];
 					req['context'] = filterContext(context, req);
 					req['context']['orchestration'] =  {'current_step': req['step'], 'next_step': req['next_step'] };
 					req['request'] = JSON.stringify(req['request']); // postgress known issue: json column only saves arrays if inputed as string.
-					databaseServices.service_requests.insert({...req, response: null,  fetched: false, processed: false});
+					return databaseServices.service_requests.insert({...req, response: null,  fetched: false, processed: false});
 				});
-				databaseServices.work_processes.updateByConditions(
-					{'id': workProcess['id'], 'status__in':[MISSION_STATUS.PREPARING,
-															MISSION_STATUS.DISPATCHED,
-															MISSION_STATUS.EXECUTING]},
-					{'status': MISSION_STATUS.CALCULATING});
+
+				return Promise.all(insertPromisses)
+							    .then(() =>databaseServices.work_processes.updateByConditions(
+											{'id': workProcess['id'], 'status__in':[MISSION_STATUS.PREPARING,
+																					MISSION_STATUS.DISPATCHED,
+																					MISSION_STATUS.EXECUTING]},
+											{'status': MISSION_STATUS.CALCULATING})
+								);
 		})
 	)
 	.catch( e => {
