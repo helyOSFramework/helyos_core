@@ -159,7 +159,7 @@ class InMemDB {
         this._dynamicallyChooseTimeout();
 
         if ((now - this.lastFlushTime) < maxAge) { 
-            return Promise.resolve(); // Do not flush if the data is too new.
+            return Promise.resolve(); // Do not flush if the data is too recent.
         }
         
         this.lastFlushTime = new Date();
@@ -273,9 +273,9 @@ class InMemDB {
 
         if (new Date() - this.timeoutCounterStartTime > 10000) {
             if (this.updateTimeout === this.shortTimeout)                 
-                logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. Timeout for this connection was reduced to ${this.shortTimeout} milliseconds to avoid system blockage.`);
+                logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. The timeout was reduced to ${this.shortTimeout} milliseconds to avoid the system blockage.`);
             logData.addLog('helyos_core', null, 'error',
-             `${this.lostUpdates} database updates lost. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs`);
+             `${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`);
             this.lostUpdates = 0;
             this.timeoutCounterStartTime = new Date();
         }
