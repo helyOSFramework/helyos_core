@@ -12,8 +12,9 @@ const { deleteConnections } = require('../services/message_broker/rabbitMQ_acces
 
 const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
 const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
-const MESSAGE_RATE_LIMIT = process.env.MESSAGE_RATE_LIMIT || 150;
-const MESSAGE_UPDATE_LIMIT = process.env.MESSAGE_UPDATE_LIMIT || 20;
+const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
+const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || 20);
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const {MISSION_STATUS } = require('../modules/data_models.js');
 
 /**
@@ -306,13 +307,13 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
                     case AGENT_VISUALIZATION_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 1000);
+                            agentAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
                         }
                         break;
 
 
                     case YARD_VISUALIZATION_QUEUE:
-                            yardAutoUpdate(objMsg.obj, uuid, 1000);
+                            yardAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
                         break;    
 
                     default:

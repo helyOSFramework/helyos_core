@@ -58,7 +58,7 @@ const {handleDatabaseMessages} = require('./event_handlers/database_event_subscr
 const databaseServices = require('./services/database/database_services.js');
 
 async function connectToDB () {
-    const postgClient = await databaseServices.getNewClient();
+    const postgClient = databaseServices.pgNotifications;
     console.log("============  Client connected with DB ==================");
     await initialization.setInitialDatabaseData();
     console.log(" ============  Configuration loaded ==================");
