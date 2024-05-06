@@ -139,17 +139,17 @@ async function configureRabbitMQSchema(dataChannel) {
             // ONE CANNOT ASCRIBE SEPARATED EXCHANGES FOR UL AND DL WHEN USE MQTT.
             await dataChannel.assertExchange(AGENT_MQTT_EXCHANGE, 'topic', { durable: true });
 
-            await dataChannel.assertQueue(AGENT_UPDATE_QUEUE, {exclusive: false, durable:true, arguments: {"x-message-ttl" : 10000}});
+            await dataChannel.assertQueue(AGENT_UPDATE_QUEUE, {exclusive: false, durable:true, arguments: {"x-message-ttl" : 3600000}});
             await dataChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.update");
             await dataChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.fact_sheet");     
             await dataChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.update");
             await dataChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.fact_sheet"); // VDA-5050 COMPATIBLE
 
-            await dataChannel.assertQueue(AGENT_VISUALIZATION_QUEUE, {exclusive: false, durable:false, arguments: {"x-message-ttl" : 10}});
+            await dataChannel.assertQueue(AGENT_VISUALIZATION_QUEUE, {exclusive: false, durable:false, arguments: {"x-message-ttl" : 2000}});
             await dataChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "agent.*.visualization");  
             await dataChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "agent.*.visualization");  // VDA-5050 COMPATIBLE
 
-            await dataChannel.assertQueue(YARD_VISUALIZATION_QUEUE, {exclusive: false, durable:false, arguments: {"x-message-ttl" : 10}});
+            await dataChannel.assertQueue(YARD_VISUALIZATION_QUEUE, {exclusive: false, durable:false, arguments: {"x-message-ttl" : 2000}});
             await dataChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "yard.*.visualization");  
             await dataChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "yard.*.visualization");  
 

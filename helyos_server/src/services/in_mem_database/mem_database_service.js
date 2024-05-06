@@ -6,9 +6,12 @@
 const { logData } = require("../../modules/systemlog");
 const { setDBTimeout } = require("../database/database_services");
 
-MAX_PENDING_UPDATES = 20;
-SHORT_TIMEOUT = Math.round(parseInt(process.env.DB_BUFFER_TIME || 1000)/2);
-LONG_TIMEOUT = SHORT_TIMEOUT * MAX_PENDING_UPDATES;
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
+const LONG_TIMEOUT = 2000; // Maximum time for the database update
+
+let MAX_PENDING_UPDATES = LONG_TIMEOUT / DB_BUFFER_TIME;
+MAX_PENDING_UPDATES = MAX_PENDING_UPDATES > 5 ? MAX_PENDING_UPDATES : 5;
+const SHORT_TIMEOUT = DB_BUFFER_TIME / 2;
 
 
 /**
@@ -22,12 +25,12 @@ LONG_TIMEOUT = SHORT_TIMEOUT * MAX_PENDING_UPDATES;
  * 
  * shortTimeout and longTimeout are used to dynamically adjust the update timeout (this.updateTimeout) based on the number of pending promisses updates. 
  * 
- * If the number of pending promisses is too big, the update timeout is reduced to shortTimeout. 
+ * If the number of pending promisses is higher than MAX_PENDING_UPDATES, the update timeout is reduced to shortTimeout. 
+ * If the number of pending promisses keeps increasing to higher then 2 x MAX_PENDING_UPDATES, the system will additionally block new updates.
  * The smaller timeout causes the the database update promises to expire which will reduce the number of pending promisses, decresing the system load.
  * Therefore, we are accepting to lose some updates in order to avoid the system to be blocked.
  * 
  * If the number of pending promisses is small, the update timeout is increased to longTimeout.
- * Such that the database has enough time to process all updates.
  * 
  * 
  */
@@ -229,7 +232,8 @@ class InMemDB {
 
    
     dispatchUpdatePromise(promiseTrigger, numberUpdates=1) {
-        if (this.pendingPromises > this.limitWaitingFlushes) {
+        // Damaging control: if the number of pending promisses is too big, block new updates and accept the losts.
+        if (this.pendingPromises > 2 * this.limitWaitingFlushes) {
             this.lostUpdates += numberUpdates;
             return Promise.resolve();
         }
