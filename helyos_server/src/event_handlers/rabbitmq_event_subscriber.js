@@ -241,7 +241,9 @@ function handleBrokerMessages(channelOrQueue, message)   {
     // SENDER IS INDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
 
         // Check if the agent is sending too many messages per second.
-        inMemDB.agents_stats[uuid]['msgPerSecond'].countMessage();
+        if (inMemDB.agents_stats[uuid]) {
+            inMemDB.agents_stats[uuid]['msgPerSecond'].countMessage();
+        }
         const avgRates = inMemDB.getHistoricalCountRateAverage('agents', uuid, 20);
         let closeConnection = false;
         

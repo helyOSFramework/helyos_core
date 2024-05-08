@@ -97,11 +97,11 @@ const RabbitMQServices = require('./services/message_broker/rabbitMQ_services.js
 
 function connectToRabbitMQ () {
        return initialization.initializeRabbitMQAccounts()
-            .then(() => RabbitMQServices.connectAndOpenChannel({subscribe: false, connect: true, recoverCallback: initialization.helyosConsumingMessages}) )       
-            .then( dataChannel => {
+            .then(() => RabbitMQServices.connectAndOpenChannels({subscribe: false, connect: true, recoverCallback: initialization.helyosConsumingMessages}) )       
+            .then( dataChannels => {
             // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
-                    initialization.configureRabbitMQSchema(dataChannel)
-                    .then( dataChannel => initialization.helyosConsumingMessages(dataChannel));
+                return initialization.configureRabbitMQSchema(dataChannels)
+                       .then( dataChannels => initialization.helyosConsumingMessages(dataChannels));
         })
 }
 

@@ -110,6 +110,16 @@ const update_guest_account_permissions = (username) => !username? Promise.resolv
         });
 
 
+const getQueueInfo = (queueName) => {
+        return requestXHTTP
+        .get(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/queues/%2F/${queueName}`)
+        .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
+        .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
+        .then(r => r.body);
+}
+
+
+
 const connect = amqp.connect;
     
 
@@ -120,6 +130,7 @@ module.exports.create_rbmq_admin = create_rbmq_admin;
 module.exports.add_rbmq_user_vhost = add_rbmq_user_vhost;
 module.exports.listConnections = listConnections;
 module.exports.deleteConnections = deleteConnections;
+module.exports.getQueueInfo = getQueueInfo;
 module.exports.connect = connect;
 
 
