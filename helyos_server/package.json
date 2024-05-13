@@ -21,7 +21,7 @@
     "nock": "^13.5.4",
     "node-rtsp-stream": "0.0.8",
     "pg": "^8.7.3",
-    "postgraphile": "^4.7.0",
+    "postgraphile": "4.13.0",
     "redoc-cli": "^0.13.21",
     "request": "2.88.2",
     "socket.io": "4.6.1",
