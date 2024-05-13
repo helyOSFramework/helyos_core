@@ -2,48 +2,54 @@
 const databaseServices = require('../../services/database/database_services.js');
 const { logData} = require('../..//modules/systemlog');
 const { inMemDB } = require('../../services/in_mem_database/mem_database_service.js');
+const { MISSION_STATUS, ASSIGNMENT_STATUS } = require('../../modules/data_models.js');
+
+
 /* Update the assignmnet if it is not already marked as 'completed' or 'succeeded' */
 /* The data is updated in the assignment table and in the agent table (under work process clearance) */
-function updateAgentMission(assignment, uuid=null) {
-    if (!assignment) return Promise.resolve();
-    const assignment_status_obj = assignment.assignment_status?  assignment.assignment_status:assignment; //back compatibility
+async function updateAgentMission(assignment, uuid = null) {
+    if (!assignment) return;
+    const assignment_status_obj = assignment.assignment_status ? assignment.assignment_status : assignment; //back compatibility
     const assignmentId = assignment_status_obj.id;
-    let assignmentStatus = assignment_status_obj.status;
-    const assignmentResult = assignment_status_obj.result; 
+    if (!assignmentId) return;
+    const assignmentStatus = assignment_status_obj.status;
+    const assignmentResult = assignment_status_obj.result;
 
+    const assmUpdate = { 'id': assignmentId, 'status': assignmentStatus, 'result': assignmentResult };
+    const currentAssm = await databaseServices.assignments.get_byId(assignmentId, ['status', 'work_process_id']);
 
-    if (assignmentId){
-        const assignment_update = {'id':assignmentId, 'status':assignmentStatus, 'result':assignmentResult };
-
-        return databaseServices.assignments.get_byId(assignmentId,['status'])
-        .then( assm => { 
-            if (assm && assm.status !== 'succeeded' && assm.status !== 'completed' ){
-                return databaseServices.assignments.update_byId(assignment_update.id, assignment_update)
-                .then(() => databaseServices.agents.get('uuid', uuid, ['id', 'wp_clearance']))
-                .then(agents => {
-                    if (!uuid) return;
-                    if (agents.length == 0) { 
-                        logData.addLog('agent', {uuid}, 'error', "agent does not exist");
-                        return;
-                    }
-
-                    const agent = agents[0];
-                    if (agent.wp_clearance) agent.wp_clearance['assignment_status'] = assignment_update;  //backward compatibility
-
-                    databaseServices.agents.update_byId(agent.id, {'wp_clearance': agent.wp_clearance, 'assignment': assignment})
-                })
-        
-            } else {
-                if (assignment_update.status!=='succeeded' && assignment_update.status !=='completed') {
-                    logData.addLog('agent', {'uuid':uuid}, 'warning', `agent is trying to change an assignment that is already completed`);
-                }
-            }
-        });
+    if (currentAssm &&
+        [ASSIGNMENT_STATUS.SUCCEEDED, ASSIGNMENT_STATUS.COMPLETED, ASSIGNMENT_STATUS.FAILED].includes(currentAssm.status)) {
+        logData.addLog('agent', { 'uuid': uuid }, 'warning', `agent tried to change the status of an assignment that is already ${currentAssm.status}`);
+        return;
     }
-    return Promise.resolve();
+
+    if ([ASSIGNMENT_STATUS.CANCELED, ASSIGNMENT_STATUS.ABORTED, ASSIGNMENT_STATUS.FAILED].includes(assmUpdate.status)) {
+        logData.addLog('agent', { 'uuid': uuid }, 'info', `agent has marked the assignment ${assignmentId} as ${assmUpdate.status}`);
+        return await databaseServices.assignments.update_byId(assignmentId, assmUpdate);
+    }
+
+    await databaseServices.assignments.updateByConditions({
+        'assignments.id': assignmentId,
+        'work_processes.id': currentAssm.work_process_id,
+        'work_processes.status__in': [  MISSION_STATUS.EXECUTING,
+                                        MISSION_STATUS.DISPATCHED,
+                                        MISSION_STATUS.CALCULATING,
+                                        MISSION_STATUS.CANCELING,
+                                        MISSION_STATUS.FAILED]
+    }, assmUpdate);
+
+    if (uuid) {
+        const agents = await databaseServices.agents.get('uuid', uuid, ['id', 'wp_clearance']);
+        if (agents.length > 0) {
+            const agent = agents[0];
+            if (agent.wp_clearance) agent.wp_clearance['assignment_status'] = assmUpdate;  //backward compatibility
+            return await databaseServices.agents.update_byId(agent.id, { 'wp_clearance': agent.wp_clearance, 'assignment': assignment });
+        } else {
+            logData.addLog('agent', { uuid }, 'error', "agent does not exist");
+        }
+    }
 }
-
-
 
 
 
