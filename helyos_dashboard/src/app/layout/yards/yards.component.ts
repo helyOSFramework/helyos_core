@@ -22,7 +22,16 @@ export class YardsComponent implements OnInit {
  
     list() {
        return this.helyosService.methods.yard.list({})
-        .then( r => this.yards = r );
+        .then( r => {
+            this.yards = r.map(yard => {
+                try {
+                    yard.mapData = JSON.stringify(yard.mapData, null, 2);
+                } catch (error) {
+                    yard.mapData = '';
+                }
+                return yard;
+            });
+        });
     }
 
 
@@ -40,6 +49,11 @@ export class YardsComponent implements OnInit {
         this.helyosService.methods.yard.get(itemId)
         .then( (r:any)=> {
             this.selectedItem = r;
+            try {
+                this.selectedItem.mapData = JSON.stringify(this.selectedItem.mapData, null, 2);
+            } catch (error) {
+                this.selectedItem.mapData = '';
+            }
         });
     }
 
@@ -60,6 +74,13 @@ export class YardsComponent implements OnInit {
         const patch = {...item};
         delete patch.createdAt;
         delete patch.modifiedAt;
+
+        try {
+            patch.mapData = JSON.parse(patch.mapData);
+        } catch (error) {
+            alert('Map Info is no a valid JSON');
+            return;
+        }
 
         this.helyosService.methods.yard.patch(patch)
         .then( r=> {

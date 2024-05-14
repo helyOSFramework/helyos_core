@@ -26,7 +26,7 @@
                     <th>Lat</th>
                     <th>Lon</th>
                     <th>Alt</th>
-                    <th>Map Info</th>
+                    <th title="Optional: JSON data. If you have extensive map data, consider using map objects." >Map Info</th>
                     <th>Source</th>
                 </tr>
             </thead>
@@ -40,8 +40,8 @@
                     <td>{{item.lat}}</td>
                     <td>{{item.lon}}</td>
                     <td>{{item.alt}}</td>
-                    <td title="Optional: JSON data. If you have extensive map data, consider using map objects.">{{item.mapData}}</td>
-                    <td>{{item.source}}</td>
+                    <td title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+                        {{item.mapData.length > 200 ? item.mapData.substring(0, 200) + '...' : item.mapData}}</td>
                 </tr>
             </tbody>
         </table>
@@ -116,8 +116,8 @@
 
 
             <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> Map data (arbritrary JSON data) </label>
+                <fieldset class="form-group col-xl-12" title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+                    <label> Map info (arbritrary JSON data) </label>
                     <textarea class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"
                     ></textarea>
                 </fieldset>
