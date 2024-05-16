@@ -135,7 +135,6 @@ async function sendReleaseFromWorkProcessRequest(agentId, wpId) {
         body: {
             work_process_id: parseInt(wpId, 10),
             operation_types_required: [], // to be used in the future
-            work_process_id: parseInt(wpId),
             reserved: false
         },
         _version: MESSAGE_VERSION

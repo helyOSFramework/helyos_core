@@ -176,7 +176,7 @@ function connectAndOpenChannels(options={}) {
 
 function sendEncriptedMsg(queue, message, publicKey='', routingKey=null, exchange=null, correlationId=null) {
     let encryptedMsg;
-    console.log(" =============== HelyOS is sending a message in rabbitMQ ===================")
+    console.log(" \n=============== helyOS core is sending a message in RabbitMQ ===================")
 
     switch (ENCRYPT) {
         case "agent":

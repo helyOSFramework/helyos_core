@@ -136,7 +136,7 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
 async function connectFollowersToLeader (leaderUUID, followerUUIDs) {
     databaseServices.connectAgents(leaderUUID, followerUUIDs)
     .then((newConnectionIds) => {
-        logData.addLog('agent', {uuid: leaderUUID}, 'normal', `new connected followers # : ${newConnectionIds}` );
+        logData.addLog('agent', {uuid: leaderUUID}, 'normal', `Followers connected to this agent # : ${newConnectionIds.length? newConnectionIds:'None'}` );
         // Allow follower agents to be updated by the leader agent user account.
         const followerPatchs = followerUUIDs.map( uuid => ({uuid, rbmq_username: leaderUUID}));
         return databaseServices.agents.updateMany(followerPatchs,'uuid');

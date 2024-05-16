@@ -93,11 +93,12 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                             console.log(`Agent ${uuid} is using the leader account ${possibleLeaderUUID}`);
                             inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
                         } else { // OK, we did our best to validate you and you will be disconnected.
-                            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`)
-                            deleteConnections(agentAccount);
+                            logData.addLog('agent', {uuid}, 'error', 
+                                `helyOS disconnected the agent: An agent is trying to publish a message for another agent. The RabbitMQ username ${agentAccount} does not match either its UUID or its leader's UUID, in case of connected agents.`)
                             inMemDB.delete('agents', 'uuid', uuid);
                             inMemDB.delete('agents', 'uuid', agentAccount);
-                            throw Error(`RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`);
+                            deleteConnections(agentAccount);
+                            throw Error(`RabbitMQ username ${agentAccount} does not match either the agent's UUID or its leader's UUID.`);
                         }
                     }
                 }
@@ -112,7 +113,7 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                     }
                 } else {    
                     deleteConnections(uuid);
-                    throw ({msg:`signature or public key-absent; ${uuid}`, code: 'AGENT-403'});
+                    throw ({msg:`Signature or public key-absent; ${uuid}`, code: 'AGENT-403'});
                 }
             }
 }
@@ -253,15 +254,16 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }
 
         if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
-            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: high db updates per second. Check the publish
-                                                 rate for agent.{uuid}.update, agent.{uuid}.state, agent.{uuid}.database_req routes`);
+            logData.addLog('agent', {uuid}, 'error',
+                            `Agent disconnected: high number of database updates per second. Please check the publish rate for the routes agent.{uuid}.update, agent.{uuid}.state, and agent.{uuid}.database_req.`);
+            
             closeConnection = true;
         }
 
         if (closeConnection) {
-            deleteConnections(agentAccount);
             inMemDB.delete('agents', 'uuid', uuid);
             inMemDB.delete('agents', 'uuid', agentAccount);
+            deleteConnections(agentAccount).catch(e => console.log(e));
             return;
         }
 
@@ -327,7 +329,8 @@ function handleBrokerMessages(channelOrQueue, message)   {
             console.log(error);
         }  
     })().catch(error => {
-        logData.addLog('agent', {uuid}, 'error',  JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        const errorMsg = error.message?  {message:error.message} : error;
+        logData.addLog('agent', {uuid}, 'error',  JSON.stringify(errorMsg, Object.getOwnPropertyNames(errorMsg)));
     });
 };
 

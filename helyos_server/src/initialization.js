@@ -185,9 +185,10 @@ async function configureRabbitMQSchema(dataChannels) {
     function helyosConsumingMessages (dataChannels) {
         const mainChannel = dataChannels[0];
         const secondaryChannel = dataChannels[1];
-        console.log(" ================================================================")
-        console.log(" ================= SUBSCRIBE TO HELYOS' QUEUES ==================")
-        console.log(" ================================================================")
+        console.log(`\n ================================================================`+
+                    `\n ================= SUBSCRIBE TO HELYOS' QUEUES ==================`+
+                    `\n ================================================================`);
+
         mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(CHECK_IN_QUEUE, message), { noAck: true});
         mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(AGENT_STATE_QUEUE, message), { noAck: true});
         mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(AGENT_UPDATE_QUEUE, message), { noAck: true});

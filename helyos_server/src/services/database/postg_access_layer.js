@@ -215,7 +215,6 @@ class DatabaseLayer {
 		let colNames = [], colValues = [...condColValues], valueMasks = [];
 		delete patch['id'];
 
-		console.log('colValues', colValues);
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
 			colValues.push(patch[key]);
