@@ -113,7 +113,7 @@ in the terminal:
 
 
 ```bash
-    docker-compose run --rm name_of_helyos_client_app "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
+    docker-compose run --rm helyos_core_service "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
 ```
 
 Note that when migrating to a new database schema, it is crucial to assess how these changes will impact the application. 
