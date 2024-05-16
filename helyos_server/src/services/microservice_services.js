@@ -63,13 +63,13 @@ const sendRequestToService = (service_url, service_licence_key, request, context
         .send({request, context, config})     
         .then((res) =>  parseResponseToJson(res))
         .catch((err)=> {
-                console.log("\n*************** Error - send request to external microservice *************\n");
-                console.log(err)
+                console.log(`\n*************** Error - microservice ${service_url} *************\n`);
+                console.log(err.message)
                 if(err.response) {
                     err.data = parseResponseToJson(err.response);
                 } else {
                     if (err.code === 'ENOTFOUND') {
-                        err.message = 'microservice is unreachable.';
+                        err.message = 'Microservice is unreachable.';
                     } 
                 }
                 throw err;
@@ -92,7 +92,7 @@ const getServiceResponse =  (service_url, service_licence_key, jobId) => {
             }
 			return data;
 		})
-		.catch((err)=> console.log('\n==== error in getResultPathPlanner===', err));
+		.catch((err)=> console.log('\n==== Error in getting microservice response ===', err.message));
 }
 
 
@@ -106,7 +106,7 @@ const cancelService =  (service_url, service_licence_key, jobId) => {
     .set('Accept', 'application/json')
     .set('Content-Type', 'application/json')
         .then((res) => res.body.toString())
-        .catch((err)=> console.log('error in cancelPathPlanner', err));
+        .catch((err)=> console.log('Error in canceling microservice', err.message));
 
 }
 

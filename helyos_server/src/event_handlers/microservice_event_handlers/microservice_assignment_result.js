@@ -9,13 +9,14 @@ const databaseServices = require('../../services/database/database_services.js')
 
 
 async function createAssignment(workProcess, servResponse, serviceRequest){
-	console.log("servResponse")
-	console.log(servResponse)
 
 	const agentIds = workProcess.agent_ids;
 	const serviceRequestId = serviceRequest?  serviceRequest.id:null
-	console.log("workProcess",workProcess)
+    logData.addLog('helyos_core', {wproc_id: workProcess.id}, 'info', `Create assignment(s) using the response of ${serviceRequest.service_url}`);
+	console.log(`WORKPROCESS ${workProcess.id}: Create assignment(s) using the response of ${serviceRequest.service_url}`);
+
 	const yardId = workProcess.yard_id;
+
 
 	if (!workProcess.sched_start_at) {
 		workProcess.sched_start_at = new Date();

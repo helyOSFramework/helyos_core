@@ -187,8 +187,15 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 				delete s['__depends_on_steps'];
 			});
 
-			console.log("\n\n(1)=========  Create service requests for the process type "+ processType +" ==========" );
-			console.log("service Requests from service matrix", serviceRequests);
+			console.log("\n\n=========  Preparing microservice requests for the process type "+ processType +" ==========" );
+			serviceRequests.forEach(s => {
+				console.log(`Request UID: ${s.request_uid}`);
+				console.log(`Step: ${s.step}`);
+				console.log(`Service Type: ${s.service_type}`);
+				console.log(`Service URL: ${s.service_url}`);
+				console.log(`Next Request UID: ${s.next_request_to_dispatch_uid}`);
+				console.log("--------------------");
+			});
 			console.log("================================================================================");
 
 			return serviceRequests;

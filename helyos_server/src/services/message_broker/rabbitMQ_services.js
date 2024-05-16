@@ -65,18 +65,6 @@ try {
 
 
 
-// function to sign string messages using crypto module and PSS padding:
-function sign_message(message, privateKey) {
-    const sign = crypto.createSign('SHA256');
-    sign.update(message);
-    sign.end();
-    return sign.sign({
-                        key: privateKey,
-                        padding: crypto.constants.RSA_PSS_SALTLEN_MAX_SIGN,
-                    });
-}       
-
-
 function verifyMessageSignature(message, publicKey, signature) {
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(message, 'utf8');
@@ -125,17 +113,25 @@ const connect_as_guest_and_create_admin = () => rbmqAccessLayer.connect(urlObj('
 
                                 
 // Initialize a RabbitMQ client and create channel
-let mainChannelPromise;
-function connectAndOpenChannel(options={}) {
-    console.log('connectAndOpenChannel', options)
+let mainChannelPromise, secondaryChannelPromise;
+
+function getMainChannel(options={}) { 
     if (mainChannelPromise && !options.connect) { 
-            return mainChannelPromise.then(ch => {
-                if (options.subscribe) {
-                    ch = options.recoverCallback(ch);
-                }
-                return ch
-            }); 
+        return mainChannelPromise.then(ch => {
+            if (options.subscribe) {
+                ch = options.recoverCallback(ch);
+            }
+            return ch
+        }); 
+
+    } else {
+        return connectAndOpenChannels(options).then( channels => channels[0]);
     }
+}
+
+
+function connectAndOpenChannels(options={}) {
+    console.log('connectAndOpenChannels', options)
 
     return rbmqAccessLayer.connect(urlObj(), sslOptions)
             .then(conn => {
@@ -148,10 +144,10 @@ function connectAndOpenChannel(options={}) {
                         console.error("====================RABITMQ CONNECTION LOST =============");
                         console.error(err);
                         console.error("=========================================================");
-                        connectAndOpenChannel({subscribe: true, connect: true, recoverCallback:options.recoverCallback});
+                        connectAndOpenChannels({subscribe: true, connect: true, recoverCallback:options.recoverCallback});
                   });
 
-                mainChannelPromise = conn.createChannel() // This is a Promise!
+                mainChannelPromise = conn.createChannel()
                 .then(ch => {
                     if (options.subscribe) {
                         ch = options.recoverCallback(ch);
@@ -159,19 +155,28 @@ function connectAndOpenChannel(options={}) {
                     return ch;
                 }); 
 
-                return mainChannelPromise;
+
+                secondaryChannelPromise = conn.createChannel()
+                .then(ch => {
+                    if (options.subscribe) {
+                        ch = options.recoverCallback(ch);
+                    }
+                    return ch;
+                }); 
+
+                return Promise.all([mainChannelPromise, secondaryChannelPromise]);
             })
             .catch(e => {
                 console.warn("\nWaiting AMQP server...\n\n");
                 const promiseSetTimeout = util.promisify(setTimeout);
-                return promiseSetTimeout(3000).then( () => connectAndOpenChannel({subscribe: false, connect: true}))
+                return promiseSetTimeout(3000).then( () => connectAndOpenChannels({subscribe: false, connect: true}))
             });
 }
 
 
 function sendEncriptedMsg(queue, message, publicKey='', routingKey=null, exchange=null, correlationId=null) {
     let encryptedMsg;
-    console.log(" =============== HelyOS is sending a message in rabbitMQ ===================")
+    console.log(" \n=============== helyOS core is sending a message in RabbitMQ ===================")
 
     switch (ENCRYPT) {
         case "agent":
@@ -206,7 +211,7 @@ function sendEncriptedMsg(queue, message, publicKey='', routingKey=null, exchang
     }
 
 
-    connectAndOpenChannel()
+    getMainChannel()
     .then( dataChannel => {
         const sign = crypto.createSign('SHA256');
         sign.update(encryptedMsg);
@@ -237,7 +242,7 @@ function sendEncriptedMsg(queue, message, publicKey='', routingKey=null, exchang
                          
 
 function createDebugQueues(agent) {
-    connectAndOpenChannel({subscribe: false, connect: false} ).then( dataChannel => {
+    getMainChannel({subscribe: false, connect: false} ).then( dataChannel => {
         dataChannel.assertQueue(`tap-${agent.name}`, {durable:false, maxLength: 10});
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.*` );
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_UL_EXCHANGE, `*.${agent.uuid}.*` );
@@ -252,8 +257,33 @@ function createDebugQueues(agent) {
 }
 
 
+async function assertOrSubstituteQueue(channel, queueName, exclusive, durable, arguments) {
+    try {
+        const queueInfo = await rbmqServices.getQueueInfo(queueName);
+        const ttl = queueInfo.arguments['x-message-ttl'];
+        if (arguments && ttl !== arguments['x-message-ttl']) {
+            console.log("Queue TTL will be altered...");
+            await channel.deleteQueue(queueName).catch(e => console.log(e));
+            console.log(`Queue ${queueName} deleted.`);
+            logData.addLog('helyos_core', null, 'warn', `Queue ${queueName} message-time-to-live was changed.`);
+        }
+
+        await channel.assertQueue(queueName, {exclusive: exclusive, durable: durable, arguments: arguments});
+        console.log(`Queue ${queueName} asserted.`);
+        return true;
+
+    } catch (error) {
+        console.log(`Queue ${queueName} not found. Creating...`);
+        await channel.assertQueue(queueName, {exclusive: exclusive, durable: durable, arguments: arguments});
+        logData.addLog('helyos_core', null, 'info', `Queue ${queueName} was created.`);
+        return false;
+
+    }
+}
+
+
 function removeDebugQueues(agent) {
-    connectAndOpenChannel({subscribe: false, connect: false} ).then( dataChannel => {
+    getMainChannel({subscribe: false, connect: false} ).then( dataChannel => {
         dataChannel.deleteQueue(`tap-${agent.name}`);
         dataChannel.deleteQueue(`tap-cmd_to_${agent.name}`);
     });
@@ -270,7 +300,7 @@ function dispatchAllBufferedMessages(bufferPayload){
 
 
 module.exports.connect = connect;
-module.exports.connectAndOpenChannel = connectAndOpenChannel;
+module.exports.connectAndOpenChannels = connectAndOpenChannels;
 module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
 module.exports.sendEncriptedMsg = sendEncriptedMsg;
 module.exports.create_rbmq_user = rbmqAccessLayer.createUser;
@@ -280,6 +310,8 @@ module.exports.connect_as_admin_and_create_accounts = connect_as_admin_and_creat
 module.exports.connect_as_guest_and_create_admin = connect_as_guest_and_create_admin;
 module.exports.createDebugQueues = createDebugQueues;
 module.exports.removeDebugQueues = removeDebugQueues;
+module.exports.assertOrSubstituteQueue = assertOrSubstituteQueue;
+module.exports.getQueueInfo = rbmqAccessLayer.getQueueInfo;
 
 
 module.exports.CHECK_IN_QUEUE = CHECK_IN_QUEUE;

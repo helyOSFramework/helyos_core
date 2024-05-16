@@ -57,7 +57,7 @@ const processMicroserviceRequest = (servRequestId) => {
         })
         .catch(e => {
             const servResponse = e.data;
-            logData.addLog('microservice', servRequest, 'error', e );
+            logData.addLog('microservice', servRequest, 'error', e.message );
             return databaseServices.service_requests.updateByConditions({   'id': servRequestId, 
                                                                             'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                             SERVICE_STATUS.WAIT_DEPENDENCIES,
