@@ -7,6 +7,15 @@
     </div>
 </div>
 
+<div class="row" style="align-items:flex-end">
+    <fieldset class="form-group col-xl-3">
+        <label>Work process id</label>
+        <input type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId"  (keydown.enter)="filterList(0)" />
+    </fieldset>
+
+    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary" (click)="filterList(0)" type="submit">APPLY</button>
+</div>
+
 <div class="card mb-3">
     <div class="card-header" style="display: flex; justify-content: space-between;">
         <div class="clickable" (click)="filterList(0)">

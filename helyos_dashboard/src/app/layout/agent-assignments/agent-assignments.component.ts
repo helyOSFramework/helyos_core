@@ -16,6 +16,7 @@ export class AgentAssignmentsComponent implements OnInit {
     public filterObj: any = {};
     public first: number = 15;
     public page: number = 1;
+    public filterWprocId: number = null;
 
     constructor(private helyosService: HelyosService) {
 
@@ -38,6 +39,10 @@ export class AgentAssignmentsComponent implements OnInit {
             this.page = 1;
         }
         this.filterObj = {};
+        if (this.filterWprocId) {
+            this.filterObj['workProcessId'] = this.filterWprocId;
+        }
+
         this.list();
     }
 

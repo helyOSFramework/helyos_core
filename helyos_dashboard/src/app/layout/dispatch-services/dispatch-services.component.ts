@@ -19,6 +19,7 @@ export class DispatchServicesComponent implements OnInit {
     public filterObj: any = {};
     public first: number = 15;
     public page: number = 1;
+    public filterWprocId = null;
 
     constructor(private helyosService: HelyosService) {
 
@@ -35,14 +36,18 @@ export class DispatchServicesComponent implements OnInit {
             .then( r => this.items = r );
         }
     
-        filterList(pageDelta:number=0) {
-            this.page += pageDelta;
-            if (this.page < 1){
-                this.page = 1;
-            }
-            this.filterObj = {};
-            this.list();
+    filterList(pageDelta:number=0) {
+        this.page += pageDelta;
+        if (this.page < 1){
+            this.page = 1;
         }
+        this.filterObj = {};
+        if (this.filterWprocId) {
+            this.filterObj['workProcessId'] = this.filterWprocId;
+        }
+
+        this.list();
+    }
 
     getItem(itemId) {
         this.helyosService.methods.servciceRequests.get(itemId)

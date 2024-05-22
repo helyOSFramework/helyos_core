@@ -161,15 +161,15 @@
                     <div class="row">
                         <fieldset class="form-group col-xl-3">
                             <label>x (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.x" name="x" placeholder=5000 />
+                            <input type="number" class="form-control" [(ngModel)]="selectedItem.x" name="x" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
                             <label>y (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.y" name="y" placeholder=13000 />
+                            <input type="number" class="form-control" [(ngModel)]="selectedItem.y" name="y" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
                             <label>z (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.z" name="z" placeholder=13000 />
+                            <input type="number" class="form-control" [(ngModel)]="selectedItem.z" name="z" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
                             <label>unit</label>
@@ -181,12 +181,12 @@
                     <div class="row">
 
                         <fieldset class="form-group col-xl-4">
-                            <label>orientation (mrad)</label>
-                            <input type="number" step=1 class="form-control" [(ngModel)]="selectedItem.orientation" name="orientation" placeholder="3142" />
+                            <label>orientation</label>
+                            <input type="number" step=1 class="form-control" [(ngModel)]="selectedItem.orientation" name="orientation" placeholder="3.14" />
                         </fieldset>
                         <fieldset class="form-group col-xl-6">
-                            <label>orientations (mrad)</label>
-                            <input  class="form-control" [(ngModel)]="selectedItem.orientations" name="orientations" placeholder="3142" />
+                            <label>orientations </label>
+                            <input  class="form-control" [(ngModel)]="selectedItem.orientations" name="orientations" placeholder="1.57, 3.14,..." />
                         </fieldset>
 
                     </div>
