@@ -169,9 +169,13 @@ export class AgentToolsComponent implements OnInit {
         }
 
         try {
-            if (!Array.isArray(patch.orientations)){
-                patch.orientations = patch.orientations.split(',');
-                patch.orientations = patch.orientations.map(e => parseFloat(e));
+            if (patch.orientations) {
+                if (!Array.isArray(patch.orientations)){
+                    patch.orientations = patch.orientations.split(',');
+                    patch.orientations = patch.orientations.map(e => parseFloat(e));
+                }
+            } else {
+                patch.orientations = [];
             }
         } catch (error) {
             alert('orientations should be a list. E.g; 1230, 1235, 7879');
