@@ -5,6 +5,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const { logData } = require('./systemlog.js');
 const lookup = require('./utils.js').lookup;
+const OVERWRITE_MISSIONS = false
 
 
 /**
@@ -67,8 +68,11 @@ const registerMissions = (missionsYmlPath) => {
                 if (oldWprocesses.length === 0) {
                     return databaseServices.work_process_type.insert(wprocess);
                 } else {
-                    const wprocId = oldWprocesses[0].id;
-                    return databaseServices.work_process_type.update_byId(wprocId, wprocess).then(() => wprocId);
+                    if (OVERWRITE_MISSIONS) {
+                        const wprocId = oldWprocesses[0].id;
+                        return databaseServices.work_process_type.update_byId(wprocId, wprocess).then(() => wprocId);
+                    }
+                    return Promise.resolve(null)
                 }
             })
             // update the mission recipe of the work process
@@ -104,6 +108,10 @@ const saveWorkProcessServicePlans = (
     workProcessTypeId,
     jsonObj
     ) => {
+
+            if (workProcessTypeId === null){
+                    return Promise.resolve([]);
+            }
 
             // define a mapping object from yml keys to database column names
             const ymlToWorkProcessServicePlanTableMap = {
@@ -246,6 +254,7 @@ const flattenServicesData = (jsonObj) => {
         context: {
                     all_agents_data: "require_agents_data",
                     mission_agents_data: "require_mission_agents_data",
+                    require_map_objects: "require_map_objects",
                     map_data: "require_map_data"
                 }
         };

@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS public.services (
     result_timeout integer DEFAULT 180,
     require_agents_data boolean DEFAULT true,
     require_mission_agents_data boolean DEFAULT true,
-    require_map_data boolean DEFAULT true
-    filter_map_objects text[]
+    require_map_data boolean DEFAULT true,
+    require_map_objects text[] DEFAULT ARRAY['__all__']
 
     );
 
