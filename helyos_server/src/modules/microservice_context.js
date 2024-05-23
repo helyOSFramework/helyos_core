@@ -50,8 +50,19 @@ function generateFullYardContext(yardId){
 
 const filterContext = (context, filter) => {
 	const filteredContext = {}
+
 	if(filter.require_map_data) {
 		filteredContext.map = context.map;
+	}
+	
+	if (filter.require_map_objects){
+		if (filter.require_map_data.length === 0){
+			filteredContext.map.map_objects = [];
+		} else {
+			if (!filter.require_map_data.includes === '__all__'){
+				filteredContext.map.map_objects = filteredContext.map.map_objects.filter(mapobj => filter.require_map_data.includes(mapobj.type))
+			}
+		}
 	}
 
 	if(filter.require_agents_data) {
