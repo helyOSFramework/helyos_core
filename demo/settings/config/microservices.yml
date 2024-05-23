@@ -15,7 +15,9 @@ services:
         map_data: true
         all_agents_data: false
         mission_agents_data: true
-        
+        require_map_objects:
+          - obstacle
+          - drivable
       config: >
             {"plan-directions": "all_directions",
               "output_format" :"trajectory"}
