@@ -24,7 +24,25 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     sched_start_at timestamp(6) without time zone,
     sched_end_at timestamp(6) without time zone,
     wait_free_agent boolean DEFAULT true,
-    process_type character varying 
+    process_type character varying,
+
+    CONSTRAINT status_check CHECK (
+        status IS NULL OR 
+        status IN (
+            'draft',
+            'dispatched',
+            'preparing resources',
+            'calculating',
+            'executing',
+            'assignments_completed',
+            'succeeded',
+            'assignment_failed',
+            'planning_failed',
+            'failed',
+            'canceling',
+            'canceled'
+        )
+    )
 );
 
 

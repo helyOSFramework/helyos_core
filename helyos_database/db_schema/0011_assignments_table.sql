@@ -18,7 +18,25 @@ CREATE TABLE IF NOT EXISTS public.assignments (
     next_assignments bigint[],
     error character varying,
     created_at timestamp(6) without time zone  NOT NULL DEFAULT NOW(),
-    modified_at timestamp(6) without time zone NOT NULL DEFAULT NOW()
+    modified_at timestamp(6) without time zone NOT NULL DEFAULT NOW(),
+    
+    CONSTRAINT status_check CHECK (
+        status IS NULL OR 
+        status IN (
+            'to_dispatch', 
+            'executing',
+            'succeeded',
+            'completed',
+            'rejected',
+            'failed',
+            'aborted',
+            'canceling',
+            'canceled',
+            'wait_dependencies',
+            'not_ready_to_dispatch',
+            'active'
+        )
+    )
 );
 
 

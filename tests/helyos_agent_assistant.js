@@ -9,7 +9,8 @@ class RabbitMQClient {
         this.RBMQ_HOST = host
         this.EXCHANGE_NAME = 'xchange_helyos.agents.ul';
         this.UUID = UUID;;
-        this.ROUTING_KEY = `agent.${this.UUID}.mission_req`;
+        this.MISSION_ROUTING_KEY = `agent.${this.UUID}.mission_req`;
+        this.AGENT_STATE_KEY = `agent.${this.UUID}.state`;
         this.connection = null; 
     }
 
@@ -47,9 +48,32 @@ class RabbitMQClient {
             };
 
             const jsonMessage = JSON.stringify(message);
-            channel.publish(this.EXCHANGE_NAME, this.ROUTING_KEY, Buffer.from(jsonMessage), { userId: this.UUID });
+            channel.publish(this.EXCHANGE_NAME, this.MISSION_ROUTING_KEY, Buffer.from(jsonMessage), { userId: this.UUID });
             await channel.close();
             console.log('Message sent to RabbitMQ');
+        } catch (error) {
+            console.error('Failed to send mission request:', error);
+            throw error;
+        }
+    }
+
+
+    async sendInvalidStatusValue() {
+        try {
+            const channel = await this.connection.createChannel();
+            const states = {
+                status: 'invalid_status',
+            };
+            const message = {
+                type: 'agent_state',
+                body: workProcesss,
+                uuid: this.UUID
+            };
+
+            const jsonMessage = JSON.stringify(message);
+            channel.publish(this.EXCHANGE_NAME, this.AGENT_STATE_KEY, Buffer.from(jsonMessage), { userId: this.UUID });
+            await channel.close();
+            console.log('Message with invalid agent status sent to RabbitMQ');
         } catch (error) {
             console.error('Failed to send mission request:', error);
             throw error;

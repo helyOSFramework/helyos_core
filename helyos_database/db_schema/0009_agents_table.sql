@@ -58,7 +58,19 @@ CREATE TABLE IF NOT EXISTS public.agents (
     sensors_data_format character varying default 'helyos-native',
     geometry_data_format character varying default 'trucktrix-vehicle',
     data_format character varying default 'trucktrix-vehicle',
-    UNIQUE(uuid)
+    
+    UNIQUE(uuid),
+    CONSTRAINT status_check CHECK (
+    status IS NULL OR 
+    status IN (
+        'not_automatable', 
+        'free',
+        'ready',
+        'busy'
+    )
+)
+
+
 );
 
 
