@@ -188,7 +188,14 @@ class InMemDB {
         const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
                                             if (r && r.length) {     
-                                                const failedIndexes = r.filter(e => e && e.failedIndex);
+                                                const failedDataTypeError = r.filter(e => e && e.error && e.error.message.includes('constraint'));
+                                                const failedIndexes = r.filter(e => e && e.error && !e.error.message.includes('constraint'));
+
+                                                failedDataTypeError.forEach(e => {
+                                                    logData.addLog('helyos_core', {uuid: e.failedIndex}, 'error',`Update failed on ${tableName} / ${e.failedIndex} ${e.error.message}` );
+                                                    console.log(e.error.message);
+                                                });
+
                                                 if (failedIndexes.length) {
                                                     this._catch_update_errors(failedIndexes.length);
                                                     failedIndexes.forEach(e => {
@@ -276,9 +283,9 @@ class InMemDB {
         this.lostUpdates += n;
 
         if (new Date() - this.timeoutCounterStartTime > 10000) {
-            if (this.updateTimeout === this.shortTimeout)                 
+            if (this.updateTimeout === this.shortTimeout || this.lostUpdates > 5)                 
                 logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. The timeout was reduced to ${this.shortTimeout} milliseconds to avoid the system blockage.`);
-            logData.addLog('helyos_core', null, 'error',
+                logData.addLog('helyos_core', null, 'error',
              `${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`);
             this.lostUpdates = 0;
             this.timeoutCounterStartTime = new Date();

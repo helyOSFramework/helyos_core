@@ -252,8 +252,8 @@ class DatabaseLayer {
 			delete patch.time_stamp;
 			if (Object.keys(patch).length < 2) return Promise.resolve({});
 			else return this.update(index, patch[index], patch, useShortTimeClient)
-						.catch(r => {
-							return { error: r, failedIndex: patch[index] } 
+						.catch(e => {
+							return { error: e, failedIndex: patch[index] } 
 						});
 		});
 
