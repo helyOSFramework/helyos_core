@@ -276,7 +276,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
                         if (objMsg.obj.body){
                             return queryDataBase(uuid, objMsg.obj, msgProps);
                         } else {
-                            logData.addLog('agent', objMsg.obj, 'error', `agent data rquest: input body not found`);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent data request: input body not found`);
                         }
                     break;
                     

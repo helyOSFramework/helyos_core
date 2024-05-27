@@ -259,13 +259,14 @@ function createDebugQueues(agent) {
 
 async function assertOrSubstituteQueue(channel, queueName, exclusive, durable, arguments) {
     try {
-        const queueInfo = await rbmqServices.getQueueInfo(queueName);
-        const ttl = queueInfo.arguments['x-message-ttl'];
-        if (arguments && ttl !== arguments['x-message-ttl']) {
-            console.log("Queue TTL will be altered...");
+        const queueInfo = await rbmqAccessLayer.getQueueInfo(queueName);
+        const ttl = parseInt(queueInfo.arguments['x-message-ttl']);
+    
+        if (arguments && arguments['x-message-ttl'] && ttl !==  arguments['x-message-ttl']) {
+            console.log(`${queueName} queue TTL will be altered from ${ttl} to ${arguments['x-message-ttl']}.`);
             await channel.deleteQueue(queueName).catch(e => console.log(e));
             console.log(`Queue ${queueName} deleted.`);
-            logData.addLog('helyos_core', null, 'warn', `Queue ${queueName} message-time-to-live was changed.`);
+            logData.addLog('helyos_core', null, 'warn', `Queue ${queueName} message-time-to-live was changed to ${arguments['x-message-ttl']}.`);
         }
 
         await channel.assertQueue(queueName, {exclusive: exclusive, durable: durable, arguments: arguments});
