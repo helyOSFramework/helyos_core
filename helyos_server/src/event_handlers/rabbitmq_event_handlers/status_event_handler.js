@@ -18,17 +18,27 @@ async function updateAgentMission(assignment, uuid = null) {
     const assmUpdate = { 'id': assignmentId, 'status': assignmentStatus, 'result': assignmentResult };
     const currentAssm = await databaseServices.assignments.get_byId(assignmentId, ['status', 'work_process_id']);
 
-    if (currentAssm &&
-        [ASSIGNMENT_STATUS.SUCCEEDED, ASSIGNMENT_STATUS.COMPLETED, ASSIGNMENT_STATUS.FAILED].includes(currentAssm.status)) {
-        logData.addLog('agent', { 'uuid': uuid }, 'warning', `agent tried to change the status of an assignment that is already ${currentAssm.status}`);
-        return;
+    if (currentAssm && currentAssm.status !== assmUpdate.status) {
+
+        // Filtering out irrelevant state update
+        if(currentAssm.status === ASSIGNMENT_STATUS.COMPLETED && assmUpdate.status === ASSIGNMENT_STATUS.SUCCEEDED) {
+            return;
+        }
+
+        // Filtering out and reportig invalid state flow
+        if ([ASSIGNMENT_STATUS.SUCCEEDED, ASSIGNMENT_STATUS.COMPLETED, ASSIGNMENT_STATUS.FAILED].includes(currentAssm.status)){
+            logData.addLog('agent', { 'uuid': uuid }, 'warning', `agent tried to change the status of an assignment that is already ${currentAssm.status}`);
+            return;
+        }
+
+        // Unconditonaly ending an assignment
+        if ([ASSIGNMENT_STATUS.CANCELED, ASSIGNMENT_STATUS.ABORTED, ASSIGNMENT_STATUS.FAILED].includes(assmUpdate.status)) {
+            logData.addLog('agent', { 'uuid': uuid }, 'info', `agent has marked the assignment ${assignmentId} as ${assmUpdate.status}`);
+            return await databaseServices.assignments.update_byId(assignmentId, assmUpdate);
+        }
     }
 
-    if ([ASSIGNMENT_STATUS.CANCELED, ASSIGNMENT_STATUS.ABORTED, ASSIGNMENT_STATUS.FAILED].includes(assmUpdate.status)) {
-        logData.addLog('agent', { 'uuid': uuid }, 'info', `agent has marked the assignment ${assignmentId} as ${assmUpdate.status}`);
-        return await databaseServices.assignments.update_byId(assignmentId, assmUpdate);
-    }
-
+    // Conditional  assignment status change
     await databaseServices.assignments.updateByConditions({
         'assignments.id': assignmentId,
         'work_processes.id': currentAssm.work_process_id,
