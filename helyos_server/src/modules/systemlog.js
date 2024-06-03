@@ -1,37 +1,52 @@
-// This module is used to collect logs and save then in the database.
+// This module is used to collect logs and save them in the database.
 
 const databaseServices = require('../services/database/database_services.js')
 const LOG_OUTPUT = process.env.LOG_OUTPUT || 'database';
 
 
-/** 
- * Class that gather 10 log messsage and insert than with a single INSERT query to the database.
+/**
+ * LogData gathers messages and inserts them with a single INSERT query to the database after a time period.
  * @class
- * @param {string} origin - The origin of the log message. It can be 'microservice', 'helyos_core' or 'agent'.
- * @param {object} metadata - The metadata of the log message. It can be the request object, the agent object or the assignment object.
- * @param {string} logType - The type of the log message. It can be 'info', 'warning' or 'error'.
- * 
- * @param {string} log_msg - The log message.
- * @param {string} eventType - The event type of the log message. It can be 'request', 'response', 'error', 'info', 'warning' or 'success'.
- * 
- * 
-    */
-
+ */
 class LogData {
-    constructor(number_of_logs=10) {
-        this.number_of_logs = number_of_logs;
+    /**
+     * Creates a new LogData instance.
+     * @param {number} [bufferTime=1000] - The time interval (in milliseconds) for periodically saving logs to the database.
+     */
+    constructor(bufferTime=1000) {
         this.logs = [];
         this._periodicallySaveLogs();
-    
+        this.lastLogMsg = '';
+        this.repeatedLog = 1;
+        this.bufferTime = bufferTime;
     }
-
+  
+    isLogRepeating(lastLog, newLog) {
+        return  lastLog.event == newLog.event &&
+                lastLog.log_type == newLog.log_type &&
+                lastLog.origin == newLog.origin &&
+                this.lastLogMsg == newLog.msg;
+    }
+   /**
+    * Adds a log entry to the internal log buffer.
+    * @param {string} origin - The origin of the log message (e.g., 'microservice', 'helyos_core', or 'agent').
+    * @param {object} metadata - The metadata associated with the log message (e.g., request object, agent object, or assignment object).
+    * @param {string} logType - The type of the log message ('info', 'warning', or 'error').
+    * @param {string} log_msg - The log message.
+    * @param {string} [eventType=''] - The event type of the log message ('request', 'response', 'error', 'info', 'warning', or 'success').
+    */
     addLog(origin, metadata, logType, log_msg, eventType='') {
         let new_log_instance = parseLogData(origin, metadata, logType, log_msg, eventType);
         if (LOG_OUTPUT === 'database') {
-            this.logs.push(new_log_instance);
-            if (this.logs.length >= this.number_of_logs) {
-                this.saveLogs();
-            }
+            const lastLog = this.logs[this.logs.length - 1];
+            if (lastLog && this.isLogRepeating(lastLog, new_log_instance)) {
+                    this.repeatedLog++;
+                    lastLog.msg = `${this.repeatedLog}X: ${log_msg}`;
+                } else {
+                    this.lastLogMsg = log_msg;
+                    this.repeatedLog = 1;
+                    this.logs.push(new_log_instance);
+                }
         } else {
             console.log(new_log_instance);
         }
@@ -48,7 +63,7 @@ class LogData {
     _periodicallySaveLogs() {
         setInterval(() => {
             this.saveLogs(true);
-        }, 1000);
+        }, this.bufferTime);
     }
 }
 
