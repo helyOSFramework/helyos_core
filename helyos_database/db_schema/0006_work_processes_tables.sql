@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     sched_end_at timestamp(6) without time zone,
     wait_free_agent boolean DEFAULT true,
     process_type character varying,
-    on_assignment_failure character varying DEFAULT 'FAIL' CHECK (on_assignment_failure IN ('FAIL', 'CONTINUE', 'RELEASE_FAILED')),
+    on_assignment_failure character varying DEFAULT 'DEFAULT' CHECK (on_assignment_failure IN ('DEFAULT','FAIL', 'CONTINUE', 'RELEASE_FAILED')),
 
     CONSTRAINT status_check CHECK (
         status IS NULL OR 
@@ -93,7 +93,9 @@ CREATE TABLE IF NOT EXISTS public.work_process_type (
     num_max_agents int,
     dispatch_order jsonb,
     settings jsonb,
-    extra_params jsonb
+    extra_params jsonb,
+    on_assignment_failure character varying DEFAULT 'FAIL' CHECK (on_assignment_failure IN ('FAIL', 'CONTINUE', 'RELEASE_FAILED'))
+
 );
 
 -- extra_params is depracated
@@ -116,6 +118,8 @@ comment on column work_process_service_plan.step is '@description Label ("A", "B
 comment on column work_process_service_plan.request_order is '@description Order of the requests sent to external service.';
 comment on column work_process_service_plan.is_result_assignment is '@description If request result should be dispacthed as an assignment.';
 comment on column work_process_service_plan.service_config is '@description It overides default config of external service.';
+comment on column work_processes.on_assignment_failure is '@ specify if the mission should FAIL and immediately release all agents, or should CONTINUE and release the agents in the end of the process.';
+
 
 
 

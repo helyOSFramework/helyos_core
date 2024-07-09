@@ -6,7 +6,7 @@
 const databaseServices = require('../services/database/database_services.js');
 const agentComm = require('./communication/agent_communication');
 const {logData} = require('./systemlog');
-const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS} = require('./data_models');
+const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS} = require('./data_models');
 const {generateFullYardContext, generateMicroserviceDependencies} = require('./microservice_context');
 const {filterContext} = require('./microservice_context');
 const { v4: uuidv4 } = require('uuid');
@@ -228,7 +228,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		agentsListIds = await databaseServices.agents.getIds(workProcess.agent_uuids);
 	} 
 
-	// check if the ids in agentsListIds exist in the database
+	// Check if the ids in agentsListIds exist in the database
 	if (agentsListIds && agentsListIds.length > 0) {
 		const agents = await databaseServices.agents.list_in('id', agentsListIds);
 		if (agents.length !== agentsListIds.length) {
@@ -238,11 +238,16 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		}
 	}
 	
-	let agentResponse; 
+	// Collect information from mission recipe.
+	const recipe = await databaseServices.work_process_type.get('name', workProcess['work_process_type_name'] ).then(r => r.length? r[0]: {});
+
+	// Behaviour upon failure
+	if (workProcess.on_assignment_failure == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
+		await databaseServices.work_processes.update_byId(workProcess.id, {on_assignment_failure: recipe.on_assignment_failure});					
+	}
+
 	// Append default work process settings to the request data as "_settings".
-	const _settings = await databaseServices.work_process_type.get('name', workProcess['work_process_type_name'] )
-							.then(r => {if (r.length && r[0].settings) return r[0].settings; else return {};});
-	if (_settings) {
+	if (recipe._settings) {
 		if (workProcess.data) { 
 			Object.assign(workProcess.data, { _settings: _settings });
 		} else {
@@ -251,7 +256,9 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 		await databaseServices.work_processes.update_byId(workProcess.id, {status: MISSION_STATUS.PREPARING, 'data': workProcess.data});					
 	}
 	//
-		
+	
+	
+	let agentResponse; 
 	const logMetadata = {work_process_id: workProcess.id};
 	if(!(workProcess.wait_free_agent===false) && agentsListIds && agentsListIds.length) {
 			const missionAgents = await databaseServices.agents.list_in('id', agentsListIds );
