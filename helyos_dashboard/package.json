@@ -32,7 +32,7 @@
     "cheap-ruler": "^3.0.2",
     "core-js": "^3.38.0",
     "font-awesome": "^4.7.0",
-    "helyosjs-sdk": "npm:testhelyos-sdk@2.0.6-rc1",
+    "helyosjs-sdk": "npm:testhelyos-sdk@2.0.6-rc2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "rxjs": "^7.4.1",
