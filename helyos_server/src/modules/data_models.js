@@ -57,6 +57,7 @@ const SERVICE_STATUS = {
     FAILED: 'failed',
     TIMEOUT: 'time-out',
     CANCELED: 'canceled',
+    SKIPPED: 'skipped',
     READY: 'ready',
     WAIT_DEPENDENCIES:'wait_dependencies',
     DISPATCHING_SERVICE: 'dispatching_service',
