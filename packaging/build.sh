@@ -1,1 +1,1 @@
-docker build --no-cache -f ./Dockerfile  -t helyosframework/helyos_core:test .. 
+docker build -f ./Dockerfile  -t helyosframework/helyos_core:2.0.5-rc2 .. 

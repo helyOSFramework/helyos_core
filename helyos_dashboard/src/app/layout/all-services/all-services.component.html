@@ -182,7 +182,7 @@
 
                     <div class="checkbox" style= "margin-left:18px" *ngIf="selectedItem.requireMapData">
                         <label>  Specify the types of map objects to include: </label>
-                        <input class="form-control"  type="text" [(ngModel)]="selectedItem.requireMapObjects"  name="requireMapObjects" />
+                        <input class="form-control"  type="text" [(ngModel)]="requireMapObjectsInput"  name="requireMapObjectsInput" />
                         <i style="color: gray;"> separate each type with a comma (,). E.g: building, road, parking_lot </i>
                     </div>
 

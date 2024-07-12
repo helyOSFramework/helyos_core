@@ -80,7 +80,8 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 														 class: s.class,
 														 require_agents_data: s.require_agents_data,
 														 require_mission_agents_data: s.require_mission_agents_data,
-														 require_map_data: s.require_map_data
+														 require_map_data: s.require_map_data,
+														 require_map_objects: s.require_map_objects
 														 });
 
 		// Step 2 Get the definition (or recipe) of the work process type, which includes the types of microservices that is emplyed by this mission.
@@ -130,6 +131,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 								'require_agents_data': serviceByType[servStep.service_type]['require_agents_data'],
 								'require_mission_agents_data': serviceByType[servStep.service_type]['require_mission_agents_data'],
 								'require_map_data': serviceByType[servStep.service_type]['require_map_data'],
+								'require_map_objects': serviceByType[servStep.service_type]['require_map_objects'],
 								'agent_ids': agentIds,
 								'depend_on_requests': [],
 								'next_request_to_dispatch_uids': [],

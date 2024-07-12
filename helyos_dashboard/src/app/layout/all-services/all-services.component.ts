@@ -11,6 +11,7 @@ export class AllServicesComponent implements OnInit {
     public services: H_Service[];
     public selectedItem: H_Service;
     public showDescription: boolean = false;
+    public requireMapObjectsInput: string;
 
     constructor(private helyosService: HelyosService) {
 
@@ -41,7 +42,7 @@ export class AllServicesComponent implements OnInit {
         this.helyosService.methods.extServices.get(itemId)
         .then( r=> {
             this.selectedItem = r;
-            this.selectedItem.requireMapObjects = r.requireMapObjects.join(', ') as any;
+            this.requireMapObjectsInput = r.requireMapObjects.join(', ') as any;
 
         });
     }
@@ -57,12 +58,13 @@ export class AllServicesComponent implements OnInit {
         const patch = {...item};
         delete patch.createdAt;
         delete patch.modifiedAt;
+        delete patch.requireMapObjects;
 
-        if (!item['requireMapObjects']) {
+        if (!this.requireMapObjectsInput) {
             patch['requireMapObjects'] = [];
         } else {
             try {
-                const jsonArray = item['requireMapObjects'].split(',').map(element => element.trim());
+                const jsonArray = this.requireMapObjectsInput.split(',').map(element => element.trim());
                 patch['requireMapObjects'] = jsonArray;
             } catch (error) {
                 alert('error: requireMapObjects must be an array of strings.')
