@@ -161,8 +161,38 @@ beforeAll(async () => {
       // })
       .start();
 
+
+      await wait5seconds();
+
+
+      agentSimulatorContainer2 = await new GenericContainer('helyosframework/helyos_agent_slim_simulator:0.7.7')
+      .withEnvironment({
+        'UUID': 'Bb34069fc5-fdgs-434b-b87e-f19c5435113',
+        'ASSIGNMENT_FORMAT': 'trajectory',
+        'NAME': 'MY_TRACTOR',
+        'X0': '-28000',
+        'Y0': '29000',
+        'ORIENTATION': '0.329',
+        'VELOCITY': '1.8',
+        'VEHICLE_PARTS': '2',
+        'YARD_UID': '1',
+        'UPDATE_RATE': '10',
+        'RBMQ_HOST': 'local_rabbitmq',
+        'RBMQ_PORT': '5672',
+        'REGISTRATION_TOKEN': '0001-0002-0003-0000-0004'
+      })
+      .withNetwork(network)
+      .withCommand(['python', '-u', 'main.py'])
+      // .withLogConsumer(stream => {
+      //   stream.on("data", line => console.log(line));
+      //   stream.on("err", line => console.error(line));
+      //   stream.on("end", () => console.log("Stream closed"));
+      // })
+      .start();
+
       helyosApplication = await setHelyOSClientInstance(helyosCoreContainer);
       await helyosApplication.waitAgentStatus(1, 'free');
+      await helyosApplication.waitAgentStatus(2, 'free');
 
       await helyosApplication.createAssistantAgent('ASSISTANT_AGENT');
       rabbitMQClient = await setRabbitMQClientInstance(rabbitmqContainer); 
@@ -181,6 +211,7 @@ afterAll(async () => {
     rabbitmqContainer.stop(),
     helyosCoreContainer.stop(),
     agentSimulatorContainer.stop(),
+    agentSimulatorContainer2.stop(),
   ]);
 
   await network.stop();

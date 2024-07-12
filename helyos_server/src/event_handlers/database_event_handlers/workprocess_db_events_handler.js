@@ -77,8 +77,8 @@ function processWorkProcessEvents(msg) {
                 workProcessStatus = payload['status'];
                 console.log(`WORKPROCESS ${payload['id']} STATUS: `, workProcessStatus);
                 switch (workProcessStatus) {
-                    case MISSION_STATUS.DISPATCHED:
 
+                    case MISSION_STATUS.DISPATCHED:
                         databaseServices.work_processes.update_byId(payload['id'], {status: MISSION_STATUS.PREPARING})
                         .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload))
                         .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `p ${err.message}`)});
@@ -103,35 +103,11 @@ function processWorkProcessEvents(msg) {
                         break;
 
                     case MISSION_STATUS.ASSIGNMENT_FAILED:
-                        // @TODO implement each failure action. 
-                        switch (payload['on_assignment_failure']) {
-                            case ON_ASSIGNMENT_FAILURE_ACTIONS.FAIL:
-                                databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
-                                .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
-                                .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
-                                .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
-                                .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_update ${err.message}`)});
-                                break;
-
-                            case ON_ASSIGNMENT_FAILURE_ACTIONS.CONTINUE:
-                                databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
-                                .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
-                                .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
-                                .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
-                                .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_update ${err.message}`)});
-                                break;
-
-                            case ON_ASSIGNMENT_FAILURE_ACTIONS.RELEASE:
-                                databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
-                                .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
-                                .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
-                                .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
-                                .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_update ${err.message}`)});
-                                break;
-                        
-                            default:
-                                break;
-                        }
+                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
+                        .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
+                        .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
+                        .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
+                        .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_update ${err.message}`)});
 
                         break;
 

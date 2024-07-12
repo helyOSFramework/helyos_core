@@ -107,9 +107,9 @@ class HelyOSClientApplication {
         return this._waitStatus(checkValue, id, status);
     }
 
-    createNewMission(missionType = 'driving') {
+    createNewMission(missionType = 'driving', agentUuids=["Ab34069fc5-fdgs-434b-b87e-f19c5435113"]) {
         return this.helyosService.workProcess.create({
-            agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 
+            agentUuids: agentUuids,   //  is the agent uuid. 
             yardId: 1,       // the yard where the agent has checked in.
             workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
             data: { "foo:": "bar", agent_id:1  },        // this data format depends on the microservice.
