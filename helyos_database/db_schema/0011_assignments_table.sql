@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.assignments (
     error character varying,
     created_at timestamp(6) without time zone  NOT NULL DEFAULT NOW(),
     modified_at timestamp(6) without time zone NOT NULL DEFAULT NOW(),
+    on_assignment_failure character varying DEFAULT 'DEFAULT' CHECK (on_assignment_failure IN ('DEFAULT','FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED')),
     
     CONSTRAINT status_check CHECK (
         status IS NULL OR 

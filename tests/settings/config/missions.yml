@@ -20,7 +20,7 @@ missions:
   driving_continue:
     maxagents: 1
     description: "drive from a to b"
-    on_assignment_failure: "CONTINUE"
+    on_assignment_failure: "CONTINUE_MISSION"
     settings: >
           {"interface": "webbrowser",
             "auth" :"required"}

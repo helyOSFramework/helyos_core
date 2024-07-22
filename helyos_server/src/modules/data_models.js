@@ -8,8 +8,8 @@
  * - RELEASE_FAILED: The system continue but releases the current agent and marks its assignment as failed.
  */
 const ON_ASSIGNMENT_FAILURE_ACTIONS = {
-    FAIL: 'FAIL',
-    CONTINUE: 'CONTINUE',
+    FAIL: 'FAIL_MISSION',
+    CONTINUE: 'CONTINUE_MISSION',
     RELEASE: 'RELEASE_FAILED',
     DEFAULT: 'DEFAULT'
 }
