@@ -66,16 +66,26 @@ function processAssignmentEvents(msg) {
                     databaseServices.work_processes.get_byId(payload['work_process_id'], ['id', 'on_assignment_failure'])
                     .then(wp => {
 
-                        if (wp.on_assignment_failure === ON_ASSIGNMENT_FAILURE_ACTIONS.CONTINUE) {
+                        const defaultFailureAction = wp.on_assignment_failure;
+                        const assignmentFailureAction = payload['on_assignment_failure'];
+
+
+                        
+                        let onAssignmentFailure = assignmentFailureAction && assignmentFailureAction !== ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT
+                                                ? assignmentFailureAction
+                                                : defaultFailureAction;
+
+
+                        if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.CONTINUE) {
                             wrapUpAssignment(payload);
                         }
 
-                        if (wp.on_assignment_failure === ON_ASSIGNMENT_FAILURE_ACTIONS.RELEASE) {
+                        if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.RELEASE) {
                             wrapUpAssignment(payload)
 	                        .then(()=> agentComm.sendReleaseFromWorkProcessRequest(payload['agent_id'], payload['work_process_id']));
                         }
 
-                        if (wp.on_assignment_failure === ON_ASSIGNMENT_FAILURE_ACTIONS.FAIL) {
+                        if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.FAIL) {
                             databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
                                                             status__in: [   MISSION_STATUS.PREPARING,
                                                                             MISSION_STATUS.CALCULATING,

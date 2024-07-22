@@ -63,6 +63,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				service_request_id: serviceRequestId,
 				status: 'not_ready_to_dispatch',
 				start_time_stamp: start_stamp,
+				on_assignment_failure: result.on_assignment_failure  || result.onAssignmentFailure, 
 				data: JSON.stringify(result.result || result.assignment)});
 		}
 			

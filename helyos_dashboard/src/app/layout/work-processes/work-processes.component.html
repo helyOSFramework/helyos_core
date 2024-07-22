@@ -102,13 +102,13 @@
             </div>
 
             <h5 style="margin-top:16px">Failure Policy </h5>
-            <label>Action on assignment failure</label>
+            <label>Default action on assignment failure</label>
             <div class="row" >
                 <fieldset class="form-group col-xl-6">
                     <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
-                        <option value="FAIL" title="FAIL">fail the mission.</option>
+                        <option value="FAIL_MISSION" title="FAIL">fail the mission.</option>
                         <option value="RELEASE_FAILED" title="RELEASE_FAILED">continue the mission and release the failed agent.</option>
-                        <option value="CONTINUE" title="CONTINUE">continue mission without releasing the failed agent.</option>
+                        <option value="CONTINUE_MISSION" title="CONTINUE">continue mission without releasing the failed agent.</option>
                     </select>
             </fieldset>
             </div>
