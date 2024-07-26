@@ -24,6 +24,7 @@ export class AgentToolsComponent implements OnInit {
     public active = 1;
     private agentClass: AgentClass = AgentClass.Tool;
     public showOthers = false;
+    public saveStateMsg: string = '';
 
     constructor(private helyosService: HelyosService) {
 
@@ -214,6 +215,7 @@ export class AgentToolsComponent implements OnInit {
         .then( r=> {
             this.updateRabbitMQ();
             this.list();
+            this.saveStateMsg = '';
             alert('changes saved');
         });
     }
@@ -225,7 +227,10 @@ export class AgentToolsComponent implements OnInit {
         // Convert the file to base64 text
         reader.readAsDataURL(file);
         // on reader upload something...
-        reader.onload = () => this.selectedItem.picture = reader.result as string;
+        reader.onload = () => {
+            this.saveStateMsg = 'unsaved changes';
+            this.selectedItem.picture = reader.result as string;
+        }
         
     }
 
