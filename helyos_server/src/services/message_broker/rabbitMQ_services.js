@@ -10,8 +10,9 @@ const rbmqAccessLayer = require('./rabbitMQ_access_layer.js');
 
 const RBMQ_HOST = process.env.RBMQ_HOST;
 const RBMQ_PORT = process.env.RBMQ_PORT;
-const RBMQ_API_PORT= process.env.RBMQ_API_PORT || 15672;
 const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
+const RBMQ_VHOST = process.env.RBMQ_VHOST || '/';
+
 const RBMQ_ADMIN_USERNAME= process.env.RBMQ_ADMIN_USERNAME || 'guest';
 const RBMQ_ADMIN_PASSWORD= process.env.RBMQ_ADMIN_PASSWORD || 'guest';
 const RBMQ_USERNAME = process.env.RBMQ_USERNAME || RBMQ_ADMIN_USERNAME;
@@ -81,7 +82,8 @@ const urlObj = (username=RBMQ_USERNAME, password=RBMQ_PASSWORD) => ({
         port: RBMQ_PORT,
         username: username,
         password: password,
-        protocol: RBMQ_PROTOCOL
+        protocol: RBMQ_PROTOCOL,
+        vhost: RBMQ_VHOST
     });
 
 const connect = (username, password) => rbmqAccessLayer.connect(urlObj(username, password), sslOptions);
