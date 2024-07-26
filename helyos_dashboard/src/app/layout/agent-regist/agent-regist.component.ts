@@ -15,6 +15,7 @@ export class AgentRegistComponent implements OnInit {
     private rbmqAccountChange: boolean = false;
     public rbmqPassword = '';
     public active = 1;
+    public saveStateMsg: string = '';
 
     constructor(private helyosService: HelyosService) {
 
@@ -181,6 +182,7 @@ export class AgentRegistComponent implements OnInit {
         .then( r=> {
             this.updateRabbitMQ();
             this.list();
+            this.saveStateMsg = '';
             alert('changes saved');
         });
     }
@@ -192,7 +194,10 @@ export class AgentRegistComponent implements OnInit {
         // Convert the file to base64 text
         reader.readAsDataURL(file);
         // on reader upload something...
-        reader.onload = () => this.selectedItem.picture = reader.result as string;
+        reader.onload = () => {
+            this.saveStateMsg = 'unsaved changes';
+            this.selectedItem.picture = reader.result as string;
+        }
         
     }
 

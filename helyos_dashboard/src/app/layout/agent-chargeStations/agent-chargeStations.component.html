@@ -82,9 +82,11 @@
         <li [ngbNavItem]="1">
             <a ngbNavLink>Details</a>
             <ng-template ngbNavContent>
-                <section class="detail-container " *ngIf="selectedItem">
+        <section class="detail-container " *ngIf="selectedItem">
     
-            <h4>{{selectedItem.name}}</h4>
+            <div style="display: flex; justify-content: space-between;">
+                <h4>{{selectedItem.name}}</h4>  <div style="color: red;"> {{saveStateMsg}}</div>
+            </div>
 
             <form role="form" style="margin: 0 auto; max-width: 1000px;">
                 <h5>Identification</h5>
