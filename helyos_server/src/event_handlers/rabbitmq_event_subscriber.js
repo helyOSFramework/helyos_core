@@ -49,8 +49,8 @@ function parseMessage(message) {
                                     
 
 const isAgentLeader = (leaderUUID, followerUUID) => { 
-        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['interconnections'] )
-        .then(leader => leader[0].interconnections.some(t => t.uuid === followerUUID));
+        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
+        .then(leader => leader[0].follower_connections.some(t => t.uuid === followerUUID));
 }
 
 function identifyMessageSender(objMsg, routingKey) {
@@ -94,7 +94,8 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                             inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
                         } else { // OK, we did our best to validate you and you will be disconnected.
                             logData.addLog('agent', {uuid}, 'error', 
-                                `helyOS disconnected the agent: An agent is trying to publish a message for another agent. The RabbitMQ username ${agentAccount} does not match either its UUID or its leader's UUID, in case of connected agents.`)
+                                `helyOS disconnected the agent: An agent is trying to publish a message for another agent.` + 
+                                `For interconnected agents, the RabbitMQ username ${agentAccount} should match the leader's UUID.`)
                             inMemDB.delete('agents', 'uuid', uuid);
                             inMemDB.delete('agents', 'uuid', agentAccount);
                             deleteConnections(agentAccount);

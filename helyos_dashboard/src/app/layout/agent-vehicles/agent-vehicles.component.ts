@@ -70,13 +70,6 @@ export class AgentVehiclesComponent implements OnInit {
         this.rbmqPassword = '';
     }
 
-
-
-
-
-
-
-
     create() {
         // const newItem={name:'Unnamed', yardId: 1, status:'checked out', agentClass:this.agentClass, allowAnonymousCheckin:false}
         const newItem= new H_Agent(this.agentClass);

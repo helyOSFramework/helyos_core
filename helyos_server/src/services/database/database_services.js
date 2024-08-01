@@ -50,8 +50,8 @@ and inserts new connections for desired followers.
 */
 async function connectAgents(leaderUUID, followerUUIDs, allowStatuses, connection_geometries = [])  {
 
-	const leader = await agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['interconnections']);
-	const currentFollowersIds = leader[0].interconnections.map(e => parseInt(e.id));
+	const leader = await agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections']);
+	const currentFollowersIds = leader[0].follower_connections.map(e => parseInt(e.id));
 	const desiredFollowersIds = await agents.getIds(followerUUIDs);
 
 	const difference = (array1, array2) => array1.length? array1.filter(e=>!array2.includes(e)):[];
