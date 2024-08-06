@@ -147,7 +147,6 @@ const graphqlServer = http
 // 5) Serving the front-end dashboard - GUI for helyOS settings
 // ---------------------------------------------------------------------------
 const app = express();
-console.log("HELYOS_REPLICA", path.join(DASHBOARD_DIR, '/fadsfdsfsadfdfsadfsfsadafa/'));
     app.use('/api-docs', express.static(API_DOC_DIR));
     app.use('/dashboard', express.static(DASHBOARD_DIR));
     app.use('/', (req, res, next) => res.redirect('/dashboard'));

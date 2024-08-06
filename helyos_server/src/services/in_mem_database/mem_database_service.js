@@ -118,6 +118,7 @@ class InMemDB {
         // Update Instance if the message is newer
         if (instance['last_message_time'] < timeStamp || statsLabel === 'realtime'){ 
             Object.assign(instance, data);
+            data.id = instance.id;
             instance['last_message_time'] = timeStamp;
             this.updateBuffer(tableName,indexName, data, timeStamp);
             return true;
