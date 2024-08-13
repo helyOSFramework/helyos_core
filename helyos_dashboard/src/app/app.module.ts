@@ -9,6 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthGuard } from './shared';
 import { LanguageTranslationModule } from './shared/modules/language-translation/language-translation.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
     imports: [
@@ -18,7 +19,8 @@ import { LanguageTranslationModule } from './shared/modules/language-translation
         FormsModule,
         HttpClientModule,
         LanguageTranslationModule,
-        AppRoutingModule
+        AppRoutingModule,
+        NgbModule
     ],
     declarations: [AppComponent],
     providers: [AuthGuard],
