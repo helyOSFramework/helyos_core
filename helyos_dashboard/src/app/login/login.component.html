@@ -1,7 +1,7 @@
 <div [@routerTransition] class="login-page">
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center align-items-center h-100">
         <div class="col-md-4">
-            <img class="user-avatar" src="assets/images/logo.png" width="150px" />
+            <img class="user-avatar" src="assets/images/logo.png" [style.width.px]="150" alt="logo" />
             <h1>helyOS Dashboard</h1>
             <form role="form">
                 <div class="form-content">
@@ -27,9 +27,9 @@
 
 
                 </div>
-                <a (click)="onLoggedin()" [routerLink]="['/all-services']" class="btn rounded-btn">{{
-                    'Log in' | translate
-                }}</a>
+                <a (click)="onLoggedin()" [routerLink]="['/all-services']" class="btn rounded-btn">
+                    {{ 'Log in' | translate }}
+                </a>
                 &nbsp;
                 <a [routerLink]="['/signup']" class="btn rounded-btn">{{ 'Change password' | translate }}</a>
                 &nbsp;
