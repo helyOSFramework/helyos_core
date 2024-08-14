@@ -28,7 +28,7 @@
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^8.0.0",
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^4.6.2",
+    "bootstrap": "^5.3.2",
     "cheap-ruler": "^3.0.2",
     "core-js": "^3.38.0",
     "font-awesome": "^4.7.0",
