@@ -18,14 +18,27 @@ const {processAssignmentEvents} = require('./database_event_handlers/assignment_
 const {processMicroserviceEvents} = require('./database_event_handlers/microservice_db_events_handler.js');
 const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_event_handlers/checkin_event_handler.js');
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
-const { inMemDB } = require('../services/in_mem_database/mem_database_service.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 // Subscribe to database changes
-function handleDatabaseMessages(client) {
-    client.on('notification', function (msg) {
-        let payload = JSON.parse(msg.payload);
+function handleDatabaseMessages(client, inMemDB) {
+    client.on('notification', async function (msg) {
+        let payload = null
+        let msgchannel0 = msg.channel;
+        let id = 0;
+    
+        const res = await client.query("DELETE FROM events_queue USING ( SELECT * FROM events_queue LIMIT 1 FOR UPDATE SKIP LOCKED) q WHERE q.id = events_queue.id RETURNING events_queue.*;");
+        if (res.rows.length){
+            payload = JSON.parse(res.rows[0].payload)
+            msg.channel = res.rows[0].event_name;
+            id =  res.rows[0].id;
+        }else {
+            return;
+        }
+        console.log(id, msgchannel0,msg.channel)
+        console.log("-------------------------")
+
 
         switch (msg.channel) {
         // AGENT TABLES TRIGGERS

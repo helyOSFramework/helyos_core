@@ -76,6 +76,8 @@ grant select, insert, update, delete on table public.agent_poses to role_admin;
 grant select, insert, update, delete on table public.assignments to role_admin; 
 grant select, insert, update, delete on table public.services to role_admin; 
 grant select, insert, delete on table public.system_logs to role_admin; 
+grant select, insert, delete on table public.events_queue to role_admin; 
+
 grant select, insert, update, delete on table public.work_process_service_plan to role_admin; 
 grant select, insert, delete on table public.service_requests to role_admin; 
 grant select, insert, delete on table public.instant_actions to role_admin; 

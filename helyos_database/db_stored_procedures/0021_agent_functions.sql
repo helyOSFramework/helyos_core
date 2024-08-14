@@ -53,8 +53,15 @@ $BODY$
     BEGIN
 
     IF (OLD.status IS DISTINCT FROM NEW.status OR OLD.connection_status IS DISTINCT FROM NEW.connection_status) THEN
-      PERFORM pg_notify('change_agent_status', 
+        PERFORM pg_notify('change_agent_status', 
             (SELECT row_to_json(r.*)::varchar FROM (
+            SELECT  id, status, uuid, name, connection_status, yard_id, modified_at from public.agents where id = NEW.id)
+            r)
+        );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('change_agent_status', 
+            (SELECT row_to_json(r.*)::text FROM (
             SELECT  id, status, uuid, name, connection_status, yard_id, modified_at from public.agents where id = NEW.id)
             r)
         );
@@ -62,8 +69,15 @@ $BODY$
 
     IF (OLD.public_key IS DISTINCT FROM NEW.public_key OR OLD.verify_signature IS DISTINCT FROM NEW.verify_signature OR
         OLD.rbmq_username IS DISTINCT FROM NEW.rbmq_username OR OLD.allow_anonymous_checkin IS DISTINCT FROM NEW.allow_anonymous_checkin) THEN
-      PERFORM pg_notify('change_agent_security', 
+        PERFORM pg_notify('change_agent_security', 
             (SELECT row_to_json(r.*)::varchar FROM (
+            SELECT  id, public_key, uuid, verify_signature, rbmq_username, allow_anonymous_checkin, yard_id, modified_at from public.agents where id = NEW.id)
+            r)
+        );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('change_agent_security', 
+            (SELECT row_to_json(r.*)::text FROM (
             SELECT  id, public_key, uuid, verify_signature, rbmq_username, allow_anonymous_checkin, yard_id, modified_at from public.agents where id = NEW.id)
             r)
         );
@@ -76,7 +90,6 @@ $BODY$
   COST 100;
 
 
-
 CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
   agent_id int,
   username text,
@@ -85,6 +98,9 @@ CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
 $BODY$
     BEGIN
        PERFORM pg_notify('new_rabbitmq_account', (json_build_object('username', username, 'password', password, 'agent_id', agent_id))::text);
+       
+       INSERT INTO public.events_queue (event_name, payload)
+       VALUES ('new_rabbitmq_account', json_build_object('username', username, 'password', password, 'agent_id', agent_id)::text);
     END; 
 $BODY$
 LANGUAGE plpgsql;
@@ -96,6 +112,10 @@ RETURNS trigger AS
 $BODY$
     BEGIN
       PERFORM pg_notify('agent_deletion', row_to_json(OLD)::text);
+      
+      INSERT INTO public.events_queue (event_name, payload)
+      VALUES ('agent_deletion', row_to_json(OLD)::text);
+      
         RETURN NULL;
     END; 
 $BODY$
