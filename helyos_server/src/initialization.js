@@ -193,6 +193,8 @@ async function configureRabbitMQSchema(dataChannels) {
         mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_STATE_QUEUE, message), { noAck: true, priority: 10});
         mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_UPDATE_QUEUE, message), { noAck: true, priority: 5});
         mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_MISSION_QUEUE, message), { noAck: true, priority: 5});
+        
+        // COMMENT: RabbitMQ priority acts relative to the consumers of each channel.
         secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
         secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(inMemDB,YARD_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
 

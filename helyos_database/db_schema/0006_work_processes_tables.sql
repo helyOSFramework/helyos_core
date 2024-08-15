@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     tools_uuids text[],
     agent_ids integer[] NOT NULL DEFAULT '{}',
     agent_uuids text[],
+    agent_pool_uuids text[][],
     created_at timestamp(6) without time zone DEFAULT NOW(),
     modified_at timestamp(6) without time zone DEFAULT NOW(),
     started_at timestamp(6) without time zone,

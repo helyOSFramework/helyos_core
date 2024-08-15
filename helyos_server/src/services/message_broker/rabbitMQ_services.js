@@ -93,7 +93,7 @@ const createAccounts = () =>  rbmqAccessLayer.createUser(RBMQ_USERNAME,RBMQ_PASS
                         .then(() => rbmqAccessLayer.createUser('anonymous','anonymous', [""] ))
                         .then(() => rbmqAccessLayer.add_rbmq_user_vhost('anonymous'))
                         .then(() => rbmqAccessLayer.update_guest_account_permissions('anonymous'))
-                        .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitmMQ helyOS account is set.' ))
+                        .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitMQ helyOS account is set.' ))
                         .catch((error) => {
                         logData.addLog('helyos_core', null, 'error', `RMBTMQ ERROR: ${error}` );
                         console.log(error, "helyos_core user already created?");});

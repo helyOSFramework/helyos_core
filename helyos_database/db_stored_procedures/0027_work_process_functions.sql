@@ -84,7 +84,7 @@ $BODY$
    BEGIN
        PERFORM pg_notify('work_processes_insertion',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, tools_uuids, agent_ids, agent_uuids, sched_start_at 
+             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, agent_ids, agent_uuids, sched_start_at 
              FROM public.work_processes 
              WHERE id = NEW.id) r)
         );
@@ -92,7 +92,7 @@ $BODY$
         INSERT INTO public.events_queue (event_name, payload)
         VALUES ('work_processes_insertion', 
             (SELECT row_to_json(r.*)::text FROM (
-             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, tools_uuids, agent_ids, agent_uuids, sched_start_at 
+             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, agent_ids, agent_uuids, sched_start_at 
              FROM public.work_processes 
              WHERE id = NEW.id) r)
         );

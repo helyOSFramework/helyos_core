@@ -40,7 +40,7 @@ const create_rbmq_admin = (username, password, tags) =>
 
         .catch((e)=>  {
             console.error(e);
-            logData.addLog('helyos_core', null, 'warn', `RabbitmMQ admin already created?/n${e.code}` );
+            logData.addLog('helyos_core', null, 'warn', `Is RabbitMQ admin account already created?/n${e.code}` );
         });
         
 
