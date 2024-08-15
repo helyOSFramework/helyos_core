@@ -32,6 +32,7 @@ const http = require('http');
 const express = require('express');
 const path = require('path');
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
+const DASHBOARD_PORT = 8080;
 const API_DOC_DIR = 'docs/';
 
 // Settings for horizontal scaling
@@ -57,6 +58,7 @@ if (MOCK_SERVICES === 'True'){
 const {handleDatabaseMessages} = require('./event_handlers/database_event_subscriber.js');
 const databaseServices = require('./services/database/database_services.js');
 
+
 async function connectToDB () {
     const postgClient = databaseServices.pgNotifications;
     console.log("============  Client connected with DB ==================");
@@ -79,15 +81,11 @@ async function connectToDB () {
       ];
     await databaseServices.subscribeToDatabaseEvents(postgClient, dBEventsToSubscribe);  
     console.log(" ============  Subscribed to DB events =================="); 
-
-    await connectToRabbitMQ();
-    initialization.initWatchers();
-    console.log("============  Watchers Initialized  ==================");
-
-    handleDatabaseMessages(postgClient);
+    return postgClient;
 }
 
-connectToDB();
+
+
 
 
 // ----------------------------------------------------------------------------
@@ -95,14 +93,18 @@ connectToDB();
 // ----------------------------------------------------------------------------
 const RabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
 
-function connectToRabbitMQ () {
-       return initialization.initializeRabbitMQAccounts()
-            .then(() => RabbitMQServices.connectAndOpenChannels({subscribe: false, connect: true, recoverCallback: initialization.helyosConsumingMessages}) )       
-            .then( dataChannels => {
-            // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
-                return initialization.configureRabbitMQSchema(dataChannels)
-                       .then( dataChannels => initialization.helyosConsumingMessages(dataChannels));
-        })
+
+async function connectToRabbitMQ() {
+      await initialization.initializeRabbitMQAccounts();
+      const dataChannels = await RabbitMQServices.connectAndOpenChannels({
+                                                                            subscribe: false,
+                                                                            connect: true,
+                                                                            recoverCallback: initialization.helyosConsumingMessages
+                                                                        });
+      // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
+      await initialization.configureRabbitMQSchema(dataChannels);
+      return dataChannels;
+
 }
 
 
@@ -135,23 +137,46 @@ const postGraphileOptions = {
 // extendedErrors: ["hint", "detail", "errcode"],
     };
 
+const setGraphQLServer = () => {
+    return http.createServer(
+        postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
+        "public",
+        postGraphileOptions ));
 
+}
 
-
-const graphqlServer = http
-    .createServer(postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
-                                "public",postGraphileOptions )).listen(process.env.GQLPORT);
 
 
 // ----------------------------------------------------------------------------
 // 5) Serving the front-end dashboard - GUI for helyOS settings
 // ---------------------------------------------------------------------------
-const app = express();
+
+const setDashboardServer = () => {
+    const app = express();
     app.use('/api-docs', express.static(API_DOC_DIR));
     app.use('/dashboard', express.static(DASHBOARD_DIR));
     app.use('/', (req, res, next) => res.redirect('/dashboard'));
+    return app;
+}
 
-    app.listen(8080);
+
+
+async function start() {
+    const postgClient = await connectToDB();
+    dataChannels = await connectToRabbitMQ();
+    initialization.helyosConsumingMessages(dataChannels);
+    initialization.initWatchers();
+    handleDatabaseMessages(postgClient);
+    const frontEndServer = setDashboardServer();
+    const graphqlServer = setGraphQLServer();
+
+    frontEndServer.listen(DASHBOARD_PORT);
+    graphqlServer.listen(process.env.GQLPORT);
+
+}
+
+
+start();
 
 
 // Microservice API Documentation ----------------------------------------------
