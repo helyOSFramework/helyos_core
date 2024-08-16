@@ -6,6 +6,7 @@ let postgresContainer;
 let rabbitmqContainer;
 let helyosCoreContainer;
 let agentSimulatorContainer;
+let redisContainer;
 let network;
 // Instances running on host machine
 let helyosApplication;
@@ -78,6 +79,18 @@ beforeAll(async () => {
       // })
       .start();
 
+      redisContainer = await new GenericContainer('redis:7.4')
+      .withName('local_redis')
+      .withExposedPorts(6379)
+      .withNetwork(network)
+      .withCommand(['redis-server', '--requirepass', 'mypass'])
+      // .withLogConsumer(stream => {
+      // stream.on("data", line => console.log(line));
+      // stream.on("err", line => console.error(line));
+      // stream.on("end", () => console.log("Stream closed"));
+      // })
+      .start();
+
 
     rabbitmqContainer = await new GenericContainer('rabbitmq:3-management')
       .withName('local_rabbitmq')
@@ -115,6 +128,9 @@ beforeAll(async () => {
         'RBMQ_API_PORT': '15672',
         'RBMQ_SSL': 'False',
         'RBMQ_API_SSL': 'False',
+        'REDIS_HOST':'local_redis',
+        'REDIS_PORT':'6379',
+        'REDIS_PASSWORD':'mypass',
         'CREATE_RBMQ_ACCOUNTS': 'True',
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
@@ -209,6 +225,7 @@ afterAll(async () => {
   await Promise.all([
     postgresContainer.stop(),
     rabbitmqContainer.stop(),
+    redisContainer.stop(),
     helyosCoreContainer.stop(),
     agentSimulatorContainer.stop(),
     agentSimulatorContainer2.stop(),

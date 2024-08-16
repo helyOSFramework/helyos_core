@@ -11,7 +11,6 @@ const microResp = require('../microservice_event_handlers/microservice_applied_r
 const databaseServices = require('../../services/database/database_services.js');
 const extServiceCommunication = require('../../modules/communication/microservice_communication.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 const {SERVICE_STATUS, MISSION_STATUS} = require('../../modules/data_models');
 const { logData } = require('../../modules/systemlog.js');
 
@@ -29,7 +28,6 @@ function processMicroserviceEvents(msg) {
             case 'service_requests_insertion':
                 service_request_status = payload['status'];
                 if(service_request_status == SERVICE_STATUS.READY_FOR_SERVICE) {
-                    bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                     service_request_id = payload['id'];
 
 
@@ -58,7 +56,6 @@ function processMicroserviceEvents(msg) {
                 switch (service_request_status) {
 
                     case SERVICE_STATUS.READY_FOR_SERVICE:
-                        bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                         service_request_id = payload['id'];
                         databaseServices.service_requests.updateByConditions({
                             id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE},
@@ -71,7 +68,6 @@ function processMicroserviceEvents(msg) {
                 
                     case  SERVICE_STATUS.READY:
                         if (payload['is_result_assignment'] && !payload['assignment_dispatched'] ){
-                            bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                             microResp.processMicroserviceResponse(payload)
                             .then(() => blMicroservice.wrapUpMicroserviceCall(payload))
                             .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service

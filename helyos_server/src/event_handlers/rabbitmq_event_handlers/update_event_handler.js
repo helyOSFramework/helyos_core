@@ -1,14 +1,13 @@
 
 const InMemorySensorTable = {};
 const databaseServices = require('../../services/database/database_services');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 
-async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
+async function agentAutoUpdate(inMemDB, objMsg, uuid, bufferPeriod=0) {
     // COMMENT: rabbitmq username must be the agent uuid.
     // check against the agent.rbmq_username for each received message is too expensive, unless we implement a in-memory table.
     // 02/06/2023: update, we need to poll data from the database anyway because the MQTT agents, we will need a in-memory database.
@@ -20,7 +19,8 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     // Get the agent id only once and save in in-memory table.
     if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
         const toolIds = await databaseServices.agents.getIds([uuid]);
-        inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]},agentUpdate['last_message_time']);
+        inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]}, agentUpdate['last_message_time']);
+        inMemDB.agents[uuid]={uuid, id:toolIds[0]};
     }
 
 
@@ -81,46 +81,24 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     let vehicleGeometry, factSheet;
 
     if ('factsheet' in msgBody){
-        factSheet =  msgBody['factsheet']; // VDA 5050
+        agentUpdate['factsheet'] =  msgBody['factsheet']; // VDA 5050
     } 
 
     if ('geometry' in msgBody) {
-        vehicleGeometry = msgBody['geometry'];
+        agentUpdate['geometry'] =  msgBody['geometry'];
     }
 
     if ('followers' in msgBody) {
         connectFollowersToLeader(uuid,  msgBody['followers']);
     }
 
-    // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-    let JSONGeometry;
-    if (vehicleGeometry) {
-        if (Array.isArray(vehicleGeometry)) {
-            agentUpdate['geometry'] =  JSON.stringify(vehicleGeometry); // Backward compatibility: 
-            JSONGeometry = vehicleGeometry;
 
-        } else {
-            agentUpdate['geometry'] = vehicleGeometry; // Backward compatibility:
-            JSONGeometry = JSON.parse(vehicleGeometry);
-        }
-    }
-
-    if (factSheet){
-        if (Array.isArray(factSheet)) {
-            agentUpdate['factsheet'] =  JSON.stringify(factSheet);
-        } else {
-            agentUpdate['factsheet'] = factSheet;
-        }
-        //
-    }
-
-
-    if (JSONGeometry){
+    if (msgBody['geometry']){
         const qryToolData = await databaseServices.agents.get('uuid', uuid, ['id', 'status']);
         if (qryToolData.length) {
             const toolData = qryToolData[0];
             let webSocketNotification = {'id': toolData.id, 'uuid': uuid, 'geometry': JSONGeometry, 'status': toolData.status};
-            bufferNotifications.pushNotificationToFrontEnd('change_agent_status', webSocketNotification);
+            bufferNotifications.pushNotificationToFrontEnd('change_agent_status', webSocketNotification); // TODO publish in redis
         }
     }
 

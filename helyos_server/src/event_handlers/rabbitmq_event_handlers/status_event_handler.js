@@ -82,7 +82,7 @@ async function updateAgentMission(assignment, uuid = null) {
 
 
 
-async function updateState(objMsg, uuid, bufferPeriod=0) {
+async function updateState(inMemDB, objMsg, uuid, bufferPeriod=0) {
     try {
         const toolUpdate = {uuid, "status": objMsg.body.status, 'last_message_time': new Date() };
 
@@ -90,6 +90,7 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
         if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
             const toolIds = await databaseServices.agents.getIds([uuid]);
             inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]}, toolUpdate['last_message_time']);
+            inMemDB.agents[uuid]={uuid, id:toolIds[0]};
         }
 
         if (objMsg.body.resources){

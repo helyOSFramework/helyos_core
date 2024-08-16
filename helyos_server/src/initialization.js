@@ -6,14 +6,12 @@ const agentComm = require('./modules/communication/agent_communication.js');
 const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js')
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
+const {tryToBecomeLeader} = require('./node_leader.js');
+
 
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
-const PREFETCH_COUNT = parseInt(process.env.PREFETCH_COUNT) || 100; // Number of messages to prefetch from the broker.
-const TTL_VISUAL_MSG = parseInt(process.env.TTL_VISUAL_MSG) || 2000; // Time to live for visualization messages in ms.
-const TTL_STATE_MSG = parseInt(process.env.TTL_STATE_MSG) || 360000; // Time to live for state messages in ms.
 
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
-const { AGENTS_UL_EXCHANGE, AGENTS_DL_EXCHANGE, ANONYMOUS_EXCHANGE, AGENT_MQTT_EXCHANGE } =  require('./services/message_broker/rabbitMQ_services.js');
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
         AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE } =  require('./services/message_broker/rabbitMQ_services.js');
 const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
@@ -123,83 +121,114 @@ function initializeRabbitMQAccounts() {
 
 
 /*
-configureRabbitMQSchema()
-helyOS defines the topic exchanges and queues in the rabbitMQ schema.
-*/
-async function configureRabbitMQSchema(dataChannels) {
-            const mainChannel = dataChannels[0];
-            const secondaryChannel = dataChannels[1];
-            await mainChannel.prefetch(PREFETCH_COUNT);
-            await secondaryChannel.prefetch(PREFETCH_COUNT);
+// configureRabbitMQSchema()
+// helyOS defines the topic exchanges and queues in the rabbitMQ schema.
+// */
+// async function configureRabbitMQSchema(dataChannels) {
+//             const mainChannel = dataChannels[0];
+//             const secondaryChannel = dataChannels[1];
+//             await mainChannel.prefetch(PREFETCH_COUNT);
+//             await secondaryChannel.prefetch(PREFETCH_COUNT);
 
-            console.log("===> Setting RabbitMQ Schema");
-            // SET EXCHANGE ANONYMOUS TO RECEIVE/SEND MESSAGES FROM/TO AGENT
-            await mainChannel.assertExchange(ANONYMOUS_EXCHANGE, 'topic', { durable: true });
-            await rbmqServices.assertOrSubstituteQueue(mainChannel, CHECK_IN_QUEUE, false, true);
-            await mainChannel.bindQueue(CHECK_IN_QUEUE, ANONYMOUS_EXCHANGE, "*.*.checkin" );
+//             console.log("===> Setting RabbitMQ Schema");
+//             // SET EXCHANGE ANONYMOUS TO RECEIVE/SEND MESSAGES FROM/TO AGENT
+//             await mainChannel.assertExchange(ANONYMOUS_EXCHANGE, 'topic', { durable: true });
+//             await rbmqServices.assertOrSubstituteQueue(mainChannel, CHECK_IN_QUEUE, false, true);
+//             await mainChannel.bindQueue(CHECK_IN_QUEUE, ANONYMOUS_EXCHANGE, "*.*.checkin" );
 
-            // SET EXCHANGE "DOWN LINK" (DL) TO SEND MESSAGES TO AGENT 
-            await mainChannel.assertExchange(AGENTS_DL_EXCHANGE, 'topic', { durable: true });
+//             // SET EXCHANGE "DOWN LINK" (DL) TO SEND MESSAGES TO AGENT 
+//             await mainChannel.assertExchange(AGENTS_DL_EXCHANGE, 'topic', { durable: true });
 
-            // SET EXCHANGE "UP LINK" (UL) AND QUEUES TO RECEIVE MESSAGES FROM AGENT
-            await mainChannel.assertExchange(AGENTS_UL_EXCHANGE, 'topic', { durable: true });
+//             // SET EXCHANGE "UP LINK" (UL) AND QUEUES TO RECEIVE MESSAGES FROM AGENT
+//             await mainChannel.assertExchange(AGENTS_UL_EXCHANGE, 'topic', { durable: true });
 
-            // SET EXCHANGE FOR "MQTT" AGENTS AND QUEUES TO RECEIVE AND SEND MESSAGES TO AGENT. No exchange is used for MQTT
-            await mainChannel.assertExchange(AGENT_MQTT_EXCHANGE, 'topic', { durable: true });
+//             // SET EXCHANGE FOR "MQTT" AGENTS AND QUEUES TO RECEIVE AND SEND MESSAGES TO AGENT. No exchange is used for MQTT
+//             await mainChannel.assertExchange(AGENT_MQTT_EXCHANGE, 'topic', { durable: true });
 
-            await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_UPDATE_QUEUE, false, true, {"x-message-ttl" : TTL_STATE_MSG});
-            await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.update");
-            await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.fact_sheet");     
-            await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.update");
-            await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.fact_sheet");
+//             await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_UPDATE_QUEUE, false, true, {"x-message-ttl" : TTL_STATE_MSG});
+//             await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.update");
+//             await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.fact_sheet");     
+//             await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.update");
+//             await mainChannel.bindQueue(AGENT_UPDATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.fact_sheet");
 
-            await rbmqServices.assertOrSubstituteQueue(secondaryChannel, AGENT_VISUALIZATION_QUEUE, false, false, {"x-message-ttl" : TTL_VISUAL_MSG});
-            await secondaryChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "agent.*.visualization");  
-            await secondaryChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "agent.*.visualization");
+//             await rbmqServices.assertOrSubstituteQueue(secondaryChannel, AGENT_VISUALIZATION_QUEUE, false, false, {"x-message-ttl" : TTL_VISUAL_MSG});
+//             await secondaryChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "agent.*.visualization");  
+//             await secondaryChannel.bindQueue(AGENT_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "agent.*.visualization");
 
-            await rbmqServices.assertOrSubstituteQueue(secondaryChannel, YARD_VISUALIZATION_QUEUE, false, false, {"x-message-ttl" : TTL_VISUAL_MSG});
-            await secondaryChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "yard.*.visualization");  
-            await secondaryChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "yard.*.visualization");  
+//             await rbmqServices.assertOrSubstituteQueue(secondaryChannel, YARD_VISUALIZATION_QUEUE, false, false, {"x-message-ttl" : TTL_VISUAL_MSG});
+//             await secondaryChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENTS_UL_EXCHANGE, "yard.*.visualization");  
+//             await secondaryChannel.bindQueue(YARD_VISUALIZATION_QUEUE, AGENT_MQTT_EXCHANGE, "yard.*.visualization");  
 
-            await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_STATE_QUEUE, false, true, {"x-message-ttl" : TTL_STATE_MSG});
-            await mainChannel.bindQueue(AGENT_STATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.state" );         
-            await mainChannel.bindQueue(AGENT_STATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.state" ); 
+//             await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_STATE_QUEUE, false, true, {"x-message-ttl" : TTL_STATE_MSG});
+//             await mainChannel.bindQueue(AGENT_STATE_QUEUE, AGENTS_UL_EXCHANGE, "*.*.state" );         
+//             await mainChannel.bindQueue(AGENT_STATE_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.state" ); 
 
-            await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_MISSION_QUEUE, false, true);
-            await mainChannel.bindQueue(AGENT_MISSION_QUEUE, AGENTS_UL_EXCHANGE, "*.*.mission_req" );   
-            await mainChannel.bindQueue(AGENT_MISSION_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.mission_req" );  
+//             await rbmqServices.assertOrSubstituteQueue(mainChannel, AGENT_MISSION_QUEUE, false, true);
+//             await mainChannel.bindQueue(AGENT_MISSION_QUEUE, AGENTS_UL_EXCHANGE, "*.*.mission_req" );   
+//             await mainChannel.bindQueue(AGENT_MISSION_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.mission_req" );  
 
-            await mainChannel.bindQueue(CHECK_IN_QUEUE, AGENTS_UL_EXCHANGE, "*.*.checkin" );
-            await mainChannel.bindQueue(CHECK_IN_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.checkin" );
+//             await mainChannel.bindQueue(CHECK_IN_QUEUE, AGENTS_UL_EXCHANGE, "*.*.checkin" );
+//             await mainChannel.bindQueue(CHECK_IN_QUEUE, AGENT_MQTT_EXCHANGE, "*.*.checkin" );
 
-            await rbmqServices.assertOrSubstituteQueue(mainChannel, SUMMARY_REQUESTS_QUEUE, false, true);
-            await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.database_req");
-            await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary_req");
-            await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary");  // MAGPIE COMPATIBLE
-            console.log("===> RabbitMQ Schema Completed");
+//             await rbmqServices.assertOrSubstituteQueue(mainChannel, SUMMARY_REQUESTS_QUEUE, false, true);
+//             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.database_req");
+//             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary_req");
+//             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary");  // MAGPIE COMPATIBLE
+//             console.log("===> RabbitMQ Schema Completed");
 
-            return dataChannels;
-}
+//             return dataChannels;
+// }
 
 
-    function helyosConsumingMessages (dataChannels, inMemDB) {
+    async function initRabbitMQConsumerWatcher (dataChannels) {
         const mainChannel = dataChannels[0];
         const secondaryChannel = dataChannels[1];
         console.log(`\n ================================================================`+
-                    `\n ================= SUBSCRIBE TO HELYOS' QUEUES ==================`+
+                    `\n ================= SUBSCRIBE TO QUEUES ==================`+
                     `\n ================================================================`);
 
-        mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(inMemDB,CHECK_IN_QUEUE, message), { noAck: true, priority: 5});
-        mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_STATE_QUEUE, message), { noAck: true, priority: 10});
-        mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_UPDATE_QUEUE, message), { noAck: true, priority: 5});
-        mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_MISSION_QUEUE, message), { noAck: true, priority: 5});
-        
-        // COMMENT: RabbitMQ priority acts relative to the consumers of each channel.
-        secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(inMemDB,AGENT_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
-        secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(inMemDB,YARD_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
+    // Distributed consumers
+        mainChannel.consume(CHECK_IN_QUEUE,
+            (message)   => handleBrokerMessages(mainChannel,CHECK_IN_QUEUE, message),
+            { noAck: true, priority: 5});
+
+        mainChannel.consume(AGENT_MISSION_QUEUE,
+            (message) => handleBrokerMessages(mainChannel,AGENT_MISSION_QUEUE, message),
+            { noAck: true, priority: 5});
+
+        secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, 
+                (message) => handleBrokerMessages(secondaryChannel,AGENT_VISUALIZATION_QUEUE,message),
+                { noAck: true, priority: 1});
+
+        secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, 
+                (message) => handleBrokerMessages(secondaryChannel,YARD_VISUALIZATION_QUEUE, message),
+                { noAck: true, priority: 1});
+
+        mainChannel.consume(SUMMARY_REQUESTS_QUEUE,
+                 (message) => handleBrokerMessages(mainChannel,SUMMARY_REQUESTS_QUEUE, message),
+                  { noAck: true});
 
 
-        mainChannel.consume(SUMMARY_REQUESTS_QUEUE, (message) => handleBrokerMessages(inMemDB,SUMMARY_REQUESTS_QUEUE, message), { noAck: true});
+        // Exclusive consumer
+        const becomingLeader = async () => {
+            console.log(
+                    `\n ================= SUBSCRIBE TO STATE QUEUE ==================`
+                    );
+
+            const ct1 = await mainChannel.consume(AGENT_STATE_QUEUE,
+                        (message) => handleBrokerMessages(mainChannel,AGENT_STATE_QUEUE, message),
+                        {noAck: false, priority: 10});
+            const ct2 = await mainChannel.consume(AGENT_UPDATE_QUEUE,
+                        (message) => handleBrokerMessages(mainChannel,AGENT_UPDATE_QUEUE, message),
+                        { noAck: true, priority: 5});
+            return [ct1, ct2]
+        }
+
+        const becomingFollower =  async (consumerTags) => {
+            await consumerTags.forEach( cti => mainChannel.cancel(cti));
+            return 0;
+        }
+        await tryToBecomeLeader(becomingLeader, becomingFollower);
         return dataChannels;    
     }
 
@@ -207,6 +236,5 @@ async function configureRabbitMQSchema(dataChannels) {
 module.exports.initWatchers = initWatchers;
 module.exports.initializeRabbitMQAccounts = initializeRabbitMQAccounts;
 module.exports.setInitialDatabaseData = setInitialDatabaseData;
-module.exports.configureRabbitMQSchema = configureRabbitMQSchema;
-module.exports.helyosConsumingMessages = helyosConsumingMessages;
+module.exports.initRabbitMQConsumerWatcher = initRabbitMQConsumerWatcher;
 

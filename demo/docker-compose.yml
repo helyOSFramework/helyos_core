@@ -16,7 +16,16 @@ services:
         networks:
             - control-tower-net
 
-
+    local_redis:
+        image: redis:latest
+        container_name: local_redis
+        ports:
+        - "6379:6379"
+        volumes:
+        - redis-data:/data
+        command: redis-server --requirepass mypass
+        networks:
+            - control-tower-net
 
     local_rabbitmq:
         image:  rabbitmq:3-management
@@ -55,6 +64,7 @@ services:
             - PGHOST=local_postgres 
             - PGDATABASE=smartfarm_db 
             - PGPORT=5432
+            - DB_BUFFER_TIME=1000
             
             # GRAPHQL VARIABLES
             - GQLPORT=5000
@@ -65,6 +75,9 @@ services:
             - RBMQ_API_PORT=15672
             - RBMQ_SSL=False
             - RBMQ_API_SSL=False 
+            - REDIS_HOST=local_redis
+            - REDIS_PORT=6379
+            - REDIS_PASSWORD=mypass
 
             # RBMQ ACCOUNTS
             - CREATE_RBMQ_ACCOUNTS=True
@@ -84,13 +97,15 @@ services:
         depends_on:
             - local_postgres
             - local_rabbitmq
+            - local_redis
 
 
 
 # ----------------- A Simple Truck Simulator -----------------
 
     agent_simulator_1:
-        image: helyosframework/helyos_agent_slim_simulator:0.7.5
+        image: helyosframework/helyos_agent_slim_simulator:0.8.0
+        platform: linux/amd64
 
             
         environment:
@@ -133,10 +148,13 @@ services:
 
 networks:
     control-tower-net:
-       external: false
+       external: true
 
 volumes:
     postgres_data:
         external: false
     rbmq_data:
         external: false
+
+    redis-data:
+        driver: local

@@ -4,7 +4,7 @@ const {inMemDB } = require('../../services/in_mem_database/mem_database_service.
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 
 
-async function queryDataBase(uuid, objMsg, msgProps) {
+async function queryDataBase(inMemDB, uuid, objMsg, msgProps) {
     console.log(objMsg, msgProps);
     inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
     

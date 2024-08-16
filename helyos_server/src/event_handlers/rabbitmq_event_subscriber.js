@@ -1,5 +1,5 @@
 const databaseServices = require('../services/database/database_services.js');
-const { inMemDB, DataRetriever } = require('../services/in_mem_database/mem_database_service.js');
+const memDBServices = require('../services/in_mem_database/mem_database_service.js');
 const { AGENT_MQTT_EXCHANGE, AGENTS_DL_EXCHANGE, CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE,
         AGENT_UPDATE_QUEUE, AGENT_STATE_QUEUE, AGENT_VISUALIZATION_QUEUE, verifyMessageSignature } = require('../services/message_broker/rabbitMQ_services.js');
 const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handler');
@@ -72,7 +72,7 @@ function identifyMessageSender(objMsg, routingKey) {
 }
 
 
-async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange) {
+async function validateMessageSender(inMemDB, registeredAgent, uuid, objMsg, msgProps, exchange) {
 
             if ( registeredAgent.protocol === 'AMQP' && exchange === AGENT_MQTT_EXCHANGE ) {
                 throw ({msg:`Wrong protocol; agent is registered as AMQP; ${uuid}`, code: 'AGENT-400'});
@@ -152,12 +152,11 @@ function validateAnonymousCheckin(registeredAgent, checkinData) {
 const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
                          'allow_anonymous_checkin', 'public_key', 'verify_signature'];
 
-const agentDataRetriever = new DataRetriever(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
 
 /**
  * That is the main function of this module.
  * it handles the messages received from the message broker.
- * @param {string} channelOrQueue - The name of the channel or queue.
+ * @param {string} queueName - The name of the channel or queue.
  * @param {Object} message - The message object.
  * @returns {Promise} A promise that resolves after the message is processed.
  * 
@@ -174,13 +173,14 @@ const agentDataRetriever = new DataRetriever(inMemDB, databaseServices, 'agents'
  * And, if required, verifies the signature of the message.
  * 
  **/
-function handleBrokerMessages(channelOrQueue, message)   {
+function handleBrokerMessages(channel,queueName, message)   {
     let objMsg;
     const content = message.content;
     if (!content) return;
     let msgProps = message.properties;
     const exchange = message.fields.exchange;
     const routingKey  = message.fields.routingKey;
+
 
     try {
         objMsg = parseMessage(content);
@@ -199,20 +199,22 @@ function handleBrokerMessages(channelOrQueue, message)   {
     const isAnonymousConnection = msgProps['userId'] == 'anonymous';
 
     ( async () => {
+        const inMemDB = await memDBServices.getInstance()
+        const agentDataRetriever = new memDBServices.DataRetriever(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
 
 // VALIDATE MESSAGE SENDER
         let registeredAgent = await agentDataRetriever.getData(uuid);
         
-        if (!registeredAgent && channelOrQueue !== CHECK_IN_QUEUE) {
+        if (!registeredAgent && queueName !== CHECK_IN_QUEUE) {
             throw ({msg:`Agent is not registered; ${uuid}`, code: 'AGENT-404'});
         }
 
         if (registeredAgent) {
-            await validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange);
+            await validateMessageSender(inMemDB,registeredAgent, uuid, objMsg, msgProps, exchange);
         }
 
 // CHECK-IN 
-        if (channelOrQueue == CHECK_IN_QUEUE) {
+        if (queueName == CHECK_IN_QUEUE) {
             let checkinData = objMsg.obj.body? objMsg.obj.body : objMsg.obj; // compatibility for agent versions < 2.0
 
             if (!registeredAgent){
@@ -230,7 +232,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
             
             logData.addLog('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
-            return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
+            return agentCheckIn(inMemDB, uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
                     .then(( ) =>  logData.addLog('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
                     .catch( err => {
                         console.log('checkin:', err);
@@ -269,13 +271,13 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }
 
         try {
-            switch (channelOrQueue) {
+            switch (queueName) {
                 
                     case SUMMARY_REQUESTS_QUEUE:
                         console.log('SUMMARY_REQUESTS_QUEUE')
 
                         if (objMsg.obj.body){
-                            return queryDataBase(uuid, objMsg.obj, msgProps);
+                            return queryDataBase(inMemDB,uuid, objMsg.obj, msgProps);
                         } else {
                             logData.addLog('agent', objMsg.obj, 'error', `agent data request: input body not found`);
                         }
@@ -293,8 +295,22 @@ function handleBrokerMessages(channelOrQueue, message)   {
                     break;
 
                     case AGENT_STATE_QUEUE:
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
+                        console.log("AGENT_STATE_QUEUE")
                         if (objMsg.obj.body.status) {
-                            updateState(objMsg.obj, uuid, 0)
+                            updateState(inMemDB,objMsg.obj, uuid, 0)
+                            .then( () => channel.ack(message))
                             .catch(e => {
                                 const msg = e.message? e.message : e;
                                 logData.addLog('agent', objMsg.obj, 'error', `agent state update: ${msg}`);
@@ -306,19 +322,19 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
                     case AGENT_UPDATE_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 0);
+                            agentAutoUpdate(inMemDB,objMsg.obj, uuid, 0);
                         }
                         break;
 
                     case AGENT_VISUALIZATION_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
+                            agentAutoUpdate(inMemDB,objMsg.obj, uuid, DB_BUFFER_TIME);
                         }
                         break;
 
 
                     case YARD_VISUALIZATION_QUEUE:
-                            yardAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
+                            yardAutoUpdate(inMemDB,objMsg.obj, uuid, DB_BUFFER_TIME);
                         break;    
 
                     default:

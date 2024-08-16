@@ -36,7 +36,7 @@ const getNewClient = () => {
 
 
 
-const agents = new AgentDataLayer(mainClient, shortTimeClient);
+const agents = new AgentDataLayer(mainClient, shortTimeClient, ['geometry', 'factsheet']);
 
 
 /**

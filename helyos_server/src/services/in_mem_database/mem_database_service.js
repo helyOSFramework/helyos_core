@@ -5,6 +5,7 @@
 
 const { logData } = require("../../modules/systemlog");
 const { setDBTimeout } = require("../database/database_services");
+const redisAccessLayer = require('./redis_access_layer');
 
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
@@ -45,18 +46,30 @@ class InMemDB {
  * @returns {InMemDB} An instance of the InMemDB class.
  * 
  */
-    constructor(longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
+    constructor(connectedClient, longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
         if (InMemDB.instance) {
             return InMemDB.instance;
         }
-        
-        this.agents = {};
-        this.agents_buffer = {};
-        this.agents_stats = {};
 
-        this.map_objects = {};
-        this.map_objects_buffer = {};
+        this.client =  connectedClient;
+        this.agents = {};
+        this.agents_stats = {};
         this.map_objects_stats = {};
+
+        this.getAsync = (key) => redisAccessLayer.getValue(this.client,key);
+        this.setAsync = (key, value) => redisAccessLayer.setValue(this.client, key, value);
+        this.delAsync = (key) => redisAccessLayer.deleteKey(this.client, key);
+        this.msetAsync = (keyValuePairs) => redisAccessLayer.setManyValues(this.client, {...keyValuePairs});
+        this.atomicGetDelete = (key) => redisAccessLayer.getAndDeleteKey(this.client, key);
+
+        this.hGetFieldAsync = (hash, field) => redisAccessLayer.hGet(this.client, hash, field);
+        this.hGetAsync = (hash, field) => redisAccessLayer.hGetAll(this.client, hash);
+        this.hSetAsync = (hash,object) => redisAccessLayer.hSet(this.client, hash, object);
+        this.hDelAsync = (hash,field) => redisAccessLayer.deleteKey(this.client, hash, field);
+        this.hashDelAsync = (hash) => redisAccessLayer.deleteHash(this.client, hash);
+        this.atomicHGetDelete = (hash) => redisAccessLayer.getAndDeleteHash(this.client, hash);
+        this.getHashesByPattern = (pattern) => redisAccessLayer.getHashesByPattern(this.client, pattern);
+        this.getAndDeleteHashesByPattern = (pattern) => redisAccessLayer.getAndDeleteHashesByPattern(this.client, pattern);
 
         this.longTimeout = longTimeout;
         this.shortTimeout = shortTimeout;
@@ -68,10 +81,8 @@ class InMemDB {
         this.timeoutCounterStartTime = null;
         this.updateTimeout = this.longTimeout;
         this.lastFlushTime = new Date();
-        InMemDB.instance = this;       
-
+        InMemDB.instance = this;
     }
-
 
     /**
      * Inserts data into the specified table.
@@ -80,10 +91,10 @@ class InMemDB {
      * @param {DatabaseService} dbService - The database service instance.
      * @returns {Promise} A promise that resolves with the inserted data.
      */
-    insert(tableName, indexName, data) {
-        return this[tableName][data[indexName]] = data;
+    async insert(tableName, indexName, data) {
+        await this.hSetAsync(`${tableName}:${data[indexName]}`, data);
+        return data;
     }
-
 
     /**
      * Updates data in the specified table based on the provided timestamp.
@@ -93,40 +104,46 @@ class InMemDB {
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    update(tableName,indexName, data, timeStamp, statsLabel='buffered') {
-        const table = this[tableName];
-        const tableStats = this[`${tableName}_stats`];
-        let instance = table[data[indexName]];
-        let statsData = tableStats[data[indexName]];
+    async update(tableName, indexName, data, timeStamp, statsLabel = 'buffered') {
+        if (!data) return false;
+        const keyId = data[indexName];
+        const entityHash = `${tableName}:${keyId}`;
+        const tableStats = `${tableName}_stats`;
+        const statHash = `${tableStats}:${keyId}`;
+        data['last_message_time'] = timeStamp;
+        await this.hSetAsync(entityHash, data);
+        await this.updateBuffer(tableName, indexName, data, timeStamp);
 
-        // Create Instance
-        if (!instance) { 
-            table[data[indexName]] = {};
-            instance = table[data[indexName]];
-            instance['last_message_time'] = 0;
-        }
+        let statsData = this[tableStats][keyId];
 
         // Create Stats
         if (!statsData ){
-            tableStats[data[indexName]] = { msgPerSecond: new UpdateStats(),
-                                            updtPerSecond: new UpdateStats(), 
-                                            errorPerSecond: new UpdateStats(10)
-                                           };
-            statsData = tableStats[data[indexName]];
+            this[tableStats][keyId] = { msgPerSecond: new UpdateStats(),
+                                        updtPerSecond: new UpdateStats(), 
+                                        errorPerSecond: new UpdateStats(10)
+                                        };
+            statsData = this[tableStats][keyId];
         }
+        
 
-        // Update Instance if the message is newer
-        if (instance['last_message_time'] < timeStamp || statsLabel === 'realtime'){ 
-            Object.assign(instance, data);
-            data.id = instance.id;
-            instance['last_message_time'] = timeStamp;
-            this.updateBuffer(tableName,indexName, data, timeStamp);
-            return true;
-        }
+        // const patchStat = {}
+        // patchStat[keyId] = statsData
+        // await this.hSetAsync(tableStats,patchStat);
 
-        return false;
+        // // Update Instance if the message is newer
+        // if (instance.last_message_time < timeStamp || statsLabel === 'realtime') {
+        //     Object.assign(instance, data);
+        //     data.id = instance.id;
+        //     instance.last_message_time = timeStamp;
+        //     const patch = {}
+        //     patch[keyId] = instance
+        //     await this.hSetAsync(tableName, patch);
+        //     await this.updateBuffer(tableName, indexName, data, timeStamp);
+        //     return true;
+        // }
+
+        return true;
     }
-
 
     /**
      * Deletes data from the specified table.
@@ -135,14 +152,13 @@ class InMemDB {
      * @param {Object} dbService - The database service object.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    delete(tableName, indexName, dataId) {
-        const tableStatsName = `${tableName}_stats`;
-        const tableBufferName = `${tableName}_buffer`;
-        delete this[tableName][dataId];
-        delete this[tableStatsName][dataId];
-        delete this[tableBufferName][dataId];
+    async delete(tableName, indexName, dataId) {
+        const keyId = dataId;
+        const entityHash = `${tableName}:${keyId}`;
+        const entityHashBuffer = `${tableName}_buffer:${keyId}`;
+        await this.hashDelAsync(entityHash);
+        await this.hashDelAsync(entityHashBuffer);
     }
-
 
     /**
      * Flushes the specified table to the database.
@@ -152,41 +168,53 @@ class InMemDB {
      * @param {number} maxAge - The maximum age of data to be flushed (optional, defaults to 0).
      * @returns {Promise} A promise that resolves after the flush operation completes.
      */
-    flush(tableName, indexName, dbService, maxAge = 0){
+    async flush(tableName, indexName, dbService, maxAge = 0) {
         const now = new Date();
         const tableBufferName = `${tableName}_buffer`;
         const tableStatsName = `${tableName}_stats`;
         const useShortTimeOutClient = maxAge > 0;
 
-
-        // Damaging control: if the number of pending promisses is too big, reduce the update timeout and accept the losts.
         this._dynamicallyChooseTimeout();
 
-        if ((now - this.lastFlushTime) < maxAge) { 
-            return Promise.resolve(); // Do not flush if the data is too recent.
+        if ((now - this.lastFlushTime) < maxAge) {
+            return Promise.resolve();
         }
-        
+        // console.log('start flush.......')
         this.lastFlushTime = new Date();
-        const objArray = Object.keys(this[tableBufferName])
-                            .map(key => { 
-                                const msgPerSecond = this[tableStatsName][key]['msgPerSecond'].countsPerSecond;
-                                this[tableName][key].msg_per_sec = msgPerSecond;
-                                this[tableBufferName][key].msg_per_sec = msgPerSecond;
+        const objectsToSave = await this.getAndDeleteHashesByPattern(`${tableBufferName}:*`);
+        const tableStatsData = this[tableStatsName];
 
-                                this[tableStatsName][key].updtPerSecond.countMessage();
-                                const updtPerSecond = this[tableStatsName][key].updtPerSecond.countsPerSecond;
-                                this[tableName][key]['updt_per_sec'] = updtPerSecond;
-                                this[tableBufferName][key]['updt_per_sec'] = updtPerSecond;
-                                if (tableName !== 'agents') {
-                                    delete this[tableName][key]['last_message_time'];
-                                    delete this[tableBufferName][key]['_leaderAgents'];
-                                }
-                                return this[tableBufferName][key];
-                            });
+        if (objectsToSave['agents_buffer:Bb34069fc5-fdgs-434b-b87e-f19c5435113']&&
+            objectsToSave['agents_buffer:Bb34069fc5-fdgs-434b-b87e-f19c5435113']['geometry']
+        ) console.log('objectsToSave', objectsToSave);
 
-        this[tableBufferName] = {};   
-        
-        const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
+
+        const objArray = Object.keys(objectsToSave)
+                    .map(key => { 
+                        const keyId = objectsToSave[key][indexName]
+                        if (tableStatsData[keyId]) {
+                            const msgPerSecond = tableStatsData[keyId]['msgPerSecond'].countsPerSecond;
+                            tableStatsData[keyId]['updtPerSecond'].countMessage();
+                            const updtPerSecond = tableStatsData[keyId]['updtPerSecond'].countsPerSecond;
+
+                            objectsToSave[key].msg_per_sec = msgPerSecond;
+                            objectsToSave[key].updt_per_sec = updtPerSecond;
+
+
+                            if (tableName !== 'agents') {
+                                delete objectsToSave[key]['last_message_time'];
+                                delete objectsToSave[key]['_leaderAgents'];
+                            }
+                            this.hSetAsync(`${tableName}:${keyId}`, {msg_per_sec: msgPerSecond, updt_per_sec: updtPerSecond});
+
+                        }
+                        
+                        return objectsToSave[key];
+                    });
+
+ 
+
+        const promiseTrigger = () => dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
                                             if (r && r.length) {     
                                                 const failedDataTypeError = r.filter(e => e && e.error && e.error.message.includes('constraint'));
@@ -201,7 +229,6 @@ class InMemDB {
                                                     this._catch_update_errors(failedIndexes.length);
                                                     failedIndexes.forEach(e => {
                                                         console.log(`Update failed on ${tableName} / ${e.failedIndex}`);
-                                                        // delete this[tableName][e.failedIndex];
                                                     });
                                                 }
                                             }
@@ -211,36 +238,26 @@ class InMemDB {
                                         });
 
 
-        return this.dispatchUpdatePromise(promiseTrigger, objArray.length);                            
+        return this.dispatchUpdatePromise(promiseTrigger, objArray.length);
     }
 
-
-     /**
+    
+    /**
      * Updates data in the specified table based on the provided timestamp.
      * @param {string} tableName - The name of the table.
      * @param {Object} data - The updated data.
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-     updateBuffer(tableName,index, data, timeStamp) {
-        const tableBufferName = `${tableName}_buffer`;
-        const tableBuffer = this[tableBufferName];
-        let instance = tableBuffer[data[index]];
-
-        // Create Instance
-        if (!instance) {
-            tableBuffer[data[index]] = {};
-            instance = tableBuffer[data[index]];
-            instance['last_message_time'] = 0;
-        }
-        // Update Instance
-        Object.assign(instance, data);
-        instance['last_message_time'] = timeStamp;
+    async updateBuffer(tableName, indexName, data, timeStamp) {
+        const keyId = data[indexName];
+        const tableBuffer = `${tableName}_buffer`;
+        const entityHash = `${tableBuffer}:${keyId}`;
+        data['last_message_time'] = timeStamp;
+        await this.hSetAsync(entityHash, data);
     }
 
-   
-    dispatchUpdatePromise(promiseTrigger, numberUpdates=1) {
-        // Damaging control: if the number of pending promisses is too big, block new updates and accept the losts.
+    dispatchUpdatePromise(promiseTrigger, numberUpdates = 1) {
         if (this.pendingPromises > 2 * this.limitWaitingFlushes) {
             this.lostUpdates += numberUpdates;
             return Promise.resolve();
@@ -248,35 +265,35 @@ class InMemDB {
         this.pendingPromises++;
 
         return promiseTrigger()
-                .finally(() => this.pendingPromises-- );
-
+            .finally(() => this.pendingPromises--);
     }
 
+    async getHistoricalCountRateAverage(tableName, index, minSample = 10) {
+        const key = `${tableName}_stats:${index}`;
+        let avgMsgPerSecond = 0;
+        let avgUpdtPerSecond = 0;
 
-    getHistoricalCountRateAverage(tableName, index, minSample=10){
-        const tableStatsName = `${tableName}_stats`;
-        let avgMsgPerSecond = 0; let avgUpdtPerSecond=0;
-        
-        if (!this[tableStatsName] || !this[tableStatsName][index] || !this[tableStatsName][index]['updtPerSecond'])  {
-            return {avgMsgPerSecond, avgUpdtPerSecond};
+        const stats = await this.getAsync(key);
+        if (!stats) {
+            return { avgMsgPerSecond, avgUpdtPerSecond };
         }
 
-        const msgPerSecondH = this[tableStatsName][index]['msgPerSecond'].countsPerSecondHistory;
-        if (msgPerSecondH.length >= minSample){
-            const sum = this[tableStatsName][index]['msgPerSecond'].countsPerSecondMovingAcumm;
+        const parsedStats = JSON.parse(stats);
+        const msgPerSecondH = parsedStats.msgPerSecond.countsPerSecondHistory;
+        if (msgPerSecondH.length >= minSample) {
+            const sum = parsedStats.msgPerSecond.countsPerSecondMovingAcumm;
             avgMsgPerSecond = (sum / msgPerSecondH.length);
         }
 
-        const updtPerSecondH = this[tableStatsName][index]['updtPerSecond'].countsPerSecondHistory;
-        if (updtPerSecondH.length >= minSample){
-            const sum = this[tableStatsName][index]['updtPerSecond'].countsPerSecondMovingAcumm;
+        const updtPerSecondH = parsedStats.updtPerSecond.countsPerSecondHistory;
+        if (updtPerSecondH.length >= minSample) {
+            const sum = parsedStats.updtPerSecond.countsPerSecondMovingAcumm;
             avgUpdtPerSecond = (sum / updtPerSecondH.length);
         }
-        return {avgMsgPerSecond, avgUpdtPerSecond};
+        return { avgMsgPerSecond, avgUpdtPerSecond };
     }
 
-
-    _catch_update_errors(n=1) {
+    _catch_update_errors(n = 1) {
         if (this.lostUpdates === 0) {
             this.timeoutCounterStartTime = new Date();
         }
@@ -295,14 +312,14 @@ class InMemDB {
 
 
     _dynamicallyChooseTimeout() {
-        if (this.pendingPromises > this.limitWaitingFlushes){
+        if (this.pendingPromises > this.limitWaitingFlushes) {
             if (this.updateTimeout === this.longTimeout) {
                 this.updateTimeout = this.shortTimeout;
                 setDBTimeout(this.updateTimeout);
             }
-        } 
-        
-        if (this.pendingPromises < Math.round(this.limitWaitingFlushes/2)){
+        }
+
+        if (this.pendingPromises < Math.round(this.limitWaitingFlushes / 2)) {
             if (this.updateTimeout === this.shortTimeout) {
                 this.updateTimeout = this.longTimeout;
                 setDBTimeout(this.updateTimeout);
@@ -321,7 +338,6 @@ class InMemDB {
  * - If the last database reloading is older than {reloadPeriod} seconds, the data is reloaded from the database.
  * - If the data is not in the database, null is returned.
  * 
- * 
  * @param {InMemDB} inMemDB - The in-memory database object.
  * @param {DatabaseService} dbTableService - The database service object.
  * @param {string} tableName - The name of the database table.
@@ -330,45 +346,52 @@ class InMemDB {
  * @returns {Promise} A promise that resolves with the agent data.
  **/
 class DataRetriever {
-    startTimePerId = {}
+    startTimePerId = {};
 
     constructor(inMemDB, dbServices, tableName, requiredFields, reloadPeriod = 0) {
         this.dbServices = dbServices;
         this.inMemDB = inMemDB;
         this.requiredFields = [...requiredFields];
-        if(this.requiredFields.indexOf('modified_at') === -1) this.requiredFields.push('modified_at');
+        if (this.requiredFields.indexOf('modified_at') === -1) this.requiredFields.push('modified_at');
         this.reloadPeriod = reloadPeriod;
         this.tableName = tableName;
     }
 
-    getData(index, indexName='uuid', reload=false) {
-        if (this.startTimePerId[index] === undefined) {this.startTimePerId[index] = new Date();}
-        const startTime = this.startTimePerId[index];
-        if (!this.reloadPeriod) {return this.getDataFromSource(index, indexName, reload); }
-
-        if ((new Date() - startTime) > this.reloadPeriod || reload) {  
+    async getData(index, indexName = 'uuid', reload = false) {
+        if (this.startTimePerId[index] === undefined) {
             this.startTimePerId[index] = new Date();
-            return this.inMemDB.flush(this.tableName,indexName, this.dbServices[this.tableName], 0)
-                   .then( () => this.getDataFromSource(index, indexName, true));
-        } 
+        }
+        const startTime = this.startTimePerId[index];
+        if (!this.reloadPeriod) {
+            return this.getDataFromSource(index, indexName, reload);
+        }
+
+        if ((new Date() - startTime) > this.reloadPeriod || reload) {
+            this.startTimePerId[index] = new Date();
+            await this.inMemDB.flush(this.tableName, indexName, this.dbServices[this.tableName], 0);
+            return this.getDataFromSource(index, indexName, true);
+        }
         return this.getDataFromSource(index, indexName, false);
     }
 
-    getDataFromSource(index, indexName='uuid', reload=false) {
-        const inMemAgentData = this.inMemDB[this.tableName][index] || {};
+    async getDataFromSource(index, indexName = 'uuid', reload = false) {
+        const key = `${this.tableName}:${index}`;
+        const inMemAgentData = await this.inMemDB.hGetAsync(key).then(data => data || {});
+
         if (!reload && this.requiredFields.every(field => inMemAgentData[field] !== undefined)) {
             return inMemAgentData;
         }
-        return this.dbServices[this.tableName].get(indexName, index, this.requiredFields)
-                .then((r) => { 
-                    if(r.length) {
-                        this.inMemDB.update(this.tableName,indexName,r[0],new Date(), 'realtime');
-                        return r[0];
-                    } else return null;
-                });
-    }
 
+        const result = await this.dbServices[this.tableName].get(indexName, index, this.requiredFields);
+        if (result.length) {
+            await this.inMemDB.update(this.tableName, indexName, result[0], new Date(), 'realtime');
+            return result[0];
+        } else {
+            return null;
+        }
+    }
 }
+
 
 
 // Helper class for calculating the average count rate.
@@ -409,7 +432,16 @@ class UpdateStats {
 
 
 // Singleton instance of the in-memory database.
-const inMemDB = new InMemDB(LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+let inMemDB;
+async function getInstance() {
+  if (!inMemDB) {
+    console.log('=========> Creating In Memory Database Service instance')
+    await redisAccessLayer.ensureConnected();
+    inMemDB = new InMemDB(redisAccessLayer.client, LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+    console.log('=========> In Memory Database Service created')
+  }
+  return inMemDB;
+}
 
-module.exports.inMemDB = inMemDB;
+module.exports.getInstance = getInstance;
 module.exports.DataRetriever = DataRetriever;

@@ -14,7 +14,6 @@ const databaseServices = require('../../services/database/database_services.js')
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const {MISSION_STATUS, ASSIGNMENT_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS } = require('../../modules/data_models.js');
 const { logData } = require('../../modules/systemlog.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 // Callbacks to database changes
@@ -26,7 +25,6 @@ function processWorkProcessEvents(msg) {
         switch (msg.channel) {
 
             case 'work_processes_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 workProcessId = payload['id'];
                 workProcessStatus = payload['status'];
                 let prepareWPData = Promise.resolve();
@@ -51,7 +49,7 @@ function processWorkProcessEvents(msg) {
                                         return databaseServices.work_processes.update_byId(workProcessId, {agent_ids: agentIds})})));
                 }
 
-                if(workProcessStatus == MISSION_STATUS.DISPATCHED || workProcessStatus == 'created')  // "created": for compatiblity with old GUI 
+                if(workProcessStatus == MISSION_STATUS.DISPATCHED ) 
                     databaseServices.work_processes.update_byId(payload['id'], {status: MISSION_STATUS.PREPARING})
                     .then(()=> prepareWPData
                     .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload)))
@@ -72,8 +70,6 @@ function processWorkProcessEvents(msg) {
 
 
             case 'work_processes_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
-                bufferNotifications.pushNotificationToFrontEnd('change_work_processes', payload); // keep for compatibility with old JS SDK versions.
                 workProcessStatus = payload['status'];
                 console.log(`WORKPROCESS ${payload['id']} STATUS: `, workProcessStatus);
                 switch (workProcessStatus) {

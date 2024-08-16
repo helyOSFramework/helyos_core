@@ -13,7 +13,6 @@ const agentComm = require('../../modules/communication/agent_communication.js');
 
 const { logData } = require('../../modules/systemlog.js');
 const {ASSIGNMENT_STATUS, MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS} = require('../../modules/data_models.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 
@@ -31,7 +30,6 @@ function processAssignmentEvents(msg) {
 
     switch (msg.channel) {
             case 'assignments_status_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 assignment_status = payload['status'];
 
                 if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){
@@ -102,7 +100,6 @@ function processAssignmentEvents(msg) {
                 break;
 
             case 'assignments_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 assignment_status = payload['status'];
                 if(assignment_status){  
                     if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){

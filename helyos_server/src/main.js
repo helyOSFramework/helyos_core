@@ -30,8 +30,9 @@ const initialization = require('./initialization.js');
 // Simple HTTP server imports
 const http = require('http');
 const express = require('express');
-const path = require('path');
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
+const DASHBOARD_PORT = 8080;
+const SOCKET_PORT = process.env.SOCKET_PORT || 5002
 const API_DOC_DIR = 'docs/';
 
 // Settings for horizontal scaling
@@ -56,6 +57,16 @@ if (MOCK_SERVICES === 'True'){
 // ----------------------------------------------------------------------------
 const {handleDatabaseMessages} = require('./event_handlers/database_event_subscriber.js');
 const databaseServices = require('./services/database/database_services.js');
+const memDBServices = require('./services/in_mem_database/mem_database_service.js');
+
+async function connectToMemDB(){
+    console.log("Connecting to In Memory Database...");
+    const inMemDB = await memDBServices.getInstance();
+    console.log("Connected");
+
+    return inMemDB;
+}
+
 
 async function connectToDB () {
     const postgClient = databaseServices.pgNotifications;
@@ -79,30 +90,29 @@ async function connectToDB () {
       ];
     await databaseServices.subscribeToDatabaseEvents(postgClient, dBEventsToSubscribe);  
     console.log(" ============  Subscribed to DB events =================="); 
-
-    await connectToRabbitMQ();
-    initialization.initWatchers();
-    console.log("============  Watchers Initialized  ==================");
-
-    handleDatabaseMessages(postgClient);
+    return postgClient;
 }
 
-connectToDB();
+
+
 
 
 // ----------------------------------------------------------------------------
 // 3) RabbitMQ Client setup -  Agent -> RabbitMQ ->  Nodejs(Rbmq-client) -> Postgres 
 // ----------------------------------------------------------------------------
 const RabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
+const RabbitMQTopology = require('./rabbitMQ_topology.js');
 
-function connectToRabbitMQ () {
-       return initialization.initializeRabbitMQAccounts()
-            .then(() => RabbitMQServices.connectAndOpenChannels({subscribe: false, connect: true, recoverCallback: initialization.helyosConsumingMessages}) )       
-            .then( dataChannels => {
-            // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
-                return initialization.configureRabbitMQSchema(dataChannels)
-                       .then( dataChannels => initialization.helyosConsumingMessages(dataChannels));
-        })
+async function connectToRabbitMQ() {
+      await initialization.initializeRabbitMQAccounts();
+      const dataChannels = await RabbitMQServices.connectAndOpenChannels({
+                                                                        subscribe: false,
+                                                                        connect: true,
+                                                                        recoverCallback: initialization.initRabbitMQConsumerWatcher
+                                                                        });
+      // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
+      await RabbitMQTopology.configureRabbitMQSchema(dataChannels);
+      return dataChannels;
 }
 
 
@@ -135,23 +145,52 @@ const postGraphileOptions = {
 // extendedErrors: ["hint", "detail", "errcode"],
     };
 
+const setGraphQLServer = () => {
+    return http.createServer(
+        postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
+        "public",
+        postGraphileOptions ));
 
+}
 
-
-const graphqlServer = http
-    .createServer(postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
-                                "public",postGraphileOptions )).listen(process.env.GQLPORT);
 
 
 // ----------------------------------------------------------------------------
 // 5) Serving the front-end dashboard - GUI for helyOS settings
 // ---------------------------------------------------------------------------
-const app = express();
+
+const webSocketServices = require('./services/socket_services.js');
+
+const setDashboardServer = () => {
+    const app = express();
     app.use('/api-docs', express.static(API_DOC_DIR));
     app.use('/dashboard', express.static(DASHBOARD_DIR));
     app.use('/', (req, res, next) => res.redirect('/dashboard'));
+    return app;
+}
 
-    app.listen(8080);
+
+const setWebSocketServer = () => {
+    return http.createServer().listen(SOCKET_PORT);;
+}
+
+async function start() {
+    const frontEndServer = setDashboardServer();
+    const graphqlServer = setGraphQLServer();
+    // const io = webSocketServices.startWebSocketServer();
+    const inMemDB = await connectToMemDB();
+    const postgClient = await connectToDB();
+    const dataChannels = await connectToRabbitMQ();
+    initialization.initRabbitMQConsumerWatcher(dataChannels);
+    initialization.initWatchers();
+    handleDatabaseMessages(postgClient, inMemDB);
+
+    frontEndServer.listen(DASHBOARD_PORT);
+    graphqlServer.listen(process.env.GQLPORT);
+
+}
+
+
 
 
 // Microservice API Documentation ----------------------------------------------
@@ -163,8 +202,34 @@ const app = express();
 // # RUN npm run make_path_api_doc
 
 
+// const cluster = require('cluster');
+
+// if (cluster.isMaster) {
+//     const numWorkers = 3;
+
+//     console.log(`Master ${process.pid} is running`);
 
 
+//         // Fork workers
+//         for (let i = 0; i < numWorkers; i++) {
+//             cluster.fork();
+//         }
+
+//         cluster.on('exit', (worker, code, signal) => {
+//             console.log(`Worker ${worker.process.pid} died`);
+//             // Optionally, you can fork a new worker if needed
+//             cluster.fork();
+//         });
+
+// } else {
+//     // Workers can share any TCP connection
+//     // They will run in parallel
+//     console.log(`Worker ${process.pid} started`);
+//     start();
+// }
+
+
+start();
 
 
 

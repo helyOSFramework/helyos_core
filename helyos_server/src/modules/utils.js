@@ -9,6 +9,56 @@ const camelize = function (text) {
     });
 }
 
+const isISODate = (value) => {
+    const parsedDate = Date.parse(value);
+    return !isNaN(parsedDate) && new Date(parsedDate).toISOString() === value;
+}
+
+const  serializeNonStringValues = (obj) => {
+    const serializedObj = {};
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        serializedObj[key] = value;
+      } else {
+        if (typeof value === 'undefined') {
+            serializedObj[key] = '';
+        } else {
+            serializedObj[key] = JSON.stringify(value);
+        }
+      }
+    });
+    return serializedObj;
+}
+
+
+function parseObjectValues(object) {
+    const parsedObject = {};
+  
+    for (const [key, value] of Object.entries(object)) {
+      let parsedValue;
+  
+      try {
+        parsedValue = JSON.parse(value);
+      } catch (e) {
+        // If JSON.parse fails, it's not a JSON string, so handle other cases
+        if (value === 'true' || value === 'false') {
+          parsedValue = value === 'true';
+        } else if (!isNaN(value)) {
+          parsedValue = Number(value);
+        } else if (isISODate(value)) {
+          parsedValue = new Date(value); // Handle datetime strings
+        } else {
+          parsedValue = value; // Keep it as a string
+        }
+      }
+  
+      parsedObject[key] = parsedValue;
+    }
+  
+    return parsedObject;
+  }
+  
 
 const camelizeAttributes = function (obj) {
     var newObject = {};
@@ -139,3 +189,7 @@ module.exports.camelizeAttributes = camelizeAttributes;
 module.exports.snakeCaseAttributes = snakeCaseAttributes;
 module.exports.lookup = lookup;
 module.exports.topologicalIndexing = topologicalIndexing;
+module.exports.serializeNonStringValues = serializeNonStringValues;
+module.exports.parseObjectValues = parseObjectValues;
+
+

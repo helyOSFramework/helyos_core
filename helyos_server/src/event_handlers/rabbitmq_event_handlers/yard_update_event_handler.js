@@ -1,14 +1,12 @@
 
 const InMemorySensorTable = {};
 const databaseServices = require('../../services/database/database_services');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 
-async function yardAutoUpdate(objMsg, uuid, bufferPeriod=0) {
+async function yardAutoUpdate(inMemDB, objMsg, uuid, bufferPeriod=0) {
     
     // OBJECT UPDATE
     let objUpdate = {id: objMsg['id'], ...objMsg};

@@ -58,10 +58,11 @@ const parseConditions = (tableName, conditions) => {
 
 class DatabaseLayer {
 
-	constructor(client, table, shortTimeClient = null) {
+	constructor(client, table, shortTimeClient = null, jsonFields=[]) {
 		this.client = client;
 		this.table = table;
 		this.shortTimeClient = shortTimeClient;
+		this.jsonFields = jsonFields;
 	}
 
 	_isEmptyObject(obj) {
@@ -74,7 +75,11 @@ class DatabaseLayer {
 
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
 			valueMasks.push('$' + (idx + 1));
 		});
 
@@ -181,7 +186,12 @@ class DatabaseLayer {
 
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
+			
 			valueMasks.push('$' + (idx + 1));
 		});
 
@@ -217,7 +227,11 @@ class DatabaseLayer {
 
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
 			valueMasks.push('$' + (idx + 1 + condColValues.length));
 		});
 
@@ -404,8 +418,8 @@ class DatabaseLayer {
 
 
 class AgentDataLayer extends DatabaseLayer {
-	constructor(client, shortTimeClient = null) {
-		super(client, 'public.agents', shortTimeClient);
+	constructor(client, shortTimeClient = null, jsonFields=[]) {
+		super(client, 'public.agents', shortTimeClient, jsonFields);
 	}
 
 

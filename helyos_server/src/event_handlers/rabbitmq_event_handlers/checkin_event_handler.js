@@ -2,7 +2,6 @@
 
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
 
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
@@ -22,8 +21,8 @@ try {
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION;
 const isYardUIdRegistered = (uid) => databaseServices.yards.get('uid', uid, ['id']).then(r => (r && r.length)? r[0].id : 0);
 
-function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
-    return processAgentCheckIn(uuid, data, msgProps, registeredAgent)
+function agentCheckIn(inMemDB, uuid, data, msgProps, registeredAgent, replyExchange) {
+    return processAgentCheckIn(inMemDB, uuid, data, msgProps, registeredAgent)
         .then(agent => {
             let replyTo = msgProps.replyTo?  msgProps.replyTo : agent.message_channel;
             if (replyTo) replyTo = replyTo.replace(/\//g,'.');
@@ -152,7 +151,7 @@ const removeAgentRbmqAccount = (agentData) => {
 }
 
 
-async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
+async function processAgentCheckIn(inMemDB, uuid, data, msgProps, registeredAgent) {
 
     // 1 - PARSE INPUT
     let checkinData = data.body? data.body : data; // compatibility for agent versions < 2.0
@@ -231,32 +230,14 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
 
 
     if ('factsheet' in checkinData){
-        factSheet =  checkinData['factsheet']; // VDA5050
+        agentUpdate['factsheet'] =  checkinData['factsheet']; // VDA5050-compatible
     } 
     
     if ('geometry' in checkinData) {
-        vehicleGeometry =  checkinData['geometry'];  
+        agentUpdate['geometry'] =  checkinData['geometry'];  
     }
 
-    if (vehicleGeometry){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(vehicleGeometry)) {
-            agentUpdate['geometry'] =  JSON.stringify(vehicleGeometry); // Backward compatibility: 
-        } else {
-            agentUpdate['geometry'] = vehicleGeometry; // Backward compatibility: 
-        }
-        //
-    }
 
-    if (factSheet){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(factSheet)) {
-            agentUpdate['factsheet'] =  JSON.stringify(factSheet);
-        } else {
-            agentUpdate['factsheet'] = factSheet;
-        }
-        //
-    }
 
     inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
     return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0).then(()=>agentUpdate);    
