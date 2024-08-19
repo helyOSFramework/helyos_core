@@ -99,7 +99,7 @@
 <section class="service-detail-container" *ngIf="selectedItem" >
         <h4>{{selectedItem.name}}</h4>
 
-        <div class="row" style="margin-left:3px">
+        <div class="row">
             <div class="checkbox">
                 <label> <input type="checkbox" [(ngModel)]="selectedItem.isDummy"  name="isDummy" /> Dummy service </label>
             </div>
@@ -133,7 +133,7 @@
 
                 <fieldset class="form-group col-xl-4">
                     <label>Domain</label>
-                    <select class="form-control" [(ngModel)]="selectedItem.class" name="class">
+                    <select class="form-control form-select" [(ngModel)]="selectedItem.class" name="class">
                         <option value="Assignment planner">Assignment planner</option>
                         <option value="Map server">Map server</option>
                         <option value="Storage server">Storage server</option>
@@ -165,7 +165,7 @@
             </div>
 
             <div class="row" >
-                <div style="margin-left: 14px;"> Context data: </div>
+                <div class="w-auto"> Context data: </div>
                 <fieldset class="form-group col-xl-8">
                     <div class="checkbox">
                         <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include yard and map objects data  </label>
