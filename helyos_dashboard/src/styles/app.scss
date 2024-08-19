@@ -4,7 +4,7 @@
 @import 'utils';
 @import 'rtl';
 @import 'responsive';
-@import '_bootstrap-overrides';
+@import 'bootstrap-overrides';
 
 @media print {
     .breadcrumb {
