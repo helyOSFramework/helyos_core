@@ -1,0 +1,9 @@
+// https://code.visualstudio.com/docs/getstarted/settings#_default-settings
+{
+    "files.exclude": {
+        ".angular/": true,
+        "node_modules/": true,
+        "dist/": true,
+        "package-lock.json": true,
+    }
+}
