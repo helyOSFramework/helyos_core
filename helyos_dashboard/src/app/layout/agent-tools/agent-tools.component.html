@@ -1,6 +1,6 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>Agent Tools</h1>
-    <div style="text-align: right; margin-bottom: 6px;">
+<div class="row" style="justify-content:space-between">
+    <h1 class="w-auto">Agent Tools</h1>
+    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
         <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
             Documentation
         </button>
@@ -61,9 +61,9 @@
 
     <div class="card-footer" style="display:flex;justify-content:space-between">
         <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
-            <div>Instant Action Command</div>
+            <div class="w-auto">Instant Action Command</div>
             <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
-            <button class="btn"  (click)="sendInstantAction()"> SEND </button>
+            <button class="btn btn-light w-auto"  (click)="sendInstantAction()"> SEND </button>
         </div>
     
         <div *ngIf="!selectedItem" class="form-group row col-xl-6">
@@ -117,17 +117,16 @@
                         <label> type </label>
                         <input class="form-control"  [(ngModel)]="selectedItem.agentType" name="agentType" placeholder="e.g. swapbody" />
                     </fieldset>
-                                
-                    <div class="row thumbnailContainer" >
-                        <input #fileUpload  type="file" class="file-upload" (change)="onImageSelected($event)" 
+
+                    <div class="w-auto row thumbnailContainer" >
+                        <input #fileUpload  type="file" class="file-upload w-auto" (change)="onImageSelected($event)" 
                         accept=".png,.jpeg, .jpg">
                 
-                        <label> Thumbnail picture </label>
+                        <label class="w-auto"> Thumbnail picture </label>
                 
-                        <button  class="btn" (click)="fileUpload.click()"> Upload </button>
-                        <img height="100%" [src]="selectedItem.picture">
+                        <button class="btn btn-light w-auto" (click)="fileUpload.click()"> Upload </button>
+                        <img class="w-auto" height="100%" [src]="selectedItem.picture">
                     </div>
-
                 </div>
 
 
@@ -142,7 +141,7 @@
 
                 <div class="row">
 
-                    <fieldset class="form-group" style="margin-left: 15px; display:flex; align-items: center;" >
+                    <fieldset class="form-group" style="display:flex; align-items: center;" >
                         <input   id="verifySignature" type="checkbox" style="height:38px; width: 40px; margin-right: 10px;"
                                 class="form-control" 
                                 [(ngModel)]="selectedItem.verifySignature" name="verifySignature" />
@@ -211,13 +210,13 @@
 
                     <fieldset (mouseover)="showAssignmentTip=1" class="form-group col-xl-3">
                         <label > Accept assignments </label> 
-                        <input title="isActuator?" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control" 
+                        <input title="isActuator?" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.isActuator" name="isActuator" />
                     </fieldset>
 
                     <fieldset (mouseover)="showAssignmentTip=2"class="form-group col-xl-3" >
                         <label> Acknowledge reservation </label> 
-                        <input  title="acknowledgeReservation" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control" 
+                        <input  title="acknowledgeReservation" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.acknowledgeReservation" name="acknowledgeReservation" />
                     </fieldset>
 
@@ -258,7 +257,7 @@
                     <div class="row">
                         <fieldset class="form-group col-xl-6">
                             <label>Protocol</label>
-                            <select class="form-control" [(ngModel)]="selectedItem.protocol" name="protocol" (ngModelChange)="changeProtocol()" >
+                            <select class="form-control form-select" [(ngModel)]="selectedItem.protocol" name="protocol" (ngModelChange)="changeProtocol()" >
                                 <option [ngValue]="'AMQP'"> AMQP (default)</option>
                                 <option [ngValue]="'MQTT'"> MQTT </option>
                             </select>
@@ -266,22 +265,26 @@
                     </div>
 
                     <div class="row" *ngIf="selectedItem.protocol == 'AMQP'">
-                        <ul style="font-size: small;" >
-                            <li> Suitable for sensors and actuators.</li>
-                            <li> Security: helyOS and agent message senders are validated by the message broker.</li>
-                        </ul>            
+                        <div class="col-xl-12">
+                            <ul style="font-size: small;" >
+                                <li> Suitable for sensors and actuators.</li>
+                                <li> Security: helyOS and agent message senders are validated by the message broker.</li>
+                            </ul>
+                        </div>       
                     </div>            
                     <div class="row" *ngIf="selectedItem.protocol == 'MQTT'">
+                        <div class="col-xl-12">
                             <ul style="font-size: small;" >
                                 <li> Suitable for sensors and actuators, but actuators must handle multiple assignments: MQTT doesn't support messages queueing.</li> 
                                 <li> Security: Sender validation must be implemented within the agent. You may use the helyOS and agent RSA signatures for that.</li>
-                            </ul>            
+                            </ul>
+                        </div>       
                     </div>
 
                     <div class="row">
                         <fieldset class="form-group col-xl-6">
                             <label>Registration</label>
-                            <select class="form-control" [disabled]="selectedItem.protocol == 'MQTT'" [(ngModel)]="selectedItem.allowAnonymousCheckin" name="allowAnonymousCheckin" (ngModelChange)="changeRegistration()">
+                            <select class="form-control form-select" [disabled]="selectedItem.protocol == 'MQTT'" [(ngModel)]="selectedItem.allowAnonymousCheckin" name="allowAnonymousCheckin" (ngModelChange)="changeRegistration()">
                                 <option [ngValue]="true"> Let helyOS create RabbitMQ account</option>
                                 <option [ngValue]="false"> Set username and password </option>
                             </select>
@@ -334,7 +337,7 @@
                         
                         <fieldset class="form-group col-xl-4">
                             <label>connection</label>
-                            <select class="form-control" [(ngModel)]="selectedItem.connectionStatus" name="connectionStatus">
+                            <select class="form-control form-select" [(ngModel)]="selectedItem.connectionStatus" name="connectionStatus">
                                 <option value="offline">offline</option>
                                 <option value="online">online</option>
                             </select>
@@ -343,7 +346,7 @@
 
                         <fieldset class="form-group col-xl-4">
                             <label>status</label>
-                            <select class="form-control" [(ngModel)]="selectedItem.status" name="status">
+                            <select class="form-control form-select" [(ngModel)]="selectedItem.status" name="status">
                                 <option value="free">free</option>
                                 <option value="busy">busy</option>
                                 <option title="for 'ready' you need to define the work process" value="ready">ready</option>
