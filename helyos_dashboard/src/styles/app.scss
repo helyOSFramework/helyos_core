@@ -35,7 +35,8 @@ tr {
 }
 
 .selectedHighlight {
-    background-color: #ced4da;
+    --bs-table-bg: #ced4da;
+    border-left: solid 1px;
 }
 
 .detail-container{
