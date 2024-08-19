@@ -68,11 +68,13 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of services" (click)="getItem(item.id)" [title]="item.enabled ? '' : 'Service is disabled'"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id, 'disable-row': !item.enabled,
-                               'assignment-row': item.class === 'Assignment planner',
-                               'mapserver-row': item.class === 'Map server',
-                               'storage-row': item.class === 'Storage server'
-                            }">
+                    [ngClass]="{
+                        'selectedHighlight': item.id==selectedItem?.id,
+                        'disable-row': !item.enabled,
+                        'assignment-row': item.class === 'Assignment planner',
+                        'mapserver-row': item.class === 'Map server',
+                        'storage-row': item.class === 'Storage server'
+                    }">
                     <th scope="row">{{item.serviceType}}</th>
                     <td>{{item.class}}</td>
                     <td>{{item.name}}</td>
