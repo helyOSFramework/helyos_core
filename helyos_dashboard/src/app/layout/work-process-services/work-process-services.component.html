@@ -103,7 +103,7 @@
                 <fieldset class="form-group col-xl-6">
                     <label>Add Step Dependencies</label>
                     <div class="row">
-                        <select  style="margin-left:10px;" class="form-control form-select" style="width: 20%;" [(ngModel)]="addedDep" name="avlbSteps" >
+                        <select class="form-control form-select" style="width: 20%;" [(ngModel)]="addedDep" name="avlbSteps" >
                             <option *ngFor="let avlbSteps of availableSteps" [value]="avlbSteps"> {{avlbSteps}}</option>
                             <option value=""> </option>
 

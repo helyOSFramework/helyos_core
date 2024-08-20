@@ -110,7 +110,7 @@
                     </fieldset>
                 </div>
 
-                <div  class="row" style="height: 100px;">
+                <div  class="row">
 
                     <fieldset class="form-group col-xl-3">
                         <label> type </label>
@@ -134,7 +134,7 @@
 
                 <div class="row">
                     <fieldset class="form-group col-xl-12">
-                        <label> Publick key (PEM) </label>
+                        <label> Public key (PEM) </label>
                         <textarea class="form-control" rows=8 [(ngModel)]="selectedItem.publicKey" name="publicKey"
                             placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
                     </fieldset>
@@ -146,7 +146,7 @@
                         <input   id="verifySignature" type="checkbox" style="height:38px; width: 40px; margin-right: 10px;"
                                 class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.verifySignature" name="verifySignature" />
-                        <label> Use this Publick key to validate the RSA signature of the agent. </label> 
+                        <label> Use this Public key to validate the RSA signature of the agent. </label> 
 
                     </fieldset>
                 </div>
@@ -207,7 +207,7 @@
                 <h5>Mission settings</h5>
                 <div class="field-group"> 
 
-                <div  class="row" style="height: 100px;">
+                <div  class="row">
 
                     <fieldset (mouseover)="showAssignmentTip=1" class="form-group col-xl-3">
                         <label > Accept assignments </label> 

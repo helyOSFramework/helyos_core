@@ -137,7 +137,7 @@
 
                         <fieldset class="form-group col-xl-2">
                             <label>Status</label> 
-                            <select  style="margin-left:10px;" class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
+                            <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
                                     name="status">
                                 <option value="draft"> draft </option>
                                 <option value="cancelling"> cancelling </option>
@@ -182,7 +182,7 @@
 
 
 
-            <div class="card mb-3" style="margin: 0px auto; width: 66%;">
+            <div class="card mb-3">
                 <div class="card-header " style="display:flex;justify-content:space-between">
                     <div>Assignments of the mission {{selectedItem.workProcessTypeName}}</div> 
                     <div class="clickable" style="width: fit-content;" (click)="assignmentList()">
