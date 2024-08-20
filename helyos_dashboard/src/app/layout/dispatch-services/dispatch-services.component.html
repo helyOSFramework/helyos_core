@@ -1,6 +1,6 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>Dispatched Services </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
+<div class="row" style="justify-content:space-between">
+    <h1 class="w-auto">Dispatched Services </h1>
+    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
         <button  class="btn btn-lg btn-outline-dark" >
                   Documentation
         </button>
@@ -13,7 +13,7 @@
         <input type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId"  (keydown.enter)="filterList(0)" />
     </fieldset>
 
-    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary" (click)="filterList(0)" type="submit">APPLY</button>
+    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary w-auto" (click)="filterList(0)" type="submit">APPLY</button>
 </div>
 
 <div class="card mb-3">
