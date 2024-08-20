@@ -2,6 +2,7 @@ $topnav-background-color: #222;
 :host {
     .navbar {
         background-color: $topnav-background-color;
+        --bs-navbar-padding-x: 1rem;
 
         .navbar-brand {
             color: #fff;
@@ -19,7 +20,6 @@ $topnav-background-color: #222;
         }
         .navbar-brand {
             width: 235px;
-            margin-left: 15px;
         }
     }
 
