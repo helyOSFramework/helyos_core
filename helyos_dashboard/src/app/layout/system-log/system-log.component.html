@@ -1,5 +1,4 @@
-
-<div class="row" style="padding: 0px 24px; justify-content:space-between">
+<div class="row" style="justify-content:space-between">
     <h1>System Logs</h1>
 </div>
 
@@ -16,7 +15,7 @@
 
     <fieldset class="form-group col-xl-4">
         <label>Origin</label>
-        <select class="form-control" [(ngModel)]="filterOrigin" name="filterOrigin">
+        <select class="form-control form-select" [(ngModel)]="filterOrigin" name="filterOrigin">
             <option value="agent">agent</option>
             <option value="microservice">microservice</option>
             <option value="helyos_core">helyOS</option>
@@ -25,7 +24,7 @@
     </fieldset>
 
 
-    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary" (click)="filterList(0)" type="submit">APPLY</button>
+    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary w-auto" (click)="filterList(0)" type="submit">APPLY</button>
 
 </div>
 
