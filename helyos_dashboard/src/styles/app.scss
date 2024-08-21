@@ -1,10 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
-@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-overrides';
 @import 'spinner';
 @import 'utils';
 @import 'rtl';
 @import 'responsive';
-@import 'bootstrap-overrides';
 
 @media print {
     .breadcrumb {
