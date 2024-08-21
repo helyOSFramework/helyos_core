@@ -6,7 +6,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production --base-href /dashboard/",
+    "build:dev": "ng build --configuration development",
+    "build:prod": "ng build --configuration production --base-href /dashboard/",
     "gitbuild": "ng build --configuration production --base-href **/dist/",
     "test": "ng test",
     "test-ci": "TEST_CI=true ng test",
