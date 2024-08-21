@@ -2,7 +2,7 @@
 
 An Angular-based admin dashboard for the HelyOS core, built with [Angular 17](https://v17.angular.io/docs/), [Bootstrap 5](https://getbootstrap.com/docs/5.0/), and [NG Bootstrap 16](https://ng-bootstrap.github.io/releases/16.x/#/home).
 
-This project is originally derived from the [SB Admin Angular 17 + Bootstrap 5 Template](https://github.com/start-angular/SB-Admin-BS4-Angular-8) (Commit: [b812a1bb1692050e299e904973e578090bc50393](https://github.com/start-angular/SB-Admin-BS4-Angular-8/tree/b812a1bb1692050e299e904973e578090bc50393)).
+This project is originally derived from the [SB Admin rewritten in Angular 17 and Bootstrap 5](https://github.com/start-angular/SB-Admin-BS4-Angular-8) (Commit: [b812a1bb1692050e299e904973e578090bc50393](https://github.com/start-angular/SB-Admin-BS4-Angular-8/tree/b812a1bb1692050e299e904973e578090bc50393)).
 
 ## Getting Started
 
