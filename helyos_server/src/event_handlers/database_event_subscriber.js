@@ -19,51 +19,50 @@ const {processMicroserviceEvents} = require('./database_event_handlers/microserv
 const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_event_handlers/checkin_event_handler.js');
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
+const databaseServices = require('../services/database/database_services.js');
 
 
-function broadcastNotifications(msg) {
-    let payload = JSON.parse(msg.payload);
-
-    switch (msg.channel) {
+function broadcastNotifications(channel, payload) {
+    switch (channel) {
 
             case 'agent_deletion': // Changes originate from applications (e.g. dashboard).
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'change_agent_status': // Changes originate from agents.
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'assignments_status_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'assignments_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case  'mission_queue_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'mission_queue_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'service_requests_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'service_requests_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'work_processes_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
 
             case 'work_processes_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
                 break;
     }
 }
@@ -75,28 +74,27 @@ function broadcastNotifications(msg) {
 function handleDatabaseMessages(client, inMemDB) {
 
     client.on('notification', async function (msg) {
+        let channel = msg.channel;
         let payload = null
-        let msgchannel0 = msg.channel;
-        let id = 0;
-
-        broadcastNotifications(msg);
-    
+        // let payload = JSON.parse(msg.payload);
+        
         const res = await client.query("DELETE FROM events_queue USING ( SELECT * FROM events_queue LIMIT 1 FOR UPDATE SKIP LOCKED) q WHERE q.id = events_queue.id RETURNING events_queue.*;");
         if (res.rows.length){
             payload = JSON.parse(res.rows[0].payload)
-            msg.channel = res.rows[0].event_name;
-            id =  res.rows[0].id;
-        }else {
+            channel = res.rows[0].event_name;
+            broadcastNotifications(channel, payload);
+
+        } else {
             return false;
         }
 
 
-        switch (msg.channel) {
+        switch (channel) {
         // AGENT TABLES TRIGGERS
 
             case 'change_agent_security': // Changes originate from agents or from applications (e.g. dashboard).
                 console.log('change_agent_security', payload);
-                inMemDB.update('agents', 'uuid', payload, new Date(), 'realtime');
+                inMemDB.update('agents', 'uuid', payload, new Date(), 'realtime',  databaseServices.agents);
                 break;
 
             case 'agent_deletion': // Changes originate from applications (e.g. dashboard).

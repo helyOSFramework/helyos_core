@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const {getInstance} = require('./services/in_mem_database/mem_database_service');
 const NODE_ID = uuidv4();
 const LEADER_KEY = 'leader';
-const LEADER_TTL = 8000; // 6 seconds
+const LEADER_TTL = 5000; // miliseconds
 
 
 let amILeader=false;
@@ -10,13 +10,12 @@ let inputBecomingFollwer;
 let inputBecomingLeader;
 
 async function tryToBecomeLeader(becomingLeader, becomingFollower) {
-    console.log(becomingLeader,becomingFollower )
     const inMemDB = await getInstance();
     const redisClient = inMemDB.client;
     try {
         const result = await redisClient.set(LEADER_KEY, NODE_ID, {
             NX: true,  // Set the key only if it does not already exist
-            PX: 5000   // Set expiration time to 5000 milliseconds (5 seconds)
+            PX: LEADER_TTL  
           });
         if (result) {
             console.log(`Node ${NODE_ID} is the leader ${result}`);
@@ -36,7 +35,7 @@ async function tryToBecomeLeader(becomingLeader, becomingFollower) {
             console.log(`Current leader is ${leaderId}`);
             // Wait for a backoff period before trying again
             setTimeout(()=> tryToBecomeLeader(becomingLeader, becomingFollower),
-                         Math.random() * 2000 + LEADER_TTL / 2); 
+                         Math.random() * 1000 + LEADER_TTL / 2); 
             return false;
         }
     } catch (error) {
@@ -55,7 +54,6 @@ async function renewLeadership(redisClient,becomingLeader, becomingFollower) {
                     NX: false,  // Set the key only if it does not already exist
                     PX: 5000   // Set expiration time to 5000 milliseconds (5 seconds)
                   });
-                console.log(`Node ${NODE_ID} renewed leadership`);
                 renewLeadership(redisClient, becomingLeader, becomingFollower);
             } else {
                 console.log(`Node ${NODE_ID} lost leadership ${leaderId}`);
