@@ -14,7 +14,6 @@ const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Ti
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
         AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE } =  require('./services/message_broker/rabbitMQ_services.js');
-const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
 
 // Settings for horizontal scaling
 let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'False';
@@ -181,6 +180,7 @@ function initializeRabbitMQAccounts() {
 
 
     async function initRabbitMQConsumerWatcher (dataChannels) {
+        const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
         const mainChannel = dataChannels[0];
         const secondaryChannel = dataChannels[1];
         console.log(`\n ================================================================`+
