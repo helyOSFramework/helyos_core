@@ -7,7 +7,7 @@ const {serializeNonStringValues, parseObjectValues} = require('../../modules/uti
 const { createClient } = require('redis');
 
 // Create Redis client
-const client = createClient({
+const pubClient = createClient({
   socket: {
     host: REDIS_HOST,
     port: REDIS_PORT,
@@ -15,24 +15,56 @@ const client = createClient({
   password: REDIS_PASSWORD,
 });
 
-// Handle connection events
+const subClient = pubClient.duplicate();
+
+const pubForSocketIOServer = createClient({
+  socket: {
+    host: REDIS_HOST,
+    port: REDIS_PORT,
+  },
+  password: REDIS_PASSWORD,
+});
+
+const subForSocketIOServer = pubForSocketIOServer.duplicate();
+
+
 async function ensureConnected() {
-  if (!client.isOpen) {
-    await client.connect();
+  if (!pubClient.isOpen) {
+    await pubClient.connect();
+  }
+  if (!subClient.isOpen) {
+    await subClient.connect();
+  }
+  if (!pubForSocketIOServer.isOpen) {
+    await pubForSocketIOServer.connect();
+  }
+  if (!subForSocketIOServer.isOpen) {
+    await subForSocketIOServer.connect();
   }
 }
 
-client.on('connect', () => {
-  console.log('Connected to Redis');
+
+// Handle connection events
+
+pubClient.on('connect', () => {
+  console.log('Pub client Connected to Redis');
 });
 
-client.on('error', (error) => {
-  console.error('Redis connection error:', error);
+pubClient.on('error', (error) => {
+  console.error('Pub client Redis connection error:', error);
+});
+
+subClient.on('connect', () => {
+  console.log('Sub client Connected to Redis');
+});
+
+subClient.on('error', (error) => {
+  console.error('Sub client Redis connection error:', error);
 });
 
 // Initialize the Redis client
 function initClient() {
-  return client.connect();
+  return Promise.all([pubClient.connect(), subClient.connect(), pubForSocketIOServer.connect(), subForSocketIOServer.connect()]);
 }
 
 // Get value from key
@@ -263,9 +295,9 @@ async function getAndDeleteHashesByPattern(client, pattern) {
     // Attempt to acquire the lock
     const lockAcquired = await acquireLock(client, lockKey);
     if (!lockAcquired) {
-      console.log('Could not acquire lock, operation aborted.');
+      console.log('Could not acquire Mem db lock, operation skipped.');
       return false;
-    }
+    } 
 
     // Start a transaction for hash retrieval
     const multi = client.multi();
@@ -369,7 +401,10 @@ initClient()
   });
 
 module.exports = {
-  client,
+  pubClient,
+  subClient,
+  pubForSocketIOServer,
+  subForSocketIOServer,
   ensureConnected,
   getValue,
   setValue,
