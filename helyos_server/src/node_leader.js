@@ -26,13 +26,10 @@ async function tryToBecomeLeader(becomingLeader, becomingFollower) {
             renewLeadership(redisClient,becomingLeader, becomingFollower);
             return true;
         } else {
-            console.log(`Node ${NODE_ID} is not the leader`);
             if (amILeader){
                 inputBecomingLeader = await becomingFollower(inputBecomingFollwer);
                 amILeader = false;
             }
-            const leaderId = await redisClient.get(LEADER_KEY);
-            console.log(`Current leader is ${leaderId}`);
             // Wait for a backoff period before trying again
             setTimeout(()=> tryToBecomeLeader(becomingLeader, becomingFollower),
                          Math.random() * 1000 + LEADER_TTL / 2); 

@@ -239,8 +239,8 @@ async function processAgentCheckIn(inMemDB, uuid, data, msgProps, registeredAgen
 
 
 
-    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
-    return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0).then(()=>agentUpdate);    
+    return inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime',  databaseServices.agents)
+    .then(()=>agentUpdate);
 }
 
 

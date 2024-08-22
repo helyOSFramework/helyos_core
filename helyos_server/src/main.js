@@ -25,7 +25,6 @@
 // ----------------------------------------------------------------------------
 // 1) IMPORTS 
 // ----------------------------------------------------------------------------
-const initialization = require('./initialization.js');
 
 // Simple HTTP server imports
 const http = require('http');
@@ -38,6 +37,8 @@ const API_DOC_DIR = 'docs/';
 // Settings for horizontal scaling
 let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
 HELYOS_REPLICA = HELYOS_REPLICA === 'true';
+const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
+
 
 // Test Settings: Override external services by `Nock` services (mocks).
 // See the file microservice_mocks.js for more details.
@@ -55,9 +56,9 @@ if (MOCK_SERVICES === 'True'){
 // This approach is not scalable, as PG_NOTIFY broadcasts to all listening clients.
 // In a near future, we will use a message queue table to handle the database events.
 // ----------------------------------------------------------------------------
-const {handleDatabaseMessages} = require('./event_handlers/database_event_subscriber.js');
-const databaseServices = require('./services/database/database_services.js');
+
 const memDBServices = require('./services/in_mem_database/mem_database_service.js');
+const databaseServices = require('./services/database/database_services.js');
 
 async function connectToMemDB(){
     console.log("Connecting to In Memory Database...");
@@ -67,8 +68,7 @@ async function connectToMemDB(){
     return inMemDB;
 }
 
-
-async function connectToDB () {
+async function connectToDB (initialization) {
     const postgClient = databaseServices.pgNotifications;
     console.log("============  Client connected with DB ==================");
     await initialization.setInitialDatabaseData();
@@ -100,20 +100,23 @@ async function connectToDB () {
 // ----------------------------------------------------------------------------
 // 3) RabbitMQ Client setup -  Agent -> RabbitMQ ->  Nodejs(Rbmq-client) -> Postgres 
 // ----------------------------------------------------------------------------
+
 const RabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
 const RabbitMQTopology = require('./rabbitMQ_topology.js');
 
-async function connectToRabbitMQ() {
-      await initialization.initializeRabbitMQAccounts();
-      const dataChannels = await RabbitMQServices.connectAndOpenChannels({
-                                                                        subscribe: false,
-                                                                        connect: true,
-                                                                        recoverCallback: initialization.initRabbitMQConsumerWatcher
-                                                                        });
-      // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
-      await RabbitMQTopology.configureRabbitMQSchema(dataChannels);
-      return dataChannels;
+async function connectToRabbitMQ(initialization) {
+
+    await initialization.initializeRabbitMQAccounts();
+    const dataChannels = await RabbitMQServices.connectAndOpenChannels({
+                                                                    subscribe: false,
+                                                                    connect: true,
+                                                                    recoverCallback: initialization.initRabbitMQConsumerWatcher
+                                                                    });
+    // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
+    await RabbitMQTopology.configureRabbitMQSchema(dataChannels);
+    return dataChannels;
 }
+
 
 
 // ----------------------------------------------------------------------------
@@ -158,7 +161,7 @@ const setGraphQLServer = () => {
 // ----------------------------------------------------------------------------
 // 5) Serving the front-end dashboard - GUI for helyOS settings
 // ---------------------------------------------------------------------------
-
+const initialization = require('./initialization.js');
 const webSocketServices = require('./services/socket_services.js');
 
 const setDashboardServer = () => {
@@ -170,21 +173,21 @@ const setDashboardServer = () => {
 }
 
 
-const setWebSocketServer = () => {
-    return http.createServer().listen(SOCKET_PORT);;
-}
+
 
 async function start() {
     const frontEndServer = setDashboardServer();
     const graphqlServer = setGraphQLServer();
-    // const io = webSocketServices.startWebSocketServer();
     const inMemDB = await connectToMemDB();
-    const postgClient = await connectToDB();
-    const dataChannels = await connectToRabbitMQ();
+    const websocket = await webSocketServices.setWebSocketServer(SOCKET_PORT);
+    const postgClient = await connectToDB(initialization);
+    const dataChannels = await connectToRabbitMQ(initialization);
     initialization.initRabbitMQConsumerWatcher(dataChannels);
     initialization.initWatchers();
+    const {handleDatabaseMessages} = require('./event_handlers/database_event_subscriber.js');
     handleDatabaseMessages(postgClient, inMemDB);
 
+    websocket.listen(SOCKET_PORT);
     frontEndServer.listen(DASHBOARD_PORT);
     graphqlServer.listen(process.env.GQLPORT);
 
@@ -202,34 +205,35 @@ async function start() {
 // # RUN npm run make_path_api_doc
 
 
-// const cluster = require('cluster');
+const cluster = require('cluster');
+const { setupPrimary } = require("@socket.io/cluster-adapter");
 
-// if (cluster.isMaster) {
-//     const numWorkers = 3;
+if (cluster.isMaster && NUM_THREADS>1) {
 
-//     console.log(`Master ${process.pid} is running`);
+    console.log(`Master ${process.pid} is running`);
+        if (webSocketServices.SOCKET_IO_ADAPTER === 'cluster'){
+            setupPrimary(); // Set up socketio connections between workers
+        }
+        // Fork workers
+        for (let i = 0; i < NUM_THREADS; i++) {
+            cluster.fork();
+        }
+
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(`Worker ${worker.process.pid} died`);
+            // Optionally, you can fork a new worker if needed
+            cluster.fork();
+        });
+
+} else {
+    // Workers can share any TCP connection
+    // They will run in parallel
+    console.log(`Worker ${process.pid} started`);
+    start();
+}
 
 
-//         // Fork workers
-//         for (let i = 0; i < numWorkers; i++) {
-//             cluster.fork();
-//         }
-
-//         cluster.on('exit', (worker, code, signal) => {
-//             console.log(`Worker ${worker.process.pid} died`);
-//             // Optionally, you can fork a new worker if needed
-//             cluster.fork();
-//         });
-
-// } else {
-//     // Workers can share any TCP connection
-//     // They will run in parallel
-//     console.log(`Worker ${process.pid} started`);
-//     start();
-// }
-
-
-start();
+// start();
 
 
 

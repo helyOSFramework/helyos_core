@@ -46,29 +46,30 @@ class InMemDB {
  * @returns {InMemDB} An instance of the InMemDB class.
  * 
  */
-    constructor(connectedClient, longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
+    constructor(connectedClients, longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
         if (InMemDB.instance) {
             return InMemDB.instance;
         }
 
-        this.client =  connectedClient;
+        this.client =  connectedClients[0];
+        this.subClient =  connectedClients[1];
         this.agents = {};
         this.agents_stats = {};
         this.map_objects_stats = {};
 
-        this.getAsync = (key) => redisAccessLayer.getValue(this.client,key);
+        this.getAsync = (key) => redisAccessLayer.getValue(this.subClient,key);
         this.setAsync = (key, value) => redisAccessLayer.setValue(this.client, key, value);
         this.delAsync = (key) => redisAccessLayer.deleteKey(this.client, key);
         this.msetAsync = (keyValuePairs) => redisAccessLayer.setManyValues(this.client, {...keyValuePairs});
         this.atomicGetDelete = (key) => redisAccessLayer.getAndDeleteKey(this.client, key);
 
-        this.hGetFieldAsync = (hash, field) => redisAccessLayer.hGet(this.client, hash, field);
-        this.hGetAsync = (hash, field) => redisAccessLayer.hGetAll(this.client, hash);
+        this.hGetFieldAsync = (hash, field) => redisAccessLayer.hGet(this.subClient, hash, field);
+        this.hGetAsync = (hash, field) => redisAccessLayer.hGetAll(this.subClient, hash);
         this.hSetAsync = (hash,object) => redisAccessLayer.hSet(this.client, hash, object);
         this.hDelAsync = (hash,field) => redisAccessLayer.deleteKey(this.client, hash, field);
         this.hashDelAsync = (hash) => redisAccessLayer.deleteHash(this.client, hash);
         this.atomicHGetDelete = (hash) => redisAccessLayer.getAndDeleteHash(this.client, hash);
-        this.getHashesByPattern = (pattern) => redisAccessLayer.getHashesByPattern(this.client, pattern);
+        this.getHashesByPattern = (pattern) => redisAccessLayer.getHashesByPattern(this.subClient, pattern);
         this.getAndDeleteHashesByPattern = (pattern) => redisAccessLayer.getAndDeleteHashesByPattern(this.client, pattern);
 
         this.longTimeout = longTimeout;
@@ -102,17 +103,25 @@ class InMemDB {
      * @param {string} indexName - The name of the table index.
      * @param {Object} data - The updated data.
      * @param {number} timeStamp - The timestamp of the updated data.
+     * @param {string} mode - If update should be "buffered" or "realtime".
+     * @param {Object} dbService - The database service object. Required if mode is "realtime".
      * @returns {Promise} A promise that resolves with a status code.
      */
-    async update(tableName, indexName, data, timeStamp, statsLabel = 'buffered') {
+    async update(tableName, indexName, data, timeStamp, mode = 'buffered', dbService=null) {
         if (!data) return false;
         const keyId = data[indexName];
         const entityHash = `${tableName}:${keyId}`;
         const tableStats = `${tableName}_stats`;
         const statHash = `${tableStats}:${keyId}`;
         data['last_message_time'] = timeStamp;
-        await this.hSetAsync(entityHash, data);
-        await this.updateBuffer(tableName, indexName, data, timeStamp);
+
+        if (mode === 'realtime') {
+            await Promise.all(  [this.hSetAsync(entityHash, data),
+                                 dbService.update(indexName, keyId, data)
+                                ]);
+        } else {
+            await this.hSetAsync(entityHash, data);
+        }
 
         let statsData = this[tableStats][keyId];
 
@@ -122,9 +131,13 @@ class InMemDB {
                                         updtPerSecond: new UpdateStats(), 
                                         errorPerSecond: new UpdateStats(10)
                                         };
-            statsData = this[tableStats][keyId];
         }
         
+        if (mode == 'buffered') {
+            await this.updateBuffer(tableName, indexName, data, timeStamp);
+        }
+
+        // Immediately save in database:
 
         // const patchStat = {}
         // patchStat[keyId] = statsData
@@ -182,13 +195,10 @@ class InMemDB {
         // console.log('start flush.......')
         this.lastFlushTime = new Date();
         const objectsToSave = await this.getAndDeleteHashesByPattern(`${tableBufferName}:*`);
+        if (!objectsToSave) return;
+
+
         const tableStatsData = this[tableStatsName];
-
-        if (objectsToSave['agents_buffer:Bb34069fc5-fdgs-434b-b87e-f19c5435113']&&
-            objectsToSave['agents_buffer:Bb34069fc5-fdgs-434b-b87e-f19c5435113']['geometry']
-        ) console.log('objectsToSave', objectsToSave);
-
-
         const objArray = Object.keys(objectsToSave)
                     .map(key => { 
                         const keyId = objectsToSave[key][indexName]
@@ -384,7 +394,7 @@ class DataRetriever {
 
         const result = await this.dbServices[this.tableName].get(indexName, index, this.requiredFields);
         if (result.length) {
-            await this.inMemDB.update(this.tableName, indexName, result[0], new Date(), 'realtime');
+            await this.inMemDB.update(this.tableName, indexName, result[0], new Date(), 'realtime', this.dbServices[this.tableName]);
             return result[0];
         } else {
             return null;
@@ -437,7 +447,8 @@ async function getInstance() {
   if (!inMemDB) {
     console.log('=========> Creating In Memory Database Service instance')
     await redisAccessLayer.ensureConnected();
-    inMemDB = new InMemDB(redisAccessLayer.client, LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+    const redisClients = [redisAccessLayer.subClient, redisAccessLayer.pubClient]
+    inMemDB = new InMemDB(redisClients, LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
     console.log('=========> In Memory Database Service created')
   }
   return inMemDB;

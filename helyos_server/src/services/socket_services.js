@@ -1,12 +1,17 @@
 // ----------------------------------------------------------------------------
 // Socket.io server setup
 // ----------------------------------------------------------------------------
-var socket_io = require('socket.io');
-var http = require('http');
+const socket_io = require('socket.io');
+const { createAdapter: createClusterAdapter } = require('@socket.io/cluster-adapter');
+const { createAdapter: createRedisAdapter } = require('@socket.io/redis-adapter');
+const redisAccessLayer = require('./in_mem_database/redis_access_layer.js');
+const http = require('http');
 const { logData} = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002
+const SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || '';
+
 
 const conf = {
     port: SOCKET_PORT,
@@ -17,61 +22,81 @@ const conf = {
 };
 
 
+
 let io;
-function startWebSocketServer(port) {
-    // return new Promise((resolve, reject) => {
-        // Create an HTTP default server
-        if (io) {
-            return io;
-            return resolve(io);
+async function setWebSocketServer(port) {
+    console.log("######## Creating socket io service...");
+    if (io) { return Promise.resolve(io); }
+
+    const webSocketServer = http.createServer();
+   
+    // Create the socket server
+    io = socket_io(webSocketServer, conf.socketIo);
+    console.log("io server created")
+    try {
+        if (SOCKET_IO_ADAPTER === 'redis') {
+            await redisAccessLayer.ensureConnected();
+            const pubClient = redisAccessLayer.pubForSocketIOServer;
+            const subClient= redisAccessLayer.subForSocketIOServer;    
+            io.adapter(createRedisAdapter(pubClient, subClient));
+        } 
+        
+        if (SOCKET_IO_ADAPTER === 'cluster') {
+            io.adapter(createClusterAdapter());
+        }    
+
+    } catch (error) {
+        Promise.reject(error.message)
+    }
+
+    console.log(`====> ${SOCKET_IO_ADAPTER} adapter set`);
+
+
+    io.sockets.on('connection', function (socket) {
+        let clientToken = null;
+        if (socket.handshake.query && socket.handshake.query.token) {
+            clientToken = socket.handshake.query.token;
         }
-        const webSocketServer = http.createServer().listen(port, (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
+        if (socket.handshake.auth && socket.handshake.auth.token) {
+            clientToken = socket.handshake.auth.token;
+        }
+        if (!clientToken) {
+            unauthorizeClient(socket);
+            return;
+        }
+        let decoded;
+        try {
+            decoded = jwt.verify(clientToken, JWT_SECRET);
+            socket.decoded = decoded;
+        } catch (e) {
+            unauthorizeClient(socket);
+            return;
+        }
 
-        // Create the socket server
-        io = socket_io(webSocketServer, conf.socketIo);
-        console.log("io server")
-        console.log("io server")
-        console.log("io server")
-        console.log("io server")
+        logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
 
-        io.sockets.on('connection', function (socket) {
-            let clientToken = null;
-            if (socket.handshake.query && socket.handshake.query.token) {
-                clientToken = socket.handshake.query.token;
-            }
-            if (socket.handshake.auth && socket.handshake.auth.token) {
-                clientToken = socket.handshake.auth.token;
-            }
-            if (!clientToken) {
-                unauthorizeClient(socket);
-                return;
-            }
-            let decoded;
-            try {
-                decoded = jwt.verify(clientToken, JWT_SECRET);
-                socket.decoded = decoded;
-            } catch (e) {
-                unauthorizeClient(socket);
-                return;
-            }
+        console.log('WebSocket client connected id', socket.id);
 
-            logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
-            console.log('Client connected id', socket.id);
+        // Join room
+        socket.join('all_users');
+        
+    });
+    return Promise.resolve(io);
 
-            // Join room
-            socket.join('all_users');
-        });
-        return io;
-            resolve(io);
-        });
+    // return new Promise((resolve, reject) => {
+    //     webSocketServer.listen(port, () => {
+    //         console.log(`WebSocket running on port ${port}`);
+    //           console.log("######## finished socket io service...");
+
+    //         resolve(io); // Ensure we resolve the promise when the server starts
+    //     }).on('error', (err) => {
+    //         reject(err); 
+    //     });
     // });
-}
 
-io = startWebSocketServer(SOCKET_PORT)
+};
+
+
 
 const unauthorizeClient = (socket) => {
     console.log('Client disconnected id', socket.id);
@@ -95,8 +120,7 @@ function dispatchAllBufferedMessages(bufferPayload){
 function sendUpdatesToFrontEnd(channel,msg=null){
     if (!io){
         console.warn("socket.io is not defined, start the websocket server");
-        io = startWebSocketServer(SOCKET_PORT);
-        return
+        return;
 
     } 
     if (!msg || msg==[]) return;
@@ -111,5 +135,6 @@ function sendUpdatesToFrontEnd(channel,msg=null){
 
 module.exports.sendUpdatesToFrontEnd = sendUpdatesToFrontEnd;
 module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
-module.exports.startWebSocketServer = startWebSocketServer;
+module.exports.setWebSocketServer = setWebSocketServer;
+module.exports.SOCKET_IO_ADAPTER = SOCKET_IO_ADAPTER;
 module.exports.io = io;

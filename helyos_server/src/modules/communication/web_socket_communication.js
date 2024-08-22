@@ -31,14 +31,7 @@ class BufferNotifications {
     async _get_latest_updated_data(inMemDB) {
         if(!inMemDB) return;
         const agents = await inMemDB.getHashesByPattern('agents:*');
-        // console.log("agentsagents")
-        // console.log(agents['agents:Ab34069fc5-fdgs-434b-b87e-f19c5435113']['id'])
-        // console.log(agents['agents:Ab34069fc5-fdgs-434b-b87e-f19c5435113']['uuid'])
-        // console.log("agentsagents")
         const agents_buffer = await inMemDB.getHashesByPattern('agents_buffer:*');
-        // console.log("agents_buffer")
-        // console.log(agents_buffer)
-        // console.log("agents_buffer")
         const map_objects = await inMemDB.getHashesByPattern('map_objects:*');
         const map_objects_buffer = await inMemDB.getHashesByPattern('map_objects_buffer:*');
 
