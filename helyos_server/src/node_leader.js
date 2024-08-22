@@ -5,9 +5,9 @@ const LEADER_KEY = 'leader';
 const LEADER_TTL = 5000; // miliseconds
 
 
-let amILeader=false;
-let inputBecomingFollwer;
-let inputBecomingLeader;
+let amILeader=undefined;
+let inputBecomingFollower = [];
+let inputBecomingLeader = [];
 
 async function tryToBecomeLeader(becomingLeader, becomingFollower) {
     const inMemDB = await getInstance();
@@ -19,15 +19,15 @@ async function tryToBecomeLeader(becomingLeader, becomingFollower) {
           });
         if (result) {
             console.log(`Node ${NODE_ID} is the leader ${result}`);
-            if (!amILeader){
-                inputBecomingFollwer = await becomingLeader(inputBecomingLeader);
+            if (amILeader!==true ){
+                inputBecomingFollower = await becomingLeader(inputBecomingLeader);
                 amILeader = true;
             }
             renewLeadership(redisClient,becomingLeader, becomingFollower);
             return true;
         } else {
-            if (amILeader){
-                inputBecomingLeader = await becomingFollower(inputBecomingFollwer);
+            if ( amILeader===true || amILeader===undefined ){
+                inputBecomingLeader = await becomingFollower(inputBecomingFollower);
                 amILeader = false;
             }
             // Wait for a backoff period before trying again

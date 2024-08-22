@@ -11,7 +11,7 @@
 // 
 // The main.js is composed of
 //  SETUP
-//  1) IMPORTS
+//  1) Settings
 //  2) Postgres client setup
 //  3) RabbitMQ client setup
 //  4) GraphQL server setup
@@ -23,25 +23,24 @@
 
 
 // ----------------------------------------------------------------------------
-// 1) IMPORTS 
+// 1) Settings
 // ----------------------------------------------------------------------------
-
-// Simple HTTP server imports
-const http = require('http');
-const express = require('express');
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
-const DASHBOARD_PORT = 8080;
-const SOCKET_PORT = process.env.SOCKET_PORT || 5002
 const API_DOC_DIR = 'docs/';
+const DASHBOARD_PORT = process.env.DASHBOARD_PORT || 8080;
+const SOCKET_PORT = process.env.SOCKET_PORT || 5002
+const GQLPORT = process.env.GQLPORT || 5000;
+const PGPORT = process.env.PGPORT || 5432;
 
-// Settings for horizontal scaling
-let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
-HELYOS_REPLICA = HELYOS_REPLICA === 'true';
+const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
+const postgraphileRolePassword = process.env.PGPASSWORD || 'xyz';
+const PGHOST = process.env.PGHOST || 'localhost';
+const PGDATABASE = process.env.PGDATABASE || 'helyos_db';
+
+// Vertical scaling
 const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
 
-
 // Test Settings: Override external services by `Nock` services (mocks).
-// See the file microservice_mocks.js for more details.
 const MOCK_SERVICES = process.env.MOCK_SERVICES;
 if (MOCK_SERVICES === 'True'){
     // console.log = function() {};
@@ -123,9 +122,6 @@ async function connectToRabbitMQ(initialization) {
 // 4) GraphQL server setup -  External App <-> Nodejs(GraphQL Lib) <-> Postgres
 // ----------------------------------------------------------------------------
 const { postgraphile } = require("postgraphile");
-const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
-const postgraphileRolePassword = process.env.PGPASSWORD || 'xyz';
-
 
 const postGraphileOptions = {
     watchPg: false,
@@ -150,17 +146,18 @@ const postGraphileOptions = {
 
 const setGraphQLServer = () => {
     return http.createServer(
-        postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
+        postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${PGHOST}:${PGPORT}/${PGDATABASE}`,
         "public",
         postGraphileOptions ));
 
 }
 
 
-
 // ----------------------------------------------------------------------------
 // 5) Serving the front-end dashboard - GUI for helyOS settings
 // ---------------------------------------------------------------------------
+const http = require('http');
+const express = require('express');
 const initialization = require('./initialization.js');
 const webSocketServices = require('./services/socket_services.js');
 
@@ -173,8 +170,9 @@ const setDashboardServer = () => {
 }
 
 
-
-
+// ----------------------------------------------------------------------------
+// 6) START
+// ---------------------------------------------------------------------------
 async function start() {
     const frontEndServer = setDashboardServer();
     const graphqlServer = setGraphQLServer();
@@ -189,20 +187,9 @@ async function start() {
 
     websocket.listen(SOCKET_PORT);
     frontEndServer.listen(DASHBOARD_PORT);
-    graphqlServer.listen(process.env.GQLPORT);
+    graphqlServer.listen(GQLPORT);
 
 }
-
-
-
-
-// Microservice API Documentation ----------------------------------------------
-// The microservice API documentation is served at /api-docs/ path.
-// AS swagger-ui cannot serve more than one documentation, each documentation is individually rendered by using the 
-// swagger script from UNPKG CDN, tagged the .html files. The api definition is loaded from the /api-docs/ as json file.
-// You can optionally enable redoc-ui in the Dockerfile to compile a static html files at /srv/api_docs/, by uncommenting the following lines:
-// # RUN npm run make_map_api_doc
-// # RUN npm run make_path_api_doc
 
 
 const cluster = require('cluster');
@@ -212,28 +199,34 @@ if (cluster.isMaster && NUM_THREADS>1) {
 
     console.log(`Master ${process.pid} is running`);
         if (webSocketServices.SOCKET_IO_ADAPTER === 'cluster'){
-            setupPrimary(); // Set up socketio connections between workers
+            setupPrimary(); // Set up the socket_io connections between workers
         }
-        // Fork workers
+
         for (let i = 0; i < NUM_THREADS; i++) {
             cluster.fork();
         }
 
         cluster.on('exit', (worker, code, signal) => {
             console.log(`Worker ${worker.process.pid} died`);
-            // Optionally, you can fork a new worker if needed
             cluster.fork();
         });
 
 } else {
-    // Workers can share any TCP connection
-    // They will run in parallel
+    // Workers will run in parallel
     console.log(`Worker ${process.pid} started`);
     start();
 }
 
 
-// start();
+
+// Microservice API Documentation
+// ----------------------------------------------
+// The microservice API documentation is available at the /api-docs/ path.
+// Since swagger-ui can only serve a single documentation at a time, each documentation instance is individually rendered using the 
+// Swagger script from the UNPKG CDN, tagged to the .html files. The API definition is loaded from the /api-docs/ path as a JSON file.
+// Optionally, you can enable redoc-ui in the Dockerfile to compile static HTML files at /srv/api_docs/ by uncommenting the following lines:
+// # RUN npm run make_map_api_doc
+// # RUN npm run make_path_api_doc
 
 
 

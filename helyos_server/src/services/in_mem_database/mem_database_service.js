@@ -445,11 +445,11 @@ class UpdateStats {
 let inMemDB;
 async function getInstance() {
   if (!inMemDB) {
-    console.log('=========> Creating In Memory Database Service instance')
+    console.log('====> Creating In Memory Database Service instance')
     await redisAccessLayer.ensureConnected();
     const redisClients = [redisAccessLayer.subClient, redisAccessLayer.pubClient]
     inMemDB = new InMemDB(redisClients, LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
-    console.log('=========> In Memory Database Service created')
+    console.log('====> In Memory Database Service created')
   }
   return inMemDB;
 }
