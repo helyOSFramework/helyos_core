@@ -20,50 +20,58 @@ const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_eve
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 const databaseServices = require('../services/database/database_services.js');
+const nodeLeader = require('../node_leader.js');
 
+
+
+function broadcastPriorityNotification(channel, payload){
+    switch (channel) {
+
+        case 'change_agent_status': // Changes originate from agents.
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'assignments_status_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'mission_queue_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'work_processes_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+    }
+}
 
 function broadcastNotifications(channel, payload) {
     switch (channel) {
 
             case 'agent_deletion': // Changes originate from applications (e.g. dashboard).
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
-                break;
-
-            case 'change_agent_status': // Changes originate from agents.
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
-                break;
-
-            case 'assignments_status_update':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
             case 'assignments_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
             case  'mission_queue_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
-                break;
-
-            case 'mission_queue_update':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
             case 'service_requests_update':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
             case 'service_requests_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
             case 'work_processes_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
                 break;
 
-            case 'work_processes_update':
-                bufferNotifications.pushNotificationToFrontEnd(channel, payload);
-                break;
     }
 }
 
@@ -74,6 +82,10 @@ function broadcastNotifications(channel, payload) {
 function handleDatabaseMessages(client, inMemDB) {
 
     client.on('notification', async function (msg) {
+        if (nodeLeader.amILeader) {
+            broadcastPriorityNotification(msg.channel, JSON.parse(msg.payload));
+        }
+
         let channel = msg.channel;
         let payload = null
         // let payload = JSON.parse(msg.payload);

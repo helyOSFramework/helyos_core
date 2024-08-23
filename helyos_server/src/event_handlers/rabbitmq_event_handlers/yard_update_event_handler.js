@@ -3,6 +3,7 @@ const InMemorySensorTable = {};
 const databaseServices = require('../../services/database/database_services');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
+const nodeLeader = require('../../node_leader.js');
 
 
 
@@ -22,8 +23,10 @@ async function yardAutoUpdate(inMemDB, objMsg, uuid, bufferPeriod=0) {
         }
     }
 
-    inMemDB.update('map_objects','id', objUpdate, objUpdate.last_message_time);
-    return inMemDB.flush('map_objects', 'id', databaseServices.map_objects, bufferPeriod);
+    await inMemDB.update('map_objects','id', objUpdate, objUpdate.last_message_time);
+    if (nodeLeader.amILeader) {
+        return inMemDB.flush('map_objects', 'id', databaseServices.map_objects, bufferPeriod);
+    }
 }
 
 

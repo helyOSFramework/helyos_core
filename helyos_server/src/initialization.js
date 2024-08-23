@@ -3,13 +3,15 @@ const { logData} = require('./modules/systemlog.js');
 const rbmqServices = require('./services/message_broker/rabbitMQ_services.js'); 
 const databaseServices = require('./services/database/database_services.js');
 const agentComm = require('./modules/communication/agent_communication.js');
-const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js')
+const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js');
+const inMemDBWatcher = require('./event_handlers/in_mem_db_watcher.js');
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
-const {tryToBecomeLeader} = require('./node_leader.js');
+const nodeLeader= require('./node_leader.js');
 
 
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
@@ -34,6 +36,7 @@ if (NUM_THREADS > 1 && !USE_HELYOS_REPLICA ) {
 const initWatchers = () => {
     agentComm.watchWhoIsOnline(AGENT_IDLE_TIME_OFFLINE);
     microserviceWatcher.initWatcher();
+    inMemDBWatcher.initWatcher(DB_BUFFER_TIME);
 };
 
 
@@ -126,64 +129,65 @@ function initializeRabbitMQAccounts() {
 
 
 
-    async function initRabbitMQConsumerWatcher (dataChannels) {
-        const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
-        const mainChannel = dataChannels[0];
-        const secondaryChannel = dataChannels[1];
-        console.log(`\n ========================================================`+
-                    `\n ================= SUBSCRIBE TO QUEUES ==================`+
-                    `\n ========================================================\n`);
+async function initRabbitMQConsumerWatcher (dataChannels) {
+    const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
+    const mainChannel = dataChannels[0];
+    const secondaryChannel = dataChannels[1];
+    console.log(`\n ========================================================`+
+                `\n ================= SUBSCRIBE TO QUEUES ==================`+
+                `\n ========================================================\n`);
 
-        mainChannel.consume(CHECK_IN_QUEUE,
-            (message)   => handleBrokerMessages(mainChannel,CHECK_IN_QUEUE, message),
-            { noAck: true, priority: 5});
+    mainChannel.consume(CHECK_IN_QUEUE,
+        (message)   => handleBrokerMessages(mainChannel,CHECK_IN_QUEUE, message),
+        { noAck: true, priority: 5});
 
-        mainChannel.consume(AGENT_MISSION_QUEUE,
-            (message) => handleBrokerMessages(mainChannel,AGENT_MISSION_QUEUE, message),
-            { noAck: true, priority: 5});
+    mainChannel.consume(AGENT_MISSION_QUEUE,
+        (message) => handleBrokerMessages(mainChannel,AGENT_MISSION_QUEUE, message),
+        { noAck: true, priority: 5});
+
+    mainChannel.consume(SUMMARY_REQUESTS_QUEUE,
+        (message) => handleBrokerMessages(mainChannel,SUMMARY_REQUESTS_QUEUE, message),
+        { noAck: true});
 
 
-        mainChannel.consume(SUMMARY_REQUESTS_QUEUE,
-                 (message) => handleBrokerMessages(mainChannel,SUMMARY_REQUESTS_QUEUE, message),
-                  { noAck: true});
+    // Divide load between leaders and followers.
+    const becomingLeader = async (consumerTagsToCancel) => {
+        await Promise.all(consumerTagsToCancel.map( cti => mainChannel.cancel(cti.consumerTag)));
 
+        console.log( `====> SUBSCRIBE TO STATE QUEUE`);
+        const ct1 = await mainChannel.consume(AGENT_STATE_QUEUE,
+                    (message) => handleBrokerMessages(mainChannel,AGENT_STATE_QUEUE, message),
+                    {noAck: false, priority: 10});
 
-        // Divide load between leaders and followers.
-        const becomingLeader = async (consumerTagsToCancel) => {
-            await consumerTagsToCancel.forEach( cti => mainChannel.cancel(cti));
+        const ct2 = await mainChannel.consume(AGENT_UPDATE_QUEUE,
+                    (message) => handleBrokerMessages(mainChannel,AGENT_UPDATE_QUEUE, message),
+                    { noAck: true, priority: 5});
+        return [ct1, ct2];
+    }
 
-            console.log( `====> SUBSCRIBE TO STATE QUEUE`);
-            const ct1 = await mainChannel.consume(AGENT_STATE_QUEUE,
-                        (message) => handleBrokerMessages(mainChannel,AGENT_STATE_QUEUE, message),
-                        {noAck: false, priority: 10});
-            const ct2 = await mainChannel.consume(AGENT_UPDATE_QUEUE,
-                        (message) => handleBrokerMessages(mainChannel,AGENT_UPDATE_QUEUE, message),
-                        { noAck: true, priority: 5});
-            return [ct1, ct2];
-        }
+    const becomingFollower =  async (consumerTagsToCancel) => {
+            await Promise.all(consumerTagsToCancel.map( cti => mainChannel.cancel(cti.consumerTag)));
 
-        const becomingFollower =  async (consumerTagsToCancel) => {
-                await consumerTagsToCancel.forEach( cti => mainChannel.cancel(cti));
-
-                console.log( `====> SUBSCRIBE TO VISUALIZATION QUEUE`);
-                const ct1 = secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, 
+            console.log( `====> SUBSCRIBE TO VISUALIZATION QUEUE`);
+            const ct1 = await secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, 
                     (message) => handleBrokerMessages(secondaryChannel,AGENT_VISUALIZATION_QUEUE,message),
                     { noAck: true, priority: 1});
-    
-                const ct2 = secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, 
-                        (message) => handleBrokerMessages(secondaryChannel,YARD_VISUALIZATION_QUEUE, message),
-                        { noAck: true, priority: 1});
-                return [ct1, ct2];
-        };
 
-        if(USE_HELYOS_REPLICA) {
-            await tryToBecomeLeader(becomingLeader, becomingFollower);
-        } else {
-            becomingLeader([]);
-            becomingFollower([]);
-        }
-        return dataChannels;    
+            const ct2 = await secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, 
+                    (message) => handleBrokerMessages(secondaryChannel,YARD_VISUALIZATION_QUEUE, message),
+                    { noAck: true, priority: 1});
+            return [ct1, ct2];
+    };
+
+    if (USE_HELYOS_REPLICA) {
+        await nodeLeader.tryToBecomeLeader(becomingLeader, becomingFollower);
+    } else {
+        nodeLeader.amILeader = true;
+        becomingLeader([]);
+        becomingFollower([]);
     }
+    return dataChannels;    
+}
 
 
 module.exports.initWatchers = initWatchers;

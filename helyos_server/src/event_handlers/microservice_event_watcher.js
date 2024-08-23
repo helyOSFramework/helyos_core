@@ -1,4 +1,4 @@
-// This module is used to watct the status of the dispatched microservices and the dependencies of the assignments.
+// This module is used to watch the status of the dispatched microservices and the dependencies of the assignments.
 // status: not_ready_for_service => wait_dependencies => ready_for_service  => pending => ready | failed | cancelled
 //
 const extServCommunication = require('../modules/communication/microservice_communication');

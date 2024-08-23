@@ -17,10 +17,9 @@ class BufferNotifications {
         this.bufferPayload = {};
         this.eventDispatchBuffer = setInterval(() => {
                 memDBServices.getInstance()
-                .then( inMemDB => {
-                                this._get_latest_updated_data(inMemDB);
-                                this._dispatch();
-                })},
+                .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
+                .then( () =>  this._dispatch());
+                },
                  bufferRetainTime);
         }
 
@@ -35,8 +34,6 @@ class BufferNotifications {
         const map_objects = await inMemDB.getHashesByPattern('map_objects:*');
         const map_objects_buffer = await inMemDB.getHashesByPattern('map_objects_buffer:*');
 
-
-
         for (const key in agents) { 
             if( agents[key].id == null) {
                 logData.addLog('agent', {uuid:key}, 'error', `MemDB error, id not registered`);
@@ -50,7 +47,7 @@ class BufferNotifications {
             } 
             agent['msg_per_sec'] = agents[key]['msg_per_sec'];
             const webSocketNotification = {'agent_id':agents[key].id,'tool_id':agents[key].id, ...agent };
-            this.pushNotificationToFrontEnd('new_agent_poses', webSocketNotification);
+            this.pushNotificationToBuffer('new_agent_poses', webSocketNotification);
         }
 
         const now = new Date();
@@ -61,13 +58,13 @@ class BufferNotifications {
                         mapObject = map_objects[key];                
                     } 
                     const webSocketNotification = {'map_object': mapObject };
-                    this.pushNotificationToFrontEnd('yard_updates', webSocketNotification);
+                    this.pushNotificationToBuffer('yard_updates', webSocketNotification);
                 }
             }
 
     }
 
-    pushNotificationToFrontEnd(channel, payload) {
+    pushNotificationToBuffer(channel, payload) {
         let _payload = utils.camelizeAttributes(payload);
         if (!this.bufferPayload) {
             this.bufferPayload = {};
@@ -78,6 +75,14 @@ class BufferNotifications {
             this.bufferPayload[channel] = [_payload];
         }
     }
+
+    publishToFrontEnd(channel, payload) {
+        this.pushNotificationToBuffer(channel, payload);
+        return memDBServices.getInstance()
+        .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
+        .then( () =>  this._dispatch());
+    }
+
 }
 
 const bufferNotifications = new BufferNotifications(PERIOD);

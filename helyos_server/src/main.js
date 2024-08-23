@@ -195,7 +195,7 @@ async function start() {
 const cluster = require('cluster');
 const { setupPrimary } = require("@socket.io/cluster-adapter");
 
-if (cluster.isMaster && NUM_THREADS>1) {
+if (cluster.isMaster && NUM_THREADS > 1) {
 
     console.log(`Master ${process.pid} is running`);
         if (webSocketServices.SOCKET_IO_ADAPTER === 'cluster'){

@@ -85,7 +85,8 @@ async function updateAgentMission(assignment, uuid = null) {
 async function updateState(inMemDB, objMsg, uuid, bufferPeriod=0) {
     try {
         const toolUpdate = {uuid, "status": objMsg.body.status, 'last_message_time': new Date() };
-
+        const debugass = objMsg.body.assignment ? objMsg.body.assignment.status: null
+        console.log(uuid, toolUpdate.status, debugass )
         // Get the agent id only once and save in in-memory table.
         if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
             const toolIds = await databaseServices.agents.getIds([uuid]);
@@ -97,11 +98,12 @@ async function updateState(inMemDB, objMsg, uuid, bufferPeriod=0) {
             toolUpdate['resources'] = objMsg.body.resources;
         }
 
-        inMemDB.update('agents','uuid', toolUpdate, toolUpdate.last_message_time, 'realtime', databaseServices.agents);
+        await inMemDB.update('agents','uuid', toolUpdate, toolUpdate.last_message_time, 'realtime', databaseServices.agents);
         
         if (objMsg.body.assignment){
-            return updateAgentMission(objMsg.body.assignment, uuid);
+            await updateAgentMission(objMsg.body.assignment, uuid);
         }
+        return 0;
 
     } catch (error) {
         console.error(error);

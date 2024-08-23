@@ -189,7 +189,7 @@ class InMemDB {
 
         this._dynamicallyChooseTimeout();
 
-        if ((now - this.lastFlushTime) < maxAge) {
+        if (!maxAge && (now - this.lastFlushTime) < maxAge) {
             return Promise.resolve();
         }
         // console.log('start flush.......')
@@ -378,7 +378,7 @@ class DataRetriever {
 
         if ((new Date() - startTime) > this.reloadPeriod || reload) {
             this.startTimePerId[index] = new Date();
-            await this.inMemDB.flush(this.tableName, indexName, this.dbServices[this.tableName], 0);
+            // await this.inMemDB.flush(this.tableName, indexName, this.dbServices[this.tableName], 0);
             return this.getDataFromSource(index, indexName, true);
         }
         return this.getDataFromSource(index, indexName, false);

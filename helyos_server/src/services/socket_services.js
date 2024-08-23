@@ -10,7 +10,7 @@ const { logData} = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002
-let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || '';
+let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || 'cluster';
 const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
 
 

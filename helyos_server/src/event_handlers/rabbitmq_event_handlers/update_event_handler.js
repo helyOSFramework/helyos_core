@@ -4,6 +4,7 @@ const databaseServices = require('../../services/database/database_services');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
+const nodeLeader = require('../../node_leader.js');
 
 
 
@@ -98,7 +99,7 @@ async function agentAutoUpdate(inMemDB, objMsg, uuid, bufferPeriod=0) {
         if (qryToolData.length) {
             const toolData = qryToolData[0];
             let webSocketNotification = {'id': toolData.id, 'uuid': uuid, 'geometry': JSONGeometry, 'status': toolData.status};
-            bufferNotifications.pushNotificationToFrontEnd('change_agent_status', webSocketNotification); // TODO publish in redis
+            bufferNotifications.pushNotificationToBuffer('change_agent_status', webSocketNotification); 
         }
     }
 
@@ -106,8 +107,7 @@ async function agentAutoUpdate(inMemDB, objMsg, uuid, bufferPeriod=0) {
     if (bufferPeriod === 0) {
         statsLabel = 'realtime';
     }
-    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel, databaseServices.agents);
-    return inMemDB.flush('agents', 'uuid', databaseServices.agents, bufferPeriod);
+    await inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel, databaseServices.agents);
 }
 
 

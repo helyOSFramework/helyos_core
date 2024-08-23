@@ -289,7 +289,7 @@ async function releaseLock(client, lockKey) {
 async function getAndDeleteHashesByPattern(client, pattern) {
   const result = {};
   const keysToDelete = [];
-  const lockKey = 'locks:hashes';
+  const lockKey = `locks:${pattern}`;
 
   try {
     // Attempt to acquire the lock
