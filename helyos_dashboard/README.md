@@ -60,7 +60,7 @@ npm run test
   ```
 - For a production build:
   ```bash
-  npm run build:prod
+  npm run build
   ```
 
 --- 
