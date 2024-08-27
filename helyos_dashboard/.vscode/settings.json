@@ -4,6 +4,5 @@
         ".angular/": true,
         "node_modules/": true,
         "dist/": true,
-        "package-lock.json": true,
     }
 }
