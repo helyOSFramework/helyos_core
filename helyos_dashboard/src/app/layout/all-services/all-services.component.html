@@ -167,9 +167,6 @@
             <div class="row" >
                 <div class="w-auto"> Context data: </div>
                 <fieldset class="form-group col-xl-8">
-                    <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include yard and map objects data  </label>
-                    </div>
 
                     <div class="checkbox">
                         <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMissionAgentsData"  name="requireMissionAgentsData" /> Include data of the agents involved in the mission </label>
@@ -177,6 +174,16 @@
 
                     <div class="checkbox">
                         <label> <input type="checkbox" [(ngModel)]="selectedItem.requireAgentsData"  name="requireAgentsData" /> Include data of all agents in the yard </label>
+                    </div>
+
+                    <div class="checkbox">
+                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include yard and map objects data  </label>
+                    </div>
+
+                    <div class="checkbox" style= "margin-left:18px" *ngIf="selectedItem.requireMapData">
+                        <label>  Specify the types of map objects to include: </label>
+                        <input class="form-control"  type="text" [(ngModel)]="selectedItem.requireMapObjects"  name="requireMapObjects" />
+                        <i style="color: gray;"> separate each type with a comma (,). E.g: buildings, roads, parkings </i>
                     </div>
 
                 </fieldset>
