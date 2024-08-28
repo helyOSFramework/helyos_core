@@ -1,10 +1,10 @@
-
-
 .row-pannel {
-    padding: 0 14px; justify-content:space-between; display: flex;
+    padding: 0 14px;
+    justify-content:space-between;
+    display: flex;
 }
 
-.truncate{
+.truncate {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

@@ -1,6 +1,6 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>Mission Queues </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
+<div class="row" style="justify-content:space-between">
+    <h1 class="w-auto">Mission Queues </h1>
+    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
         <button  class="btn btn-lg btn-outline-dark" (click)="openDocs()">
                   Documentation
         </button>
@@ -63,7 +63,7 @@
 
                 <fieldset class="form-group col-xl-3">
                     <label>Status</label>
-                    <select  style="margin-left:10px;" class="form-control " [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
+                    <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
                             name="status">
                         <option value="stop"> stop </option>
                         <option value="run"> run </option>
@@ -74,7 +74,7 @@
 
                 <fieldset class="form-group col-xl-3">
                     <label > Stop on mission failure </label>
-                    <input   type="checkbox" style="height:38px; width: 40px;" class="form-control" [(ngModel)]="selectedItem.stopOnFailure" name="stopOnFailure" />
+                    <input   type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" [(ngModel)]="selectedItem.stopOnFailure" name="stopOnFailure" />
                 </fieldset>
     
 

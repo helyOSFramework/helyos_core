@@ -44,7 +44,9 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of items" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{
+                        selectedHighlight: item.id==selectedItem?.id
+                    }">
                     <td>{{item.id}}</td>
                     <td>{{item.username}}</td>
                     <td>{{USER_ROLE[item.userRole]}}</td>
@@ -119,7 +121,7 @@
 
                 <fieldset class="form-group col-xl-4">
                     <label>Role</label>
-                    <select class="form-control" [(ngModel)]="selectedItem.userRole" name="class">
+                    <select class="form-control form-select" [(ngModel)]="selectedItem.userRole" name="class">
                         <option [value]="0">{{USER_ROLE[0]}}</option>
                         <option [value]="1">{{USER_ROLE[1]}}</option>
                         <option [value]="2">{{USER_ROLE[2]}}</option>

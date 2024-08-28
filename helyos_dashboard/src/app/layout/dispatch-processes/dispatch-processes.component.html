@@ -1,6 +1,6 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>Dispatched Missions </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
+<div class="row" style="justify-content:space-between">
+    <h1 class="w-auto">Dispatched Missions </h1>
+    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
         <button  class="btn btn-lg btn-outline-dark" (click)="openDocs()">
                   Documentation
         </button>
@@ -137,7 +137,7 @@
 
                         <fieldset class="form-group col-xl-2">
                             <label>Status</label> 
-                            <select  style="margin-left:10px;" class="form-control " [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
+                            <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
                                     name="status">
                                 <option value="draft"> draft </option>
                                 <option value="cancelling"> cancelling </option>
@@ -163,11 +163,11 @@
 
 
                     <div class="row" style="justify-content:space-between;">
-                        <div>
+                        <div class="w-auto">
                             <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem, 'draft')">Save</button>
                             <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
                         </div>
-                        <div>
+                        <div class="w-auto">
                             <button  class="btn btn-secondary" style="background-color: green;"  type="submit" [disabled]="!(selectedItem.workProcessTypeName && selectedItem.yardId)"  (click)="editItem(selectedItem, 'dispatched')">Dispatch Mission</button>
                         </div>
                     </div>
@@ -182,7 +182,7 @@
 
 
 
-            <div class="card mb-3" style="margin: 0px auto; width: 66%;">
+            <div class="card mb-3">
                 <div class="card-header " style="display:flex;justify-content:space-between">
                     <div>Assignments of the mission {{selectedItem.workProcessTypeName}}</div> 
                     <div class="clickable" style="width: fit-content;" (click)="assignmentList()">

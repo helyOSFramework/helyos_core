@@ -1,6 +1,6 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>All Agents </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
+<div class="row" style="justify-content:space-between">
+    <h1 class="w-auto">All Agents </h1>
+    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
         <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
             Documentation
         </button>
@@ -63,9 +63,9 @@
 
     <div class="card-footer" style="display:flex;justify-content:space-between">
         <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
-            <div>Instant Action Command</div>
+            <div class="w-auto">Instant Action Command</div>
             <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
-            <button class="btn"  (click)="sendInstantAction()"> SEND </button>
+            <button class="btn btn-light w-auto"  (click)="sendInstantAction()"> SEND </button>
         </div>
     
         <div *ngIf="!selectedItem" class="form-group row col-xl-6">

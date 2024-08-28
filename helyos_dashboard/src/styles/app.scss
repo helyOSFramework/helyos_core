@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import 'bootstrap/bootstrap';
+@import 'bootstrap-overrides';
 @import 'spinner';
 @import 'utils';
 @import 'rtl';
@@ -9,6 +9,13 @@
     .breadcrumb {
         display: none !important;
     }
+}
+
+@mixin nav-divider($color: #e5e5e5) {
+    height: 0;
+    margin: calc($spacer / 2) 0;
+    overflow: hidden;
+    border-top: 1px solid $color;
 }
 
 .nav-divider {
@@ -27,14 +34,14 @@ tr {
 }
 
 .selectedHighlight {
-    background-color: #ced4da;
+    --bs-table-bg: #ced4da;
+    border-left: solid 1px;
 }
 
 .detail-container{
     border-radius: 10px;
     border: solid 0.5px lightgray;
     padding: 20px;
-    margin: 10px 5%;
 }
 
 .map {

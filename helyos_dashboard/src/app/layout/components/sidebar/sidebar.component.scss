@@ -137,12 +137,14 @@ $topnav-background-color: #222;
             display: block;
             list-style-type: none;
             height: auto;
+            padding-left: 3rem;
 
             li {
                 a {
                     color: #fff;
                     padding: 10px;
                     display: block;
+                    text-decoration: none;
                 }
             }
         }
