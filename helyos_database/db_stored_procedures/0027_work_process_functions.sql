@@ -122,6 +122,7 @@ CREATE TRIGGER trigger_work_processes_before_insertion
   BEFORE INSERT
   ON public.work_processes
   FOR EACH ROW
+  WHEN (NEW.run_order IS NULL)
   EXECUTE PROCEDURE public.update_work_process_list_order();
 
 
