@@ -63,30 +63,64 @@ function processAssignmentEvents(msg) {
                 if(assignment_status == ASSIGNMENT_STATUS.FAILED ||  assignment_status == ASSIGNMENT_STATUS.ABORTED || assignment_status == ASSIGNMENT_STATUS.REJECTED){
                     logData.addLog('helyos_core', null, 'error', `assignment ${payload['id']} ${assignment_status}`);
 
-                    databaseServices.work_processes.get_byId(payload['work_process_id'], ['id', 'on_assignment_failure'])
+                    databaseServices.work_processes.get_byId(payload['work_process_id'], ['id', 'on_assignment_failure', 'fallback_mission',
+                                                                                           'yard_id', 'work_process_type_name', 'data'])
                     .then(wp => {
 
                         const defaultFailureAction = wp.on_assignment_failure;
                         const assignmentFailureAction = payload['on_assignment_failure'];
 
+                        const defaultFallbackMission = wp.fallback_mission;
+                        const assignmentFallbackMission = payload['fallback_mission'];
 
                         
                         let onAssignmentFailure = assignmentFailureAction && assignmentFailureAction !== ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT
                                                 ? assignmentFailureAction
                                                 : defaultFailureAction;
 
+                        let fallbackMission = assignmentFallbackMission && assignmentFallbackMission !== 'DEFAULT'
+                                                ? assignmentFallbackMission
+                                                : defaultFallbackMission;
+
 
                         if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.CONTINUE) {
-                            wrapUpAssignment(payload);
+                            return wrapUpAssignment(payload);
                         }
 
                         if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.RELEASE) {
-                            wrapUpAssignment(payload)
-	                        .then(()=> agentComm.sendReleaseFromWorkProcessRequest(payload['agent_id'], payload['work_process_id']));
+                           return  wrapUpAssignment(payload)
+	                        .then(() => agentComm.sendReleaseFromWorkProcessRequest(payload['agent_id'], payload['work_process_id']))
+                            .then(() => {
+                                if (fallbackMission) {
+                                    logData.addLog('agent', {'agent_id': payload.agent_id}, 'normal', `fallback mission: ${fallbackMission}`)
+                                    return databaseServices.assignments.get_byId(payload['id'])
+                                    .then((assignment) => {
+                                        const data = {...wp.data, 
+                                                    '_failed_assignment':{ 
+                                                                        'result': assignment.result,
+                                                                        'context': assignment.context,
+                                                                        'data': assignment.data,
+                                                                        'work_process':{id: wp.id,
+                                                                                        data: wp.data,
+                                                                                        recipe: wp.work_process_type_name
+                                                                                       }
+                                                                         }
+                                        };
+                                        return databaseServices.work_processes.insert({data, 
+                                                                                agent_ids: [assignment.agent_id],
+                                                                                yard_id: wp.yard_id,
+                                                                                work_process_type_name: fallbackMission,
+                                                                                status: MISSION_STATUS.DISPATCHED
+                                                                               })
+                                        .then((wpId) => logData.addLog('agent', {'agent_id': assignment.agent_id}, 'normal', `fallback mission  dispatched`))
+                                    })
+                                }
+                            });
                         }
 
+
                         if (onAssignmentFailure === ON_ASSIGNMENT_FAILURE_ACTIONS.FAIL) {
-                            databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
+                            return databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
                                                             status__in: [   MISSION_STATUS.PREPARING,
                                                                             MISSION_STATUS.CALCULATING,
                                                                             MISSION_STATUS.EXECUTING

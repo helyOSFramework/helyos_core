@@ -189,7 +189,8 @@ const flattenMissionsData = (jsonObj) => {
         dispatch_order: "dispatch_order",
         settings: "settings",
         extra_params: "extra_params",
-        on_assignment_failure: "on_assignment_failure"
+        on_assignment_failure: "on_assignment_failure",
+        fallback_mission: "fallback_mission"
         };
 
         // use lookup to find the missions object in the input json

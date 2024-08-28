@@ -46,7 +46,9 @@ $BODY$
         PERFORM pg_notify('work_processes_update',            
             (SELECT row_to_json(r.*)::varchar FROM (
              SELECT id, yard_id, work_process_type_id, status, work_process_type_name,
-                    agent_ids, on_assignment_failure, tools_uuids, agent_uuids, sched_start_at from public.work_processes  where id = NEW.id)
+                    agent_ids, on_assignment_failure, fallback_mission, tools_uuids, agent_uuids,
+                    sched_start_at 
+             FROM public.work_processes  WHERE id = NEW.id)
             r)
         );
         RETURN NULL;
