@@ -48,7 +48,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 			}
 
 			if (!agentIds.includes(parseInt(agent_id))){
-				logData.addLog('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not defined in the work_process ${workProcess.id} agent_ids.`+
+				logData.addLog('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not included in the work_process ${workProcess.id} agent_ids.`+
 				` In future versions, this will block the mission execution.`);
 			}
 
@@ -110,7 +110,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: ASSIGNMENT_STATUS.TO_DISPATCH}));
 			}
 
-			Promise.all(updatePromises)
+			return Promise.all(updatePromises)
 			.then(()=>{
 				const statusUpdatePromises = assigmentInputs.map( input => 
 					databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})

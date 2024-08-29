@@ -31,7 +31,7 @@ function generateFullYardContext(yardId){
 							 'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
 							'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z','unit',
 							 'orientations', 'sensors', 'resources']
-			return  databaseServices.agents.get('yard_id', yardId,agentFields, null, ['interconnections']); // return selected fields plus the interconnected tools
+			return  databaseServices.agents.get('yard_id', yardId,agentFields, null, ['follower_connections']); // return selected fields plus the interconnected tools
 	})
 	.then((agents) => {	
 		for (i=0; i < agents.length; i++){
