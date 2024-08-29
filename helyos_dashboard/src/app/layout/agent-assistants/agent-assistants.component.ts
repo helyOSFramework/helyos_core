@@ -110,6 +110,7 @@ export class AgentAssistantsComponent implements OnInit {
             this.selectedItem.geometry = JSON.stringify(r.geometry);
             this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
             this.rbmqPassword = '';
+            this.saveStateMsg = '';
             this.helyosService.methods.toolsInterconnections.list({leaderId: r.id})
             .then(r => this.interconnections = r);
         })

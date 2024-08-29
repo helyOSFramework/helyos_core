@@ -112,6 +112,7 @@ export class AgentToolsComponent implements OnInit {
             this.selectedItem.factsheet = JSON.stringify(r.factsheet, null, 2);
             this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
             this.rbmqPassword = '';
+            this.saveStateMsg = '';
             this.helyosService.methods.toolsInterconnections.list({leaderId: r.id})
             .then(r => this.interconnections = r);
         })
