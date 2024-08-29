@@ -24,6 +24,7 @@ export class AgentChargeStationsComponent implements OnInit {
     public rbmqPassword = '';
     public active = 1;
     private agentClass: AgentClass = AgentClass.ChargeStation;
+    public saveStateMsg: string = '';
 
     constructor(private helyosService: HelyosService) {
 
@@ -110,6 +111,7 @@ export class AgentChargeStationsComponent implements OnInit {
             this.selectedItem.geometry = JSON.stringify(r.geometry);
             this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
             this.rbmqPassword = '';
+            this.saveStateMsg = '';
             this.helyosService.methods.toolsInterconnections.list({leaderId: r.id})
             .then(r => this.interconnections = r);
         })
@@ -205,6 +207,7 @@ export class AgentChargeStationsComponent implements OnInit {
         .then( r=> {
             this.updateRabbitMQ();
             this.list();
+            this.saveStateMsg = '';
             alert('changes saved');
         });
     }
@@ -216,7 +219,10 @@ export class AgentChargeStationsComponent implements OnInit {
         // Convert the file to base64 text
         reader.readAsDataURL(file);
         // on reader upload something...
-        reader.onload = () => this.selectedItem.picture = reader.result as string;
+        reader.onload = () => {
+            this.saveStateMsg = 'unsaved changes';
+            this.selectedItem.picture = reader.result as string;
+        }
         
     }
 
