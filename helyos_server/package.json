@@ -22,7 +22,6 @@
     "nock": "^13.5.4",
     "pg": "^8.7.3",
     "postgraphile": "4.13.0",
-    "redoc-cli": "^0.13.21",
     "socket.io": "4.7.5",
     "superagent": "^8.1.2",
     "util": "^0.11.1",
