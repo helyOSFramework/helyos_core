@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS public.services (
     result_timeout integer DEFAULT 180,
     require_agents_data boolean DEFAULT true,
     require_mission_agents_data boolean DEFAULT true,
-    require_map_data boolean DEFAULT true
+    require_map_data boolean DEFAULT true,
+    require_map_objects text[] DEFAULT ARRAY['__all__']
 
     );
 
@@ -38,3 +39,4 @@ comment on column services.is_dummy is '@ do not dispatch request; just copy req
 comment on column services.health_endpoint is '@ end-point that returns status 2XX when service is healthy';
 comment on column services.unhealthy is '@  Is microservice unhealthy?';
 comment on column services.availability_timeout is '@ maximum time helyos will hold a request waiting for the system to be healthy';
+comment on column services.filter_map_objects is '@ array used to filter map objects by type to be included in the helyOS context, sent to the microservice.';

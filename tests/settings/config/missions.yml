@@ -17,6 +17,38 @@ missions:
           apply_result: true
           override_config: "{}"
 
+  driving_continue:
+    maxagents: 1
+    description: "drive from a to b"
+    on_assignment_failure: "CONTINUE_MISSION"
+    settings: >
+          {"interface": "webbrowser",
+            "auth" :"required"}
+    
+    recipe:
+      steps:
+        - step: "A"
+          service_type: "drive"
+          request_order: 1
+          apply_result: true
+          override_config: "{}"
+
+
+  driving_release:
+    maxagents: 1
+    description: "drive from a to b"
+    on_assignment_failure: "RELEASE_FAILED"
+    settings: >
+          {"interface": "webbrowser",
+            "auth" :"required"}
+    
+    recipe:
+      steps:
+        - step: "A"
+          service_type: "drive"
+          request_order: 1
+          apply_result: true
+          override_config: "{}"
 
   mapping:
     maxagents: 0

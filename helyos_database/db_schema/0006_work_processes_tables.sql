@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     yard_id bigint,
     yard_uid character varying,
     work_process_type_id int,
-    status character varying,
+    status character varying DEFAULT 'draft',
     work_process_type_name character varying NOT NULL,
     description character varying,
     data jsonb,
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     sched_end_at timestamp(6) without time zone,
     wait_free_agent boolean DEFAULT true,
     process_type character varying,
+    on_assignment_failure character varying DEFAULT 'DEFAULT' CHECK (on_assignment_failure IN ('DEFAULT','FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED')),
 
     CONSTRAINT status_check CHECK (
         status IS NULL OR 
@@ -55,6 +56,7 @@ comment on column work_processes.data is '@ object with request data';
 comment on column work_processes.agent_ids is '@ array of agent ids participating within work process; the redundancy with agent_uuids is necessary to improve usability of graphQL requests';
 comment on column work_processes.agent_uuids is '@ array of agent uuids participating within work process; the redundancy with agent_ids is necessary to improve usability of graphQL requests';
 comment on column work_processes.sched_start_at is '@ specify when the work process will be processed: path planning, agent reservation, etc.';
+comment on column work_processes.on_assignment_failure is '@ specify if the mission should FAIL and immediately release all agents, or should CONTINUE and release the agents in the end of the process.';
 
 -- process_type is depracated, it will be substituted by work_process_type_name
 -- description is depracated, it will be substituted by data
@@ -86,12 +88,14 @@ EXECUTE PROCEDURE  public.trigger_set_timestamp_work_processes();
 
 CREATE TABLE IF NOT EXISTS public.work_process_type (
     id BIGSERIAL PRIMARY KEY,
-    name character varying,
+    name character varying,\
     description character varying,
     num_max_agents int,
     dispatch_order jsonb,
     settings jsonb,
-    extra_params jsonb
+    extra_params jsonb,
+    on_assignment_failure character varying DEFAULT 'FAIL_MISSION' CHECK (on_assignment_failure IN ('FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED'))
+
 );
 
 -- extra_params is depracated
@@ -114,6 +118,8 @@ comment on column work_process_service_plan.step is '@description Label ("A", "B
 comment on column work_process_service_plan.request_order is '@description Order of the requests sent to external service.';
 comment on column work_process_service_plan.is_result_assignment is '@description If request result should be dispacthed as an assignment.';
 comment on column work_process_service_plan.service_config is '@description It overides default config of external service.';
+comment on column work_processes.on_assignment_failure is '@ specify if the mission should FAIL and immediately release all agents, or should CONTINUE and release the agents in the end of the process.';
+
 
 
 
@@ -130,3 +136,5 @@ ALTER TABLE ONLY public.work_processes
 
 -- ALTER TABLE ONLY public.assignments
 --     ADD CONSTRAINT fk_rails_79461edfd8 FOREIGN KEY (work_process_id) REFERENCES public.work_processes(id);
+
+

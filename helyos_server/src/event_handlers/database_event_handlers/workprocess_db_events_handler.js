@@ -12,7 +12,7 @@ const blAssignm = require('../../modules/assignment_orchestration.js');
 const blMicroservice = require('../../modules/microservice_orchestration');
 const databaseServices = require('../../services/database/database_services.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
-const {MISSION_STATUS, ASSIGNMENT_STATUS } = require('../../modules/data_models.js');
+const {MISSION_STATUS, ASSIGNMENT_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS } = require('../../modules/data_models.js');
 const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
@@ -77,8 +77,8 @@ function processWorkProcessEvents(msg) {
                 workProcessStatus = payload['status'];
                 console.log(`WORKPROCESS ${payload['id']} STATUS: `, workProcessStatus);
                 switch (workProcessStatus) {
-                    case MISSION_STATUS.DISPATCHED:
 
+                    case MISSION_STATUS.DISPATCHED:
                         databaseServices.work_processes.update_byId(payload['id'], {status: MISSION_STATUS.PREPARING})
                         .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload))
                         .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `p ${err.message}`)});

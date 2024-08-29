@@ -1,5 +1,21 @@
 
 /**
+ * Actions to take on assignment failure.
+ * @enum {string}
+ * 
+ * - FAIL: The system stops the current process and reports an error.
+ * - CONTINUE: The system continues with the next steps despite the failure.
+ * - RELEASE_FAILED: The system continue but releases the current agent and marks its assignment as failed.
+ */
+const ON_ASSIGNMENT_FAILURE_ACTIONS = {
+    FAIL: 'FAIL_MISSION',
+    CONTINUE: 'CONTINUE_MISSION',
+    RELEASE: 'RELEASE_FAILED',
+    DEFAULT: 'DEFAULT'
+}
+
+
+/**
  * Defines agent statuses.
  * @enum {string}
  * 
@@ -41,6 +57,7 @@ const SERVICE_STATUS = {
     FAILED: 'failed',
     TIMEOUT: 'time-out',
     CANCELED: 'canceled',
+    SKIPPED: 'skipped',
     READY: 'ready',
     WAIT_DEPENDENCIES:'wait_dependencies',
     DISPATCHING_SERVICE: 'dispatching_service',
@@ -134,3 +151,4 @@ module.exports.UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH = UNCOMPLETE_ASSIGNM_BEFORE_DI
 module.exports.UNCOMPLETE_ASSIGNM_AFTER_DISPATCH = UNCOMPLETE_ASSIGNM_AFTER_DISPATCH;
 module.exports.UNCOMPLETE_MISSION_STATUS = UNCOMPLETE_MISSION_STATUS;
 module.exports.MISSION_QUEUE_STATUS = MISSION_QUEUE_STATUS;
+module.exports.ON_ASSIGNMENT_FAILURE_ACTIONS = ON_ASSIGNMENT_FAILURE_ACTIONS;

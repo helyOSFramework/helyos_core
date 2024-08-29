@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.service_requests (
     require_agents_data boolean DEFAULT true,
     require_mission_agents_data boolean DEFAULT true,
     require_map_data boolean DEFAULT true,
+    require_map_objects text[],
     tool_ids integer[],
     agent_ids integer[],
 

@@ -99,8 +99,8 @@
                     <div class="row" >
 
 
-                        <div class="form-group col-xl-4">
-                            <label>Scheduled to start </label>
+                        <!-- <div class="form-group col-xl-4">
+                            <label>Scheduled to start not before</label>
 
                             <div class="input-group datepicker-input">
                                 <input [hidden]="!showInput"
@@ -119,7 +119,7 @@
                             </div>
                         </div>
 
-                        <ngb-timepicker [hidden]="!showInput" [(ngModel)]="selectedItem.schedStartAt"></ngb-timepicker>
+                        <ngb-timepicker [hidden]="!selectedItem.schedStartAt" [(ngModel)]="selectedItem.schedStartAt"></ngb-timepicker> -->
 
 
                         <fieldset class="form-group col-xl-2">
@@ -151,7 +151,21 @@
 
                     </div>
 
+                    <div class="row" >
 
+                        <fieldset class="form-group col-xl-6">
+                            <label>Action on assignment failure</label>
+
+                            <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
+                                <option value="DEFAULT">to be defined by mission recipe</option>
+                                <option value="FAIL_MISSION" title="FAIL">fail the mission.</option>
+                                <option value="RELEASE_FAILED" title="RELEASE_FAILED">continue the mission and release the failed agent.</option>
+                                <option value="CONTINUE_MISSION" title="CONTINUE">continue mission without releasing the failed agent.</option>
+                            </select>
+
+                        </fieldset>
+
+                    </div>
 
                     <div class="row" >
                         <fieldset class="form-group col-xl-12">
