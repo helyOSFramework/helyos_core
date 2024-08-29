@@ -16,12 +16,22 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 response = await databaseServices.agents.select(objMsg.body['conditions']);
                 break;
 
+            case 'allLeaders':
+                if (objMsg.body['conditions'] && objMsg.body['conditions']['uuid']) {
+                    response = await databaseServices.agents.get('uuid', objMsg.body['conditions']['uuid'], ['id','uuid', 'geometry'], null, ['leader_connections']);
+                    response = response[0]['leader_connections'];
+                } else {
+                    throw Error('Please include the follower uuid in the data request conditions. For example: {"uuid" : "1111-2222-3333-4444" }');
+                }
+                break;
+
+
             case 'allFollowers':
                 if (objMsg.body['conditions'] && objMsg.body['conditions']['uuid']) {
-                    response = await databaseServices.agents.get('uuid', objMsg.body['conditions']['uuid'], ['id','uuid', 'geometry'], null, ['interconnections']);
-                    response = response[0]['interconnections'];
+                    response = await databaseServices.agents.get('uuid', objMsg.body['conditions']['uuid'], ['id','uuid', 'geometry'], null, ['follower_connections']);
+                    response = response[0]['follower_connections'];
                 } else {
-                    throw Error('Please include the leader uuid in conditions. For example: {"uuid" : "1111-2222-3333-4444" }');
+                    throw Error('Please include the leader uuid in the data request conditions. For example: {"uuid" : "1111-2222-3333-4444" }');
                 }
                 break;
 

@@ -431,15 +431,13 @@ class AgentDataLayer extends DatabaseLayer {
 	get(key, value, items, orderBy = null, nestedFields = null) {
 		let colNames;
 		let orderByStr;
-		let aggregateInterconnections = nestedFields && nestedFields.includes('interconnections');
-
-		if (aggregateInterconnections) {
-			items = items.filter(i => i !== 'interconnections');
-		}
+		let followerInterconnectionsFlag = nestedFields &&  nestedFields.includes('follower_connections');
+		let leaderInterconnectionsFlag = nestedFields && nestedFields.includes('leader_connections');
 
 		if (items === undefined || items.length == 0)
 			colNames = '*';
 		else {
+			items = items.filter(i => (!('leader_interconnections','follower_connections').includes(i)  ));
 			colNames = items.join(',');
 		}
 
@@ -450,24 +448,49 @@ class AgentDataLayer extends DatabaseLayer {
 
 		return this.client.query('SELECT ' + colNames + ' FROM ' + this.table + ' WHERE ' + key + '= $1' + orderByStr, [value])
 			.then((res) => {
-				if (!aggregateInterconnections) { return res['rows'] }
+				let aggregatePromises;
+				if (!followerInterconnectionsFlag && !leaderInterconnectionsFlag) 
+					{ return res['rows'] };
+
+				if (followerInterconnectionsFlag && !leaderInterconnectionsFlag) 
+					{aggregatePromises = this.aggregatedFollowerConnections.bind(this)};
+
+				if (!followerInterconnectionsFlag && leaderInterconnectionsFlag) 
+					{aggregatePromises = this.aggregatedLeaderConnections.bind(this)};
+
+				if (followerInterconnectionsFlag && leaderInterconnectionsFlag ){
+					{aggregatePromises = (a) => this.aggregatedFollowerConnections(a).bind(this)
+												.then( a => this.aggregatedLeaderConnections(a).bind(this))};
+				}
+
 				const agents = res['rows'];
-				const promiseArray = agents.map(t => this.aggregatedInterconnections(t));
+				const promiseArray = agents.map(t => aggregatePromises(t));
 				return Promise.all(promiseArray);
 			});
 
 	}
 
 
-	aggregatedInterconnections(agent) {
+	aggregatedFollowerConnections(agent) {
 		return this.client.query(`
 		SELECT A.id, A.uuid, A.geometry, B.connection_geometry FROM public.agents as A 
 		JOIN public.agents_interconnections as B 
 		ON A.id = B.follower_id
 		WHERE A.id IN  (SELECT follower_id FROM  public.agents_interconnections WHERE leader_id = $1) 
 		`, [agent.id])
-			.then(res => ({ ...agent, interconnections: res['rows'] }));
+			.then(res => ({ ...agent, follower_connections: res['rows'] }));
 	}
+
+	aggregatedLeaderConnections(agent) {
+		return this.client.query(`
+		SELECT A.id, A.uuid, A.geometry, B.connection_geometry FROM public.agents as A 
+		JOIN public.agents_interconnections as B 
+		ON A.id = B.leader_id
+		WHERE A.id IN  (SELECT leader_id FROM  public.agents_interconnections WHERE follower_id = $1) 
+		`, [agent.id])
+			.then(res => ({ ...agent, leader_connections: res['rows'] }));
+	}
+
 
 }
 
