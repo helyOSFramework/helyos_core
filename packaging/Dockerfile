@@ -66,6 +66,7 @@ RUN chmod +x   /usr/local/helyos_core/bin/entrypoint.sh
 
 # REDOC API DOCUMENTATION - 
 # Uncomment to generate redoc static api documentation instead of using swagger on the fly.
+# RUN npm install redoc-cli
 # RUN npm run make_map_api_doc
 # RUN npm run make_path_api_doc
 

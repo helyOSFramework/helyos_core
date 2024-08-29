@@ -1,7 +1,7 @@
 {
   "name": "helyos-core",
   "private": true,
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "helyOS core",
   "repository": "",
   "author": {
@@ -17,14 +17,12 @@
   "dependencies": {
     "amqplib": "^0.10.3",
     "events": "^3.3.0",
-    "express": "4.18.3",
+    "express": "4.19.2",
     "js-yaml": "^4.1.0",
     "nock": "^13.5.4",
     "pg": "^8.7.3",
     "postgraphile": "4.13.0",
-    "redoc-cli": "^0.13.21",
-    "request": "2.88.2",
-    "socket.io": "4.6.1",
+    "socket.io": "4.7.5",
     "superagent": "^8.1.2",
     "util": "^0.11.1",
     "uuid": "^9.0.1"
