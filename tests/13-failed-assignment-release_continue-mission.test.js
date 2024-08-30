@@ -9,7 +9,7 @@ console.log("starting test 13");
 
 let helyosApplication;
 
-describe('13 Test Failed Assignment - Continue mission',   () =>  {
+describe('13 Test Failed Assignment - Release Agent ',   () =>  {
 
     it('Agent is reserved', async () => {
         helyosApplication = await getHelyOSClientInstance();
