@@ -53,7 +53,6 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 			}
 
 
-			console.log()
 
 
 			assigmentInputs.push({

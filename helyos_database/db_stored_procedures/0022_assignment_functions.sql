@@ -25,7 +25,7 @@ $BODY$
     BEGIN
         PERFORM pg_notify('assignments_status_update', 
             (SELECT row_to_json(r.*)::varchar FROM (
-            SELECT id, yard_id,  work_process_id, agent_id, status,on_assignment_failure,  start_time_stamp from public.assignments  where id = NEW.id)
+            SELECT id, yard_id,  work_process_id, agent_id, status,on_assignment_failure, fallback_mission,  start_time_stamp from public.assignments  where id = NEW.id)
             r)
         );
         RETURN NULL;
