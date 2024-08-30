@@ -17,6 +17,7 @@ export class DispatchProcessesComponent implements OnInit {
     public first: number = 15;
     public page: number = 1;
     public active = 1;
+    public availableMissions: string[] = [];
 
     constructor(private helyosService: HelyosService) {
 
@@ -24,6 +25,9 @@ export class DispatchProcessesComponent implements OnInit {
 
     ngOnInit() {
         this.list();
+        this.helyosService.methods.workProcessType.list({}).then( wpTypes => {
+            this.availableMissions = wpTypes.map( wp => wp.name);
+         });
     }
 
 

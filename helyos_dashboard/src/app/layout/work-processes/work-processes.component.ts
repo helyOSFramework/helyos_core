@@ -13,6 +13,7 @@ export class WorkProcessesComponent implements OnInit {
     public wpTypes: H_WorkProcessType[];
     public selectedItem: H_WorkProcessType;
     public showDescription: boolean = false;
+    public availableMissions: string[] = [];
 
 
     constructor(private helyosService: HelyosService) {
@@ -26,7 +27,10 @@ export class WorkProcessesComponent implements OnInit {
 
     list() {
         return this.helyosService.methods.workProcessType.list({})
-         .then( r => this.wpTypes = r );
+         .then( r => {
+            this.wpTypes = r;
+            this.availableMissions = r.map( wp => wp.name);
+        });
      }
 
 
