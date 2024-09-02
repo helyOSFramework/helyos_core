@@ -95,7 +95,16 @@ CREATE OR REPLACE FUNCTION public.notify_deleted_tool()
 RETURNS trigger AS
 $BODY$
     BEGIN
-      PERFORM pg_notify('agent_deletion', row_to_json(OLD)::text);
+
+          PERFORM pg_notify(
+          'agent_deletion', 
+          json_build_object(
+              'id', OLD.id, 
+              'uuid', OLD.uuid, 
+              'rbmq_username', OLD.rbmq_username,
+              'yard_id', OLD.yard_id
+          )::text
+      );
         RETURN NULL;
     END; 
 $BODY$

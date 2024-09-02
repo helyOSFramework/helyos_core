@@ -8,7 +8,10 @@ const getExtServiceEndpoint = (serviceUrl, serviceClass) => {
     let url = serviceUrl;
     if (!url) return " ";
     url = url.replace(/\/$/, '');
-
+    const pattern = /(plan_job|map|storage|plan_job\/|map\/|storage\/)$/;
+    if (pattern.test(url)) {
+        return url;
+    } 
     switch (serviceClass) {
         case 'Map server':
             url = url + '/map/';
