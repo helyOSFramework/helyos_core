@@ -158,11 +158,22 @@
 
                             <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
                                 <option value="DEFAULT">to be defined by mission recipe</option>
-                                <option value="FAIL_MISSION" title="FAIL">fail the mission.</option>
-                                <option value="RELEASE_FAILED" title="RELEASE_FAILED">continue the mission and release the failed agent.</option>
-                                <option value="CONTINUE_MISSION" title="CONTINUE">continue mission without releasing the failed agent.</option>
+                                <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
+                                <option value="CONTINUE_MISSION" title="CONTINUE">continue mission </option>
+                                <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
                             </select>
 
+                        </fieldset>
+
+
+                        <fieldset class="form-group col-xl-6" title='Fallback mission when failed agent is released.'>
+                            <label>Fallback mission </label>
+                            <select class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
+                                <option [value]="''"> ---- ---- </option>
+                                <ng-container  *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
+                                    <option *ngFor="let missionName of availableMissions" [value]="missionName"> {{missionName}}</option>
+                                </ng-container>
+                            </select>
                         </fieldset>
 
                     </div>

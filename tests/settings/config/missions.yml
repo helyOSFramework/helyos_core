@@ -50,13 +50,25 @@ missions:
           apply_result: true
           override_config: "{}"
 
+
+  driving_release_fallback:
+    maxagents: 1
+    description: "drive from a to b"
+    on_assignment_failure: "RELEASE_FAILED"
+    fallback_mission: "driving"
+    
+    recipe:
+      steps:
+        - step: "A"
+          service_type: "drive"
+          request_order: 1
+          apply_result: true
+          override_config: "{}"
+
   mapping:
     maxagents: 0
     description: "get fresh map data"
-    settings: >
-          {"interface": "webbrowser",
-            "auth" :"required"}
-    
+
     recipe:
       steps:
         - step: "A"
@@ -69,9 +81,6 @@ missions:
   map_driving:
     maxagents: 1
     description: "get fresh map data and drive from a to b"
-    settings: >
-          {"interface": "webbrowser",
-            "auth" :"required"}
     
     recipe:
       steps:

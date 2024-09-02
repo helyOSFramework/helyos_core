@@ -1,7 +1,6 @@
 // What is being tested:
 // Same than test 01 but the mission will failed because microservice produces wrong
-// assignment format and fail the mission, despites the work process is set to continue on failure.
-
+// assignment format. The microservice response overrides the mission recipe assigment policy.
 
 process.env.TEST_NUMBER = 14;
 console.log("starting test 14");

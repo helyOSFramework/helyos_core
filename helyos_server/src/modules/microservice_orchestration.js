@@ -245,7 +245,11 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 	// Behaviour upon failure
 	if (workProcess.on_assignment_failure == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
-		await databaseServices.work_processes.update_byId(workProcess.id, {on_assignment_failure: recipe.on_assignment_failure});					
+		await databaseServices.work_processes.update_byId(workProcess.id, { on_assignment_failure: recipe.on_assignment_failure});
+	}
+	// Mission after failure
+	if (workProcess.fallback_mission == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
+		await databaseServices.work_processes.update_byId(workProcess.id, {fallback_mission: recipe.fallback_mission});					
 	}
 
 	// Append default work process settings to the request data as "_settings".

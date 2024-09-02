@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     wait_free_agent boolean DEFAULT true,
     process_type character varying,
     on_assignment_failure character varying DEFAULT 'DEFAULT' CHECK (on_assignment_failure IN ('DEFAULT','FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED')),
+    fallback_mission character varying DEFAULT 'DEFAULT',
 
     CONSTRAINT status_check CHECK (
         status IS NULL OR 
@@ -43,6 +44,9 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
             'canceling',
             'canceled'
         )
+    ), 
+    CONSTRAINT yard_id_or_yard_uid_not_null CHECK (
+            yard_id IS NOT NULL OR yard_uid IS NOT NULL
     )
 );
 
@@ -94,7 +98,8 @@ CREATE TABLE IF NOT EXISTS public.work_process_type (
     dispatch_order jsonb,
     settings jsonb,
     extra_params jsonb,
-    on_assignment_failure character varying DEFAULT 'FAIL_MISSION' CHECK (on_assignment_failure IN ('FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED'))
+    on_assignment_failure character varying DEFAULT 'FAIL_MISSION' CHECK (on_assignment_failure IN ('FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED')),
+    fallback_mission character varying DEFAULT ''
 
 );
 

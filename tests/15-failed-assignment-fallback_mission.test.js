@@ -3,17 +3,17 @@
 // assignment format.
 
 
-process.env.TEST_NUMBER = 13;
-console.log("starting test 13");
+process.env.TEST_NUMBER = 15;
+console.log("starting test 15");
 
 
 let helyosApplication;
 
-describe('13 Test Failed Assignment - Release Agent ',   () =>  {
+describe('15 Test Failed Assignment - Fallback mission',   () =>  {
 
     it('Agent is reserved', async () => {
         helyosApplication = await getHelyOSClientInstance();
-        await helyosApplication.createNewMission('driving_release', ['Ab34069fc5-fdgs-434b-b87e-f19c5435113',
+        await helyosApplication.createNewMission('driving_release_fallback', ['Ab34069fc5-fdgs-434b-b87e-f19c5435113',
                                                   'Bb34069fc5-fdgs-434b-b87e-f19c5435113']);
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
         expect(result).toEqual(true);
@@ -36,32 +36,50 @@ describe('13 Test Failed Assignment - Release Agent ',   () =>  {
     });  
 
 
+    it('Fallback Microservice is ready', async () => {
+        const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
+        expect(result).toEqual(true);
+    });
+
+
     it('Assignment 2 is completed', async () => {
         const result = await helyosApplication.waitAssignmentStatus(2, 'completed');
         expect(result).toEqual(true);
     });
 
-    it('Assignment is failed -> Mission goes on => Mission is marked as succeeded', async () => {
+
+    it('Fallback Assignment for failed agent is completed', async () => {
+        const result = await helyosApplication.waitAssignmentStatus(3, 'completed');
+        expect(result).toEqual(true);
+    });
+
+
+    it('Assignment was failed -> Mission goes on => Mission is marked as succeeded', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
         expect(result).toEqual(true);
     });
 
-    it('Agent is free', async () => {
+    it('Fallback Mission is marked as succeeded', async () => {
+        const result = await helyosApplication.waitMissionStatus(2, 'succeeded');
+        expect(result).toEqual(true);
+    });
+
+    it('Agents are free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
         const result2 = await helyosApplication.waitAgentStatus(2, 'free');
         expect(result).toEqual(true);
         expect(result2).toEqual(true);
     });
 
-    it('Check 1 x Reserve/ 2 x Release sent to the agent 1', async () => {
+    it('Check 2 x Reserve/ 3 x Release sent to the agent 1', async () => {
         const logs = await helyosApplication.getAgentRelatedLogs('Ab34069fc5-fdgs-434b-b87e-f19c5435113');
         const reservationsSent = logs.filter(log => log.msg.includes('Sending reserve')).length;
         const cancelationsSent = logs.filter(log => log.msg.includes('Sending cancel')).length;
         const releasesSent = logs.filter(log => log.msg.includes('Sending release')).length;
 
-        expect(reservationsSent).toEqual(1);
+        expect(reservationsSent).toEqual(2);
         expect(cancelationsSent).toEqual(0);
-        expect(releasesSent).toEqual(2);
+        expect(releasesSent).toEqual(3);
     });  
 
     it('Check Reserve/---/Release sent to the agent 2', async () => {

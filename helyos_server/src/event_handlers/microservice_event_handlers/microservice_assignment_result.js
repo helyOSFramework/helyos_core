@@ -53,7 +53,6 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 			}
 
 
-			console.log()
 
 
 			assigmentInputs.push({
@@ -64,6 +63,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				status: 'not_ready_to_dispatch',
 				start_time_stamp: start_stamp,
 				on_assignment_failure: result.on_assignment_failure  || result.onAssignmentFailure, 
+				fallback_mission: result.fallback_mission || result.fallbackMission,
 				data: JSON.stringify(result.result || result.assignment)});
 		}
 			

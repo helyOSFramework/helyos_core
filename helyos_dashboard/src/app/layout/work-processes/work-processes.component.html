@@ -64,6 +64,8 @@
         <h4>{{selectedItem.name}}</h4>
 
         <form role="form"  style="margin: 0 auto; max-width: 1000px;">
+            <h5 style="margin-top:16px">Definition </h5>
+
             <div class="row">
                 <fieldset class="form-group col-xl-6">
                     <label>Name</label>
@@ -92,6 +94,31 @@
                 </fieldset>
             </div>
 
+
+            <h5 style="margin-top:16px">Failure Policy </h5>
+            <div class="row" >
+                <fieldset class="form-group col-xl-6">
+                <label>Default action on assignment failure</label>
+
+                    <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
+                        <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
+                        <option value="CONTINUE_MISSION" title="CONTINUE">continue the mission </option>
+                        <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
+                    </select>
+                </fieldset>
+
+                <fieldset class="form-group col-xl-6" title='Run mission when assignment fails.'>
+                    <label>Fallback mission </label>
+                    <select class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
+                        <option [value]="''"> ---- ---- </option>
+                        <ng-container  *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
+                            <option *ngFor="let missionName of availableMissions" [value]="missionName"> {{missionName}}</option>
+                        </ng-container>
+                    </select>
+                </fieldset>
+
+            </div>
+
             <h5 style="margin-top:16px">Default Settings </h5>
             <label>Automatically included in mission request data under the key "_settings".</label>            
             <div class="row" >
@@ -101,17 +128,7 @@
                 </fieldset>
             </div>
 
-            <h5 style="margin-top:16px">Failure Policy </h5>
-            <label>Default action on assignment failure</label>
-            <div class="row" >
-                <fieldset class="form-group col-xl-6">
-                    <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
-                        <option value="FAIL_MISSION" title="FAIL">fail the mission.</option>
-                        <option value="RELEASE_FAILED" title="RELEASE_FAILED">continue the mission and release the failed agent.</option>
-                        <option value="CONTINUE_MISSION" title="CONTINUE">continue mission without releasing the failed agent.</option>
-                    </select>
-            </fieldset>
-            </div>
+
 
 
             <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
