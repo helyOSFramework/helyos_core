@@ -45,7 +45,7 @@
             <tbody>
                 <tr *ngFor="let item of items" (click)="getItem(item.id)"
                     [ngClass]="{
-                        selectedHighlight: item.id==selectedItem?.id
+                        selectedHighlight: item.id===selectedItem?.id
                     }">
                     <td>{{item.id}}</td>
                     <td>{{item.username}}</td>
@@ -68,7 +68,7 @@
 
     <div>
         <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-        <button class="btn btn-danger" [disabled]="!selectedItem || selectedItem?.username=='admin'" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
+        <button class="btn btn-danger" [disabled]="!selectedItem || selectedItem?.username==='admin'" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
     </div>
 
 </div>
@@ -83,30 +83,30 @@
             <div class="row">
 
                 <fieldset class="form-group col-xl-3">
-                    <label>Username</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.username" name="username" />
+                    <label for="username">Username</label>
+                    <input id="username" class="form-control" [(ngModel)]="selectedItem.username" name="username" />
                 </fieldset>
 
                 <fieldset *ngIf="!setPassFlag" class="form-group  col-xl-3">
-                    <label> &nbsp;</label>
+                    <label for="btn"> &nbsp; </label>
                     <button style="height: 36px; width: 100%;" class="btn btn-primary" type="submit" (click)="setPassFlag=true">Change Password</button>
                 </fieldset>
 
                 <ng-container *ngIf="setPassFlag">
                     <fieldset class="form-group col-xl-3">
-                        <label> Password</label>
-                        <input class="form-control" [(ngModel)]="password" name="password" type="password"
+                        <label for="password"> Password</label>
+                        <input id="password" class="form-control" [(ngModel)]="password" name="password" type="password"
                         placeholder="password" />
                     </fieldset>
     
                     <fieldset class="form-group  col-xl-3">
-                        <label> &nbsp;</label>
-                        <input class="form-control" [(ngModel)]="confirmedPassword" name="confirmedPassword" type="password"
+                        <label for="confirm_password"> &nbsp;</label>
+                        <input id="confirm_password" class="form-control" [(ngModel)]="confirmedPassword" name="confirmedPassword" type="password"
                         placeholder="confirm password" />
                     </fieldset>
 
                     <fieldset class="form-group  col-xl-3">
-                        <label> &nbsp;</label>
+                        <label for="btn"> &nbsp; </label>
                         <button style="height: 36px; width: 100%;" class="btn btn-primary" type="submit"  (click)="setPassword()">Set Password</button>
                     </fieldset>
 
@@ -120,8 +120,8 @@
             <div class="row" >
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Role</label>
-                    <select class="form-control form-select" [(ngModel)]="selectedItem.userRole" name="class">
+                    <label for="role">Role</label>
+                    <select id="role" class="form-control form-select" [(ngModel)]="selectedItem.userRole" name="class">
                         <option [value]="0">{{USER_ROLE[0]}}</option>
                         <option [value]="1">{{USER_ROLE[1]}}</option>
                         <option [value]="2">{{USER_ROLE[2]}}</option>
@@ -134,8 +134,8 @@
             <div class="row" >
 
                 <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.description" name="description" maxlength="255"
+                    <label for="description"> Description </label>
+                    <input id="description" class="form-control" [(ngModel)]="selectedItem.description" name="description" maxlength="255"
                     placeholder="Add here a short description..." />
                 </fieldset>
             </div>
@@ -143,8 +143,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> Metadata </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.metadata" name="metadata"
+                    <label for="metadata"> Metadata </label>
+                    <textarea id="metadata" class="form-control" [(ngModel)]="selectedItem.metadata" name="metadata"
                     ></textarea>
                 </fieldset>
             </div>

@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { H_Yard } from 'helyosjs-sdk';
 import { H_UserAccount } from 'helyosjs-sdk/dist/helyos.models';
 import { HelyosService } from '../../services/helyos.service';
-import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -58,7 +57,7 @@ export class AccountsComponent implements OnInit {
 
     deleteItem(itemId) {
         this.helyosService.methods.userAccounts.delete(itemId)
-        .then( r=> {
+        .then((_) => {
             this.list();
         });
     }
@@ -82,7 +81,7 @@ export class AccountsComponent implements OnInit {
         }
 
         this.helyosService.methods.userAccounts.patch(patch)
-        .then( r=> {
+        .then((_) => {
             this.list();
         });
     }
@@ -93,7 +92,7 @@ export class AccountsComponent implements OnInit {
         this.helyosService.methods.adminGetUserAuthToken(this.selectedItem.username)
         .then( r => {
             this.accountToken = `Bearer ${r.jwtToken}`;
-            const modalRef = this.modalService.open(content,  { size: 'lg', centered: true, backdrop: false });
+            const _ = this.modalService.open(content,  { size: 'lg', centered: true, backdrop: false });
         })
 
     }
