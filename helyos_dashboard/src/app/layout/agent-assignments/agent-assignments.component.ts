@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HelyosService } from '../../services/helyos.service';
 import { H_Assignment } from 'helyosjs-sdk';
-import { ToolPose } from 'helyosjs-sdk/dist/helyos.models';
-import { NgbDate, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-agent-assignments',
@@ -113,7 +112,7 @@ export class AgentAssignmentsComponent implements OnInit {
         delete patch.modifiedAt;
 
         this.helyosService.methods.assignments.patch(patch)
-        .then( r=> {
+        .then((_) => {
             this.list();
         }).catch( e => {
             alert(JSON.stringify(e));
@@ -129,8 +128,8 @@ export class AgentAssignmentsComponent implements OnInit {
     }
 
     downloadObject(content, fileName, contentType) {
-        var a = document.createElement("a");
-        var file = new Blob([content], {type: contentType});
+        const a = document.createElement("a");
+        const file = new Blob([content], {type: contentType});
         a.href = URL.createObjectURL(file);
         a.download = fileName;
         a.click();
