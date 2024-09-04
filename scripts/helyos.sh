@@ -15,7 +15,7 @@ reset_dir /usr/local/helyos_core
 # DASHBOARD
 reset_dir /usr/src/app
 sudo cp -r helyos_dashboard/* /usr/src/app
-sudo npm set fetch-retry-maxtimeout 600000 && sudo npm install --no-audit --timeout=600000 --prefix=/usr/src/app
+sudo npm ci --prefer-offline --no-audit --no-fund --prefix=/usr/src/app
 sudo npm run build --prod --prefix=/usr/src/app
 reset_dir /usr/local/helyos_core/helyos_dashboard/dist
 sudo cp -r /usr/src/app/dist/* /usr/local/helyos_core/helyos_dashboard/dist
@@ -25,7 +25,7 @@ sudo cp LICENSE.txt /usr/local/helyos_core/LICENSE.txt
 # HELYOS CORE SERVER
 reset_dir /usr/local/helyos_core/helyos_server
 sudo cp -r helyos_server/* /usr/local/helyos_core/helyos_server
-sudo npm ci --omit=dev --timeout=600000 --prefix=/usr/local/helyos_core/helyos_server
+sudo npm ci --prefer-offline --no-audit --no-fund --prefix=/usr/local/helyos_core/helyos_server
 
 echo $PGHOST $PGPASSWORD $PGUSER $PGDATABASE $RUN_MODE
 export PGHOST PGPASSWORD PGUSER PGDATABASE RUN_MODE
