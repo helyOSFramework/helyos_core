@@ -11,7 +11,7 @@ fi
 
 current_dir=$(pwd)
 working_dir=$current_dir/..
-export working_dir
+cd $working_dir
 
-bash ./base-image.sh
-bash ./helyos.sh
+bash ./scripts/base-image.sh
+bash ./scripts/helyos.sh
