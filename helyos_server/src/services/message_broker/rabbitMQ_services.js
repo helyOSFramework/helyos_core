@@ -85,6 +85,11 @@ const urlObj = (username=RBMQ_USERNAME, password=RBMQ_PASSWORD) => ({
     });
 
 const connect = (username, password) => rbmqAccessLayer.connect(urlObj(username, password), sslOptions);
+const disconnect = async () =>  {   
+   await mainChannelPromise.then( channel => channel.close());
+   await secondaryChannelPromise.then (channel => channel.close());
+}
+
     
 const createAccounts = () =>  rbmqAccessLayer.createUser(RBMQ_USERNAME,RBMQ_PASSWORD,['administrator', 'management'])
                         .then(() => rbmqAccessLayer.add_rbmq_user_vhost(RBMQ_USERNAME))
@@ -301,6 +306,8 @@ function dispatchAllBufferedMessages(bufferPayload){
 
 
 module.exports.connect = connect;
+module.exports.disconnect = disconnect;
+
 module.exports.connectAndOpenChannels = connectAndOpenChannels;
 module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
 module.exports.sendEncriptedMsg = sendEncriptedMsg;

@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:focal-20240530
 
 # ------------------- install prerequisites -------------------
 
@@ -39,6 +39,6 @@ RUN apt-get update && apt-get install -y dos2unix
 
 
 RUN apt-get -y update 
-RUN curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash - && \
     apt-get -y install nodejs 
 RUN apt-get -y install postgresql postgresql-contrib

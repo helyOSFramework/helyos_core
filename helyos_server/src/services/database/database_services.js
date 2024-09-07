@@ -8,6 +8,11 @@ const { DatabaseLayer, AgentDataLayer, Client,
 	getUncompletedAssignments_byWPId,
 	updateAgentsConnectionStatus, setDBTimeout} = require('./postg_access_layer');
 
+// Singleton database clients
+const mainClient =  new Client();
+const shortTimeClient = new Client();
+const pgNotifications = new Client();
+
 
 const connectToDB = async (_client, statementTimeout = 0) => {
 	await _client.connect();
@@ -18,14 +23,15 @@ const connectToDB = async (_client, statementTimeout = 0) => {
 	}
 }
 
+const disconnectFromDB = async (clients) => {
+	return Promise.all(clients.map( client => client.end()))
+}
 
-// Singleton database clients
-const mainClient =  new Client();
-const shortTimeClient = new Client();
-const pgNotifications = new Client();
+
+
 
 connectToDB(mainClient); // async
-connectToDB(shortTimeClient, 1000); // async
+connectToDB(shortTimeClient, 1000); // async short timeout for queries
 connectToDB(pgNotifications); // async
 
 
@@ -96,8 +102,12 @@ const agents_interconnections = new DatabaseLayer(mainClient, 'public.agents_int
 
 
 module.exports.connectToDB = connectToDB;
+module.exports.disconnectFromDB = disconnectFromDB;
+
+
 module.exports.client = mainClient;
 module.exports.pgNotifications = pgNotifications;
+module.exports.shortTimeClient = shortTimeClient;
 module.exports.getNewClient = getNewClient;
 
 module.exports.map = map;

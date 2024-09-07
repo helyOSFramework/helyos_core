@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 -t helyosframework/helyos_core_base:2.0.1 . --push
+docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 -t helyosframework/helyos_core_base:2.0.5 . --push
