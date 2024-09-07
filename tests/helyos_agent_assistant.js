@@ -2,6 +2,15 @@ const amqp = require('amqplib');
 const RBMQ_HOST = process.env.RBMQ_HOST || 'localhost';
 const RBMQ_PORT = process.env.RBMQ_PORT || 99999;
 const UUID = 'ASSISTANT_AGENT';
+const VEHICLE_UUID = 'Ab34069fc5-fdgs-434b-b87e-f19c5435113';
+
+function parse_any_helyos_agent_message(raw_str) {
+    const object = JSON.parse(raw_str);
+    const message_str = object['message'];
+    const message_signature = object['signature'];
+    const message = JSON.parse(message_str);
+    return message;
+}
 
 class RabbitMQClient {
     constructor(host, port) {
@@ -12,12 +21,27 @@ class RabbitMQClient {
         this.MISSION_ROUTING_KEY = `agent.${this.UUID}.mission_req`;
         this.AGENT_STATE_KEY = `agent.${this.UUID}.state`;
         this.connection = null; 
+        this.channel = null;
+        this.vehicleInstantActions= [];
     }
 
     async login(username, password) {
         try {
             // Create connection
             this.connection = await amqp.connect(`amqp://${username}:${password}@${this.RBMQ_HOST}:${this.RBMQ_PORT}`);
+
+            // Tap data from the vehicle agent
+            this.channel = await this.connection.createChannel();
+            const queue = await this.channel.assertQueue('', { exclusive: true });
+            await this.channel.bindQueue(queue.queue, 'xchange_helyos.agents.dl', `agent.${VEHICLE_UUID}.instantActions`);
+
+            this.channel.consume(queue.queue, (msg)=> {
+                if (msg !== null) {
+                    const messageString = msg.content.toString();
+                    const parsedMessage = parse_any_helyos_agent_message(messageString);
+                    this.vehicleInstantActions.push(parsedMessage);
+                }
+            });
 
             this.connection.on('error', (err) => {
                 if (err.message !== 'Connection closing') {
@@ -35,11 +59,12 @@ class RabbitMQClient {
         try {
             const channel = await this.connection.createChannel();
             const workProcesss = {
-                agent_uuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],
+                agent_uuids: [VEHICLE_UUID],
                 yard_id: 1,
                 work_process_type_name: 'driving',
                 data: { "foo:": "bar", agent_id: 1 },
                 status: 'dispatched',
+                operation_types_required: ['autonomous_driving']
             };
             const message = {
                 type: 'work_process',

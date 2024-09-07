@@ -102,7 +102,7 @@ async function sendCustomInstantActionToAgent(agentId, commandStr) {
  * Agent does whatever it needs to get ready for a mission and then updates status ("READY").
  */
 
-async function sendGetReadyForWorkProcessRequest(agentIdList, wpId) {
+async function sendGetReadyForWorkProcessRequest(agentIdList, wpId, operation_types_required=[]) {
     const agents = await databaseServices.agents.list_in('id',agentIdList);
     const msgs = {};
 
@@ -111,7 +111,7 @@ async function sendGetReadyForWorkProcessRequest(agentIdList, wpId) {
                             type: 'reserve_for_mission',
                             uuid: agent.uuid,
                             body: {
-                                operation_types_required: [], // to be used in the future
+                                operation_types_required: operation_types_required,
                                 work_process_id: parseInt(wpId, 10),
                                 reserved: true, 
                             },
