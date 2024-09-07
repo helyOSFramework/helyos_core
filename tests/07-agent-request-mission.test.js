@@ -56,5 +56,11 @@ describe('07 Agent Request Mission',   () =>  {
     });
 
     
+    it('Agent has received the correct reserve command', async () => {
+        const reserveMsg = rabbitMQClient.vehicleInstantActions.filter(m => m.type === 'reserve_for_mission')[0];
+        const result =  reserveMsg.body.operation_types_required.includes("autonomous_driving");
+        expect(result).toEqual(true);
+    });
+
 
   });

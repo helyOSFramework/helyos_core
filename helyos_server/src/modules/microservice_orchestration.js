@@ -286,7 +286,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				}
 			
 			// Requesting "FREE" agents to be "READY"				
-				await agentComm.sendGetReadyForWorkProcessRequest(agentsListIds, workProcess.id);
+				await agentComm.sendGetReadyForWorkProcessRequest(agentsListIds, workProcess.id, workProcess.operation_types_required);
 				missionAgents.forEach( agent => {
 					logMetadata['uuid'] = agent.uuid;
 					logData.addLog('agent', logMetadata, 'normal', `requesting agent to be ready`);	
