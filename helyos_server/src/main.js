@@ -91,12 +91,12 @@ async function connectToDB () {
 // ----------------------------------------------------------------------------
 // 3) RabbitMQ Client setup -  Agent -> RabbitMQ ->  Nodejs(Rbmq-client) -> Postgres 
 // ----------------------------------------------------------------------------
-const RabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
+const rabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
 
 
 async function connectToRabbitMQ() {
       await initialization.initializeRabbitMQAccounts();
-      const dataChannels = await RabbitMQServices.connectAndOpenChannels({
+      const dataChannels = await rabbitMQServices.connectAndOpenChannels({
                                                                             subscribe: false,
                                                                             connect: true,
                                                                             recoverCallback: initialization.helyosConsumingMessages
@@ -173,8 +173,36 @@ async function start() {
     frontEndServer.listen(DASHBOARD_PORT);
     graphqlServer.listen(process.env.GQLPORT);
 
+    // Graceful shutdown
+    process.on('SIGINT', async () => {
+        console.log('Received SIGINT. Shutting down gracefully...');
+        await end();
+        process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+        console.log('Received SIGTERM. Shutting down gracefully...');
+        await end();
+        process.exit(0);
+    });
+
 }
 
+
+
+async function end() {
+    try {
+        await rabbitMQServices.disconnect();
+        console.log('Disconnected from RabbitMQ.');
+        await databaseServices.disconnectFromDB([ databaseServices.client,
+                                                databaseServices.shortTimeClient,
+                                                databaseServices.pgNotifications ]);
+        console.log('Disconnected from all database services.');
+
+    } catch (error) {
+        console.error("At least one service disconnection failed", error);
+    }    
+}
 
 start();
 
