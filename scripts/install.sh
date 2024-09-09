@@ -13,5 +13,5 @@ current_dir=$(pwd)
 working_dir=$current_dir/..
 cd $working_dir
 
-bash ./scripts/base-image.sh
-bash ./scripts/helyos.sh
+bash ./scripts/install-base-image.sh
+bash ./scripts/install-helyos.sh

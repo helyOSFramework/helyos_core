@@ -7,16 +7,16 @@
    cd scripts
    ```
 
-2. **Make the index file executable**  
-   To grant execute permissions to the index file, run the following command:
+2. **Make the install file executable**  
+   To grant execute permissions to the install file, run the following command:
    ```bash
-   chmod +x index.sh
+   chmod +x install.sh
    ```
 
 3. **Install and Run `helyos_core`**  
-   Execute the index file to install and launch **helyos_core**:
+   Execute the install file to install and launch **helyos_core**:
    ```bash
-   ./index.sh
+   ./install.sh
    ```
 
 4. **Installed Directories**  
