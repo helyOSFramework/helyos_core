@@ -39,19 +39,15 @@ sudo npm ci --prefer-offline --no-audit --no-fund --loglevel=error --prefix=/usr
 # endregion
 
 # region DATABASE
-echo $PGHOST $PGPASSWORD $PGUSER $PGDATABASE $RUN_MODE
-export PGHOST PGPASSWORD PGUSER PGDATABASE RUN_MODE
 
 reset_dir /usr/local/helyos_core/helyos_database
 sudo cp -r helyos_database/* /usr/local/helyos_core/helyos_database
 
 sudo dos2unix /usr/local/helyos_core/helyos_database/db_commands/migrate.sh
 sudo chmod +x /usr/local/helyos_core/helyos_database/db_commands/migrate.sh
-bash /usr/local/helyos_core/helyos_database/db_commands/migrate.sh
 
 sudo dos2unix /usr/local/helyos_core/helyos_database/db_commands/create_admin_account.sh
 sudo chmod +x /usr/local/helyos_core/helyos_database/db_commands/create_admin_account.sh
-bash /usr/local/helyos_core/helyos_database/db_commands/create_admin_account.sh
 # endregion
 
 # region SETTINGS
@@ -68,10 +64,8 @@ reset_dir /usr/local/helyos_core/bin
 sudo cp packaging/wait-for-postgres.sh /usr/local/helyos_core/bin/wait-for-postgres.sh
 sudo dos2unix /usr/local/helyos_core/bin/wait-for-postgres.sh
 sudo chmod +x /usr/local/helyos_core/bin/wait-for-postgres.sh
-bash /usr/local/helyos_core/bin/wait-for-postgres.sh
 
 sudo cp packaging/entrypoint.sh /usr/local/helyos_core/bin/entrypoint.sh
 sudo dos2unix /usr/local/helyos_core/bin/entrypoint.sh
 sudo chmod +x /usr/local/helyos_core/bin/entrypoint.sh
-bash /usr/local/helyos_core/bin/entrypoint.sh
 # endregion
