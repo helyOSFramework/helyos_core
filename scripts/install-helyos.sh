@@ -25,17 +25,17 @@ sudo cp LICENSE.txt /usr/local/helyos_core/LICENSE.txt
 # region DASHBOARD
 reset_dir /usr/src/app
 sudo cp -r helyos_dashboard/* /usr/src/app
-sudo npm ci --prefer-offline --no-audit --no-fund --prefix=/usr/src/app
+sudo npm ci --prefer-offline --no-audit --no-fund --loglevel=error --prefix=/usr/src/app
 sudo npm run build --prod --prefix=/usr/src/app
 reset_dir /usr/local/helyos_core/helyos_dashboard/dist
 sudo cp -r /usr/src/app/dist/* /usr/local/helyos_core/helyos_dashboard/dist
-# endregion
 delete_dir /usr/src/app
+# endregion
 
 # region HELYOS CORE SERVER
 reset_dir /usr/local/helyos_core/helyos_server
 sudo cp -r helyos_server/* /usr/local/helyos_core/helyos_server
-sudo npm ci --prefer-offline --no-audit --no-fund --prefix=/usr/local/helyos_core/helyos_server
+sudo npm ci --prefer-offline --no-audit --no-fund --loglevel=error --prefix=/usr/local/helyos_core/helyos_server
 # endregion
 
 # region DATABASE
