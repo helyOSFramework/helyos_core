@@ -37,4 +37,10 @@
    /etc/helyos/db_initial_data/
    ```
 
+7. **SSL keys**  
+   SSL keys can be found in the following directory:
+   ```bash
+   /etc/helyos/.ssl_keys
+   ```
+
 ---
