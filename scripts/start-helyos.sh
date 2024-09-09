@@ -9,7 +9,7 @@ if [ -f .env ]; then
     set +o allexport
 fi
 
-bash /usr/local/helyos_core/helyos_database/db_commands/migrate.sh
-bash /usr/local/helyos_core/helyos_database/db_commands/create_admin_account.sh
+cd /usr/local/helyos_core/helyos_server
+
 bash /usr/local/helyos_core/bin/wait-for-postgres.sh
 bash /usr/local/helyos_core/bin/entrypoint.sh
