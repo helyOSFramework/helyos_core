@@ -69,3 +69,5 @@ sudo cp packaging/entrypoint.sh /usr/local/helyos_core/bin/entrypoint.sh
 sudo dos2unix /usr/local/helyos_core/bin/entrypoint.sh
 sudo chmod +x /usr/local/helyos_core/bin/entrypoint.sh
 # endregion
+
+sudo chown -R $USER:$USER /usr/local/helyos_core
