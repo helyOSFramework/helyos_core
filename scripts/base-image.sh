@@ -2,13 +2,12 @@
 
 set -e
 
-sudo apt-get -y  update
-sudo apt-get install -y curl dos2unix
+sudo apt-get -q update
+sudo apt-get -yq install curl dos2unix
 
 # Install Node.js 18
-curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get -y install nodejs
+curl -sSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get -yq install nodejs
 
 # Install PostgreSQL and postgresql-contrib
-sudo apt-get install -y postgresql-client-16 postgresql-contrib-16
-
+sudo apt-get -yq install postgresql-client-16 postgresql-contrib-16
