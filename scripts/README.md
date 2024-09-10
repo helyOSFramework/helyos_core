@@ -13,8 +13,8 @@
    chmod +x install.sh
    ```
 
-3. **Install and Run `helyos_core`**  
-   Execute the install file to install and launch **helyos_core**:
+3. **Install `helyos_core`**  
+   Execute the install file to install **helyos_core**:
    ```bash
    ./install.sh
    ```
@@ -25,22 +25,19 @@
    /usr/local/helyos_core/
    ```
 
-5. **Configuration Files**  
-   Configuration files can be found in the following directory:
-   ```bash
-   /etc/helyos/config/
-   ```
+5. **Paths**
 
-6. **Database Initial Data Files**  
-   The initial data files for the database are located in:
-   ```bash
-   /etc/helyos/db_initial_data/
-   ```
-
-7. **SSL keys**  
-   SSL keys can be found in the following directory:
-   ```bash
-   /etc/helyos/.ssl_keys
-   ```
+   - **Core Components**:
+     - **Dashboard**: `/usr/local/helyos_core/helyos_dashboard`
+     - **Server**: `/usr/local/helyos_core/helyos_server`
+     - **Database**: `/usr/local/helyos_core/helyos_database`
+  
+   - **Scripts and Binaries**:
+     - **Entrypoint Files**: `/usr/local/helyos_core/bin`
+  
+   - **Configuration and Data**:
+     - **Configuration Files**: `/etc/helyos/config/`
+     - **Initial Database Data Files**: `/etc/helyos/db_initial_data/`
+     - **SSL Keys**: `/etc/helyos/.ssl_keys`
 
 ---
