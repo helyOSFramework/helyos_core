@@ -11,10 +11,10 @@ fi
 
 cd /usr/local/helyos_core/helyos_server
 
-print_success "Generating redoc static API documentation"
+print_info "Generating redoc static API documentation"
 
 npm install --prefer-offline --no-audit --no-fund --loglevel=error --no-save redoc-cli
 npm run make_map_api_doc
 npm run make_path_api_doc
 
-print_success "API documentation created sucessfully at /usr/local/helyos_core/helyos_server/docs"
+print_info "API documentation created sucessfully at /usr/local/helyos_core/helyos_server/docs"

@@ -1,6 +1,6 @@
 # https://stackoverflow.com/a/28938235
 
-print_success() {
+print_info() {
     Color='\033[0;102m'   
     Color_Off='\033[0m'
 
