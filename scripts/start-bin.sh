@@ -2,8 +2,10 @@
 
 set -e
 
+source functions.sh
+
 if [ ! -d "/usr/local/helyos_core/helyos_server" ]; then
-  echo "Error: Directory /usr/local/helyos_core/helyos_server does not exist."
+  print_fail "Error: Directory /usr/local/helyos_core/helyos_server does not exist"
   exit 1
 fi
 
@@ -13,7 +15,7 @@ if [ -f .env ]; then
     source .env
     set +o allexport
 else
-  echo "Error: File .env does not exist."
+  print_fail "Error: File .env does not exist"
   exit 1
 fi
 

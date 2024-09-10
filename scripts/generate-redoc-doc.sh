@@ -5,7 +5,7 @@ set -e
 source functions.sh
 
 if [ ! -d "/usr/local/helyos_core/helyos_server" ]; then
-  print_fail "Error: Directory /usr/local/helyos_core/helyos_server does not exist."
+  print_fail "Error: Directory /usr/local/helyos_core/helyos_server does not exist"
   exit 1
 fi
 

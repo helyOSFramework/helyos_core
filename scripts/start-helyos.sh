@@ -2,13 +2,15 @@
 
 set -e
 
+source functions.sh
+
 # Load environment variables from .env file
 if [ -f .env ]; then
     set -o allexport
     source .env
     set +o allexport
 else
-  echo "Error: File .env does not exist."
+  print_fail "Error: File .env does not exist."
   exit 1
 fi
 
