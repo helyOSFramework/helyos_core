@@ -2,18 +2,15 @@
 
 set -e
 
-# Define color codes
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
-print() {
-    echo -e "\n${GREEN}### $1...${NC}"
-}
-
 if [ ! -d "/usr/local/helyos_core/helyos_server" ]; then
   echo "Error: Directory /usr/local/helyos_core/helyos_server does not exist."
   exit 1
 fi
+
+source functions.sh
+
+# Export all functions defined in functions.sh
+export -f $(declare -F | awk '{print $3}')
 
 cd /usr/local/helyos_core/helyos_server
 

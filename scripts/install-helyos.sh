@@ -2,14 +2,6 @@
 
 set -e
 
-# Define color codes
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
-print() {
-    echo -e "\n${GREEN}### $1...${NC}"
-}
-
 # region FUNCTIONS
 delete_dir() {
     local dir=$1
