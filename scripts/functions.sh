@@ -1,7 +1,14 @@
 
-print() {
-    GREEN='\033[0;32m'
-    NC='\033[0m' # No Color
-    
-    echo -e "\n${GREEN}### $1...${NC}"
+print_success() {
+    Color='\033[0;102m'   
+    Color_Off='\033[0m'
+
+    echo -e "\n${Color}### $1...${Color_Off}"
+}
+
+print_fail() {
+    Color='\033[0;101m'
+    Color_Off='\033[0m'
+
+    echo -e "\n${Color}### $1...${Color_Off}"
 }
