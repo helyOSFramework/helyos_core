@@ -1,1 +1,1 @@
-docker build -f ./Dockerfile  -t helyosframework/helyos_core:test .. 
+docker build  -f ./Dockerfile  -t helyosframework/helyos_core:test .. 

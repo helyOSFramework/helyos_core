@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.work_processes (
     sched_end_at timestamp(6) without time zone,
     wait_free_agent boolean DEFAULT true,
     process_type character varying,
+    operation_types_required character varying[]  DEFAULT '{}',
     on_assignment_failure character varying DEFAULT 'DEFAULT' CHECK (on_assignment_failure IN ('DEFAULT','FAIL_MISSION', 'CONTINUE_MISSION', 'RELEASE_FAILED')),
     fallback_mission character varying DEFAULT 'DEFAULT',
 
@@ -92,7 +93,7 @@ EXECUTE PROCEDURE  public.trigger_set_timestamp_work_processes();
 
 CREATE TABLE IF NOT EXISTS public.work_process_type (
     id BIGSERIAL PRIMARY KEY,
-    name character varying,\
+    name character varying,
     description character varying,
     num_max_agents int,
     dispatch_order jsonb,
