@@ -96,6 +96,7 @@
                     </div>
 
 
+
                     <div class="row" >
 
 
@@ -186,6 +187,13 @@
                         </fieldset>
                     </div>
 
+                    <div class="row">
+                        <fieldset class="form-group col-xl-12">
+                            <label> Optional: Specify Required Operations for Reserved Agents </label>
+                            <input class="form-control"  type="text" [(ngModel)]="operationTypesRequired"  name="operationTypesRequired" />
+                            <small class="form-text text-muted"> Enter the names, separate operation types with a comma (,), of the operations needed for the agent to be prepared upon reservation.</small>
+                         </fieldset>
+                    </div>
 
                     <div class="row" style="justify-content:space-between;">
                         <div class="w-auto">
