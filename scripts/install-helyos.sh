@@ -50,6 +50,7 @@ delete_dir /usr/src/app
 print "Setting up helyos_server"
 reset_dir /usr/local/helyos_core/helyos_server
 sudo cp -r helyos_server/* /usr/local/helyos_core/helyos_server
+sudo touch /usr/local/helyos_core/helyos_server/src/microservice_mocks.js
 print "Running npm ci for helyos_server"
 sudo npm ci --prefer-offline --no-audit --no-fund --loglevel=error --prefix=/usr/local/helyos_core/helyos_server
 # endregion
