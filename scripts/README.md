@@ -34,23 +34,36 @@ Run the migration process once to set up the database schema:
   ./start-helyos.sh
   ```
 
-- **Stop**: To stop the Helyos Core, use the `stop-helyos.sh` script:
+- **Stop**: To stop the helyOS Core, use the `stop-helyos.sh` script:
   ```bash
   ./stop-helyos.sh
   ```
 
-## 4. Project Utilities
+## 4. Configuration and Data:
 
-### `generate-redoc-doc.sh`
+helyOS Core relies on several configuration files to define its behavior.
+
+- **Configuration Files**: `/etc/helyos/config/`
+- **Initial Database Data Files**: `/etc/helyos/db_initial_data/`
+- **SSL Keys**: `/etc/helyos/.ssl_keys`
+
+## 5. Project Utilities
+
+### Documentation
 
 This script generates static API documentation. Run the following command to create the documentation:
 ```bash
 ./generate-redoc-doc.sh
 ```
 
-### `source-to-bin.sh`
+### Binary
 
 Use this script to convert the source code into a binary format. Run the following command:
 ```bash
 ./source-to-bin.sh
+```
+
+Use this script to run the binary. Run the following command:
+```bash
+./start-bin.sh
 ```
