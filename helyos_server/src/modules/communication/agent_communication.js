@@ -50,15 +50,16 @@ async function cancelAssignmentInAgent(assignment) {
     const assignment_obj = {type: 'assignment_cancel',
                             uuid: uuids[0],
                             metadata: { id: parseInt(assignment.id, 10),
-                                                yard_id: parseInt(assignment.yard_id, 10),
-                                                work_process_id: parseInt(assignment.work_process_id, 10),
-                                                status: assignment.status, 
-                                                start_time_stamp: assignment.start_time_stamp,
-                                                context: assignment.context // from other assignments 
+                                        yard_id: parseInt(assignment.yard_id, 10),
+                                        work_process_id: parseInt(assignment.work_process_id, 10),
+                                        status: assignment.status, 
+                                        start_time_stamp: assignment.start_time_stamp,
+                                        context: assignment.context // from other assignments 
                                         },
-                            body: { data: {metadata: {type: 'assignment_cancel', 
-                                                        custom_meta: assignment.data.metadata, 
-                                                        assignment_id: assignment.id}}
+                            body: { assignment_id: assignment.id,
+                                    data: {metadata: {type: 'assignment_cancel', 
+                                                    custom_meta: assignment.data.metadata, 
+                                                    assignment_id: assignment.id}}
                                 },
                             _version: MESSAGE_VERSION
 

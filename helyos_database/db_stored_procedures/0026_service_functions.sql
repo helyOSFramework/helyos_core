@@ -28,7 +28,7 @@ $BODY$
         PERFORM pg_notify('service_requests_update', 
             (SELECT row_to_json(r.*)::varchar FROM (
             SELECT  id, work_process_id, fetched, processed, canceled, service_type, request_uid,
-                    status, next_request_to_dispatch_uid, is_result_assignment, assignment_dispatched,
+                    status, next_request_to_dispatch_uid, next_request_to_dispatch_uids, is_result_assignment, assignment_dispatched,
                      context->'map'->>'id' as yard_id from public.service_requests  where id = NEW.id)
             r)
         );

@@ -88,6 +88,11 @@ function processMicroserviceEvents(msg) {
 
                         break;
 
+                    case  SERVICE_STATUS.SKIPPED:
+                            blMicroservice.wrapUpMicroserviceCall(payload)
+                            .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err.message}`));
+                        break;
+
                     case SERVICE_STATUS.FAILED:
                         databaseServices.work_processes.updateByConditions({id: payload['work_process_id'], 
                                                                             status__in: [   MISSION_STATUS.PREPARING,
