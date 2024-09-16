@@ -18,6 +18,9 @@ export class DispatchProcessesComponent implements OnInit {
     public page: number = 1;
     public active = 1;
     public availableMissions: string[] = [];
+    public yardId:any;
+    public availableYardIds: any[];
+    public operationTypesRequired: string;
 
     constructor(private helyosService: HelyosService) {
 
@@ -25,6 +28,7 @@ export class DispatchProcessesComponent implements OnInit {
 
     ngOnInit() {
         this.list();
+        this.helyosService.methods.yard.list().then( yards => this.availableYardIds = yards.map(y=>y.id));
         this.helyosService.methods.workProcessType.list({}).then( wpTypes => {
             this.availableMissions = wpTypes.map( wp => wp.name);
          });
@@ -46,12 +50,24 @@ export class DispatchProcessesComponent implements OnInit {
             this.list();
         }
 
+
     create() {
-        const newItem={status: 'draft', workProcessTypeName:'undefined'}
-        this.helyosService.methods.workProcess.create(newItem)
-        .then( r=> {
-            console.log("helyosService.methods.workProcess.create",r);
-            this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
+        this.helyosService.methods.yard.list()
+        .then((yards)=> {
+            if (yards.length === 0) {
+                alert("You need to register at least one Yard before creating a mission.");
+                throw new Error("No yard");
+            }
+            this.availableYardIds = yards.map(y=>y.id);
+            if (!this.availableYardIds.includes(this.yardId))  this.yardId = this.availableYardIds[0];
+        })
+        .then(() => {
+            const newItem={status: 'draft', workProcessTypeName:'undefined', yardId: this.yardId};
+            this.helyosService.methods.workProcess.create(newItem)
+            .then( r=> {
+                console.log("helyosService.methods.workProcess.create",r);
+                this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
+            });
         });
     }
 
@@ -80,6 +96,8 @@ export class DispatchProcessesComponent implements OnInit {
             }
             this.selectedItem = r;   
             this.selectedItem['agentIds'] = JSON.stringify(r['agentIds']) as any;
+            if (r.operationTypesRequired)
+            this.operationTypesRequired = r.operationTypesRequired.join(', ') as any;
             this.assignmentList();
             if(this.selectedItem.schedStartAt) {
   
@@ -102,8 +120,9 @@ export class DispatchProcessesComponent implements OnInit {
         }
 
         const patch = {...item};
+        delete patch.operationTypesRequired;
 
-        console.log(item);
+
         if (!item['agentIds']) {
             patch['agentIds'] = [];
         } else {
@@ -114,6 +133,27 @@ export class DispatchProcessesComponent implements OnInit {
                 return;
             }
         } 
+
+        if (item['yardId']) {
+            if (this.availableYardIds.includes(item['yardId'])) {
+                this.yardId = item['yardId'];  
+            } else {
+                alert('Warning: this yard may not exist.');
+            }
+        }
+
+        if (!this.operationTypesRequired) {
+            patch['operationTypesRequired'] = [];
+        } else {
+            try {
+                const jsonArray = this.operationTypesRequired.split(',').map(element => element.trim());
+                patch['operationTypesRequired'] = jsonArray;
+            } catch (error) {
+                alert('error: operationTypesRequired must be an array of strings.')
+                return;
+            }
+        } 
+
 
         delete patch.createdAt;
         delete patch.modifiedAt;

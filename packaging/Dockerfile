@@ -12,7 +12,7 @@ RUN npm run build --prod
 
 
 # # Second stage
-FROM helyosframework/helyos_core_base:2.0.1
+FROM helyosframework/helyos_core_base:2.0.5
 
 # ------------------- BUILDING THE SERVER -----------------------------
 
@@ -85,7 +85,7 @@ EXPOSE 5002
 EXPOSE 5000
 EXPOSE 8080
 
-CMD [ "/usr/local/helyos_core/bin/wait-for-postgres.sh", "sh -c /usr/local/helyos_core/bin/entrypoint.sh"]
+CMD [ "/usr/local/helyos_core/bin/wait-for-postgres.sh", "/usr/local/helyos_core/bin/entrypoint.sh"]
 
 
 

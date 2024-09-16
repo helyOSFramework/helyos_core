@@ -7,30 +7,32 @@ const requestXHTTP = require('superagent');
 const getExtServiceEndpoint = (serviceUrl, serviceClass) => {
     let url = serviceUrl;
     if (!url) return " ";
-    url = url.replace(/\/$/, '');
-    const pattern = /(plan_job|map|storage|plan_job\/|map\/|storage\/)$/;
-    if (pattern.test(url)) {
-        return url;
-    } 
-    switch (serviceClass) {
-        case 'Map server':
-            url = url + '/map/';
-            break;
-        case 'Path planner':
-            url = url + '/plan_job/';
-            break;
-        case 'Assignment planner':
-            url = url + '/plan_job/';
-            break;
-        case 'Storage':
-            url = url + '/storage/';
-            break;    
-        default:
-            url = url + '/';
-            break;
-    }
-
     return url;
+
+    // url = url.replace(/\/$/, '');
+    // const pattern = /(plan_job|map|storage|plan_job\/|map\/|storage\/)$/;
+    // if (pattern.test(url)) {
+    //     return url;
+    // } 
+    // switch (serviceClass) {
+    //     case 'Map server':
+    //         url = url + '/map/';
+    //         break;
+    //     case 'Path planner':
+    //         url = url + '/plan_job/';
+    //         break;
+    //     case 'Assignment planner':
+    //         url = url + '/plan_job/';
+    //         break;
+    //     case 'Storage':
+    //         url = url + '/storage/';
+    //         break;    
+    //     default:
+    //         url = url + '/';
+    //         break;
+    // }
+
+    // return url;
 }
 
 
