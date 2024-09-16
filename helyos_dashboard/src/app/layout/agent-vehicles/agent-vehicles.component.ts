@@ -89,7 +89,7 @@ export class AgentVehiclesComponent implements OnInit {
             'sender': 'helyOS dashboard'
         }
         this.helyosService.methods.instantActions.create(instantAction)
-        .then( r => alert('command sent'));
+        .then( (_) => alert('command sent'));
     }
 
     getItem(itemId) {
@@ -113,7 +113,7 @@ export class AgentVehiclesComponent implements OnInit {
 
     deleteItem(itemId) {
         this.helyosService.methods.agents.delete(itemId)
-        .then( r=> {
+        .then( (_) => {
             this.list();
         });
     }
@@ -207,7 +207,7 @@ export class AgentVehiclesComponent implements OnInit {
         }
 
         this.helyosService.methods.agents.patch(patch)
-        .then( r=> {
+        .then( (_) => {
             this.updateRabbitMQ();
             this.list();
             this.saveStateMsg = '';
