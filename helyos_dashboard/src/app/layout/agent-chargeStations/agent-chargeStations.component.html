@@ -36,7 +36,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of tools" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <td>{{item.id}}</td>
                     <th scope="row">{{item.agentType}}</th>
                     <td>{{item.name}}</td>
@@ -60,7 +60,7 @@
     <div class="card-footer" style="display:flex;justify-content:space-between">
         <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
             <div class="w-auto">Instant Action Command</div>
-            <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
+            <div class="col-xl-6" ><input id="aaa" class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
             <button class="btn btn-light w-auto"  (click)="sendInstantAction()"> SEND </button>
         </div>
     
@@ -94,19 +94,19 @@
 
                 <div class="row">
                     <fieldset class="form-group col-xl-3">
-                        <label>Name</label>
-                        <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+                        <label for="name">Name</label>
+                        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
                     </fieldset>
 
                     <fieldset class="form-group col-xl-6">
-                        <label> UUID</label>
-                        <input class="form-control" [(ngModel)]="selectedItem.uuid" name="uuid"
+                        <label for="uuid"> UUID</label>
+                        <input id="uuid" class="form-control" [(ngModel)]="selectedItem.uuid" name="uuid"
                             placeholder="0000-0000-0000-0000" />
                     </fieldset>
 
                     <fieldset class="form-group col-xl-2">
-                        <label>yard id</label>
-                        <input type="number" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId"
+                        <label for="yardId">yard id</label>
+                        <input id="yardId" type="number" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId"
                             placeholder="db index" />
                     </fieldset>
                 </div>
@@ -114,18 +114,18 @@
                 <div  class="row">
 
                     <fieldset class="form-group col-xl-3">
-                        <label> type </label>
-                        <input class="form-control"  [(ngModel)]="selectedItem.agentType" name="agentType" placeholder="e.g. fast-charge" />
+                        <label for="agentType"> type </label>
+                        <input id="agentType" class="form-control"  [(ngModel)]="selectedItem.agentType" name="agentType" placeholder="e.g. fast-charge" />
                     </fieldset>
                                 
                     <div class="w-auto row thumbnailContainer" >
-                        <input #fileUpload  type="file" class="file-upload w-auto" (change)="onImageSelected($event)" 
+                        <input id="thumbnail" #fileUpload  type="file" class="file-upload w-auto" (change)="onImageSelected($event)" 
                         accept=".png,.jpeg, .jpg">
                 
-                        <label class="w-auto"> Thumbnail picture </label>
+                        <label for="thumbnail" class="w-auto"> Thumbnail picture </label>
                 
                         <button class="btn btn-light w-auto" (click)="fileUpload.click()"> Upload </button>
-                        <img class="w-auto" height="100%" [src]="selectedItem.picture">
+                        <img class="w-auto" height="100%" [src]="selectedItem.picture" alt="thumbnail">
                     </div>
                 </div>
 
@@ -133,8 +133,8 @@
 
                 <div class="row">
                     <fieldset class="form-group col-xl-12">
-                        <label> Public key (PEM) </label>
-                        <textarea class="form-control" rows=8 [(ngModel)]="selectedItem.publicKey" name="publicKey"
+                        <label for="publicKey"> Public key (PEM) </label>
+                        <textarea id="publicKey" class="form-control" rows=8 [(ngModel)]="selectedItem.publicKey" name="publicKey"
                             placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
                     </fieldset>
                 </div>
@@ -142,10 +142,10 @@
                 <div class="row">
 
                     <fieldset class="form-group" style="display:flex; align-items: center;" >
-                        <input   id="verifySignature" type="checkbox" style="height:38px; width: 40px; margin-right: 10px;"
+                        <input id="verifySignature" type="checkbox" style="height:38px; width: 40px; margin-right: 10px;"
                                 class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.verifySignature" name="verifySignature" />
-                        <label> Use this Public key to validate the RSA signature of the agent. </label> 
+                        <label for="verifySignature"> Use this Public key to validate the RSA signature of the agent. </label> 
 
                     </fieldset>
                 </div>
@@ -161,20 +161,20 @@
 
                     <div class="row">
                         <fieldset class="form-group col-xl-3">
-                            <label>x (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.x" name="x" placeholder=0 />
+                            <label for="x">x (unit)</label>
+                            <input id="x" type="number" class="form-control" [(ngModel)]="selectedItem.x" name="x" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
-                            <label>y (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.y" name="y" placeholder=0 />
+                            <label for="y">y (unit)</label>
+                            <input id="y" type="number" class="form-control" [(ngModel)]="selectedItem.y" name="y" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
-                            <label>z (unit)</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.z" name="z" placeholder=0 />
+                            <label for="z">z (unit)</label>
+                            <input id="z" type="number" class="form-control" [(ngModel)]="selectedItem.z" name="z" placeholder=0 />
                         </fieldset>
                         <fieldset class="form-group col-xl-3">
-                            <label>unit</label>
-                            <input type="text" class="form-control" [(ngModel)]="unit" name="unit" placeholder="e.g. mm" />
+                            <label for="unit">unit</label>
+                            <input id="unit" type="text" class="form-control" [(ngModel)]="unit" name="unit" placeholder="e.g. mm" />
                         </fieldset>
 
                     </div>
@@ -182,12 +182,12 @@
                     <div class="row">
 
                         <fieldset class="form-group col-xl-4">
-                            <label>orientation</label>
-                            <input type="number" step=1 class="form-control" [(ngModel)]="selectedItem.orientation" name="orientation" placeholder="3.14" />
+                            <label for="orientation">orientation</label>
+                            <input id="orientation" type="number" step=1 class="form-control" [(ngModel)]="selectedItem.orientation" name="orientation" placeholder="3.14" />
                         </fieldset>
                         <fieldset class="form-group col-xl-6">
-                            <label>orientations </label>
-                            <input  class="form-control" [(ngModel)]="selectedItem.orientations" name="orientations" placeholder="1.57, 3.14,..." />
+                            <label for="orientations">orientations </label>
+                            <input id="orientations" class="form-control" [(ngModel)]="selectedItem.orientations" name="orientations" placeholder="1.57, 3.14,..." />
                         </fieldset>
 
                     </div>
@@ -196,8 +196,8 @@
 
                     <div class="row">
                         <fieldset class="form-group col-xl-12">
-                            <label> geometry (JSON)</label>
-                            <textarea class="form-control" rows=8 [(ngModel)]="selectedItem.geometry" name="geometry"></textarea>
+                            <label for="geometry"> geometry (JSON)</label>
+                            <textarea id="geometry" class="form-control" rows=8 [(ngModel)]="selectedItem.geometry" name="geometry"></textarea>
                         </fieldset>
                     </div>
                 </div>
@@ -208,24 +208,24 @@
 
                 <div  class="row">
 
-                    <fieldset (mouseover)="showAssignmentTip=1" class="form-group col-xl-3">
-                        <label > Accept assignments </label> 
-                        <input title="isActuator?" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
+                    <fieldset (mouseover)="showAssignmentTip=1" (focus)="showAssignmentTip=1" class="form-group col-xl-3">
+                        <label for="isActuator"> Accept assignments </label> 
+                        <input title="isActuator?" id="isActuator" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.isActuator" name="isActuator" />
                     </fieldset>
 
-                    <fieldset (mouseover)="showAssignmentTip=2"class="form-group col-xl-3" >
-                        <label> Acknowledge reservation </label> 
-                        <input  title="acknowledgeReservation" id="agentCheckbox" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
+                    <fieldset (mouseover)="showAssignmentTip=2" (focus)="showAssignmentTip=2" class="form-group col-xl-3" >
+                        <label for="acknowledgeReservation"> Acknowledge reservation </label> 
+                        <input title="acknowledgeReservation" id="acknowledgeReservation" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
                                 [(ngModel)]="selectedItem.acknowledgeReservation" name="acknowledgeReservation" />
                     </fieldset>
 
-                    <div *ngIf="showAssignmentTip==1" class="col-xl-6"  style="font-size: small;">
+                    <div *ngIf="showAssignmentTip===1" class="col-xl-6"  style="font-size: small;">
                         Trucks, tractors, robots can receive assignments. 
                         Trailers, cameras and sensors usually do not receive assignments.
                     </div>
 
-                    <div  *ngIf="showAssignmentTip==2" class="col-xl-6" style="font-size: small;">
+                    <div  *ngIf="showAssignmentTip===2" class="col-xl-6" style="font-size: small;">
 
                         Before a mission, agents receive a reservation request and should acknowlege their readiness. 
                         <br> Should helyOS wait for this acknowledgement before proceeding with a mission? 
@@ -239,8 +239,8 @@
                 <div class="row" >
 
                     <fieldset class="form-group col-xl-4">
-                        <label>Assignment data format</label>
-                        <input type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
+                        <label for="dataFormat">Assignment data format</label>
+                        <input id="dataFormat" type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
                         placeholder="e.g. Fhf-IVI" />
                     </fieldset>
 
@@ -256,15 +256,15 @@
                 <div class="field-group"> 
                     <div class="row">
                         <fieldset class="form-group col-xl-6">
-                            <label>Protocol</label>
-                            <select class="form-control form-select" [(ngModel)]="selectedItem.protocol" name="protocol" (ngModelChange)="changeProtocol()" >
+                            <label for="protocol">Protocol</label>
+                            <select id="protocol" class="form-control form-select" [(ngModel)]="selectedItem.protocol" name="protocol" (ngModelChange)="changeProtocol()" >
                                 <option [ngValue]="'AMQP'"> AMQP (default)</option>
                                 <option [ngValue]="'MQTT'"> MQTT </option>
                             </select>
                         </fieldset>
                     </div>
 
-                    <div class="row" *ngIf="selectedItem.protocol == 'AMQP'">
+                    <div class="row" *ngIf="selectedItem.protocol === 'AMQP'">
                         <div class="col-xl-12">
                             <ul style="font-size: small;" >
                                 <li> Suitable for sensors and actuators.</li>
@@ -272,7 +272,7 @@
                             </ul>
                         </div>       
                     </div>            
-                    <div class="row" *ngIf="selectedItem.protocol == 'MQTT'">
+                    <div class="row" *ngIf="selectedItem.protocol === 'MQTT'">
                         <div class="col-xl-12">
                             <ul style="font-size: small;" >
                                 <li> Suitable for sensors and actuators, but actuators must handle multiple assignments: MQTT doesn't support messages queueing.</li> 
@@ -283,8 +283,8 @@
 
                     <div class="row">
                         <fieldset class="form-group col-xl-6">
-                            <label>Registration</label>
-                            <select class="form-control form-select" [disabled]="selectedItem.protocol == 'MQTT'" [(ngModel)]="selectedItem.allowAnonymousCheckin" name="allowAnonymousCheckin" (ngModelChange)="changeRegistration()">
+                            <label for="allowAnonymousCheckin">Registration</label>
+                            <select id="allowAnonymousCheckin" class="form-control form-select" [disabled]="selectedItem.protocol === 'MQTT'" [(ngModel)]="selectedItem.allowAnonymousCheckin" name="allowAnonymousCheckin" (ngModelChange)="changeRegistration()">
                                 <option [ngValue]="true"> Let helyOS create RabbitMQ account</option>
                                 <option [ngValue]="false"> Set username and password </option>
                             </select>
@@ -307,15 +307,15 @@
                     <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
 
                             <fieldset class="form-group col-xl-6">
-                                <label>username *</label>
-                                <input class="form-control" [(ngModel)]="selectedItem.rbmqUsername"  (ngModelChange)="rbmqAccountChange=true"  name="rbmqUsername" 
+                                <label for="rbmqUsername">username *</label>
+                                <input id="rbmqUsername" class="form-control" [(ngModel)]="selectedItem.rbmqUsername"  (ngModelChange)="rbmqAccountChange=true"  name="rbmqUsername" 
                                     placeholder="0000-0000-0000-0000"  />
                             </fieldset>
 
                 
                             <fieldset class="form-group col-xl-6">
-                                <label> password </label>
-                                <input class="form-control" [(ngModel)]="rbmqPassword" (ngModelChange)="rbmqAccountChange=true" name="rbmqPassword"
+                                <label for="rbmqPassword"> password </label>
+                                <input id="rbmqPassword" class="form-control" [(ngModel)]="rbmqPassword" (ngModelChange)="rbmqAccountChange=true" name="rbmqPassword"
                                     placeholder="*********" 
                                     />
                             </fieldset>
@@ -336,8 +336,8 @@
 
                         
                         <fieldset class="form-group col-xl-4">
-                            <label>connection</label>
-                            <select class="form-control form-select" [(ngModel)]="selectedItem.connectionStatus" name="connectionStatus">
+                            <label for="connectionStatus">connection</label>
+                            <select id="connectionStatus" class="form-control form-select" [(ngModel)]="selectedItem.connectionStatus" name="connectionStatus">
                                 <option value="offline">offline</option>
                                 <option value="online">online</option>
                             </select>
@@ -345,8 +345,8 @@
 
 
                         <fieldset class="form-group col-xl-4">
-                            <label>status</label>
-                            <select class="form-control form-select" [(ngModel)]="selectedItem.status" name="status">
+                            <label for="status">status</label>
+                            <select id="status" class="form-control form-select" [(ngModel)]="selectedItem.status" name="status">
                                 <option value="free">free</option>
                                 <option value="busy">busy</option>
                                 <option title="for 'ready' you need to define the work process" value="ready">ready</option>
@@ -357,8 +357,8 @@
 
                     <div class="row" *ngIf="selectedItem.status!=='free'">
                         <fieldset  class="form-group col-xl-8">
-                            <label>Work process info (wp_clearance for status: {{selectedItem.status}})</label>
-                            <textarea class="form-control" rows=4 [(ngModel)]="selectedItem.wpClearance" name="wpClearance"></textarea>
+                            <label for="wpClearance">Work process info (wp_clearance for status: {{selectedItem.status}})</label>
+                            <textarea id="wpClearance" class="form-control" rows=4 [(ngModel)]="selectedItem.wpClearance" name="wpClearance"></textarea>
                         </fieldset>
                     </div>
 

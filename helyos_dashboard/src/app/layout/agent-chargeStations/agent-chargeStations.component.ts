@@ -11,7 +11,7 @@ enum AgentClass {
 }
 
 @Component({
-    selector: 'app-agent-chargeStations',
+    selector: 'app-agent-chargestations',
     templateUrl: './agent-chargeStations.component.html',
     styleUrls: ['./agent-chargeStations.component.scss']
 })
@@ -96,7 +96,7 @@ export class AgentChargeStationsComponent implements OnInit {
             'sender': 'helyOS dashboard'
         }
         this.helyosService.methods.instantActions.create(instantAction)
-        .then( r => alert('command sent'));
+        .then( (_) => alert('command sent'));
     }
 
     getItem(itemId) {
@@ -119,7 +119,7 @@ export class AgentChargeStationsComponent implements OnInit {
 
     deleteItem(itemId) {
         this.helyosService.methods.agents.delete(itemId)
-        .then( r=> {
+        .then( (_) => {
             this.list();
         });
     }
@@ -204,7 +204,7 @@ export class AgentChargeStationsComponent implements OnInit {
         }
 
         this.helyosService.methods.agents.patch(patch)
-        .then( r=> {
+        .then( (_) => {
             this.updateRabbitMQ();
             this.list();
             this.saveStateMsg = '';
