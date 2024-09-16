@@ -125,7 +125,7 @@
                         <label for="thumbnail" class="w-auto"> Thumbnail picture </label>
                 
                         <button class="btn btn-light w-auto" (click)="fileUpload.click()"> Upload </button>
-                        <img class="w-auto" height="100%" [src]="selectedItem.picture" alt="thumbnail">
+                        <img *ngIf="selectedItem.picture" class="w-auto" height="100%" [src]="selectedItem.picture" alt="thumbnail">
                     </div>
                 </div>
 
