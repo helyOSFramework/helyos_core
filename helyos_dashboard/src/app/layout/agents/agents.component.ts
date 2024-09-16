@@ -3,9 +3,9 @@ import { H_Agent } from 'helyosjs-sdk';
 import { ModalDismissReasons, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { HelyosService } from '../../services/helyos.service';
 
-interface sensor {};
+interface sensor {}
 
-interface patch {};
+interface patch {}
 
 class AgentModel extends H_Agent {
     _iterSensors: sensor[];
@@ -82,10 +82,9 @@ export class AgentsComponent implements OnInit {
 
     getSensorsMeasures(sensorSet) {
         const sensorArray = [];
-        const name_spaces = Object.keys(sensorSet);
 
         
-            for (let key in sensorSet) {
+            for (const key in sensorSet) {
                 try {
                         const item = {
                             title: sensorSet[key].title,

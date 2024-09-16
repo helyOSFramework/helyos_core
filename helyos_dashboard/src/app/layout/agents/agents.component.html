@@ -65,7 +65,7 @@
                 <span [ngClass]="{'bg-danger': agent.status==='busy', 'text-white': agent.status==='busy' }">
                      {{agent.status}}
                 </span>
-                <img  [src]="agent.picture" style="width: 100%">
+                <img *ngIf="agent.picture" [src]="agent.picture" style="width: 100%" alt="picture">
 
                 <p  [ngClass]="{'bg-danger': agent.msgPerSec > 12}">messages:  {{agent.msgPerSec}}/s</p>
                 <table class="table table-sm">
@@ -101,11 +101,11 @@
                                 </div>
 
                                 <div *ngIf="sensor.perc" class=" sensor-progress-container">
-                                    <span  class="sensor-progress-label"> {{sensor.perc}}% </span>
+                                    <span class="sensor-progress-label"> {{sensor.perc}}% </span>
                                      <div  
-                                        aria-valuemax="sensor.maximum"
-                                        aria-valuemin="sensor.minimum"
-                                        aria-valuenow="sensor.value"
+                                        [aria-valuemax]="sensor.maximum"
+                                        [aria-valuemin]="sensor.minimum"
+                                        [aria-valuenow]="sensor.value"
                                         class="sensor-progress-bar"
                                         role="progressbar"
                                         [ngStyle]="{'width': sensor.progressBar}"
