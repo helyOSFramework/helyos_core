@@ -146,7 +146,7 @@ export const importFromYML = (rawdata:string, wpTypeMethods: WORKPROCESS_TYPE, w
 	
 }
 
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * saveWorkProcessServicePlans()
  * function which saves all recipe steps of particular workProcessType to the db
@@ -217,6 +217,7 @@ const saveWorkProcessServicePlans = (
             return  Promise.all(promiseSequence);
     };
 
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /*
 flattenMissionsData()

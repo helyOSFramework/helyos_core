@@ -47,7 +47,7 @@ export class RunListsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.missionQueue.get(itemId)
-        .then( (r:any)=> {
+        .then( (r: H_WorkProcess)=> {
             this.selectedItem = r;   
             this.missionList();
         })

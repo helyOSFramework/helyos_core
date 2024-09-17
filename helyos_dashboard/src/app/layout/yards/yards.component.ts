@@ -47,7 +47,7 @@ export class YardsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.yard.get(itemId)
-        .then( (r:any)=> {
+        .then( (r: H_Yard)=> {
             this.selectedItem = r;
             try {
                 this.selectedItem.mapData = JSON.stringify(this.selectedItem.mapData, null, 2);

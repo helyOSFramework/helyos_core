@@ -13,7 +13,7 @@ export class SystemLogComponent implements OnInit, OnDestroy {
     public showDescription: boolean = false;
     public filterOrigin: string = 'all';
     public filterWprocId: number | null = null;
-    public filterObj: any = {};
+    public filterObj: Partial<H_SystemLog> = {};
     public filterAgentUuid: string = '';
     public first: number = 50;
     public page: number = 1;
