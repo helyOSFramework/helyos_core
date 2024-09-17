@@ -57,7 +57,7 @@ export class WorkProcessesComponent implements OnInit {
     deleteItem() {
         if (this.selectedItem) {
             this.helyosService.methods.workProcessType.delete(this.selectedItem.id as string)
-            .then( r=> {
+            .then( (_) => {
                 this.list();
             });
         }
@@ -76,7 +76,7 @@ export class WorkProcessesComponent implements OnInit {
         }
 
         this.helyosService.methods.workProcessType.patch(patch)
-        .then( r=> {
+        .then( (_) => {
             this.list();
             alert('changes saved');
         });
@@ -95,7 +95,7 @@ export class WorkProcessesComponent implements OnInit {
         const reader = new FileReader();
         reader.readAsText(selectedFile, "UTF-8");
      
-        reader.onload = (e) => {
+        reader.onload = (_) => {
             // convert yml to DB data and save it.
             const data = reader.result as string;
             importFromYML(data, this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
@@ -115,8 +115,8 @@ export class WorkProcessesComponent implements OnInit {
     }
 
     download_object(content, fileName, contentType) {
-        var a = document.createElement("a");
-        var file = new Blob([content], {type: contentType});
+        const a = document.createElement("a");
+        const file = new Blob([content], {type: contentType});
         a.href = URL.createObjectURL(file);
         a.download = fileName;
         a.click();

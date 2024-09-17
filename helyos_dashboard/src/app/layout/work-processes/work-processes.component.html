@@ -39,7 +39,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of wpTypes" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.name}}</td>
                     <td>{{item.numMaxAgents}}</td>
@@ -68,19 +68,19 @@
 
             <div class="row">
                 <fieldset class="form-group col-xl-6">
-                    <label>Name</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+                    <label for="name">Name</label>
+                    <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Maximum of agents employed </label>
-                    <input class="form-control" type="number" min="0" [(ngModel)]="selectedItem.numMaxAgents"  name="numMaxAgents"
+                    <label for="numMaxAgents">Maximum of agents employed </label>
+                    <input id="numMaxAgents" class="form-control" type="number" min="0" [(ngModel)]="selectedItem.numMaxAgents"  name="numMaxAgents"
                     placeholder="1" />
                 </fieldset>
 
                 <!-- <fieldset class="form-group col-xl-6">
-                    <label>Execution order (use step tag) </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.dispatchOrder"  name="dispatchOrder"
+                    <label for="dispatchOrder">Execution order (use step tag) </label>
+                    <input id="dispatchOrder" class="form-control" [(ngModel)]="selectedItem.dispatchOrder" name="dispatchOrder"
                     placeholder="[['A'], ['B'],...]" />
                 </fieldset> -->
 
@@ -88,8 +88,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.description" name="description"
+                    <label for="description"> Description </label>
+                    <textarea id="description" class="form-control" [(ngModel)]="selectedItem.description" name="description"
                     ></textarea>
                 </fieldset>
             </div>
@@ -98,9 +98,9 @@
             <h5 style="margin-top:16px">Failure Policy </h5>
             <div class="row" >
                 <fieldset class="form-group col-xl-6">
-                <label>Default action on assignment failure</label>
+                <label for="onAssignmentFailure">Default action on assignment failure</label>
 
-                    <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
+                    <select id="onAssignmentFailure" class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
                         <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
                         <option value="CONTINUE_MISSION" title="CONTINUE">continue the mission </option>
                         <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
@@ -108,8 +108,8 @@
                 </fieldset>
 
                 <fieldset class="form-group col-xl-6" title='Run mission when assignment fails.'>
-                    <label>Fallback mission </label>
-                    <select class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
+                    <label for="fallbackMission">Fallback mission </label>
+                    <select id="fallbackMission" class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
                         <option [value]="''"> ---- ---- </option>
                         <ng-container  *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
                             <option *ngFor="let missionName of availableMissions" [value]="missionName"> {{missionName}}</option>
@@ -120,10 +120,10 @@
             </div>
 
             <h5 style="margin-top:16px">Default Settings </h5>
-            <label>Automatically included in mission request data under the key "_settings".</label>            
+            <label for="settings">Automatically included in mission request data under the key "_settings".</label>            
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <textarea class="form-control" [(ngModel)]="selectedItem.settings" name="settings" rows="10"
+                    <textarea id="settings" class="form-control" [(ngModel)]="selectedItem.settings" name="settings" rows="10"
                     ></textarea>
                 </fieldset>
             </div>
@@ -138,7 +138,7 @@
 
 </section>
 
-<input
+<input id="aaa"
   style="display: none" extensions=".json"
   type="file" (change)="importYML($event)"
   #importYMLElementInput>
