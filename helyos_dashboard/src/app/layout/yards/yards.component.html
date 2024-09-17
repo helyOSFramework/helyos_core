@@ -32,7 +32,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of yards" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <td>{{item.id}}</td>
                     <td>{{item.uid}}</td>
                     <th scope="row">{{item.yardType}}</th>
@@ -64,20 +64,20 @@
         <form role="form"  style="margin: 0 auto; max-width: 1000px;">
             <div class="row">
                 <fieldset class="form-group col-xl-6">
-                    <label>Name</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+                    <label for="name">Name</label>
+                    <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
                 </fieldset>
 
 
                 <fieldset class="form-group col-xl-3">
-                    <label> UID </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.uid" name="uid"
+                    <label for="uid"> UID </label>
+                    <input id="uid" class="form-control" [(ngModel)]="selectedItem.uid" name="uid"
                     placeholder="IVI001" />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-3">
-                    <label> Yard type</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.yardType" name="yardType"
+                    <label for="yardType"> Yard type</label>
+                    <input id="yardType" class="form-control" [(ngModel)]="selectedItem.yardType" name="yardType"
                     placeholder="logistic_yard" />
                 </fieldset>
 
@@ -87,18 +87,18 @@
             <div class="row" >
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Latitude</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.lat"  name="lat"
+                    <label for="lat">Latitude</label>
+                    <input id="lat" type="number" class="form-control" [(ngModel)]="selectedItem.lat"  name="lat"
                     placeholder="50.232" />
                 </fieldset>
                 <fieldset class="form-group col-xl-4">
-                    <label>Longitude</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.lon"  name="lon"
+                    <label for="lon">Longitude</label>
+                    <input id="lon" type="number" class="form-control" [(ngModel)]="selectedItem.lon"  name="lon"
                     placeholder="13.344" />
                 </fieldset>
                 <fieldset  class="form-group col-xl-4">
-                    <label>Altitude</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.alt"  name="alt"
+                    <label for="alt">Altitude</label>
+                    <input id="alt" type="number" class="form-control" [(ngModel)]="selectedItem.alt"  name="alt"
                     placeholder="0" />
                 </fieldset>
 
@@ -108,8 +108,8 @@
             <div class="row" >
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Data format</label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
+                    <label for="dataFormat">Data format</label>
+                    <input id="dataFormat" type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
                     placeholder="e.g. GeoJson-7946" />
                 </fieldset>
 
@@ -118,8 +118,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12" title="Optional: JSON data. If you have extensive map data, consider using map objects.">
-                    <label> Map info (arbritrary JSON data) </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"
+                    <label for="mapData"> Map info (arbritrary JSON data) </label>
+                    <textarea id="mapData" class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"
                     ></textarea>
                 </fieldset>
             </div>
