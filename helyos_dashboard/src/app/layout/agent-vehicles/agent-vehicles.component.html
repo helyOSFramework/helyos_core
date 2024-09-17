@@ -61,7 +61,7 @@
     <div class="card-footer" style="display:flex;justify-content:space-between">
         <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
             <div class="w-auto">Instant Action Command</div>
-            <div class="col-xl-6" ><input id="aaa" class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
+            <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
             <button class="btn btn-light w-auto"  (click)="sendInstantAction()"> SEND </button>
         </div>
     
