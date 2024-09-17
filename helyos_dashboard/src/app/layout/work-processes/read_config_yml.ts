@@ -58,8 +58,8 @@ export const exportToYML = async ( wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMe
 
         // parse properites of work_process_type into missions
         dataJSON['missions'][wpType.name] = {}
-        for (var key in wpType) {
-            if (WorkProcessTypeTableToYmlMap.hasOwnProperty(key) && wpType.hasOwnProperty(key)) {
+        for (const key in wpType) {
+            if (Object.prototype.hasOwnProperty.call(WorkProcessTypeTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpType, key)) {
                 if(key == "settings" || key == "dispatchOrder"){ // JSON.stringify() is used to preserve list brackets
                     if(wpType[key] != null){
                         dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key])
@@ -75,8 +75,8 @@ export const exportToYML = async ( wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMe
         const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId == wpType.id);
         const formatedSteps = wpTypeRecipeSteps.map((wpStep) => {
                 const formatedStep = {}
-                for (var key in wpStep) {
-                    if (WorkProcessServicePlanTableToYmlMap.hasOwnProperty(key) && wpStep.hasOwnProperty(key)) {
+                for (const key in wpStep) {
+                    if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
                         if(key == "dependsOnSteps"){  // JSON.stringify() is used to preserve list brackets
                             if(wpStep[key] != null){
                                 formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key])
@@ -88,7 +88,7 @@ export const exportToYML = async ( wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMe
                 }
 
                 // add dummy override_config if not present
-                if(!formatedStep.hasOwnProperty('override_config')){
+                if(!Object.prototype.hasOwnProperty.call(formatedStep, 'override_config')){
                     formatedStep['override_config'] = "{}"
                 }
 
@@ -179,7 +179,7 @@ const saveWorkProcessServicePlans = (
             // loop through the recipe steps array
             const promiseSequence = []
             promiseSequence.push(deletePromises(workProcessTypeId));
-            for (const [index, step] of recipeSteps.entries()) {
+            for (const [_index, step] of recipeSteps.entries()) {
                 // initialize arrays to store the column names and values
                 const colNames2 = [ymlToWorkProcessServicePlanTableMap['work_process_type_id']];
                 const colValues2 = [workProcessTypeId];
@@ -293,7 +293,7 @@ const lookup = (obj, k) => {
         }
         let result = null;
         // check if the object has the key as a direct property
-        if (obj.hasOwnProperty(k)) {
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
         return obj[k];
         } else {
         // otherwise, loop through the values of the object
