@@ -31,12 +31,12 @@ export class HeaderComponent implements OnInit {
     }
 
     toggleSidebar() {
-        const dom: any = document.querySelector('body');
+        const dom = document.querySelector('body');
         dom.classList.toggle(this.pushRightClass);
     }
 
     rltAndLtr() {
-        const dom: any = document.querySelector('body');
+        const dom = document.querySelector('body');
         dom.classList.toggle('rtl');
     }
 

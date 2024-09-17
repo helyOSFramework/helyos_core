@@ -42,7 +42,7 @@ export class AllServicesComponent implements OnInit {
         this.helyosService.methods.extServices.get(itemId)
         .then( r=> {
             this.selectedItem = r;
-            this.requireMapObjectsInput = r.requireMapObjects.join(', ') as any;
+            this.requireMapObjectsInput = r.requireMapObjects.join(', ');
 
         });
     }
