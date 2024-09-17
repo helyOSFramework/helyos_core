@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { H_Agent } from 'helyosjs-sdk';
 import { ModalDismissReasons, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { HelyosService } from '../../services/helyos.service';
@@ -16,7 +16,7 @@ class AgentModel extends H_Agent {
     templateUrl: './agents.component.html',
     styleUrls: ['./agents.component.scss']
 })
-export class AgentsComponent implements OnInit {
+export class AgentsComponent implements OnInit, OnDestroy {
     public agents: H_Agent[];
     public modalOptions:NgbModalOptions;
     closeResult: string;
@@ -119,9 +119,9 @@ export class AgentsComponent implements OnInit {
         // This function modifies the input parameter for better performance.
         updates.forEach(patch => {
             if (patch.sensors){
-                const iterSensorSets: any[] = [];
+                const iterSensorSets: {name: string; sensors: sensor[]}[] = [];
                 for (const key in patch.sensors) {
-                        const iterSensorSet : sensor[] = this.getSensorsMeasures(patch.sensors[key]);
+                        const iterSensorSet: sensor[] = this.getSensorsMeasures(patch.sensors[key]);
                         iterSensorSets.push( {name: key, sensors: iterSensorSet});
                 }
                 patch._iterSensors = iterSensorSets;
@@ -160,7 +160,7 @@ export class AgentsComponent implements OnInit {
         });
       }
     
-      private getDismissReason(reason: any): string {
+      private getDismissReason(reason: ModalDismissReasons | string): string {
         if (reason === ModalDismissReasons.ESC) {
           return 'by pressing ESC';
         } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
