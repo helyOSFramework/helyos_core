@@ -26,7 +26,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of yardmap" (click)="getYardItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.name}}</th>
                     <td>{{item.yardType}}</td>
                     <td>{{item.dataFormat}}</td>
@@ -91,43 +91,43 @@
             <tbody>
                 <ng-container *ngFor="let item of mapObjects" >
                 <tr (click)="getObjectItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedObjectItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedObjectItem?.id}">
 
                     <th  style="width:20px">{{item.id}}</th>
 
                     <td>
                         <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.type}} </span>
-                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.type"> </span>
+                        <span *ngIf="item.id===selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.type"> </span>
                     </td>
 
 
                     <td>
                         <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.name}} </span>
-                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.name"> </span>
+                        <span *ngIf="item.id===selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.name"> </span>
                     </td>
 
                     <td>
                         <span *ngIf="item.id!==selectedObjectItem?.id"> {{item.dataFormat}} </span>
-                        <span *ngIf="item.id==selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.dataFormat"> </span>
+                        <span *ngIf="item.id===selectedObjectItem?.id">  <input style="width:120px" type="text"  [(ngModel)]="selectedObjectItem.dataFormat"> </span>
                     </td>
 
 
                     <td>
                         <div  style="max-height: 20px; width:350px; overflow: hidden;" *ngIf="item.id!==selectedObjectItem?.id"> {{item.data}} </div>
                         <span>
-                            <textarea *ngIf="item.id==selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.data"></textarea> 
+                            <textarea *ngIf="item.id===selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.data"></textarea> 
                         </span>
                     </td>
                     <td>
                         <div  style="max-height: 20px; width:350px; overflow: hidden;" *ngIf="item.id!==selectedObjectItem?.id"> {{item.metadata}} </div>
                         <span>
-                            <textarea *ngIf="item.id==selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.metadata"></textarea> 
+                            <textarea *ngIf="item.id===selectedObjectItem?.id"  style="width:350px; height:200px"  [(ngModel)]="selectedObjectItem.metadata"></textarea> 
                         </span>
                     </td>
 
                 </tr>
 
-                <tr  *ngIf="item.id==selectedObjectItem?.id">
+                <tr  *ngIf="item.id===selectedObjectItem?.id">
                     <td></td>
                     <td></td>
                     <td></td>

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, AfterViewInit } from '@angular/core';
-import { H_Guideline, H_Shape, H_Yard } from 'helyosjs-sdk';
+import { H_Yard } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { H_MapObject } from 'helyosjs-sdk/dist/helyos.models';
 
@@ -65,7 +65,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
 
 
-    changeDataFormat(ev){
+    changeDataFormat(_ev){
     }
 
     debouncingFilterText(event) {
@@ -143,7 +143,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         });
     }
 
-    saveObjectItem(itemId){
+    saveObjectItem(_itemId){
         const patch = {...this.selectedObjectItem};
         delete patch.createdAt;
         delete patch.modifiedAt;
@@ -188,7 +188,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         return this.helyosService.methods.mapObjects.markAllDeleted(this.selectedItem.id)
         .then(()=> {
             const promisses = newShapes.map( s => this.helyosService.methods.mapObjects.create(s));
-            return Promise.all(promisses).then((s) => alert('map shapes saved.'))
+            return Promise.all(promisses).then((_) => alert('map shapes saved.'))
         })
         .catch((err) => alert(JSON.stringify(err)));
     }
@@ -207,8 +207,8 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
 
     download_object(content, fileName, contentType) {
-        var a = document.createElement("a");
-        var file = new Blob([content], {type: contentType});
+        const a = document.createElement("a");
+        const file = new Blob([content], {type: contentType});
         a.href = URL.createObjectURL(file);
         a.download = fileName;
         a.click();
