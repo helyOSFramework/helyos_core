@@ -45,7 +45,7 @@ export class SidebarComponent implements OnInit, AfterViewInit {
             .then( r => this.wpTypes = r );
             
         } catch (error) {
-            
+            return
         }
 
     }
