@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { H_Service, H_WorkProcessServicePlan, H_WorkProcessType } from 'helyosjs-sdk';
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { HelyosService } from '../../services/helyos.service';
     templateUrl: './work-process-services.component.html',
     styleUrls: ['./work-process-services.component.scss']
 })
-export class WorkProcessServicesComponent implements OnInit {
+export class WorkProcessServicesComponent implements OnInit, OnDestroy {
     public wpServPlan: H_WorkProcessServicePlan[];
     public selectedItem: H_WorkProcessServicePlan;
     private sub: Subscription;
@@ -69,7 +69,7 @@ export class WorkProcessServicesComponent implements OnInit {
             return JSON.parse(objString);
             
         } catch (error) {
-            return objString as any;
+            return objString;
         }
     }
 
@@ -141,11 +141,11 @@ export class WorkProcessServicesComponent implements OnInit {
 
     addDependency(value) {
         if (!value) return;
-        if (!this.selectedItem.dependsOnSteps) this.selectedItem.dependsOnSteps = '[]' as any;
-        let dependsOnSteps = this.returnObj(this.selectedItem.dependsOnSteps as any);
+        let dependsOnSteps = !this.selectedItem.dependsOnSteps ? [] : this.returnObj(this.selectedItem.dependsOnSteps);
         if (!dependsOnSteps.includes(value)) {
             dependsOnSteps.push(value);
             dependsOnSteps = dependsOnSteps.filter(e => Boolean(e));
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.selectedItem.dependsOnSteps = JSON.stringify(dependsOnSteps) as any;
         }
     }
