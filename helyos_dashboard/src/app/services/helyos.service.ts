@@ -42,8 +42,8 @@ export class HelyosService {
 
 
    instantiateService(gqlPort=null, socketPort=null){
-     if(!gqlPort) { gqlPort = environment['gqlPort']};
-     if(!socketPort) { socketPort = environment['socketPort']};
+     if(!gqlPort) { gqlPort = environment['gqlPort']}
+     if(!socketPort) { socketPort = environment['socketPort']}
      this.methods = new HelyosServices(this.helyosURL, {socketPort, gqlPort});
    } 
 

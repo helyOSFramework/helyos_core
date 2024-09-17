@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { routerTransition } from '../router.animations';
 import { HelyosService } from '../services/helyos.service';
@@ -9,16 +9,13 @@ import { HelyosService } from '../services/helyos.service';
     styleUrls: ['./signup.component.scss'],
     animations: [routerTransition()]
 })
-export class SignupComponent implements OnInit {
+export class SignupComponent {
     public username: string;
     public password: string;
     public oldPassword: string;
     public confirmedPassword: string;
 
     constructor(public router: Router, private helyosService : HelyosService) {}
-
-    ngOnInit() {}
-
 
     changePassword(){
     if (this.confirmedPassword!= this.password){
