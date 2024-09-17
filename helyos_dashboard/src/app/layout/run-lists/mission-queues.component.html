@@ -28,7 +28,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of mQueues" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.name}}</td>
                     <td>{{item.createdAt}}</td>
@@ -55,15 +55,15 @@
             <div class="row">
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Name </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" 
+                    <label for="name">Name </label>
+                    <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" 
                     [ngModelOptions]="{standalone: true}"
                     />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-3">
-                    <label>Status</label>
-                    <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
+                    <label for="status">Status</label>
+                    <select id="status" class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
                             name="status">
                         <option value="stop"> stop </option>
                         <option value="run"> run </option>
@@ -73,8 +73,8 @@
                 </fieldset>
 
                 <fieldset class="form-group col-xl-3">
-                    <label > Stop on mission failure </label>
-                    <input   type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" [(ngModel)]="selectedItem.stopOnFailure" name="stopOnFailure" />
+                    <label for="stopOnFailure"> Stop on mission failure </label>
+                    <input id="stopOnFailure" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" [(ngModel)]="selectedItem.stopOnFailure" name="stopOnFailure" />
                 </fieldset>
     
 
@@ -132,8 +132,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.description" name="description"
+                    <label for="description"> Description </label>
+                    <textarea id="description" class="form-control" [(ngModel)]="selectedItem.description" name="description"
                     ></textarea>
                 </fieldset>
             </div>

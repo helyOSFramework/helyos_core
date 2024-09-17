@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HelyosService } from '../../services/helyos.service';
 import { H_MissionQueue, H_WorkProcess } from 'helyosjs-sdk';
-import { NgbDate, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-mission-queues',
@@ -57,7 +57,7 @@ export class RunListsComponent implements OnInit {
 
     deleteItem(itemId) {
         this.helyosService.methods.missionQueue.delete(itemId)
-        .then( r=> {
+        .then( (_) => {
             this.list();
             this.selectedItem = null;
         });
@@ -78,7 +78,7 @@ export class RunListsComponent implements OnInit {
         delete patch.modifiedAt;
 
         this.helyosService.methods.missionQueue.patch(patch)
-        .then( r=> {
+        .then( (_) => {
             this.list();
         }).catch( e => {
             alert(JSON.stringify(e));
