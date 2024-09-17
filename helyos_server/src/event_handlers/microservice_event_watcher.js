@@ -5,7 +5,7 @@ const extServCommunication = require('../modules/communication/microservice_comm
 const databaseServices = require('../services/database/database_services.js');
 const { logData} = require('../modules/systemlog');
 const { SERVICE_STATUS } = require('../modules/data_models');
-const { isRequestReadyForService } = require('../modules/microservice_orchestration');
+const { determineServiceRequestStatus } = require('../modules/microservice_orchestration');
 
 
 const waitForServicesResults = () => {
@@ -108,7 +108,8 @@ const waitForServicesDependencies = (conditions={}) =>  {
     .then( (allAwaitingServices) => { 
         const promises = allAwaitingServices.map(
         async(waitingServReq) => {
-            if (await isRequestReadyForService(waitingServReq)) {
+
+            if (SERVICE_STATUS.READY_FOR_SERVICE === await determineServiceRequestStatus(waitingServReq)) {
                return databaseServices.service_requests.updateByConditions({'id':waitingServReq.id, 'status':  SERVICE_STATUS.WAIT_DEPENDENCIES},
                                                                     { status:  SERVICE_STATUS.READY_FOR_SERVICE });
              } else {

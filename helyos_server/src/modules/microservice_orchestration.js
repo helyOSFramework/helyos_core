@@ -6,7 +6,8 @@
 const databaseServices = require('../services/database/database_services.js');
 const agentComm = require('./communication/agent_communication');
 const {logData} = require('./systemlog');
-const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS} = require('./data_models');
+const {SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS,
+	   UNCOMPLETED_SERVICE_STATUS} = require('./data_models');
 const {generateFullYardContext, generateMicroserviceDependencies} = require('./microservice_context');
 const {filterContext} = require('./microservice_context');
 const { v4: uuidv4 } = require('uuid');
@@ -195,7 +196,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 				console.log(`Step: ${s.step}`);
 				console.log(`Service Type: ${s.service_type}`);
 				console.log(`Service URL: ${s.service_url}`);
-				console.log(`Next Request UID: ${s.next_request_to_dispatch_uid}`);
+				console.log(`Next Request UID: ${s.next_request_to_dispatch_uids}`);
 				console.log("--------------------");
 			});
 			console.log("================================================================================");
@@ -212,7 +213,7 @@ function createServiceRequestsForWorkProcessType(processType, request, agentIds,
 		throw new Error(e);
 	});
 			
-	}
+}
 
 
 
@@ -363,7 +364,11 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
  * @returns {Promise<boolean>}
 **/
 function wrapUpMicroserviceCall(partialServiceRequest) {
-	if (partialServiceRequest.next_request_to_dispatch_uid) {
+	if (partialServiceRequest.next_request_to_dispatch_uids &&
+		partialServiceRequest.next_request_to_dispatch_uids.length) {
+		return Promise.resolve(false);
+	}
+	if (partialServiceRequest.status === SERVICE_STATUS.SKIPPED){
 		return Promise.resolve(false);
 	}
 
@@ -376,8 +381,12 @@ function wrapUpMicroserviceCall(partialServiceRequest) {
 			if (uncompleteAssgms.length === 0) {
 
 				return databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status'])
-				.then( wproc => {
-					if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
+				.then( async wproc => {
+					const isMissionStillUncompleted = UNCOMPLETE_MISSION_STATUS.includes(wproc.status);
+
+					const uncompleteServices = await databaseServices.service_requests.select({work_process_id: wproc.id, 
+																							  status__in: UNCOMPLETED_SERVICE_STATUS})
+					if (isMissionStillUncompleted && !uncompleteServices.length) {
 						return databaseServices.work_processes.updateByConditions({ id: partialServiceRequest.work_process_id, 
 																					status__in: [   
 																						MISSION_STATUS.PREPARING,
@@ -394,6 +403,32 @@ function wrapUpMicroserviceCall(partialServiceRequest) {
 		});
 
 }
+
+
+/**
+ * checkIfServiceShouldRun
+ * Determines whether the next service request step should run based on the response data from previous service requests.
+ * If the `orchestration.allow_dependent_steps` field is not defined in the response, it defaults to allowing the next step to run.
+ * 
+ * @param {*} serviceResponses 
+ * @param {*} nextServRequest 
+ * @returns 
+ */
+function checkIfServiceShouldRun(serviceResponses, nextServRequest) {
+	let runService = true;
+	serviceResponses.forEach(serviceResponse => {
+			const enabled_step = serviceResponse &&
+							  serviceResponse.orchestration &&
+							  serviceResponse.orchestration.allow_dependent_steps ?  serviceResponse.orchestration.allow_dependent_steps:null;
+
+			if (enabled_step !== null) {
+				runService = runService && enabled_step.includes(nextServRequest.step);
+			}	
+	});
+
+	return runService;
+};
+
 
 /**
  * updateRequestData
@@ -428,10 +463,10 @@ function updateRequestData(serviceResponses, nextServRequest) {
 
 async function activateNextServicesInPipeline(partialServiceRequest) {
 	// If there is no next request to dispatch, return.
-	if (!partialServiceRequest.next_request_to_dispatch_uid) { 
+	if (!(partialServiceRequest.next_request_to_dispatch_uids && partialServiceRequest.next_request_to_dispatch_uids.length)) { 
 		return Promise.resolve(0) 
 	};
-	// Check if mission is still in progress.
+	// Check if mission is still in progress or in preparation, otherwise it should not run the next services.
 	const workProcessStatus = await databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status']);
 	if (![MISSION_STATUS.PREPARING, MISSION_STATUS.EXECUTING, MISSION_STATUS.CALCULATING].includes(workProcessStatus.status)) {
 		return Promise.resolve(0);
@@ -444,14 +479,8 @@ async function activateNextServicesInPipeline(partialServiceRequest) {
 
 	const updatingPromises = nextRequests.map(async nextServRequest => {
 		if (nextServRequest.status !== SERVICE_STATUS.NOT_READY) { return Promise.resolve(0); }
-
-		const isReadyForService = await isRequestReadyForService(nextServRequest);
-		if (isReadyForService) {
-			nextServRequest.status = SERVICE_STATUS.READY_FOR_SERVICE;
-		} else {
-			nextServRequest.status = SERVICE_STATUS.WAIT_DEPENDENCIES;
-		}
-		return databaseServices.service_requests.update('request_uid', serviceRequest.next_request_to_dispatch_uid, nextServRequest);
+		nextServRequest.status = await determineServiceRequestStatus(nextServRequest);
+		return databaseServices.service_requests.update('request_uid', nextServRequest.request_uid, nextServRequest);
 	});
 
 	await Promise.all(updatingPromises);
@@ -479,12 +508,12 @@ async function updateRequestContext(servRequestId) {
 
 
 /**
- * isRequestReadyForService
- * Check if a service request is ready to be sent to a microservice.
- * That is, if a service with `wait_dependencies` status can be turned to a `ready for service`.
- * A service request is ready if all its dependencies are completed. 
+ * determineServiceRequestStatus
+ * Determines the status of a service request based on its dependencies.
+ * A service request is considered ready for service if all its dependencies are completed.
+ * If dependencies are not met, the service request status will reflect the appropriate state.
  */ 
-const isRequestReadyForService = async (serviceRequest) => {
+const determineServiceRequestStatus = async (serviceRequest) => {
 	const completed_wp_requests = await databaseServices.service_requests.select(
 		{ work_process_id: serviceRequest.work_process_id, status: SERVICE_STATUS.READY },
 		['id', 'request_uid']
@@ -494,11 +523,20 @@ const isRequestReadyForService = async (serviceRequest) => {
 	const remain_dependencies = serviceRequest.depend_on_requests.filter(el => !completed_wp_requests_uids.includes(el)); 
 
 	if (remain_dependencies.length > 0) {
-		return false;
+		return  SERVICE_STATUS.WAIT_DEPENDENCIES;
 	}
-	
+
+	const dependencies = await generateMicroserviceDependencies(serviceRequest.depend_on_requests);
+	const dependenciesResponses = dependencies.map(d => d.response);
+	const shouldServiceRun = checkIfServiceShouldRun(dependenciesResponses, serviceRequest);
+
+	if(!shouldServiceRun){
+		return SERVICE_STATUS.SKIPPED;
+	}
+
+
 	if (!serviceRequest.wait_dependencies_assignments) {
-		return true;
+		return SERVICE_STATUS.READY_FOR_SERVICE;
 	}
 
 	const requestDeps = completed_wp_requests.filter(e => serviceRequest.depend_on_requests.includes(e.request_uid));
@@ -506,14 +544,14 @@ const isRequestReadyForService = async (serviceRequest) => {
 	const remain_assignments = dependencies_assignments.filter(assgm => !(assgm.status === 'completed' || assgm.status === 'succeeded'));
 
 	if (remain_assignments.length > 0) {
-		return false;
+		return SERVICE_STATUS.WAIT_DEPENDENCIES;
 	}
 
-	return true;
+	return SERVICE_STATUS.READY_FOR_SERVICE;
 }
 
 module.exports.prepareServicesPipelineForWorkProcess = prepareServicesPipelineForWorkProcess;
 module.exports.updateRequestContext = updateRequestContext;
 module.exports.activateNextServicesInPipeline = activateNextServicesInPipeline;
 module.exports.wrapUpMicroserviceCall = wrapUpMicroserviceCall;
-module.exports.isRequestReadyForService = isRequestReadyForService;
+module.exports.determineServiceRequestStatus = determineServiceRequestStatus;

@@ -111,3 +111,38 @@ missions:
           request_order: 1
           apply_result: true
           override_config: "{}"
+
+
+
+  drive_twice:
+    maxagents: 1
+    description: "drive from a to b, and from b to c"
+    on_assignment_failure: "FAIL_MISSION"
+    settings: >
+          {"interface": "webbrowser",
+            "auth" :"required"}
+    
+    recipe:
+      steps:
+        - step: "A"
+          service_type: "drive"
+          request_order: 1
+          apply_result: true
+          override_config: "{}"
+
+
+        - step: "B"
+          service_type: "drive"
+          request_order: 2
+          apply_result: true
+          override_config: "{}"
+          dependencies: '["A"]'
+
+
+
+        - step: "B_SKIPPED"
+          service_type: "map"
+          request_order: 3
+          apply_result: true
+          override_config: "{}"
+          dependencies: '["A"]'

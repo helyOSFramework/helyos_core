@@ -20,8 +20,9 @@ const processMicroserviceRequest = (servRequestId) => {
     .then((servRequests) => {
         const servRequest = servRequests[0];
         if (!servRequest) { // @TODO Better handle this error as process failed.
-            const e = `service request not found or canceled. id=${servRequestId}`;
-            throw Error(e);  
+            const msg = `service request not found, skipped or canceled. id=${servRequestId}`;
+            logData.addLog('microservice', null, 'warn', msg ); 
+            return Promise.resolve();
         } 
 
         const serviceRequestPatch = { fetched: true, processed: false, response: null, status: SERVICE_STATUS.PENDING};
@@ -62,7 +63,8 @@ const processMicroserviceRequest = (servRequestId) => {
                                                                             'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                             SERVICE_STATUS.WAIT_DEPENDENCIES,
                                                                                             SERVICE_STATUS.PENDING] },
-                                                                            { fetched: true, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+                                                                            { fetched: true, processed: true,  
+                                                                              status: SERVICE_STATUS.FAILED, response: servResponse});
         });
 
 
@@ -75,7 +77,8 @@ const processMicroserviceRequest = (servRequestId) => {
                                                                     'status__in': [ SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                     SERVICE_STATUS.WAIT_DEPENDENCIES,
                                                                                     SERVICE_STATUS.PENDING] },
-                                                                     { fetched: false, processed: true,  status: SERVICE_STATUS.FAILED, response: servResponse});
+                                                                     { fetched: false, processed: true,  
+                                                                       status: SERVICE_STATUS.FAILED, response: servResponse});
     });
 }
 
@@ -115,11 +118,13 @@ const saveServiceResponse = (requestId, servResponse, defaultStatus) => {
         if(servResponse.status && servResponse.status == SERVICE_STATUS.FAILED) status = SERVICE_STATUS.FAILED;
         if(servResponse.status && servResponse.status == SERVICE_STATUS.READY) status = SERVICE_STATUS.READY;
 
+        const processed =  status !== SERVICE_STATUS.PENDING;
+
         return databaseServices.service_requests.updateByConditions({'id': requestId, 
                                                                      'status__in': [SERVICE_STATUS.DISPATCHING_SERVICE,
                                                                                     SERVICE_STATUS.WAIT_DEPENDENCIES,
                                                                                     SERVICE_STATUS.PENDING]},
-                                                                    { fetched: true, processed: true, response: servResponse,
+                                                                    { fetched: true, processed: processed, response: servResponse,
                                                                        status: status, result_at: now})
                                                 .then(() => status);
 }

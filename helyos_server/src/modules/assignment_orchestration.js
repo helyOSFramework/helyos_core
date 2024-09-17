@@ -5,7 +5,8 @@
 const databaseServices = require('../services/database/database_services.js');
 const { generateAssignmentDependencies } = require('./assignment_context.js');
 const agentComm = require('./communication/agent_communication.js');
-const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, SERVICE_STATUS, UNCOMPLETE_MISSION_STATUS } = require('./data_models.js');
+const { ASSIGNMENT_STATUS, MISSION_STATUS, MISSION_QUEUE_STATUS, SERVICE_STATUS,
+	    UNCOMPLETE_MISSION_STATUS, UNCOMPLETED_SERVICE_STATUS } = require('./data_models.js');
 const { logData } = require('./systemlog.js');
 
 
@@ -124,7 +125,10 @@ async function onWorkProcessEnd(workProcessId, reason){
 }
 
 async function assignmentUpdatesMissionStatus(id, wprocId) {
-	const remaingServiceRequests = await databaseServices.service_requests.select({ work_process_id: wprocId, processed: false }, ['id']);
+	const remaingServiceRequests = await databaseServices.service_requests.select({ work_process_id: wprocId,
+																					processed: false,
+																					status__in: UNCOMPLETED_SERVICE_STATUS},
+																					['id']);
 	if (remaingServiceRequests.length === 0) {
 		const uncompleteAssgms = await databaseServices.searchAllRelatedUncompletedAssignments(id);
 		if (uncompleteAssgms.length == 0) {
