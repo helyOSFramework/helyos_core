@@ -104,8 +104,7 @@ export class AgentChargeStationsComponent implements OnInit {
     getItem(itemId) {
         this.helyosService.methods.agents.get(itemId)
         .then( (r: H_Agent)=> {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (r as any).message
+            const message = r['message']
             if(message){  
                 alert(message);
                 return;
