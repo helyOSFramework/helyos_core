@@ -35,7 +35,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of wProcesses" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.workProcessTypeName}}</td>
                     <td>{{item.yardId}}</td>
@@ -73,22 +73,22 @@
                 <div role="form"  style="margin: 0 auto; max-width: 1000px;">
                     <div class="row">
                         <fieldset class="form-group col-xl-4">
-                            <label>Work type </label>
-                            <input class="form-control" [(ngModel)]="selectedItem.workProcessTypeName" name="workProcessTypeName" 
+                            <label for="workProcessTypeName">Work type </label>
+                            <input id="workProcessTypeName" class="form-control" [(ngModel)]="selectedItem.workProcessTypeName" name="workProcessTypeName" 
                             [ngModelOptions]="{standalone: true}"
                             />
                         </fieldset>
 
                         <fieldset class="form-group col-xl-4">
-                            <label>Yard id </label>
-                            <input class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId" 
+                            <label for="yardId">Yard id </label>
+                            <input id="yardId" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId" 
                             [ngModelOptions]="{standalone: true}"
                             />
                         </fieldset>
 
                         <fieldset class="form-group col-xl-4" title="Array with the database ids, not the UUIDs.">
-                            <label>Agent Ids</label>
-                            <input class="form-control" [(ngModel)]="selectedItem.agentIds"  name="agentIds"
+                            <label for="agentIds">Agent Ids</label>
+                            <input id="agentIds" class="form-control" [(ngModel)]="selectedItem.agentIds"  name="agentIds"
                             [ngModelOptions]="{standalone: true}"
                             placeholder="e.g. [2, 4, 5]" />
                         </fieldset>
@@ -101,10 +101,10 @@
 
 
                         <!-- <div class="form-group col-xl-4">
-                            <label>Scheduled to start not before</label>
+                            <label for="dp">Scheduled to start not before</label>
 
                             <div class="input-group datepicker-input">
-                                <input [hidden]="!showInput"
+                                <input id="dp" [hidden]="!showInput"
                                     #d="ngbDatepicker"
                                     [(ngModel)]="selectedItem.schedStartAt"
                                     [ngModelOptions]="{standalone: true}"
@@ -124,21 +124,21 @@
 
 
                         <fieldset class="form-group col-xl-2">
-                            <label>Mission Queue ID</label>
-                            <input type="number" class="form-control" [(ngModel)]="selectedItem.missionQueueId"  name="missionQueueId"
+                            <label for="missionQueueId">Mission Queue ID</label>
+                            <input id="missionQueueId" type="number" class="form-control" [(ngModel)]="selectedItem.missionQueueId"  name="missionQueueId"
                             />
                         </fieldset>
 
                         
                         <fieldset class="form-group col-xl-2" title="blank is assigned to the last position" >
-                            <label>Run order</label>
-                            <input type="number"  class="form-control" [(ngModel)]="selectedItem.runOrder"  name="runOrder" [readonly]="!selectedItem.missionQueueId" 
+                            <label for="runOrder">Run order</label>
+                            <input id="runOrder" type="number"  class="form-control" [(ngModel)]="selectedItem.runOrder"  name="runOrder" [readonly]="!selectedItem.missionQueueId" 
                             />
                         </fieldset>
 
                         <fieldset class="form-group col-xl-2">
-                            <label>Status</label> 
-                            <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
+                            <label for="status">Status</label> 
+                            <select id="status" class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
                                     name="status">
                                 <option value="draft"> draft </option>
                                 <option value="cancelling"> cancelling </option>
@@ -155,9 +155,9 @@
                     <div class="row" >
 
                         <fieldset class="form-group col-xl-6">
-                            <label>Action on assignment failure</label>
+                            <label for="onAssignmentFailure">Action on assignment failure</label>
 
-                            <select class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
+                            <select id="onAssignmentFailure" class="form-control" [(ngModel)]="selectedItem.onAssignmentFailure" name="onAssignmentFailure">
                                 <option value="DEFAULT">to be defined by mission recipe</option>
                                 <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
                                 <option value="CONTINUE_MISSION" title="CONTINUE">continue mission </option>
@@ -168,8 +168,8 @@
 
 
                         <fieldset class="form-group col-xl-6" title='Fallback mission when failed agent is released.'>
-                            <label>Fallback mission </label>
-                            <select class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
+                            <label for="fallbackMission">Fallback mission </label>
+                            <select id="fallbackMission" class="form-control form-select" [(ngModel)]="selectedItem.fallbackMission" name="fallbackMission">
                                 <option [value]="''"> ---- ---- </option>
                                 <ng-container  *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
                                     <option *ngFor="let missionName of availableMissions" [value]="missionName"> {{missionName}}</option>
@@ -181,16 +181,16 @@
 
                     <div class="row" >
                         <fieldset class="form-group col-xl-12">
-                            <label> JSON Request data </label>
-                            <textarea class="form-control" [(ngModel)]="selectedItem.data" name="data"
+                            <label for="data"> JSON Request data </label>
+                            <textarea id="data" class="form-control" [(ngModel)]="selectedItem.data" name="data"
                             ></textarea>
                         </fieldset>
                     </div>
 
                     <div class="row">
                         <fieldset class="form-group col-xl-12">
-                            <label> Optional: Specify Required Operations for Reserved Agents </label>
-                            <input class="form-control"  type="text" [(ngModel)]="operationTypesRequired"  name="operationTypesRequired" />
+                            <label for="operationTypesRequired"> Optional: Specify Required Operations for Reserved Agents </label>
+                            <input id="operationTypesRequired" class="form-control"  type="text" [(ngModel)]="operationTypesRequired"  name="operationTypesRequired" />
                             <small class="form-text text-muted"> Enter the names, separate operation types with a comma (,), of the operations needed for the agent to be prepared upon reservation.</small>
                          </fieldset>
                     </div>
@@ -239,7 +239,7 @@
                                 <th scope="row">{{assg.id}}</th>
                                 <td>{{assg.agentId}}</td>
                                 <td>{{assg.startTimeStamp | date:'dd.MM.yy HH:mm:ss' }}</td>
-                                <td [ngStyle]="{color: assg.status != 'completed'? 'red':'green'}">{{assg.status}}</td>
+                                <td [ngStyle]="{color: assg.status !== 'completed'? 'red':'green'}">{{assg.status}}</td>
                             </tr>
                         </tbody>
                     </table>

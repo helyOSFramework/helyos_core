@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HelyosService } from '../../services/helyos.service';
 import { H_Assignment, H_WorkProcess } from 'helyosjs-sdk';
-import { NgbDate, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-dispatch-processes',
@@ -100,7 +100,7 @@ export class DispatchProcessesComponent implements OnInit {
             this.operationTypesRequired = r.operationTypesRequired.join(', ') as any;
             this.assignmentList();
             if(this.selectedItem.schedStartAt) {
-  
+                return;
             }
         })
 
