@@ -1,6 +1,6 @@
 # helyOS Core Installation and Management Scripts
 
-This directory contains scripts to help install **helyOS Core** on a bare Linux-compatible system without Docker. These steps have been tested on **Ubuntu 20.04.6 LTS**.
+This directory contains scripts to help install **helyOS Core** on a bare Debian-compatible system without Docker. These steps have been tested on **Ubuntu 20.04.6 LTS**.
 
 ## 1. Installation
 
