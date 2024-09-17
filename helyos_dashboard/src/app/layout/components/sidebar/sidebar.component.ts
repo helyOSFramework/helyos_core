@@ -54,7 +54,7 @@ export class SidebarComponent implements OnInit, AfterViewInit {
         this.isActive = !this.isActive;
     }
 
-    addExpandClass(element: any) {
+    addExpandClass(element: string) {
         if (element === this.showMenu) {
             this.showMenu = '0';
         } else {
@@ -74,12 +74,12 @@ export class SidebarComponent implements OnInit, AfterViewInit {
     }
 
     toggleSidebar() {
-        const dom: any = document.querySelector('body');
+        const dom = document.querySelector('body');
         dom.classList.toggle(this.pushRightClass);
     }
 
     rltAndLtr() {
-        const dom: any = document.querySelector('body');
+        const dom = document.querySelector('body');
         dom.classList.toggle('rtl');
     }
 
