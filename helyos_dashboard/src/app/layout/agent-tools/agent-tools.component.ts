@@ -101,9 +101,10 @@ export class AgentToolsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.agents.get(itemId)
-        .then( (r:any)=> {
-            if(r.message){  
-                alert(r.message);
+        .then( (r: H_Agent)=> {
+            const message = r['message']            
+            if(message){  
+                alert(message);
                 return;
             }
             console.log(r)
@@ -113,7 +114,9 @@ export class AgentToolsComponent implements OnInit {
             this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
             this.rbmqPassword = '';
             this.saveStateMsg = '';
-            this.helyosService.methods.toolsInterconnections.list({leaderId: r.id})
+            const id = r.id;
+            const leaderId = typeof id === 'string' ? Number(id) : id;
+            this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
             .then(r => this.interconnections = r);
         })
     }
@@ -236,7 +239,9 @@ export class AgentToolsComponent implements OnInit {
     }
 
     interconnectionList(){
-        return this.helyosService.methods.toolsInterconnections.list({leaderId: this.selectedItem.id as any})
+        const id = this.selectedItem.id;
+        const leaderId = typeof id === 'string' ? Number(id) : id;
+        return this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
         .then(r => this.interconnections = r);
     }
 
@@ -258,7 +263,9 @@ export class AgentToolsComponent implements OnInit {
                 return;
             }
 
-            this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: this.selectedItem.id as any})
+            const id = this.selectedItem.id;
+            const leaderId = typeof id === 'string' ? Number(id) : id;
+            this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: leaderId})
             .then((r)=> {
                 if (r.message){
                     alert(r.message);
