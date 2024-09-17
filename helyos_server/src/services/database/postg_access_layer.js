@@ -158,9 +158,9 @@ class DatabaseLayer {
 		let queryText;
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions + orderByStr;
+			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions + in_conditions + orderByStr;
 		} else {
-			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions + orderByStr;
+			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions + in_conditions + orderByStr;
 		}
 
 		const _client = useShortTimeClient ? this.shortTimeClient : this.client;

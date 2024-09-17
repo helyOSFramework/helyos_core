@@ -41,7 +41,7 @@ class HelyOSClientApplication {
        
                 tries += 1;
                 if (tries > maxTries){
-                    console.log(`Max tries reached for ${id} with status ${result['value']}`);
+                    console.log(`Max tries reached for ${id} with status ${result['value']} instead ${status}`);
                     clearInterval(watcher);
                     resolve(false);
                 }
