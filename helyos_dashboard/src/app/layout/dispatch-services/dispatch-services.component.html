@@ -9,8 +9,8 @@
 
 <div class="row" style="align-items:flex-end">
     <fieldset class="form-group col-xl-3">
-        <label>Work process id</label>
-        <input type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId"  (keydown.enter)="filterList(0)" />
+        <label for="filterWprocId">Work process id</label>
+        <input id="filterWprocId" type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId"  (keydown.enter)="filterList(0)" />
     </fieldset>
 
     <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary w-auto" (click)="filterList(0)" type="submit">APPLY</button>
@@ -48,7 +48,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of items" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.serviceUrl}}</td>
                     <td>{{item.dispatchedAt | date:'dd.MM.yy HH:mm:ss' }}</td>
@@ -82,8 +82,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> JSON Request data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.request" name="request" readonly
+                    <label for="request"> JSON Request data </label>
+                    <textarea id="request" class="form-control" [ngModel]="selectedItem.request" name="request" readonly
                     ></textarea>
                 </fieldset>
             </div>
@@ -91,8 +91,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> JSON Config data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.config" name="config" readonly
+                    <label for="config"> JSON Config data </label>
+                    <textarea id="config" class="form-control" [ngModel]="selectedItem.config" name="config" readonly
                     ></textarea>
                 </fieldset>
             </div>
@@ -103,16 +103,16 @@
             <div>
                 <div class="row" >
                     <fieldset class="form-group col-xl-12">
-                        <label> JSON Map and Agents (snapshot of the yard state at the moment the service is called)</label>
-                        <textarea class="form-control" [ngModel]="selectedItemYardContext" name="selectedItemYardContext" readonly
+                        <label for="selectedItemYardContext"> JSON Map and Agents (snapshot of the yard state at the moment the service is called)</label>
+                        <textarea id="selectedItemYardContext" class="form-control" [ngModel]="selectedItemYardContext" name="selectedItemYardContext" readonly
                         ></textarea>
                     </fieldset>
                 </div>
 
                 <div class="row" >
                     <fieldset class="form-group col-xl-12">
-                        <label> JSON Dependencies (responses from previous linked services) </label>
-                        <textarea class="form-control" [ngModel]="selectedItemDepsContext" name="selectedItemDepsContext" readonly
+                        <label for="selectedItemDepsContext"> JSON Dependencies (responses from previous linked services) </label>
+                        <textarea id="selectedItemDepsContext" class="form-control" [ngModel]="selectedItemDepsContext" name="selectedItemDepsContext" readonly
                         ></textarea>
                     </fieldset>
                 </div>
@@ -122,8 +122,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> JSON Response data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.response" name="response" readonly
+                    <label for="response"> JSON Response data </label>
+                    <textarea id="response" class="form-control" [ngModel]="selectedItem.response" name="response" readonly
                     ></textarea>
                 </fieldset>
             </div>
@@ -132,22 +132,22 @@
             <h3> Parent work process</h3>
             <div class="row" *ngIf="wprocess">
                 <fieldset class="form-group col-xl-2">
-                    <label>ID </label>
-                    <input class="form-control" [ngModel]="wprocess.id" name="id" readonly/>
+                    <label for="id">ID </label>
+                    <input id="id" class="form-control" [ngModel]="wprocess.id" name="id" readonly/>
                 </fieldset>
                 <fieldset class="form-group col-xl-3">
-                    <label>Work type </label>
-                    <input class="form-control" [ngModel]="wprocess.workProcessTypeName" name="workProcessTypeName" readonly/>
+                    <label for="workProcessTypeName">Work type </label>
+                    <input id="workProcessTypeName" class="form-control" [ngModel]="wprocess.workProcessTypeName" name="workProcessTypeName" readonly/>
                 </fieldset>
 
                 <fieldset class="form-group col-xl-3">
-                    <label>Yard id </label>
-                    <input class="form-control" [ngModel]="wprocess.yardId" name="yardId" readonly />
+                    <label for="yardId">Yard id </label>
+                    <input id="yardId" class="form-control" [ngModel]="wprocess.yardId" name="yardId" readonly />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Agent Ids</label>
-                    <input class="form-control" [ngModel]="wprocess.agentIds"  name="agentIds" readonly
+                    <label for="agentIds">Agent Ids</label>
+                    <input id="agentIds" class="form-control" [ngModel]="wprocess.agentIds"  name="agentIds" readonly
                     placeholder="e.g. [2, 4, 5]" />
                 </fieldset>
 

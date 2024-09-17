@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HelyosService } from '../../services/helyos.service';
 import { H_WorkProcess } from 'helyosjs-sdk';
-import { H_ServiceRequest, ToolPose } from 'helyosjs-sdk/dist/helyos.models';
-import { NgbDate, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { H_ServiceRequest } from 'helyosjs-sdk/dist/helyos.models';
+import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-dispatch-services',
@@ -59,7 +59,7 @@ export class DispatchServicesComponent implements OnInit {
                 this.selectedItemYardContext = JSON.stringify({'map':context.map, 'agents': context.agents}, null, 3);
                 this.selectedItemDepsContext = JSON.stringify({'dependencies':context.dependencies}, null, 3);
             } catch (error) {
-                
+                return;
             }
             if(this.selectedItem.workProcessId) {
                 this.helyosService.methods.workProcess.get(this.selectedItem.workProcessId.toString())
