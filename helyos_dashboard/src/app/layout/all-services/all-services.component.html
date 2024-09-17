@@ -69,7 +69,7 @@
             <tbody>
                 <tr *ngFor="let item of services" (click)="getItem(item.id)"
                     [ngClass]="{
-                        'selectedHighlight': item.id==selectedItem?.id,
+                        'selectedHighlight': item.id===selectedItem?.id,
                         'disable-row': !item.enabled,
                         'assignment-row': item.class === 'Assignment planner',
                         'mapserver-row': item.class === 'Map server',
@@ -101,7 +101,7 @@
 
         <div class="row">
             <div class="checkbox">
-                <label> <input type="checkbox" [(ngModel)]="selectedItem.isDummy"  name="isDummy" /> Dummy service </label>
+                <label for="isDummy"> <input id="isDummy" type="checkbox" [(ngModel)]="selectedItem.isDummy"  name="isDummy" /> Dummy service </label>
             </div>
         </div>
 
@@ -109,19 +109,19 @@
         <form role="form"  style="margin: 10px auto; max-width: 1000px;">
             <div class="row">
                 <fieldset class="form-group col-xl-6">
-                    <label>Name</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+                    <label for="name">Name</label>
+                    <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-6" *ngIf="!selectedItem?.isDummy">
-                    <label> URL</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.serviceUrl" name="serviceUrl"
+                    <label for="serviceUrl"> URL</label>
+                    <input id="serviceUrl" class="form-control" [(ngModel)]="selectedItem.serviceUrl" name="serviceUrl"
                     placeholder="https://..." />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-6" *ngIf="selectedItem?.isDummy">
-                    <label> URL is not used: response data = request data</label>
-                    <input class="form-control" name="serviceUrl" [disabled]="true"
+                    <label for="serviceUrl"> URL is not used: response data = request data</label>
+                    <input id="serviceUrl" class="form-control" name="serviceUrl" [disabled]="true"
                     placeholder="-- not used --" />
                 </fieldset>
 
@@ -132,8 +132,8 @@
             <div class="row" >
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Domain</label>
-                    <select class="form-control form-select" [(ngModel)]="selectedItem.class" name="class">
+                    <label for="class">Domain</label>
+                    <select id="class" class="form-control form-select" [(ngModel)]="selectedItem.class" name="class">
                         <option value="Assignment planner">Assignment planner</option>
                         <option value="Map server">Map server</option>
                         <option value="Storage server">Storage server</option>
@@ -141,15 +141,15 @@
                 </fieldset>
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Type</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.serviceType"  name="serviceType"
+                    <label for="serviceType">Type</label>
+                    <input id="serviceType" class="form-control" [(ngModel)]="selectedItem.serviceType"  name="serviceType"
                     placeholder="drive, crop..." />
                 </fieldset>
 
 
                 <fieldset class="form-group col-xl-4">
-                    <label>Process time limit (sec)</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.resultTimeout"  name="resultTimeout"
+                    <label for="resultTimeout">Process time limit (sec)</label>
+                    <input id="resultTimeout" type="number" class="form-control" [(ngModel)]="selectedItem.resultTimeout"  name="resultTimeout"
                     />
                 </fieldset>
 
@@ -158,8 +158,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> API Key</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.licenceKey" name="licenceKey" [disabled]="selectedItem?.isDummy"
+                    <label for="licenceKey"> API Key</label>
+                    <input id="licenceKey" class="form-control" [(ngModel)]="selectedItem.licenceKey" name="licenceKey" [disabled]="selectedItem?.isDummy"
                     />
                 </fieldset>
             </div>
@@ -169,20 +169,20 @@
                 <fieldset class="form-group col-xl-8">
 
                     <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMissionAgentsData"  name="requireMissionAgentsData" /> Include data of the agents involved in the mission </label>
+                        <label for="requireMissionAgentsData"> <input id="requireMissionAgentsData" type="checkbox" [(ngModel)]="selectedItem.requireMissionAgentsData"  name="requireMissionAgentsData" /> Include data of the agents involved in the mission </label>
                     </div>
 
                     <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireAgentsData"  name="requireAgentsData" /> Include data of all agents in the yard </label>
+                        <label for="requireAgentsData"> <input id="requireAgentsData" type="checkbox" [(ngModel)]="selectedItem.requireAgentsData"  name="requireAgentsData" /> Include data of all agents in the yard </label>
                     </div>
 
                     <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include yard and map objects data  </label>
+                        <label for="requireMapData"> <input id="requireMapData" type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include yard and map objects data  </label>
                     </div>
 
                     <div class="checkbox" style= "margin-left:18px" *ngIf="selectedItem.requireMapData">
-                        <label>  Specify the types of map objects to include: </label>
-                        <input class="form-control"  type="text" [(ngModel)]="requireMapObjectsInput"  name="requireMapObjectsInput" />
+                        <label for="requireMapObjectsInput">  Specify the types of map objects to include: </label>
+                        <input id="requireMapObjectsInput" class="form-control"  type="text" [(ngModel)]="requireMapObjectsInput"  name="requireMapObjectsInput" />
                         <small class="form-text text-muted">separate each type with a comma (,). E.g: building, road, parking_lot</small>
                     </div>
 
@@ -191,8 +191,8 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12">
-                    <label> Config </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.config" name="config"
+                    <label for="config"> Config </label>
+                    <textarea id="config" class="form-control" [(ngModel)]="selectedItem.config" name="config"
                     ></textarea>
                 </fieldset>
             </div>

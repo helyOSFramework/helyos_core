@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {  H_Service, H_Yard } from 'helyosjs-sdk';
+import {  H_Service } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 
 @Component({
@@ -50,7 +50,7 @@ export class AllServicesComponent implements OnInit {
     delete(itemId) {
         if (confirm('Are you sure you want to delete?')) {
             this.helyosService.methods.extServices.delete(itemId)
-            .then( r=>  this.list());
+            .then( (_) =>  this.list());
         }
     }
 
@@ -74,7 +74,7 @@ export class AllServicesComponent implements OnInit {
 
 
         this.helyosService.methods.extServices.patch(patch)
-        .then( r=>  {
+        .then( (_) =>  {
             this.list();
             alert('changes saved');
         });
@@ -91,7 +91,7 @@ export class AllServicesComponent implements OnInit {
 
     toggleEnable(item) {
         return this.helyosService.methods.extServices.patch({id: item.id, enabled: !item.enabled})
-        .then( r => {
+        .then( (_) => {
             item.enabled = !item.enabled;
             this.list();
         });
