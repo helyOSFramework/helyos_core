@@ -28,7 +28,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of wpServPlan" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
+                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
                     <th scope="row">{{item.step}}</th>
                     <td>{{item.requestOrder}}</td>
                     <td>{{item.serviceType}}</td>
@@ -57,30 +57,30 @@
 
             <div class="row" >
                     <fieldset class="form-group col-xl-3">
-                        <label>Step</label>
-                        <input class="form-control" [(ngModel)]="selectedItem.step" name="step" />
+                        <label for="step">Step</label>
+                        <input id="step" class="form-control" [(ngModel)]="selectedItem.step" name="step" />
                     </fieldset>
 
 
                     <fieldset class="form-group col-xl-3" title='You can create Service Types in "Microservices"'>
-                        <label>Service Type</label>
-                        <select class="form-control form-select" [(ngModel)]="selectedItem.serviceType" name="serviceType">
+                        <label for="serviceType">Service Type</label>
+                        <select id="serviceType" class="form-control form-select" [(ngModel)]="selectedItem.serviceType" name="serviceType">
                             <option *ngFor="let servType of availableServiceTypes" [value]="servType"> {{servType}}</option>
                         </select>
                     </fieldset>
 
 
                     <fieldset class="form-group  col-xl-6">
-                        <label>Service response</label>
+                        <label for="isResultAssignment">Service response</label>
                         <div class="radio">
-                            <label title="result will be used as assignment or yard update.">
+                            <label for="optionsRadios1" title="result will be used as assignment or yard update.">
                                 <input [checked]="selectedItem.isResultAssignment" id="optionsRadios1" (click)="changeRadio(true)" name="true" type="radio"  />
                                 apply step result.
                             </label>
                         </div>
                         <div class="radio">
-                            <label title="result will be used by subsequent microservice.">
-                                <input  [checked]="!selectedItem?.isResultAssignment" id="optionsRadios2" name="isResultAssignment" (click)="changeRadio(0)" type="radio" /> 
+                            <label for="optionsRadios2" title="result will be used by subsequent microservice.">
+                                <input [checked]="!selectedItem?.isResultAssignment" id="optionsRadios2" name="isResultAssignment" (click)="changeRadio(0)" type="radio" /> 
                                 is an intermediate step.
                             </label>
                         </div>
@@ -91,32 +91,32 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-2">
-                    <label>Service Order</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.requestOrder" name="requestOrder"  type="number" />
+                    <label for="requestOrder">Service Order</label>
+                    <input id="requestOrder" class="form-control" [(ngModel)]="selectedItem.requestOrder" name="requestOrder"  type="number" />
                 </fieldset>
 <!-- 
                 <fieldset class="form-group col-xl-3">
-                    <label>Agent calc. Order</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.agent" name="agent" type="number" />
+                    <label for="agent">Agent calc. Order</label>
+                    <input id="agent" class="form-control" [(ngModel)]="selectedItem.agent" name="agent" type="number" />
                 </fieldset> -->
 
                 <fieldset class="form-group col-xl-6">
-                    <label>Add Step Dependencies</label>
+                    <label for="avlbSteps">Add Step Dependencies</label>
                     <div class="row">
-                        <select class="form-control form-select" style="width: 20%;" [(ngModel)]="addedDep" name="avlbSteps" >
+                        <select id="avlbSteps" class="form-control form-select" style="width: 20%;" [(ngModel)]="addedDep" name="avlbSteps" >
                             <option *ngFor="let avlbSteps of availableSteps" [value]="avlbSteps"> {{avlbSteps}}</option>
                             <option value=""> </option>
 
                         </select> 
-                        <div  class="click-to-add " style="width: 5%;" (click)=addDependency(addedDep)> >> </div>
-                        <input  class="form-control " style="width: 65%;" [(ngModel)]="selectedItem.dependsOnSteps" name="dependsOnSteps" />
+                        <div class="click-to-add " style="width: 5%;" (click)=addDependency(addedDep)> >> </div>
+                        <input class="form-control " style="width: 65%;" [(ngModel)]="selectedItem.dependsOnSteps" name="dependsOnSteps" />
                     </div>
 
                 </fieldset>
 
-                <fieldset (mouseover)="showAssignmentTip=2"class="form-group col-xl-4" >
-                    <label> Wait dependencies assignments </label> 
-                    <input  title="acknowledgeReservation" id="waitDepAssignments" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
+                <fieldset (mouseover)="showAssignmentTip=2" (focus)="showAssignmentTip=2" class="form-group col-xl-4" >
+                    <label for="waitDependenciesAssignments"> Wait dependencies assignments </label> 
+                    <input id="waitDependenciesAssignments" title="acknowledgeReservation" id="waitDepAssignments" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
                             [(ngModel)]="selectedItem.waitDependenciesAssignments" name="waitDependenciesAssignments" />
                 </fieldset>
 
@@ -127,9 +127,9 @@
 
             <div class="row" >
                 <fieldset class="form-group col-xl-12" >
-                    <label> Server Config data </label>  
-                    <label style="margin-left: 20px;" title="it will clear your custom config."> 
-                        <input type="checkbox" [(ngModel)]="selectedItem._defaultConfig"  name="_defaultConfig">
+                    <label for="_defaultConfig"> Server Config data </label>  
+                    <label for="_defaultConfig" style="margin-left: 20px;" title="it will clear your custom config."> 
+                        <input id="_defaultConfig" type="checkbox" [(ngModel)]="selectedItem._defaultConfig"  name="_defaultConfig">
                          use the default for this service. 
                     </label>
 

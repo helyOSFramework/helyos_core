@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { H_Service, H_WorkProcessServicePlan, H_WorkProcessType } from 'helyosjs-sdk';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { HelyosService } from '../../services/helyos.service';
 
 
@@ -77,7 +77,7 @@ export class WorkProcessServicesComponent implements OnInit {
         this.helyosService.methods.workProcessServicePlan.get(itemId)
         .then( r=> {
             this.selectedItem = r;
-            this.selectedItem['_defaultConfig'] = !Boolean(this.selectedItem.serviceConfig);
+            this.selectedItem['_defaultConfig'] = !this.selectedItem.serviceConfig;
             if (!this.selectedItem['_defaultConfig']){
                 this.selectedItem.serviceConfig = JSON.stringify(this.selectedItem.serviceConfig);
             }
@@ -95,7 +95,7 @@ export class WorkProcessServicesComponent implements OnInit {
     deleteItem() {
         if (this.selectedItem) {
             this.helyosService.methods.workProcessServicePlan.delete(this.selectedItem.id as string)
-            .then( r=> {
+            .then( (_) => {
                 this.list();
             });
         }
@@ -123,7 +123,7 @@ export class WorkProcessServicesComponent implements OnInit {
         } 
 
         this.helyosService.methods.workProcessServicePlan.patch(patch)
-        .then( r=> {
+        .then( (_) => {
             this.list();
         });
     }
