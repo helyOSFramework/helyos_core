@@ -3,8 +3,6 @@ import { H_UserAccount } from 'helyosjs-sdk/dist/helyos.models';
 import { HelyosService } from '../../services/helyos.service';
 import { NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
-
-
 @Component({
     selector: 'app-accounts',
     templateUrl: './accounts.component.html',
@@ -12,7 +10,7 @@ import { NgbModal} from '@ng-bootstrap/ng-bootstrap';
 })
 export class AccountsComponent implements OnInit {
     public items: H_UserAccount[];
-    public selectedItem: any;
+    public selectedItem: H_UserAccount;
     public USER_ROLE = ['administration', 'application', 'visualization'];
     public password: string;
     public confirmedPassword: string;
@@ -48,7 +46,7 @@ export class AccountsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.userAccounts.get(itemId)
-        .then( (r:any)=> {
+        .then( (r: H_UserAccount)=> {
             this.selectedItem = r;
             if (!r.metadata) { r.metadata = {}; }
             this.selectedItem.metadata = JSON.stringify(r.metadata, null, 2);
@@ -72,12 +70,12 @@ export class AccountsComponent implements OnInit {
         try {
             patch.metadata = JSON.parse(patch.metadata);
         } catch (error) {
-            alert('Settings is no a valid JSON');
+            alert('Settings is not a valid JSON');
             return 0;
         }
 
-        if (patch.userRole){
-            patch.userRole = parseInt(patch.userRole as any);
+        if (typeof patch.userRole !== 'number') {
+            patch.userRole = parseInt(patch.userRole);
         }
 
         this.helyosService.methods.userAccounts.patch(patch)
