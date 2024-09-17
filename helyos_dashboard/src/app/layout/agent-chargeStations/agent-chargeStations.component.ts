@@ -36,6 +36,7 @@ export class AgentChargeStationsComponent implements OnInit {
 
  
     list() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
        return this.helyosService.methods.agents.list({agentClass:this.agentClass as any})
         .then( r => this.tools = r );
     }
@@ -79,6 +80,7 @@ export class AgentChargeStationsComponent implements OnInit {
 
     create() {
         // const newItem={name:'Unnamed', yardId: 1, status:'checked out', agentClass:this.agentClass, allowAnonymousCheckin:false}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const newItem= new H_Agent(this.agentClass as any);
         this.helyosService.methods.agents.create(newItem)
         .then( r=> {
@@ -101,9 +103,11 @@ export class AgentChargeStationsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.agents.get(itemId)
-        .then( (r:any)=> {
-            if(r.message){  
-                alert(r.message);
+        .then( (r: H_Agent)=> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (r as any).message
+            if(message){  
+                alert(message);
                 return;
             }
             console.log(r)
@@ -112,7 +116,9 @@ export class AgentChargeStationsComponent implements OnInit {
             this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
             this.rbmqPassword = '';
             this.saveStateMsg = '';
-            this.helyosService.methods.toolsInterconnections.list({leaderId: r.id})
+            const id = r.id;
+            const leaderId = typeof id === 'string' ? Number(id) : id;
+            this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
             .then(r => this.interconnections = r);
         })
     }
@@ -227,7 +233,9 @@ export class AgentChargeStationsComponent implements OnInit {
     }
 
     interconnectionList(){
-        return this.helyosService.methods.toolsInterconnections.list({leaderId: this.selectedItem.id as any})
+        const id = this.selectedItem.id;
+        const leaderId = typeof id === 'string' ? Number(id) : id;
+        return this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
         .then(r => this.interconnections = r);
     }
 
@@ -249,7 +257,9 @@ export class AgentChargeStationsComponent implements OnInit {
                 return;
             }
 
-            this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: this.selectedItem.id as any})
+            const id = this.selectedItem.id;
+            const leaderId = typeof id === 'string' ? Number(id) : id;
+            this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: leaderId})
             .then((r)=> {
                 if (r.message){
                     alert(r.message);
