@@ -42,7 +42,7 @@ export class SystemLogComponent implements OnInit, OnDestroy {
                     .catch(()=>{});
             
         } catch (error) {
-            
+            return;
         }
 
     }
@@ -55,7 +55,7 @@ export class SystemLogComponent implements OnInit, OnDestroy {
         }, 4000);
     }
 
-    getItem(id) {
+    getItem(_id) {
 
     }
 
