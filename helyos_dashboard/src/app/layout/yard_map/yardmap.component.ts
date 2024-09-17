@@ -14,23 +14,19 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     public selectedObjectItem: H_MapObject;
     public mapObjects: H_MapObject[];
 
-    public filterObj: any = {};
+    public filterObj: Partial<H_MapObject> = {};
     public first: number = 15;
     public page: number = 1;
     public filterType: string;
 
-    public selectedMapObject: any;
-    public selectedLeafletObject: any;
     public otherDataFormat: string;
     public disableUploadButton: boolean = false;
 
-    public options: any;
     public loadingShape: boolean = false;
     public mapObjDataInput: string;
-    public mapObjData: any;
     
     
-    private filterTextTimeout: any;
+    private filterTextTimeout: NodeJS.Timeout;
 
 
     constructor(private helyosService: HelyosService, private changeDetector: ChangeDetectorRef) {}
@@ -174,7 +170,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
 
     saveShapeData(mapObjData) {
-        const newShapes = mapObjData.map((data:any) => {
+        const newShapes = mapObjData.map((data) => {
                         const newItem = new H_MapObject();
                         if (data && data.geometry_type && typeof data.geometry_type === 'string' ) {
                             newItem.data.geometry_type = data.geometry_type;
@@ -236,7 +232,9 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       }
 
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     overwriteYardShapes(yardData: H_MapObject[] | any) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let mapObjects: any;
 
         if (Array.isArray(yardData)) { mapObjects = yardData;}
