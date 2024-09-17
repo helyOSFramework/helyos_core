@@ -13,13 +13,13 @@ export class DispatchProcessesComponent implements OnInit {
     public selectedItem: H_WorkProcess;
     public startDate_ngbDateStruct: NgbDateStruct;
     public assignments: H_Assignment[];
-    public filterObj: any = {};
+    public filterObj: Partial<H_WorkProcess> = {};
     public first: number = 15;
     public page: number = 1;
     public active = 1;
     public availableMissions: string[] = [];
-    public yardId:any;
-    public availableYardIds: any[];
+    public yardId: string | number;
+    public availableYardIds: (string | number)[];
     public operationTypesRequired: string;
 
     constructor(private helyosService: HelyosService) {
@@ -28,7 +28,9 @@ export class DispatchProcessesComponent implements OnInit {
 
     ngOnInit() {
         this.list();
-        this.helyosService.methods.yard.list().then( yards => this.availableYardIds = yards.map(y=>y.id));
+        this.helyosService.methods.yard.list().then( yards => {
+            this.availableYardIds = yards.map(y=>y.id)
+        });
         this.helyosService.methods.workProcessType.list({}).then( wpTypes => {
             this.availableMissions = wpTypes.map( wp => wp.name);
          });
@@ -62,7 +64,9 @@ export class DispatchProcessesComponent implements OnInit {
             if (!this.availableYardIds.includes(this.yardId))  this.yardId = this.availableYardIds[0];
         })
         .then(() => {
-            const newItem={status: 'draft', workProcessTypeName:'undefined', yardId: this.yardId};
+            const id = this.yardId;
+            const yardId = typeof id === 'string' ? Number(id) : id;
+            const newItem={status: 'draft', workProcessTypeName:'undefined', yardId: yardId};
             this.helyosService.methods.workProcess.create(newItem)
             .then( r=> {
                 console.log("helyosService.methods.workProcess.create",r);
@@ -73,7 +77,8 @@ export class DispatchProcessesComponent implements OnInit {
 
 
     duplicate() {
-        this.helyosService.methods.workProcess.get(this.selectedItem.id as any)
+        const workProcessId = `${this.selectedItem.id}`
+        this.helyosService.methods.workProcess.get(workProcessId)
         .then( wprocess => {
             const newItem = {...wprocess, status: 'draft'};
             delete newItem.id;
@@ -87,17 +92,19 @@ export class DispatchProcessesComponent implements OnInit {
     }
 
 
-    getItem(itemId) {
-        this.helyosService.methods.workProcess.get(itemId)
-        .then( (r:any)=> {
+    getItem(itemId: string) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.helyosService.methods.workProcess.get(itemId).then( (r:any)=> {
             if (r.message) {
                 alert(r.message);
                 return;
             }
-            this.selectedItem = r;   
+            this.selectedItem = r;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.selectedItem['agentIds'] = JSON.stringify(r['agentIds']) as any;
-            if (r.operationTypesRequired)
-            this.operationTypesRequired = r.operationTypesRequired.join(', ') as any;
+            if (r.operationTypesRequired) {
+                this.operationTypesRequired = r.operationTypesRequired.join(', ');
+            }
             this.assignmentList();
             if(this.selectedItem.schedStartAt) {
                 return;
@@ -174,7 +181,9 @@ export class DispatchProcessesComponent implements OnInit {
 
 
     assignmentList() {
-        this.helyosService.methods.assignments.list({workProcessId:this.selectedItem.id as any})
+        const id = this.selectedItem.id;
+        const workProcessId = typeof id === 'string' ? Number(id) : id;
+        this.helyosService.methods.assignments.list({workProcessId: workProcessId})
         .then(r => this.assignments = r)
 
     }
