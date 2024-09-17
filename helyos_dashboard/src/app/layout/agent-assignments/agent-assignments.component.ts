@@ -12,7 +12,7 @@ export class AgentAssignmentsComponent implements OnInit {
     public assignments: H_Assignment[];
     public selectedItem: H_Assignment;
     public startDate_ngbDateStruct: NgbDateStruct;
-    public filterObj: any = {};
+    public filterObj: Partial<H_Assignment> = {};
     public first: number = 15;
     public page: number = 1;
     public filterWprocId: number = null;
@@ -39,7 +39,7 @@ export class AgentAssignmentsComponent implements OnInit {
         }
         this.filterObj = {};
         if (this.filterWprocId) {
-            this.filterObj['workProcessId'] = this.filterWprocId;
+            this.filterObj.workProcessId = this.filterWprocId;
         }
 
         this.list();
@@ -56,11 +56,12 @@ export class AgentAssignmentsComponent implements OnInit {
 
     getItem(itemId) {
         this.helyosService.methods.assignments.get(itemId)
-        .then( (r:any)=> {
+        .then( (r: H_Assignment)=> {
             this.selectedItem = r;   
-            this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4) as any;
+            this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.selectedItem['context'] = JSON.stringify(r['context'], undefined, 4) as any;
-            this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4) as any;
+            this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4);
 
         })
 
