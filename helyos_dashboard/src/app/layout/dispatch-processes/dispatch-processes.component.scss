@@ -10,9 +10,9 @@
     width: 300px;
 }
 
-.tableFixHead          { overflow-y: auto; height: 300px; padding-top: 0px ; }
-.tableFixHead thead th { position: sticky; top: 0; background-color: white; }
-.tableFixHeadHideScrolled { height:20px;
+.table-fix-head          { overflow-y: auto; height: 300px; padding-top: 0px ; }
+.table-fix-head thead th { position: sticky; top: 0; background-color: white; }
+.table-fix-head-hide-scrolled { height:20px;
                              background-color: white;
                              z-index: 999;
                              padding: 0px;
