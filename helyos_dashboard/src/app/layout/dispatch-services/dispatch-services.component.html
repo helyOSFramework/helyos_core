@@ -48,7 +48,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of items" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.serviceUrl}}</td>
                     <td>{{item.dispatchedAt | date:'dd.MM.yy HH:mm:ss' }}</td>

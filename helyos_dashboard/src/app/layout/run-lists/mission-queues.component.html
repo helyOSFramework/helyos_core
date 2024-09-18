@@ -28,7 +28,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of mQueues" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.name}}</td>
                     <td>{{item.createdAt}}</td>

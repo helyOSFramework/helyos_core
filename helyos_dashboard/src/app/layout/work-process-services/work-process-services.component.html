@@ -28,7 +28,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of wpServPlan" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.step}}</th>
                     <td>{{item.requestOrder}}</td>
                     <td>{{item.serviceType}}</td>

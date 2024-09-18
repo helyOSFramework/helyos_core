@@ -39,7 +39,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of wpTypes" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.name}}</td>
                     <td>{{item.numMaxAgents}}</td>

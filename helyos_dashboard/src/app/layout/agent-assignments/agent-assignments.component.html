@@ -44,7 +44,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of assignments" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.id}}</th>
                     <td>{{item.workProcessId}}</td>
                     <td>{{item.yardId}}</td>

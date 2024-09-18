@@ -69,7 +69,7 @@
             <tbody>
                 <tr *ngFor="let item of services" (click)="getItem(item.id)"
                     [ngClass]="{
-                        'selectedHighlight': item.id===selectedItem?.id,
+                        'selected-highlight': item.id===selectedItem?.id,
                         'disable-row': !item.enabled,
                         'assignment-row': item.class === 'Assignment planner',
                         'mapserver-row': item.class === 'Map server',

@@ -37,7 +37,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of tools" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <td>{{item.id}}</td>
                     <th scope="row">{{item.agentType}}</th>
                     <td>{{item.name}}</td>

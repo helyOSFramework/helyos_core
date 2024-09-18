@@ -26,7 +26,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let item of yardmap" (click)="getYardItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
                     <th scope="row">{{item.name}}</th>
                     <td>{{item.yardType}}</td>
                     <td>{{item.dataFormat}}</td>
@@ -91,7 +91,7 @@
             <tbody>
                 <ng-container *ngFor="let item of mapObjects" >
                 <tr (click)="getObjectItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id===selectedObjectItem?.id}">
+                    [ngClass]="{'selected-highlight': item.id===selectedObjectItem?.id}">
 
                     <th  style="width:20px">{{item.id}}</th>
 
