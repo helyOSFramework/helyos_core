@@ -12,7 +12,8 @@
     "selector-no-vendor-prefix": null,
     "at-rule-no-vendor-prefix": null,
     "color-function-notation": "legacy",
-    "alpha-value-notation": "number"
+    "alpha-value-notation": "number",
+    "no-descending-specificity": null
   }
 }
   
