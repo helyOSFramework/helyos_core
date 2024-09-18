@@ -4,14 +4,15 @@
 
 
 .thumbnail-container {
-
   align-items: flex-start;
   height: inherit;
   display: flex;
   flex-direction: column;
+
   .btn {
-    margin-left: calc(var(--bs-gutter-x)* 0.5);
+    margin-left: calc(var(--bs-gutter-x) * 0.5);
   }
+  
   img {
       margin: 3px;
       height: 100%;
