@@ -41,7 +41,7 @@ The server will start on a local port, and the app will be accessible via your b
 ### Linting
 
 This project uses:
-- **[ESLint](https://eslint.org/)** for JavaScript and TypeScript linting.
+- **[ESLint](https://eslint.org/)** for HTML and TypeScript linting.
 - **[Stylelint](https://stylelint.io/)** for CSS and SCSS linting.
 
 To check for linting issues across both JavaScript/TypeScript and CSS/SCSS files, run the following command:
