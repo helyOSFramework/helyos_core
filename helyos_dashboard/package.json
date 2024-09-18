@@ -11,9 +11,9 @@
     "gitbuild": "ng build --configuration production --base-href **/dist/",
     "test": "ng test",
     "test-ci": "TEST_CI=true ng test",
-    "lint": "npm run lint:eslint && npm run lint:stylint",
+    "lint": "npm run lint:eslint && npm run lint:stylelint",
     "lint:eslint": "ng lint",
-    "lint:stylint": "stylelint 'src/**/*.{css,scss}'"
+    "lint:stylelint": "stylelint 'src/**/*.{css,scss}'"
   },
   "private": true,
   "dependencies": {
@@ -58,6 +58,8 @@
     "@typescript-eslint/parser": "7.11.0",
     "codelyzer": "^6.0.2",
     "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "jasmine-core": "^5.2.0",
     "jasmine-spec-reporter": "^7.0.0",
     "karma": "^6.4.4",
