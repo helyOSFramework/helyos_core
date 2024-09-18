@@ -11,8 +11,9 @@
     "gitbuild": "ng build --configuration production --base-href **/dist/",
     "test": "ng test",
     "test-ci": "TEST_CI=true ng test",
-    "lint": "ng lint",
-    "lint:styles": "stylelint 'src/**/*.{css,scss}'"
+    "lint": "npm run lint:eslint && npm run lint:stylint",
+    "lint:eslint": "ng lint",
+    "lint:stylint": "stylelint 'src/**/*.{css,scss}'"
   },
   "private": true,
   "dependencies": {
