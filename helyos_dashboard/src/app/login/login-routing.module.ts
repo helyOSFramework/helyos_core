@@ -14,6 +14,9 @@ const routes: Routes = [
     imports:[RouterModule.forChild(routes)
         
     ],
-    exports: [RouterModule, FormsModule]
+    exports: [
+        RouterModule,
+        FormsModule
+    ]
 })
 export class LoginRoutingModule {}

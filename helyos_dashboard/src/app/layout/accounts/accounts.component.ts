@@ -11,7 +11,11 @@ import { NgbModal} from '@ng-bootstrap/ng-bootstrap';
 export class AccountsComponent implements OnInit {
     public items: H_UserAccount[];
     public selectedItem: H_UserAccount;
-    public USER_ROLE = ['administration', 'application', 'visualization'];
+    public USER_ROLE = [
+        'administration',
+        'application',
+        'visualization'
+    ];
     public password: string;
     public confirmedPassword: string;
     public encryptedPassword: string;

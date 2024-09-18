@@ -8,7 +8,14 @@ import { DispatchServicesRoutingModule } from './dispatch-services-routing.modul
 import { DispatchServicesComponent } from './dispatch-services.component';
 
 @NgModule({
-    imports: [CommonModule, DispatchServicesRoutingModule, WorkProcessesRoutingModule, FormsModule, ReactiveFormsModule, NgbModule],
+    imports: [
+        CommonModule,
+        DispatchServicesRoutingModule,
+        WorkProcessesRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgbModule
+    ],
     declarations: [DispatchServicesComponent],
     providers: [
         { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }

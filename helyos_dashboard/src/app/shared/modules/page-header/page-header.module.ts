@@ -5,7 +5,10 @@ import { RouterModule } from '@angular/router';
 import { PageHeaderComponent } from './page-header.component';
 
 @NgModule({
-    imports: [CommonModule, RouterModule],
+    imports: [
+        CommonModule,
+        RouterModule
+    ],
     declarations: [PageHeaderComponent],
     exports: [PageHeaderComponent]
 })

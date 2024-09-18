@@ -8,7 +8,14 @@ import { AgentAssignmentsRoutingModule } from './agent-assignments-routing.modul
 import { AgentAssignmentsComponent } from './agent-assignments.component';
 
 @NgModule({
-    imports: [CommonModule, AgentAssignmentsRoutingModule, WorkProcessesRoutingModule, FormsModule, ReactiveFormsModule, NgbModule],
+    imports: [
+        CommonModule,
+        AgentAssignmentsRoutingModule,
+        WorkProcessesRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgbModule
+    ],
     declarations: [AgentAssignmentsComponent],
     providers: [
         { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }

@@ -40,6 +40,10 @@
             "prefix": "app",
             "style": "kebab-case"
           }
+        ],
+        "array-element-newline": [
+          "error",
+          "consistent"
         ]
       }
     },

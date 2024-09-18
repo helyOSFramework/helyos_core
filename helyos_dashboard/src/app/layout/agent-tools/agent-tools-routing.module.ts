@@ -12,6 +12,9 @@ const routes: Routes = [
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule, FormsModule]
+    exports: [
+        RouterModule,
+        FormsModule
+    ]
 })
 export class AgentToolsRoutingModule {}

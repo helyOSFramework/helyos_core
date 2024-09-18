@@ -11,7 +11,11 @@ describe('HeaderComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [LayoutModule, RouterTestingModule, TranslateModule.forRoot()]
+            imports: [
+                LayoutModule,
+                RouterTestingModule,
+                TranslateModule.forRoot()
+            ]
         }).compileComponents();
     }));
 

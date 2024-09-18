@@ -11,7 +11,11 @@ describe('LoginComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [LoginModule, RouterTestingModule, BrowserAnimationsModule]
+            imports: [
+                LoginModule,
+                RouterTestingModule,
+                BrowserAnimationsModule
+            ]
         }).compileComponents();
     }));
 

@@ -6,7 +6,11 @@ import { AllServicesRoutingModule } from './all-services-routing.module';
 import { AllServicesComponent } from './all-services.component';
 
 @NgModule({
-    imports: [CommonModule, FormsModule, AllServicesRoutingModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        AllServicesRoutingModule
+    ],
     declarations: [AllServicesComponent]
 })
 export class AllServicesModule {}
