@@ -1,14 +1,12 @@
 $topnav-background-color: #222;
+
 :host {
     display: block;
 }
 
 .login-page {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     overflow: auto;
     background: $topnav-background-color;
     text-align: center;
@@ -23,7 +21,7 @@ $topnav-background-color: #222;
         height: 46px;
         padding: 10px 16px;
         font-size: 18px;
-        line-height: 1.3333333;
+        line-height: 1.3333;
         border-radius: 0;
     }
 
