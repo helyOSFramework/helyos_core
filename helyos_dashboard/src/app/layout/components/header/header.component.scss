@@ -1,11 +1,14 @@
 $topnav-background-color: #222;
+
 :host {
     .navbar {
         background-color: $topnav-background-color;
+
         --bs-navbar-padding-x: 1rem;
 
         .navbar-brand {
             color: #fff;
+            width: 235px;
         }
 
         .nav-item > a {
@@ -15,11 +18,9 @@ $topnav-background-color: #222;
                 color: #fff;
             }
         }
+
         .ml-auto {
             margin-left: auto;
-        }
-        .navbar-brand {
-            width: 235px;
         }
     }
 
