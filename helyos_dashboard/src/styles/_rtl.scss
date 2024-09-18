@@ -3,21 +3,26 @@
         left: auto !important;
         right: 0 !important;
         text-align: right;
+
         > ul.list-group {
             padding: 0;
         }
     }
+
     .main-container {
         margin-left: 0 !important;
         margin-right: 235px;
     }
-    /*rtl dropdown items correction*/
+
+    /* rtl dropdown items correction */
     .dropdown-menu {
         text-align: right;
     }
+
     * {
         direction: rtl;
     }
+
     .navbar * {
         direction: ltr;
     }
@@ -41,6 +46,7 @@
 
     .datepicker-input {
         direction: ltr;
+
         .dropdown-menu {
             direction: ltr;
 
@@ -54,17 +60,21 @@
         direction: ltr;
     }
 }
+
 @media screen and (max-width: 992px) {
     .rtl {
         .navbar-brand {
             direction: ltr;
         }
+
         .sidebar {
             right: -235px !important;
         }
+
         .main-container {
             margin-right: 0;
         }
+
         &.push-right {
             .sidebar {
                 left: auto !important;
