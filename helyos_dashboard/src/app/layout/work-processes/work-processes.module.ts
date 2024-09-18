@@ -7,8 +7,8 @@ import { WorkProcessesComponent } from './work-processes.component';
 
 @NgModule({
     imports: [CommonModule,
-FormsModule,
-WorkProcessesRoutingModule],
+        FormsModule,
+        WorkProcessesRoutingModule],
     declarations: [WorkProcessesComponent]
 })
 export class WorkProcessesModule {}

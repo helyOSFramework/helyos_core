@@ -29,7 +29,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
             backdrop:false,
             backdropClass:'customBackdrop',
         
-          }
+        }
         this.example = this.getExample()
 
     }
@@ -38,10 +38,10 @@ export class AgentsComponent implements OnInit, OnDestroy {
         const socket = this.helyosService.methods.socket;
 
         this.helyosService.methods.agents.list({}, 1e6,0,'CONNECTION_STATUS_DESC' )
-        .then( r => {
-            this.agents = r;
-            this.appendSensorFormatToPatchObject(this.agents);
-         });
+            .then( r => {
+                this.agents = r;
+                this.appendSensorFormatToPatchObject(this.agents);
+            });
 
         socket.on('new_agent_poses',(updates: patch[])=>{
             updates = this.appendSensorFormatToPatchObject(updates)
@@ -59,7 +59,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
         const socket = this.helyosService.methods.socket;
         socket.removeAllListeners('change_agent_status');
         socket.removeAllListeners('new_agent_poses');
-      }
+    }
 
     updateItems(updates, listItems){
         updates.forEach(patch => {
@@ -76,7 +76,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
                 }
             } 
 
-         });
+        });
     }
 
 
@@ -84,31 +84,31 @@ export class AgentsComponent implements OnInit, OnDestroy {
         const sensorArray = [];
 
         
-            for (const key in sensorSet) {
-                try {
-                        const item = {
-                            title: sensorSet[key].title,
-                            value: sensorSet[key].value,
-                            type: sensorSet[key].type,
-                            maximum: sensorSet[key].maximum,
-                            minimum: sensorSet[key].minimum,
-                            key: key,
-                            unit: sensorSet[key].unit,
-                        }
-
-                        if (item.maximum) {
-                            try {
-                                item['perc'] = Math.round(item.value/item.maximum * 10000)/100;
-                                item['progressBar'] = Math.round(100*((item.value/item.maximum))).toString() + '%';
-                            } catch (error) {
-                                item['perc'] = null;
-                            }
-                        }
-                        sensorArray.push(item);
-                } catch (error) {
-                    console.log(error, sensorSet)
+        for (const key in sensorSet) {
+            try {
+                const item = {
+                    title: sensorSet[key].title,
+                    value: sensorSet[key].value,
+                    type: sensorSet[key].type,
+                    maximum: sensorSet[key].maximum,
+                    minimum: sensorSet[key].minimum,
+                    key: key,
+                    unit: sensorSet[key].unit,
                 }
-            }        
+
+                if (item.maximum) {
+                    try {
+                        item['perc'] = Math.round(item.value/item.maximum * 10000)/100;
+                        item['progressBar'] = Math.round(100*((item.value/item.maximum))).toString() + '%';
+                    } catch (error) {
+                        item['perc'] = null;
+                    }
+                }
+                sensorArray.push(item);
+            } catch (error) {
+                console.log(error, sensorSet)
+            }
+        }        
         
         return sensorArray;
     }
@@ -121,8 +121,8 @@ export class AgentsComponent implements OnInit, OnDestroy {
             if (patch.sensors){
                 const iterSensorSets: {name: string; sensors: sensor[]}[] = [];
                 for (const key in patch.sensors) {
-                        const iterSensorSet: sensor[] = this.getSensorsMeasures(patch.sensors[key]);
-                        iterSensorSets.push( {name: key, sensors: iterSensorSet});
+                    const iterSensorSet: sensor[] = this.getSensorsMeasures(patch.sensors[key]);
+                    iterSensorSets.push( {name: key, sensors: iterSensorSet});
                 }
                 patch._iterSensors = iterSensorSets;
 
@@ -154,68 +154,68 @@ export class AgentsComponent implements OnInit, OnDestroy {
 
     open(content) {
         this.modalService.open(content, this.modalOptions).result.then((result) => {
-          this.closeResult = `Closed with: ${result}`;
+            this.closeResult = `Closed with: ${result}`;
         }, (reason) => {
-          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
         });
-      }
+    }
     
-      private getDismissReason(reason: ModalDismissReasons | string): string {
+    private getDismissReason(reason: ModalDismissReasons | string): string {
         if (reason === ModalDismissReasons.ESC) {
-          return 'by pressing ESC';
+            return 'by pressing ESC';
         } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-          return 'by clicking on a backdrop';
+            return 'by clicking on a backdrop';
         } else {
-          return  `with: ${reason}`;
+            return  `with: ${reason}`;
         }
-      }
+    }
 
 
 
-      getExample(){
+    getExample(){
         const example = { "sensor_set_1" : {
-        "bat_1" : {
-            title:"Battery level",
-            value: 45,
-            type:"number",
-            description: "battery used for backlight system",
-            unit: "%",
-            minimum: 0,
-            maximum: 100
-        },
+            "bat_1" : {
+                title:"Battery level",
+                value: 45,
+                type:"number",
+                description: "battery used for backlight system",
+                unit: "%",
+                minimum: 0,
+                maximum: 100
+            },
     
-       "bat_2" : {
-            title:"Main power",
-            value: 59,
-            type:"number",
-            description: "battery used for truck engine",
-            unit: "%",
-            minimum: 0,
-            maximum: 100
-        }},
+            "bat_2" : {
+                title:"Main power",
+                value: 59,
+                type:"number",
+                description: "battery used for truck engine",
+                unit: "%",
+                minimum: 0,
+                maximum: 100
+            }},
         "sensor_set_2": {
     
-       "velocity" : {
-            title:"velocity",
-            value: 20,
-            type:"number",
-            unit: "km/h",
-            minimum: 0,
-            maximum: 200
-        },
+            "velocity" : {
+                title:"velocity",
+                value: 20,
+                type:"number",
+                unit: "km/h",
+                minimum: 0,
+                maximum: 200
+            },
     
-        "back_door_status" : {
-            title: "Truck door status",
-            value: "half-open",
-            type:"string",
-            unit: "km/h",
-            minLength: 5,
-            maxLength: 10
-        }}
-      }
+            "back_door_status" : {
+                title: "Truck door status",
+                value: "half-open",
+                type:"string",
+                unit: "km/h",
+                minLength: 5,
+                maxLength: 10
+            }}
+        }
 
 
-      return JSON.stringify(example,null, 5)
+        return JSON.stringify(example,null, 5)
 
     }
 

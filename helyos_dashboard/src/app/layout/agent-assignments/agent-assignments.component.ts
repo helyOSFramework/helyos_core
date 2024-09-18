@@ -27,9 +27,9 @@ export class AgentAssignmentsComponent implements OnInit {
 
 
     list() {
-    const offset = (this.page - 1)*this.first;
-    return this.helyosService.methods.assignments.list(this.filterObj, this.first, offset)
-        .then( r => this.assignments = r );
+        const offset = (this.page - 1)*this.first;
+        return this.helyosService.methods.assignments.list(this.filterObj, this.first, offset)
+            .then( r => this.assignments = r );
     }
 
     filterList(pageDelta:number=0) {
@@ -48,22 +48,22 @@ export class AgentAssignmentsComponent implements OnInit {
     create() {
         const newItem={status: 'draft'}
         this.helyosService.methods.assignments.create(newItem)
-        .then( r=> {
-            console.log(r);
-            this.list().then( () =>  this.getItem(r.id) );
-        });
+            .then( r=> {
+                console.log(r);
+                this.list().then( () =>  this.getItem(r.id) );
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.assignments.get(itemId)
-        .then( (r: H_Assignment)=> {
-            this.selectedItem = r;   
-            this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this.selectedItem['context'] = JSON.stringify(r['context'], undefined, 4) as any;
-            this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4);
+            .then( (r: H_Assignment)=> {
+                this.selectedItem = r;   
+                this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                this.selectedItem['context'] = JSON.stringify(r['context'], undefined, 4) as any;
+                this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4);
 
-        })
+            })
 
     }
 
@@ -113,17 +113,17 @@ export class AgentAssignmentsComponent implements OnInit {
         delete patch.modifiedAt;
 
         this.helyosService.methods.assignments.patch(patch)
-        .then((_) => {
-            this.list();
-        }).catch( e => {
-            alert(JSON.stringify(e));
-        });
+            .then((_) => {
+                this.list();
+            }).catch( e => {
+                alert(JSON.stringify(e));
+            });
     }
 
 
 
     downloadData() {
-            this.downloadObject(this.selectedItem.data,
+        this.downloadObject(this.selectedItem.data,
                                  `assignment_data_${this.selectedItem.id}.json`,
                                  'application/json');
     }

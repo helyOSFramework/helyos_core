@@ -24,8 +24,8 @@ export class RunListsComponent implements OnInit {
 
 
     list() {
-    return this.helyosService.methods.missionQueue.list({})
-        .then( r => this.mQueues = r );
+        return this.helyosService.methods.missionQueue.list({})
+            .then( r => this.mQueues = r );
     }
 
     missionList() {
@@ -39,28 +39,28 @@ export class RunListsComponent implements OnInit {
         const newName = 'run-list ' + now.toLocaleTimeString();
         const newItem={status: 'stopped', name: newName }
         this.helyosService.methods.missionQueue.create(newItem)
-        .then( r=> {
-            console.log(r)
-            this.list().then( () =>  this.getItem(r.id) )
-        });
+            .then( r=> {
+                console.log(r)
+                this.list().then( () =>  this.getItem(r.id) )
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.missionQueue.get(itemId)
-        .then( (r: H_WorkProcess)=> {
-            this.selectedItem = r;   
-            this.missionList();
-        })
+            .then( (r: H_WorkProcess)=> {
+                this.selectedItem = r;   
+                this.missionList();
+            })
 
     }
 
 
     deleteItem(itemId) {
         this.helyosService.methods.missionQueue.delete(itemId)
-        .then( (_) => {
-            this.list();
-            this.selectedItem = null;
-        });
+            .then( (_) => {
+                this.list();
+                this.selectedItem = null;
+            });
     }
 
 
@@ -78,11 +78,11 @@ export class RunListsComponent implements OnInit {
         delete patch.modifiedAt;
 
         this.helyosService.methods.missionQueue.patch(patch)
-        .then( (_) => {
-            this.list();
-        }).catch( e => {
-            alert(JSON.stringify(e));
-        });
+            .then( (_) => {
+                this.list();
+            }).catch( e => {
+                alert(JSON.stringify(e));
+            });
     }
 
 

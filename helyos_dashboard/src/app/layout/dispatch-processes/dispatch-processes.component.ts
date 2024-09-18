@@ -33,7 +33,7 @@ export class DispatchProcessesComponent implements OnInit {
         });
         this.helyosService.methods.workProcessType.list({}).then( wpTypes => {
             this.availableMissions = wpTypes.map( wp => wp.name);
-         });
+        });
     }
 
 
@@ -41,54 +41,54 @@ export class DispatchProcessesComponent implements OnInit {
         const offset = (this.page - 1)*this.first;
         return this.helyosService.methods.workProcess.list(this.filterObj, this.first, offset)
             .then( r => this.wProcesses = r );
-        }
+    }
     
-        filterList(pageDelta:number=0) {
-            this.page += pageDelta;
-            if (this.page < 1){
-                this.page = 1;
-            }
-            this.filterObj = {};
-            this.list();
+    filterList(pageDelta:number=0) {
+        this.page += pageDelta;
+        if (this.page < 1){
+            this.page = 1;
         }
+        this.filterObj = {};
+        this.list();
+    }
 
 
     create() {
         this.helyosService.methods.yard.list()
-        .then((yards)=> {
-            if (yards.length === 0) {
-                alert("You need to register at least one Yard before creating a mission.");
-                throw new Error("No yard");
-            }
-            this.availableYardIds = yards.map(y=>y.id);
-            if (!this.availableYardIds.includes(this.yardId))  this.yardId = this.availableYardIds[0];
-        })
-        .then(() => {
-            const id = this.yardId;
-            const yardId = typeof id === 'string' ? Number(id) : id;
-            const newItem={status: 'draft', workProcessTypeName:'undefined', yardId: yardId};
-            this.helyosService.methods.workProcess.create(newItem)
-            .then( r=> {
-                console.log("helyosService.methods.workProcess.create",r);
-                this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
+            .then((yards)=> {
+                if (yards.length === 0) {
+                    alert("You need to register at least one Yard before creating a mission.");
+                    throw new Error("No yard");
+                }
+                this.availableYardIds = yards.map(y=>y.id);
+                if (!this.availableYardIds.includes(this.yardId))  this.yardId = this.availableYardIds[0];
+            })
+            .then(() => {
+                const id = this.yardId;
+                const yardId = typeof id === 'string' ? Number(id) : id;
+                const newItem={status: 'draft', workProcessTypeName:'undefined', yardId: yardId};
+                this.helyosService.methods.workProcess.create(newItem)
+                    .then( r=> {
+                        console.log("helyosService.methods.workProcess.create",r);
+                        this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
+                    });
             });
-        });
     }
 
 
     duplicate() {
         const workProcessId = `${this.selectedItem.id}`
         this.helyosService.methods.workProcess.get(workProcessId)
-        .then( wprocess => {
-            const newItem = {...wprocess, status: 'draft'};
-            delete newItem.id;
-            delete newItem.__typename;
-            this.helyosService.methods.workProcess.create(newItem)
-            .then( r=> {
-                console.log(r);
-                this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
-            });
-        })
+            .then( wprocess => {
+                const newItem = {...wprocess, status: 'draft'};
+                delete newItem.id;
+                delete newItem.__typename;
+                this.helyosService.methods.workProcess.create(newItem)
+                    .then( r=> {
+                        console.log(r);
+                        this.list().then( () =>  setTimeout(()=>this.getItem(r.id),200) );
+                    });
+            })
     }
 
 
@@ -166,17 +166,17 @@ export class DispatchProcessesComponent implements OnInit {
         delete patch.modifiedAt;
         const commonErrors = `\nDid you set an inexistent yard id or mission queue id?`
         this.helyosService.methods.workProcess.patch(patch)
-        .then( r=> {
-            if (r.message){
-                const message = r.message + commonErrors;
-                alert(message);
-            } else {
-                this.list();
-                alert('changes saved');
-            }
-        }).catch( e => {
-            alert(JSON.stringify(e));
-        });
+            .then( r=> {
+                if (r.message){
+                    const message = r.message + commonErrors;
+                    alert(message);
+                } else {
+                    this.list();
+                    alert('changes saved');
+                }
+            }).catch( e => {
+                alert(JSON.stringify(e));
+            });
     }
 
 
@@ -184,7 +184,7 @@ export class DispatchProcessesComponent implements OnInit {
         const id = this.selectedItem.id;
         const workProcessId = typeof id === 'string' ? Number(id) : id;
         this.helyosService.methods.assignments.list({workProcessId: workProcessId})
-        .then(r => this.assignments = r)
+            .then(r => this.assignments = r)
 
     }
 

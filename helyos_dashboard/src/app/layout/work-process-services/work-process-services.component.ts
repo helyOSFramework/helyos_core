@@ -22,17 +22,17 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
     constructor(private helyosService: HelyosService,
                 private activatedroute:ActivatedRoute,
-                ) { }
+    ) { }
 
 
     ngOnInit() {
         this.sub=this.activatedroute.paramMap.subscribe(params => { 
-             this.wpTypeId = parseInt(params.get('id')); 
-             this.helyosService.methods.workProcessType.get(params.get('id')).then( r => this.wpType = r);
-             this.list();
-         });
+            this.wpTypeId = parseInt(params.get('id')); 
+            this.helyosService.methods.workProcessType.get(params.get('id')).then( r => this.wpType = r);
+            this.list();
+        });
 
-         this.helyosService.methods.extServices.list({}).then( r => {
+        this.helyosService.methods.extServices.list({}).then( r => {
             this.availableServiceTypes = [];
             r.forEach((service: H_Service) => {
                 if (!this.availableServiceTypes.includes(service.serviceType)) {
@@ -40,7 +40,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
                 }
             });
 
-         })
+        })
     }
 
     ngOnDestroy() {
@@ -49,17 +49,17 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
     list() {
         return this.helyosService.methods.workProcessServicePlan.list({'workProcessTypeId':this.wpTypeId})
-         .then( r => this.wpServPlan = r );
-     }
+            .then( r => this.wpServPlan = r );
+    }
 
 
-     create() {
+    create() {
         const newItem={step:'X', workProcessTypeId: this.wpTypeId }
         this.helyosService.methods.workProcessServicePlan.create(newItem)
-        .then( r=> {
-            console.log(r);
-            this.list().then( () => this.getItem(r.id));
-        });
+            .then( r=> {
+                console.log(r);
+                this.list().then( () => this.getItem(r.id));
+            });
     }
 
 
@@ -75,29 +75,29 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
     getItem(itemId) {
         this.helyosService.methods.workProcessServicePlan.get(itemId)
-        .then( r=> {
-            this.selectedItem = r;
-            this.selectedItem['_defaultConfig'] = !this.selectedItem.serviceConfig;
-            if (!this.selectedItem['_defaultConfig']){
-                this.selectedItem.serviceConfig = JSON.stringify(this.selectedItem.serviceConfig);
-            }
-            this.addedDep = '';
-            this.availableSteps = this.wpServPlan.filter( plan => {
+            .then( r=> {
+                this.selectedItem = r;
+                this.selectedItem['_defaultConfig'] = !this.selectedItem.serviceConfig;
+                if (!this.selectedItem['_defaultConfig']){
+                    this.selectedItem.serviceConfig = JSON.stringify(this.selectedItem.serviceConfig);
+                }
+                this.addedDep = '';
+                this.availableSteps = this.wpServPlan.filter( plan => {
                     if ( plan.id == r.id) return false;
                     const dependsOnSteps = this.returnObj(plan.dependsOnSteps); // cannot depend of itself
                     if (dependsOnSteps && dependsOnSteps.includes(r.step)) return false; // avoid recursive dependencies
                     return true;
                 }).map( plan =>  plan.step);
-        });
+            });
     }
 
 
     deleteItem() {
         if (this.selectedItem) {
             this.helyosService.methods.workProcessServicePlan.delete(this.selectedItem.id as string)
-            .then( (_) => {
-                this.list();
-            });
+                .then( (_) => {
+                    this.list();
+                });
         }
     }
 
@@ -123,9 +123,9 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
         } 
 
         this.helyosService.methods.workProcessServicePlan.patch(patch)
-        .then( (_) => {
-            this.list();
-        });
+            .then( (_) => {
+                this.list();
+            });
     }
 
 

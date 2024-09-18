@@ -28,8 +28,8 @@ export class LoginComponent implements OnInit {
             this.gqlPort = window.sessionStorage.getItem('gqlPort');
             this.wsPort = window.sessionStorage.getItem('wsPort');
             this.runlocal = true;
-          } 
-     }
+        } 
+    }
 
     onLoggedin() {
 
@@ -44,22 +44,22 @@ export class LoginComponent implements OnInit {
         }
 
         return this.helyosService.methods.login(this.username, this.password)
-        .then( response => {
+            .then( response => {
                 console.log("response login", response);         
 
                 if (response && response.jwtToken){
                     return  this.helyosService.methods.connect()
                         .then(() => {
-                                window.sessionStorage.setItem('token', response.jwtToken);
-                                console.log("helyos connected");
-                                window.sessionStorage.setItem('isLoggedin', 'true');
-                                this.router.navigate(['/all-services']);
-                                return true;
+                            window.sessionStorage.setItem('token', response.jwtToken);
+                            console.log("helyos connected");
+                            window.sessionStorage.setItem('isLoggedin', 'true');
+                            this.router.navigate(['/all-services']);
+                            return true;
                         })
-                            .catch(errorConnect => {
-                                alert(`Error connecting to helyos ${errorConnect.message}`);
-                                console.log(errorConnect);
-                                return false;
+                        .catch(errorConnect => {
+                            alert(`Error connecting to helyos ${errorConnect.message}`);
+                            console.log(errorConnect);
+                            return false;
                         });
                 } else {
                     if (response && response.graphQLErrors && response.graphQLErrors.length > 0){
@@ -68,8 +68,8 @@ export class LoginComponent implements OnInit {
                     return false;
                 } 
 
-        })
-        .catch(errorLogin => console.log(errorLogin));
+            })
+            .catch(errorLogin => console.log(errorLogin));
         
     }
 

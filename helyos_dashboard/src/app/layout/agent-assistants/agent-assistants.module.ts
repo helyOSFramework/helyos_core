@@ -16,6 +16,6 @@ import { FormsModule } from '@angular/forms';
     declarations: [AgentAssistantsComponent],
     providers: [
         { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
-      ]
+    ]
 })
 export class AgentAssistantsModule {}

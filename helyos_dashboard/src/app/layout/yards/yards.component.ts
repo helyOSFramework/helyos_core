@@ -21,52 +21,52 @@ export class YardsComponent implements OnInit {
 
  
     list() {
-       return this.helyosService.methods.yard.list({})
-        .then( r => {
-            this.yards = r.map(yard => {
-                try {
-                    yard.mapData = JSON.stringify(yard.mapData, null, 2);
-                } catch (error) {
-                    yard.mapData = '';
-                }
-                return yard;
+        return this.helyosService.methods.yard.list({})
+            .then( r => {
+                this.yards = r.map(yard => {
+                    try {
+                        yard.mapData = JSON.stringify(yard.mapData, null, 2);
+                    } catch (error) {
+                        yard.mapData = '';
+                    }
+                    return yard;
+                });
             });
-        });
     }
 
 
     create() {
         const newItem={name:'Unnamed', source: 'manual input'}
         this.helyosService.methods.yard.create(newItem)
-        .then( r=> {
-            console.log(r)
-            this.list().then( () =>  this.getItem(r.id) )
+            .then( r=> {
+                console.log(r)
+                this.list().then( () =>  this.getItem(r.id) )
            
-        });
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.yard.get(itemId)
-        .then( (r: H_Yard)=> {
-            this.selectedItem = r;
-            try {
-                this.selectedItem.mapData = JSON.stringify(this.selectedItem.mapData, null, 2);
-            } catch (error) {
-                this.selectedItem.mapData = '';
-            }
-        });
+            .then( (r: H_Yard)=> {
+                this.selectedItem = r;
+                try {
+                    this.selectedItem.mapData = JSON.stringify(this.selectedItem.mapData, null, 2);
+                } catch (error) {
+                    this.selectedItem.mapData = '';
+                }
+            });
     }
 
     deleteItem(itemId) {
         this.helyosService.methods.yard.delete(itemId)
-        .then( r=> {
-            if (r.message){
-                const message = r.message;
-                alert(message);
-            } else {
-                this.list();
-            }
-        })
+            .then( r=> {
+                if (r.message){
+                    const message = r.message;
+                    alert(message);
+                } else {
+                    this.list();
+                }
+            })
         
     }
 
@@ -83,16 +83,16 @@ export class YardsComponent implements OnInit {
         }
 
         this.helyosService.methods.yard.patch(patch)
-        .then( r=> {
-            if (r.message){
-                const message = r.message;
-                alert(message);
-            } else {
-                this.list();
-                alert('changes saved');
-            }
+            .then( r=> {
+                if (r.message){
+                    const message = r.message;
+                    alert(message);
+                } else {
+                    this.list();
+                    alert('changes saved');
+                }
 
-        });
+            });
     }
 
     openDocs(){

@@ -33,35 +33,35 @@ export class AccountsComponent implements OnInit {
 
  
     list() {
-       return this.helyosService.methods.userAccounts.list({})
-        .then( r => this.items = r );
+        return this.helyosService.methods.userAccounts.list({})
+            .then( r => this.items = r );
     }
 
 
     create() {
         const newItem={username:'unnamed', passwordHash:" "};
         this.helyosService.methods.userAccounts.create(newItem)
-        .then( r=> {
-            console.log(r)
-            this.list().then( () =>  this.getItem(r.id) )
+            .then( r=> {
+                console.log(r)
+                this.list().then( () =>  this.getItem(r.id) )
            
-        });
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.userAccounts.get(itemId)
-        .then( (r: H_UserAccount)=> {
-            this.selectedItem = r;
-            if (!r.metadata) { r.metadata = {}; }
-            this.selectedItem.metadata = JSON.stringify(r.metadata, null, 2);
-        });
+            .then( (r: H_UserAccount)=> {
+                this.selectedItem = r;
+                if (!r.metadata) { r.metadata = {}; }
+                this.selectedItem.metadata = JSON.stringify(r.metadata, null, 2);
+            });
     }
 
     deleteItem(itemId) {
         this.helyosService.methods.userAccounts.delete(itemId)
-        .then((_) => {
-            this.list();
-        });
+            .then((_) => {
+                this.list();
+            });
     }
 
     editItem(item) {
@@ -83,26 +83,26 @@ export class AccountsComponent implements OnInit {
         }
 
         this.helyosService.methods.userAccounts.patch(patch)
-        .then((_) => {
-            this.list();
-        });
+            .then((_) => {
+                this.list();
+            });
     }
 
 
     getToken(content){
         this.copyLabel = ' Copy ';
         this.helyosService.methods.adminGetUserAuthToken(this.selectedItem.username)
-        .then( r => {
-            this.accountToken = `Bearer ${r.jwtToken}`;
-            const _ = this.modalService.open(content,  { size: 'lg', centered: true, backdrop: false });
-        })
+            .then( r => {
+                this.accountToken = `Bearer ${r.jwtToken}`;
+                const _ = this.modalService.open(content,  { size: 'lg', centered: true, backdrop: false });
+            })
 
     }
 
 
     copyText() {
         navigator.clipboard.writeText( this.accountToken)
-        .then(() => this.copyLabel =  String.fromCharCode(10003) + ' Copied');
+            .then(() => this.copyLabel =  String.fromCharCode(10003) + ' Copied');
         
     }
 
@@ -112,11 +112,11 @@ export class AccountsComponent implements OnInit {
             return;
         }
         this.helyosService.methods.adminChangePassword(this.selectedItem.username, this.password)
-        .then(() => {
-            this.password = '';
-            this.confirmedPassword = '';
-            this.setPassFlag = false;
-        });
+            .then(() => {
+                this.password = '';
+                this.confirmedPassword = '';
+                this.setPassFlag = false;
+            });
 
 
     }

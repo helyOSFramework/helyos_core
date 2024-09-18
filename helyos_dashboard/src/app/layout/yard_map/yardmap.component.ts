@@ -43,20 +43,20 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
     
     listYards() {
-       return this.helyosService.methods.yard.list({})
-        .then( r => {
-            this.yardmap = r;
-        });
+        return this.helyosService.methods.yard.list({})
+            .then( r => {
+                this.yardmap = r;
+            });
     }
 
     
     getYardItem(itemId) {
         return this.helyosService.methods.yard.get(itemId)
-        .then( (r:H_Yard)=> {
-            this.selectedItem = r;
-            this.page = 1;
-            return this.filterObjList(0); 
-        })
+            .then( (r:H_Yard)=> {
+                this.selectedItem = r;
+                this.page = 1;
+                return this.filterObjList(0); 
+            })
     }
 
 
@@ -107,16 +107,16 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         if (this.selectedObjectItem && this.selectedObjectItem.id === itemId) return;
     
         this.helyosService.methods.mapObjects.get(itemId)
-        .then( (o:H_MapObject)=> {
-            this.selectedObjectItem = o;
-            if (o.data) {
-                o.data = JSON.stringify(o.data, null, 3);
-            }
-            if (o.metadata) {
-                o.metadata = JSON.stringify(o.metadata, null, 3);
-            }
+            .then( (o:H_MapObject)=> {
+                this.selectedObjectItem = o;
+                if (o.data) {
+                    o.data = JSON.stringify(o.data, null, 3);
+                }
+                if (o.metadata) {
+                    o.metadata = JSON.stringify(o.metadata, null, 3);
+                }
             
-        });
+            });
     }
 
 
@@ -124,19 +124,19 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         const newItem = new H_MapObject();
         newItem.yardId = this.selectedItem.id;
         this.helyosService.methods.mapObjects.create(newItem)
-        .then( (r)=> {
-            this.selectedObjectItem = r;
-            this.getYardItem(this.selectedItem.id);
-        });
+            .then( (r)=> {
+                this.selectedObjectItem = r;
+                this.getYardItem(this.selectedItem.id);
+            });
     }
 
 
     deleteObjectItem(itemId){
         this.helyosService.methods.mapObjects.delete(itemId)
-        .then( ()=> {
-            this.selectedObjectItem = null;
-            this.getYardItem(this.selectedItem.id);
-        });
+            .then( ()=> {
+                this.selectedObjectItem = null;
+                this.getYardItem(this.selectedItem.id);
+            });
     }
 
     saveObjectItem(_itemId){
@@ -161,32 +161,32 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         }
 
         this.helyosService.methods.mapObjects.patch(this.selectedObjectItem)
-        .then( ()=> {
-            this.selectedObjectItem = null;
-            this.getYardItem(this.selectedItem.id);
-        });
+            .then( ()=> {
+                this.selectedObjectItem = null;
+                this.getYardItem(this.selectedItem.id);
+            });
     }
 
 
 
     saveShapeData(mapObjData) {
         const newShapes = mapObjData.map((data) => {
-                        const newItem = new H_MapObject();
-                        if (data && data.geometry_type && typeof data.geometry_type === 'string' ) {
-                            newItem.data.geometry_type = data.geometry_type;
-                        } 
-                        newItem.data =  data;
-                        newItem['dataFormat'] = this.selectedItem.dataFormat;
-                        newItem.yardId =  this.selectedItem.id;
-                        return newItem;
-                    });
+            const newItem = new H_MapObject();
+            if (data && data.geometry_type && typeof data.geometry_type === 'string' ) {
+                newItem.data.geometry_type = data.geometry_type;
+            } 
+            newItem.data =  data;
+            newItem['dataFormat'] = this.selectedItem.dataFormat;
+            newItem.yardId =  this.selectedItem.id;
+            return newItem;
+        });
 
         return this.helyosService.methods.mapObjects.markAllDeleted(this.selectedItem.id)
-        .then(()=> {
-            const promisses = newShapes.map( s => this.helyosService.methods.mapObjects.create(s));
-            return Promise.all(promisses).then((_) => alert('map shapes saved.'))
-        })
-        .catch((err) => alert(JSON.stringify(err)));
+            .then(()=> {
+                const promisses = newShapes.map( s => this.helyosService.methods.mapObjects.create(s));
+                return Promise.all(promisses).then((_) => alert('map shapes saved.'))
+            })
+            .catch((err) => alert(JSON.stringify(err)));
     }
 
 
@@ -226,10 +226,10 @@ export class YardmapComponent implements OnInit, AfterViewInit {
             this.overwriteYardShapes(JSON.parse(fileReader.result as string));
         }
         fileReader.onerror = (error) => {
-          this.disableUploadButton = false;
-          console.log(error);
+            this.disableUploadButton = false;
+            console.log(error);
         }
-      }
+    }
 
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,19 +260,19 @@ export class YardmapComponent implements OnInit, AfterViewInit {
                     patch.mapData = yardData.mapData;
                 }
                 this.helyosService.methods.yard.patch(patch)
-                .then(() => {this.listYards(); Object.assign(this.selectedItem, patch);});
+                    .then(() => {this.listYards(); Object.assign(this.selectedItem, patch);});
             }
         }
 
 
         if (confirm('Are you sure you want to overwrite all current objects?')){
             this.helyosService.methods.mapObjects.markAllDeleted(this.selectedItem.id)
-            .then(() => this.helyosService.methods.mapObjects.createMany(_shapes))
-            .then(() => {
-                this.filterObjList(0)
+                .then(() => this.helyosService.methods.mapObjects.createMany(_shapes))
+                .then(() => {
+                    this.filterObjList(0)
+                        .finally(() => this.disableUploadButton = false);
+                })
                 .finally(() => this.disableUploadButton = false);
-            })
-            .finally(() => this.disableUploadButton = false);
         }
 
     }

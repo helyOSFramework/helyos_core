@@ -27,39 +27,39 @@ export class WorkProcessesComponent implements OnInit {
 
     list() {
         return this.helyosService.methods.workProcessType.list({})
-         .then( r => {
-            this.wpTypes = r;
-            this.availableMissions = r.map( wp => wp.name);
-        });
-     }
+            .then( r => {
+                this.wpTypes = r;
+                this.availableMissions = r.map( wp => wp.name);
+            });
+    }
 
 
-     create() {
+    create() {
         const newItem={name:'Unnamed'}
         this.helyosService.methods.workProcessType.create(newItem)
-        .then( r=> {
-            console.log(r)
-            this.list().then( () =>  this.getItem(r.id) )
+            .then( r=> {
+                console.log(r)
+                this.list().then( () =>  this.getItem(r.id) )
            
-        });
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.workProcessType.get(itemId)
-        .then( r=> {
-            this.selectedItem = r;
-            if (!r.settings) { r.settings = {}; }
-            this.selectedItem.settings = JSON.stringify(r.settings, null, 2);
-        });
+            .then( r=> {
+                this.selectedItem = r;
+                if (!r.settings) { r.settings = {}; }
+                this.selectedItem.settings = JSON.stringify(r.settings, null, 2);
+            });
     }
 
 
     deleteItem() {
         if (this.selectedItem) {
             this.helyosService.methods.workProcessType.delete(this.selectedItem.id as string)
-            .then( (_) => {
-                this.list();
-            });
+                .then( (_) => {
+                    this.list();
+                });
         }
     }
 
@@ -76,10 +76,10 @@ export class WorkProcessesComponent implements OnInit {
         }
 
         this.helyosService.methods.workProcessType.patch(patch)
-        .then( (_) => {
-            this.list();
-            alert('changes saved');
-        });
+            .then( (_) => {
+                this.list();
+                alert('changes saved');
+            });
     }
 
 
@@ -99,19 +99,19 @@ export class WorkProcessesComponent implements OnInit {
             // convert yml to DB data and save it.
             const data = reader.result as string;
             importFromYML(data, this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
-            .then( () => {
-                this.list();
-                alert('changes saved');
-            });
+                .then( () => {
+                    this.list();
+                    alert('changes saved');
+                });
         }
     }
 
     exportYML(){
         // convert DB data to yml
         exportToYML(this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
-        .then( ymlData => {
-            this.download_object(ymlData, 'missions.yml','application/x-yaml');
-        });
+            .then( ymlData => {
+                this.download_object(ymlData, 'missions.yml','application/x-yaml');
+            });
     }
 
     download_object(content, fileName, contentType) {

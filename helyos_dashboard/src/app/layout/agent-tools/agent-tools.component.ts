@@ -36,8 +36,8 @@ export class AgentToolsComponent implements OnInit {
 
  
     list() {
-       return this.helyosService.methods.agents.list({agentClass:this.agentClass})
-        .then( r => this.tools = r );
+        return this.helyosService.methods.agents.list({agentClass:this.agentClass})
+            .then( r => this.tools = r );
     }
 
 
@@ -56,15 +56,15 @@ export class AgentToolsComponent implements OnInit {
         if (!this.selectedItem.allowAnonymousCheckin && this.rbmqAccountChange) {
 
             this.helyosService.methods.agents.createRabbitMQAgent(Number(this.selectedItem.id),
-                                                                 this.selectedItem.rbmqUsername,
-                                                                 this.rbmqPassword)
-                                                                 .then((r)=> {
-                                                                    if (r.errors){
-                                                                        alert(JSON.stringify(r.errors));
-                                                                    } else {
-                                                                        alert('RabbitMQ account created or updated.');
-                                                                    }
-                                                                });
+                this.selectedItem.rbmqUsername,
+                this.rbmqPassword)
+                .then((r)=> {
+                    if (r.errors){
+                        alert(JSON.stringify(r.errors));
+                    } else {
+                        alert('RabbitMQ account created or updated.');
+                    }
+                });
         }
         this.rbmqAccountChange = false;
         this.rbmqPassword = '';
@@ -81,11 +81,11 @@ export class AgentToolsComponent implements OnInit {
         // const newItem={name:'Unnamed', yardId: 1, status:'checked out', agentClass:this.agentClass, allowAnonymousCheckin:false}
         const newItem= new H_Agent(this.agentClass);
         this.helyosService.methods.agents.create(newItem)
-        .then( r=> {
-            console.log(r);
-            this.list().then( () =>  this.getItem(r.id) );
+            .then( r=> {
+                console.log(r);
+                this.list().then( () =>  this.getItem(r.id) );
            
-        });
+            });
     }
 
     sendInstantAction() {
@@ -96,36 +96,36 @@ export class AgentToolsComponent implements OnInit {
             'sender': 'helyOS dashboard'
         }
         this.helyosService.methods.instantActions.create(instantAction)
-        .then( (_) => alert('command sent'));
+            .then( (_) => alert('command sent'));
     }
 
     getItem(itemId) {
         this.helyosService.methods.agents.get(itemId)
-        .then( (r: H_Agent)=> {
-            const message = r['message']            
-            if(message){  
-                alert(message);
-                return;
-            }
-            console.log(r)
-            this.selectedItem = r;
-            this.selectedItem.geometry = JSON.stringify(r.geometry, null, 2);
-            this.selectedItem.factsheet = JSON.stringify(r.factsheet, null, 2);
-            this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
-            this.rbmqPassword = '';
-            this.saveStateMsg = '';
-            const id = r.id;
-            const leaderId = typeof id === 'string' ? Number(id) : id;
-            this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
-            .then(r => this.interconnections = r);
-        })
+            .then( (r: H_Agent)=> {
+                const message = r['message']            
+                if(message){  
+                    alert(message);
+                    return;
+                }
+                console.log(r)
+                this.selectedItem = r;
+                this.selectedItem.geometry = JSON.stringify(r.geometry, null, 2);
+                this.selectedItem.factsheet = JSON.stringify(r.factsheet, null, 2);
+                this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
+                this.rbmqPassword = '';
+                this.saveStateMsg = '';
+                const id = r.id;
+                const leaderId = typeof id === 'string' ? Number(id) : id;
+                this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
+                    .then(r => this.interconnections = r);
+            })
     }
 
     deleteItem(itemId) {
         this.helyosService.methods.agents.delete(itemId)
-        .then( (_) => {
-            this.list();
-        });
+            .then( (_) => {
+                this.list();
+            });
     }
 
 
@@ -207,21 +207,21 @@ export class AgentToolsComponent implements OnInit {
         }
          
         if (this.rbmqAccountChange && !this.selectedItem.allowAnonymousCheckin) {
-              this.selectedItem.rbmqUsername = this.selectedItem.rbmqUsername.trim();
+            this.selectedItem.rbmqUsername = this.selectedItem.rbmqUsername.trim();
 
-              if (!this.validateRabbitMQCredentials(this.selectedItem.rbmqUsername, this.rbmqPassword)){
+            if (!this.validateRabbitMQCredentials(this.selectedItem.rbmqUsername, this.rbmqPassword)){
                 return;
-              }
+            }
 
         }
 
         this.helyosService.methods.agents.patch(patch)
-        .then( (_) => {
-            this.updateRabbitMQ();
-            this.list();
-            this.saveStateMsg = '';
-            alert('changes saved');
-        });
+            .then( (_) => {
+                this.updateRabbitMQ();
+                this.list();
+                this.saveStateMsg = '';
+                alert('changes saved');
+            });
     }
 
     onImageSelected(ev){
@@ -242,7 +242,7 @@ export class AgentToolsComponent implements OnInit {
         const id = this.selectedItem.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
         return this.helyosService.methods.toolsInterconnections.list({leaderId: leaderId})
-        .then(r => this.interconnections = r);
+            .then(r => this.interconnections = r);
     }
 
     addInterconnection(){
@@ -257,26 +257,26 @@ export class AgentToolsComponent implements OnInit {
         }
         
         this.helyosService.methods.agents.list({uuid: followerUUID})
-        .then( r => {
-            if (!r.length) {
-                alert("Agent does not exist!");
-                return;
-            }
-
-            const id = this.selectedItem.id;
-            const leaderId = typeof id === 'string' ? Number(id) : id;
-            this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: leaderId})
-            .then((r)=> {
-                if (r.message){
-                    alert(r.message);
-                } else {
-                    this.interconnectionList();
-                    alert('changes saved');
+            .then( r => {
+                if (!r.length) {
+                    alert("Agent does not exist!");
+                    return;
                 }
-            }).catch( e => {
-                alert(JSON.stringify(e));
+
+                const id = this.selectedItem.id;
+                const leaderId = typeof id === 'string' ? Number(id) : id;
+                this.helyosService.methods.toolsInterconnections.create({followerId: r[0].id, leaderId: leaderId})
+                    .then((r)=> {
+                        if (r.message){
+                            alert(r.message);
+                        } else {
+                            this.interconnectionList();
+                            alert('changes saved');
+                        }
+                    }).catch( e => {
+                        alert(JSON.stringify(e));
+                    });
             });
-        });
     }
     
 

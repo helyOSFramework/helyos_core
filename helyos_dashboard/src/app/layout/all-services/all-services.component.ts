@@ -23,34 +23,34 @@ export class AllServicesComponent implements OnInit {
 
 
     list() {
-       return this.helyosService.methods.extServices.list({})
-        .then( r => this.services = r );
+        return this.helyosService.methods.extServices.list({})
+            .then( r => this.services = r );
     }
 
 
     create() {
         const newItem={name:'Unnamed'}
         this.helyosService.methods.extServices.create(newItem)
-        .then( r=> {
-            console.log(r)
-            this.list().then( () =>  this.getItem(r.id) )
+            .then( r=> {
+                console.log(r)
+                this.list().then( () =>  this.getItem(r.id) )
            
-        });
+            });
     }
 
     getItem(itemId) {
         this.helyosService.methods.extServices.get(itemId)
-        .then( r=> {
-            this.selectedItem = r;
-            this.requireMapObjectsInput = r.requireMapObjects.join(', ');
+            .then( r=> {
+                this.selectedItem = r;
+                this.requireMapObjectsInput = r.requireMapObjects.join(', ');
 
-        });
+            });
     }
 
     delete(itemId) {
         if (confirm('Are you sure you want to delete?')) {
             this.helyosService.methods.extServices.delete(itemId)
-            .then( (_) =>  this.list());
+                .then( (_) =>  this.list());
         }
     }
 
@@ -74,10 +74,10 @@ export class AllServicesComponent implements OnInit {
 
 
         this.helyosService.methods.extServices.patch(patch)
-        .then( (_) =>  {
-            this.list();
-            alert('changes saved');
-        });
+            .then( (_) =>  {
+                this.list();
+                alert('changes saved');
+            });
     }
 
 
@@ -91,9 +91,9 @@ export class AllServicesComponent implements OnInit {
 
     toggleEnable(item) {
         return this.helyosService.methods.extServices.patch({id: item.id, enabled: !item.enabled})
-        .then( (_) => {
-            item.enabled = !item.enabled;
-            this.list();
-        });
+            .then( (_) => {
+                item.enabled = !item.enabled;
+                this.list();
+            });
     }
 }

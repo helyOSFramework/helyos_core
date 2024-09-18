@@ -16,6 +16,6 @@ import { FormsModule } from '@angular/forms';
     declarations: [AgentChargeStationsComponent],
     providers: [
         { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
-      ]
+    ]
 })
 export class AgentChargeStationsModule {}
