@@ -6,16 +6,21 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+
     "build:dev": "ng build --configuration development",
     "build": "ng build --configuration production --base-href /dashboard/",
     "gitbuild": "ng build --configuration production --base-href **/dist/",
+
     "test": "ng test",
     "test-ci": "TEST_CI=true ng test",
-    "lint": "npm-run-all --continue-on-error lint:eslint lint:stylelint",
+
+    "lint": "npm-run-all --continue-on-error lint:eslint lint:stylelint \"lint:prettier:html -- --check\" \"lint:prettier:style -- --check\"",
     "lint:eslint": "ng lint",
-    "lint:stylelint": "stylelint 'src/**/*.{css,scss}'",
-    "lint:fix": "npm-run-all --continue-on-error \"lint:eslint -- --fix\" \"lint:stylelint -- --fix\"",
-    "lint:ci": "npm run lint:eslint && npm run lint:stylelint"
+    "lint:stylelint": "stylelint 'src/**/*.{css,scss,sass,less}'",
+    "lint:prettier:html": "prettier --check --parser=angular src/**/*.html",
+    "lint:prettier:style": "prettier --check src/**/*.{css,scss,sass,less}",
+    "lint:fix": "npm-run-all --continue-on-error \"lint:eslint -- --fix\" \"lint:stylelint -- --fix\" \"lint:prettier:html -- --write\" \"lint:prettier:style -- --write\"",
+    "lint:ci": "npm run lint:eslint && npm run lint:stylelint && npm run lint:prettier:html && npm run lint:prettier:style"
   },
   "private": true,
   "dependencies": {
