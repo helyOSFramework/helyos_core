@@ -1,4 +1,3 @@
-
 import { H_WorkProcessServicePlan, H_WorkProcessType } from 'helyosjs-sdk';
 import { WORKPROCESS_SERVICE_PLAN } from 'helyosjs-sdk/dist/cruds/wprocess_service_matrix';
 import { WORKPROCESS_TYPE } from 'helyosjs-sdk/dist/cruds/wprocess_types';
@@ -45,8 +44,6 @@ const ymlToWorkProcessServicePlanTableMap = {
   wait_assignments: 'waitDependenciesAssignments',
   apply_result: 'isResultAssignment',
 };
-
-
 
 export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN) => {
   // Template JSON to populate data from tables
@@ -105,7 +102,6 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
     }
 
   });
-
 
   // convert JSON to yml
   const ymlData = yaml.dump(dataJSON);
@@ -238,7 +234,6 @@ function which returns list of flat jsons with missions data.
 const flattenMissionsData = (jsonObj) => {
   try {
 
-
     // use lookup to find the missions object in the input json
     const missions = lookup(jsonObj, 'missions');
     // initialize an empty array to store the flattened missions
@@ -291,8 +286,6 @@ const flattenMissionsData = (jsonObj) => {
     return [];
   }
 };
-
-
 
 /*
 lookup()

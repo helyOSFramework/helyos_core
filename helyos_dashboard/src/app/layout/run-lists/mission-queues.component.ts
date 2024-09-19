@@ -22,7 +22,6 @@ export class RunListsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.missionQueue.list({})
       .then(r => this.mQueues = r);
@@ -34,7 +33,6 @@ export class RunListsComponent implements OnInit {
     }, 99999, 0, 'RUN_ORDER_ASC')
       .then(r => this.wProcesses = r);
   }
-
 
   create() {
     const now = new Date();
@@ -59,7 +57,6 @@ export class RunListsComponent implements OnInit {
 
   }
 
-
   deleteItem(itemId) {
     this.helyosService.methods.missionQueue.delete(itemId)
       .then((_) => {
@@ -67,8 +64,6 @@ export class RunListsComponent implements OnInit {
         this.selectedItem = null;
       });
   }
-
-
 
   editItem(item, status = null) {
     if (status) {
@@ -92,7 +87,6 @@ export class RunListsComponent implements OnInit {
       });
   }
 
-
   onStatusChange(ev) {
     const newValue = ev.target.value;
     if (newValue !== 'running' && newValue !== 'stopped') {
@@ -101,7 +95,6 @@ export class RunListsComponent implements OnInit {
       ev.target.value = this.selectedItem.status;
     }
   }
-
 
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/4-helyos-and-microservices/helyos-request.html#mission-request', '_blank');

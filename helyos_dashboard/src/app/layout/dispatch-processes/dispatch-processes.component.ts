@@ -36,7 +36,6 @@ export class DispatchProcessesComponent implements OnInit {
     });
   }
 
-
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.workProcess.list(this.filterObj, this.first, offset)
@@ -51,7 +50,6 @@ export class DispatchProcessesComponent implements OnInit {
     this.filterObj = {};
     this.list();
   }
-
 
   create() {
     this.helyosService.methods.yard.list()
@@ -79,7 +77,6 @@ export class DispatchProcessesComponent implements OnInit {
       });
   }
 
-
   duplicate() {
     const workProcessId = `${this.selectedItem.id}`;
     this.helyosService.methods.workProcess.get(workProcessId)
@@ -97,7 +94,6 @@ export class DispatchProcessesComponent implements OnInit {
           });
       });
   }
-
 
   getItem(itemId: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,13 +116,11 @@ export class DispatchProcessesComponent implements OnInit {
 
   }
 
-
   cancelMission(itemId) {
     if (confirm("Cancel all assignments that belong to this mission?")) {
       this.editItem(itemId, 'canceling');
     }
   }
-
 
   editItem(item, status = null) {
     if (status) {
@@ -137,7 +131,6 @@ export class DispatchProcessesComponent implements OnInit {
       ...item, 
     };
     delete patch.operationTypesRequired;
-
 
     if (!item['agentIds']) {
       patch['agentIds'] = [];
@@ -170,7 +163,6 @@ export class DispatchProcessesComponent implements OnInit {
       }
     }
 
-
     delete patch.createdAt;
     delete patch.modifiedAt;
     const commonErrors = `\nDid you set an inexistent yard id or mission queue id?`;
@@ -187,7 +179,6 @@ export class DispatchProcessesComponent implements OnInit {
         alert(JSON.stringify(e));
       });
   }
-
 
   assignmentList() {
     const id = this.selectedItem.id;

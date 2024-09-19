@@ -28,14 +28,12 @@ export class AgentVehiclesComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.agents.list({
       agentClass: this.agentClass, 
     })
       .then(r => this.tools = r);
   }
-
 
   changeRegistration() {
     if (!this.selectedItem.allowAnonymousCheckin && !this.selectedItem.rbmqUsername) {
@@ -119,7 +117,6 @@ export class AgentVehiclesComponent implements OnInit {
       });
   }
 
-
   validateRabbitMQCredentials(username, password) {
     if (!password) {
       alert('RabbitMQ password is empty');
@@ -132,7 +129,6 @@ export class AgentVehiclesComponent implements OnInit {
     return true;
   }
 
-
   validateUniqueIdentifier(uuid) {
     if (!uuid) {
       alert('UUID cannot be blank. UUID V4 is recommended.');
@@ -144,7 +140,6 @@ export class AgentVehiclesComponent implements OnInit {
     }
     return true;
   }
-
 
   editItem(item) {
     const patch = {
@@ -187,14 +182,12 @@ export class AgentVehiclesComponent implements OnInit {
       return;
     }
 
-
     try {
       patch.factsheet = JSON.parse(patch.factsheet);
     } catch (error) {
       alert('Factsheet is no a valid JSON');
       return;
     }
-
 
     if (!this.validateUniqueIdentifier(patch.uuid)) {
       return;
@@ -279,7 +272,6 @@ export class AgentVehiclesComponent implements OnInit {
           });
       });
   }
-
 
   removeAllInterconnections() {
     if (confirm(`Remove all connections to the agents ${this.selectedItem.name}`)) {

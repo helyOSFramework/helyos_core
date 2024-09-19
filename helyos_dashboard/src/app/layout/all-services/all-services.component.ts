@@ -21,12 +21,10 @@ export class AllServicesComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.extServices.list({})
       .then(r => this.services = r);
   }
-
 
   create() {
     const newItem = {
@@ -76,14 +74,12 @@ export class AllServicesComponent implements OnInit {
       }
     }
 
-
     this.helyosService.methods.extServices.patch(patch)
       .then((_) => {
         this.list();
         alert('changes saved');
       });
   }
-
 
   openMapAPIDoc() {
     window.open('/api-docs/map_api.html', '_blank');

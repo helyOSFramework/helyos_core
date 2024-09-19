@@ -29,7 +29,6 @@ export class DispatchServicesComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.servciceRequests.list(this.filterObj, this.first, offset)
@@ -81,7 +80,5 @@ export class DispatchServicesComponent implements OnInit {
     const d2 = new Date(date2);
     return `${Math.round((d1.getTime() - d2.getTime()) / 1000)} secs`;
   }
-
-
 
 }

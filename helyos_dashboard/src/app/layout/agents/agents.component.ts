@@ -54,7 +54,6 @@ export class AgentsComponent implements OnInit, OnDestroy {
     });
   }
 
-
   ngOnDestroy(): void {
     const socket = this.helyosService.methods.socket;
     socket.removeAllListeners('change_agent_status');
@@ -79,10 +78,8 @@ export class AgentsComponent implements OnInit, OnDestroy {
     });
   }
 
-
   getSensorsMeasures(sensorSet) {
     const sensorArray = [];
-
 
     for (const key in sensorSet) {
       try {
@@ -113,8 +110,6 @@ export class AgentsComponent implements OnInit, OnDestroy {
     return sensorArray;
   }
 
-
-
   appendSensorFormatToPatchObject(updates) {
     // This function modifies the input parameter for better performance.
     updates.forEach(patch => {
@@ -136,9 +131,6 @@ export class AgentsComponent implements OnInit, OnDestroy {
     return (updates);
   }
 
-
-
-
   convertToPercent(value, key) {
     let max = 1;
     if (key === "battery") {
@@ -147,13 +139,10 @@ export class AgentsComponent implements OnInit, OnDestroy {
     return Math.round(100 * ((value / max) - 0.7)).toString() + '%';
   }
 
-
   openAPIDoc() {
     window.open('https://app.swaggerhub.com/apis-docs/helyOS/helyos_agent_comm/2.0.7#/SensorSet', '_blank');
 
   }
-
-
 
   open(content) {
     this.modalService.open(content, this.modalOptions).result.then((result) => {
@@ -172,8 +161,6 @@ export class AgentsComponent implements OnInit, OnDestroy {
       return `with: ${reason}`;
     }
   }
-
-
 
   getExample() {
     const example = {
@@ -219,7 +206,6 @@ export class AgentsComponent implements OnInit, OnDestroy {
         },
       },
     };
-
 
     return JSON.stringify(example, null, 5);
 

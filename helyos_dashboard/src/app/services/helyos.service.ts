@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HelyosServices } from 'helyosjs-sdk';
 import { environment } from '../../environments/environment';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -40,7 +39,6 @@ export class HelyosService {
     console.log(this.methods);
   }
 
-
   instantiateService(gqlPort = null, socketPort = null) {
     if (!gqlPort) { gqlPort = environment['gqlPort']; }
     if (!socketPort) { socketPort = environment['socketPort']; }
@@ -49,7 +47,5 @@ export class HelyosService {
       gqlPort, 
     });
   }
-
-
 
 }

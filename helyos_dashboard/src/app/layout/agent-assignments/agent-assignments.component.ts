@@ -25,7 +25,6 @@ export class AgentAssignmentsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.assignments.list(this.filterObj, this.first, offset)
@@ -103,7 +102,6 @@ export class AgentAssignmentsComponent implements OnInit {
       }
     }
 
-
     if (item['result']) {
       try {
         patch['result'] = JSON.parse(item['result']);
@@ -123,8 +121,6 @@ export class AgentAssignmentsComponent implements OnInit {
         alert(JSON.stringify(e));
       });
   }
-
-
 
   downloadData() {
     this.downloadObject(this.selectedItem.data,

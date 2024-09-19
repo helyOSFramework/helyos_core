@@ -4,7 +4,6 @@ import { H_Service, H_WorkProcessServicePlan, H_WorkProcessType } from 'helyosjs
 import { Subscription } from 'rxjs';
 import { HelyosService } from '../../services/helyos.service';
 
-
 @Component({
   selector: 'app-work-process-services',
   templateUrl: './work-process-services.component.html',
@@ -21,7 +20,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   public addedDep: string;
 
   constructor(private helyosService: HelyosService, private activatedroute: ActivatedRoute) { }
-
 
   ngOnInit() {
     this.sub = this.activatedroute.paramMap.subscribe(params => {
@@ -52,7 +50,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
       .then(r => this.wpServPlan = r);
   }
 
-
   create() {
     const newItem = {
       step: 'X',
@@ -64,8 +61,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
         this.list().then(() => this.getItem(r.id));
       });
   }
-
-
 
   returnObj(objString) {
     try {
@@ -93,7 +88,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
         }).map(plan => plan.step);
       });
   }
-
 
   deleteItem() {
     if (this.selectedItem) {
@@ -133,7 +127,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
       });
   }
 
-
   changeRadio(value) {
     this.selectedItem.isResultAssignment = !!value;
   }
@@ -141,8 +134,6 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   isAssignmentResult(ev) {
     console.log(ev);
   }
-
-
 
   addDependency(value) {
     if (!value) return;
@@ -158,6 +149,5 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/2-helyos-configuration/admin-dashboard.html#missions-recipes-view', '_blank');
   }
-
 
 }

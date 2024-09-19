@@ -28,14 +28,12 @@ export class AgentToolsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.agents.list({
       agentClass: this.agentClass, 
     })
       .then(r => this.tools = r);
   }
-
 
   changeRegistration() {
     if (!this.selectedItem.allowAnonymousCheckin && !this.selectedItem.rbmqUsername) {
@@ -65,13 +63,6 @@ export class AgentToolsComponent implements OnInit {
     this.rbmqAccountChange = false;
     this.rbmqPassword = '';
   }
-
-
-
-
-
-
-
 
   create() {
     // const newItem={name:'Unnamed', yardId: 1, status:'checked out', agentClass:this.agentClass, allowAnonymousCheckin:false}
@@ -126,7 +117,6 @@ export class AgentToolsComponent implements OnInit {
       });
   }
 
-
   validateRabbitMQCredentials(username, password) {
     if (!password) {
       alert('RabbitMQ password is empty');
@@ -139,7 +129,6 @@ export class AgentToolsComponent implements OnInit {
     return true;
   }
 
-
   validateUniqueIdentifier(uuid) {
     if (!uuid) {
       alert('UUID cannot be blank. UUID V4 is recommended.');
@@ -151,7 +140,6 @@ export class AgentToolsComponent implements OnInit {
     }
     return true;
   }
-
 
   editItem(item) {
     const patch = {
@@ -193,7 +181,6 @@ export class AgentToolsComponent implements OnInit {
       alert('Geometry is no a valid JSON');
       return;
     }
-
 
     try {
       patch.factsheet = JSON.parse(patch.factsheet);
@@ -285,7 +272,6 @@ export class AgentToolsComponent implements OnInit {
           });
       });
   }
-
 
   removeAllInterconnections() {
     if (confirm(`Remove all connections to the agents ${this.selectedItem.name}`)) {

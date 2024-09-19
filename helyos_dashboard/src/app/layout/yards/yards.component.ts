@@ -19,7 +19,6 @@ export class YardsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.yard.list({})
       .then(r => {
@@ -33,7 +32,6 @@ export class YardsComponent implements OnInit {
         });
       });
   }
-
 
   create() {
     const newItem = {
@@ -103,6 +101,5 @@ export class YardsComponent implements OnInit {
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/1-the-helyos-framework/data-formats.html#yard-and-map-formats', '_blank');
   }
-
 
 }

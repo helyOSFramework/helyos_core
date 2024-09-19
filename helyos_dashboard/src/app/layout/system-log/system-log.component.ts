@@ -33,7 +33,6 @@ export class SystemLogComponent implements OnInit, OnDestroy {
     clearInterval(this.reloadTimer);
   }
 
-
   list() {
     try {
       const offset = (this.page - 1) * this.first;

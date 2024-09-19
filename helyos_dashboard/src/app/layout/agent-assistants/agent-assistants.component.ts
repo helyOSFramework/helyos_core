@@ -3,7 +3,6 @@ import { H_InstantAction, H_AgentInterconnection, H_Agent } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { AgentClass } from 'helyosjs-sdk/dist/helyos.models';
 
-
 @Component({
   selector: 'app-agent-assistants',
   templateUrl: './agent-assistants.component.html',
@@ -28,14 +27,12 @@ export class AgentAssistantsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.agents.list({
       agentClass: this.agentClass, 
     })
       .then(r => this.tools = r);
   }
-
 
   changeRegistration() {
     if (!this.selectedItem.allowAnonymousCheckin && !this.selectedItem.rbmqUsername) {
@@ -65,13 +62,6 @@ export class AgentAssistantsComponent implements OnInit {
     this.rbmqAccountChange = false;
     this.rbmqPassword = '';
   }
-
-
-
-
-
-
-
 
   create() {
     // const newItem={name:'Unnamed', yardId: 1, status:'checked out', agentClass:this.agentClass, allowAnonymousCheckin:false}
@@ -125,7 +115,6 @@ export class AgentAssistantsComponent implements OnInit {
       });
   }
 
-
   validateRabbitMQCredentials(username, password) {
     if (!password) {
       alert('RabbitMQ password is empty');
@@ -138,7 +127,6 @@ export class AgentAssistantsComponent implements OnInit {
     return true;
   }
 
-
   validateUniqueIdentifier(uuid) {
     if (!uuid) {
       alert('UUID cannot be blank. UUID V4 is recommended.');
@@ -150,7 +138,6 @@ export class AgentAssistantsComponent implements OnInit {
     }
     return true;
   }
-
 
   editItem(item) {
     const patch = {
@@ -262,7 +249,6 @@ export class AgentAssistantsComponent implements OnInit {
           });
       });
   }
-
 
   removeAllInterconnections() {
     if (confirm(`Remove all connections to the agents ${this.selectedItem.name}`)) {

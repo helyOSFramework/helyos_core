@@ -31,12 +31,10 @@ export class AccountsComponent implements OnInit {
     this.list();
   }
 
-
   list() {
     return this.helyosService.methods.userAccounts.list({})
       .then(r => this.items = r);
   }
-
 
   create() {
     const newItem = {
@@ -93,7 +91,6 @@ export class AccountsComponent implements OnInit {
       });
   }
 
-
   getToken(content) {
     this.copyLabel = ' Copy ';
     this.helyosService.methods.adminGetUserAuthToken(this.selectedItem.username)
@@ -107,7 +104,6 @@ export class AccountsComponent implements OnInit {
       });
 
   }
-
 
   copyText() {
     navigator.clipboard.writeText(this.accountToken)
@@ -127,12 +123,10 @@ export class AccountsComponent implements OnInit {
         this.setPassFlag = false;
       });
 
-
   }
 
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/3-helyos-and-client-apps/application-accounts.html', '_blank');
   }
-
 
 }

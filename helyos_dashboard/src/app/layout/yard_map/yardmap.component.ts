@@ -25,13 +25,9 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   public loadingShape: boolean = false;
   public mapObjDataInput: string;
 
-
   private filterTextTimeout: NodeJS.Timeout;
 
-
   constructor(private helyosService: HelyosService, private changeDetector: ChangeDetectorRef) { }
-
-
 
   ngOnInit() {
     this.listYards();
@@ -41,14 +37,12 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     this.listYards();
   }
 
-
   listYards() {
     return this.helyosService.methods.yard.list({})
       .then(r => {
         this.yardmap = r;
       });
   }
-
 
   getYardItem(itemId) {
     return this.helyosService.methods.yard.get(itemId)
@@ -58,8 +52,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         return this.filterObjList(0);
       });
   }
-
-
 
   changeDataFormat(_ev) {
   }
@@ -123,7 +115,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       });
   }
 
-
   addObjectItem() {
     const newItem = new H_MapObject();
     newItem.yardId = this.selectedItem.id;
@@ -133,7 +124,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         this.getYardItem(this.selectedItem.id);
       });
   }
-
 
   deleteObjectItem(itemId) {
     this.helyosService.methods.mapObjects.delete(itemId)
@@ -173,8 +163,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       });
   }
 
-
-
   saveShapeData(mapObjData) {
     const newShapes = mapObjData.map((data) => {
       const newItem = new H_MapObject();
@@ -194,8 +182,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       })
       .catch((err) => alert(JSON.stringify(err)));
   }
-
-
 
   async downloadYardData() {
     const mapObjects = await this.helyosService.methods.mapObjects.list({
@@ -218,7 +204,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
 
   }
-
 
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
@@ -250,7 +235,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       console.log(error);
     };
   }
-
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   overwriteYardShapes(yardData: H_MapObject[] | any) {
@@ -289,7 +273,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       }
     }
 
-
     if (confirm('Are you sure you want to overwrite all current objects?')) {
       this.helyosService.methods.mapObjects.markAllDeleted(this.selectedItem.id)
         .then(() => this.helyosService.methods.mapObjects.createMany(_shapes))
@@ -301,8 +284,6 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     }
 
   }
-
-
 
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/1-the-helyos-framework/data-formats.html#yard-and-map-formats', '_blank');

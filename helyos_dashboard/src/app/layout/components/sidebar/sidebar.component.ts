@@ -19,7 +19,6 @@ export class SidebarComponent implements OnInit, AfterViewInit {
 
   public wpTypes: H_WorkProcessType[];
 
-
   constructor(private helyosService: HelyosService, private translate: TranslateService, public router: Router) {
     this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {

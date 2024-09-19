@@ -16,11 +16,9 @@ export class LoginComponent implements OnInit {
   public wsPort: string = '5002';
   public runlocal: boolean = false;
 
-
   constructor(public router: Router, private helyosService: HelyosService) {
     this.runlocal = window.location.href.includes('localhost');
   }
-
 
   ngOnInit() {
 

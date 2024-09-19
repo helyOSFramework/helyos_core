@@ -3,7 +3,6 @@ import { H_WorkProcessType } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { exportToYML, importFromYML } from './read_config_yml';
 
-
 @Component({
   selector: 'app-work-processes',
   templateUrl: './work-processes.component.html',
@@ -15,15 +14,12 @@ export class WorkProcessesComponent implements OnInit {
   public showDescription: boolean = false;
   public availableMissions: string[] = [];
 
-
   constructor(private helyosService: HelyosService) {
   }
-
 
   ngOnInit() {
     this.list();
   }
-
 
   list() {
     return this.helyosService.methods.workProcessType.list({})
@@ -32,7 +28,6 @@ export class WorkProcessesComponent implements OnInit {
         this.availableMissions = r.map(wp => wp.name);
       });
   }
-
 
   create() {
     const newItem = {
@@ -54,7 +49,6 @@ export class WorkProcessesComponent implements OnInit {
         this.selectedItem.settings = JSON.stringify(r.settings, null, 2);
       });
   }
-
 
   deleteItem() {
     if (this.selectedItem) {
@@ -86,13 +80,11 @@ export class WorkProcessesComponent implements OnInit {
       });
   }
 
-
   browserYardShapes() {
     const uploadBtn = document.getElementById('fileup');
     uploadBtn.click();
 
   }
-
 
   importYML(event) {
     const selectedFile = event.target.files[0];
@@ -127,6 +119,5 @@ export class WorkProcessesComponent implements OnInit {
     a.download = fileName;
     a.click();
   }
-
 
 }
