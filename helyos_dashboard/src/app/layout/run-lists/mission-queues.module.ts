@@ -8,17 +8,17 @@ import { RunListsRoutingModule } from './mission-queues-routing.module';
 import { RunListsComponent } from './mission-queues.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        RunListsRoutingModule,
-        WorkProcessesRoutingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NgbModule
-    ],
-    declarations: [RunListsComponent],
-    providers: [
-        { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
-    ]
+  imports: [
+    CommonModule,
+    RunListsRoutingModule,
+    WorkProcessesRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgbModule
+  ],
+  declarations: [RunListsComponent],
+  providers: [
+    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
+  ]
 })
 export class RunListsModule {}

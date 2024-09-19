@@ -1,14 +1,14 @@
 import { AgentChargeStationsModule } from './agent-chargeStations.module';
 
 describe('AgentRegistModule', () => {
-    let agentRegistModule: AgentChargeStationsModule;
+  let agentRegistModule: AgentChargeStationsModule;
 
-    beforeEach(() => {
-        agentRegistModule = new AgentChargeStationsModule();
-    });
+  beforeEach(() => {
+    agentRegistModule = new AgentChargeStationsModule();
+  });
 
-    it('should create an instance', () => {
-        expect(agentRegistModule).toBeTruthy();
-    });
+  it('should create an instance', () => {
+    expect(agentRegistModule).toBeTruthy();
+  });
     
 });

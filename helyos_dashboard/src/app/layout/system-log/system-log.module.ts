@@ -5,10 +5,10 @@ import { SystemLogRoutingModule } from './system-log-routing.module';
 import { SystemLogComponent } from './system-log.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SystemLogRoutingModule
-    ],
-    declarations: [SystemLogComponent]
+  imports: [
+    CommonModule,
+    SystemLogRoutingModule
+  ],
+  declarations: [SystemLogComponent]
 })
 export class SystemLogModule {}

@@ -4,18 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { DispatchServicesComponent } from './dispatch-services.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: DispatchServicesComponent
-    }
+  {
+    path: '',
+    component: DispatchServicesComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [
-        RouterModule,
-        FormsModule
-    ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule
+  ]
 })
 export class DispatchServicesRoutingModule {}
 

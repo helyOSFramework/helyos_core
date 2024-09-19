@@ -5,46 +5,46 @@ import { environment } from '../../../../environments/environment';
 
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss']
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-    public pushRightClass: string;
-    public version: string = environment.version;
+  public pushRightClass: string;
+  public version: string = environment.version;
 
-    constructor(private translate: TranslateService, public router: Router) {
-        this.router.events.subscribe((val) => {
-            if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
-                this.toggleSidebar();
-            }
-        });
-    }
+  constructor(private translate: TranslateService, public router: Router) {
+    this.router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
+        this.toggleSidebar();
+      }
+    });
+  }
 
-    ngOnInit() {
-        this.pushRightClass = 'push-right';
-    }
+  ngOnInit() {
+    this.pushRightClass = 'push-right';
+  }
 
-    isToggled(): boolean {
-        const dom: Element = document.querySelector('body');
-        return dom.classList.contains(this.pushRightClass);
-    }
+  isToggled(): boolean {
+    const dom: Element = document.querySelector('body');
+    return dom.classList.contains(this.pushRightClass);
+  }
 
-    toggleSidebar() {
-        const dom = document.querySelector('body');
-        dom.classList.toggle(this.pushRightClass);
-    }
+  toggleSidebar() {
+    const dom = document.querySelector('body');
+    dom.classList.toggle(this.pushRightClass);
+  }
 
-    rltAndLtr() {
-        const dom = document.querySelector('body');
-        dom.classList.toggle('rtl');
-    }
+  rltAndLtr() {
+    const dom = document.querySelector('body');
+    dom.classList.toggle('rtl');
+  }
 
-    onLoggedout() {
-        window.sessionStorage.removeItem('isLoggedin');
-    }
+  onLoggedout() {
+    window.sessionStorage.removeItem('isLoggedin');
+  }
 
-    changeLang(language: string) {
-        this.translate.use(language);
-    }
+  changeLang(language: string) {
+    this.translate.use(language);
+  }
 }

@@ -4,17 +4,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { YardsComponent } from './yards.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: YardsComponent
-    }
+  {
+    path: '',
+    component: YardsComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [
-        RouterModule,
-        FormsModule
-    ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule
+  ]
 })
 export class YardsRoutingModule {}

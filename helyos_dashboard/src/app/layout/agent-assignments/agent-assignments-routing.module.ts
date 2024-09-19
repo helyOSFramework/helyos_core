@@ -4,18 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { AgentAssignmentsComponent } from './agent-assignments.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: AgentAssignmentsComponent
-    }
+  {
+    path: '',
+    component: AgentAssignmentsComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [
-        RouterModule,
-        FormsModule
-    ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule
+  ]
 })
 export class AgentAssignmentsRoutingModule {}
 

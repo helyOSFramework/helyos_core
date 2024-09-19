@@ -3,14 +3,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { AllServicesComponent } from './all-services.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: AllServicesComponent
-    }
+  {
+    path: '',
+    component: AllServicesComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
 })
 export class AllServicesRoutingModule {}

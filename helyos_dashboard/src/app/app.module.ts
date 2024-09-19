@@ -12,18 +12,18 @@ import { LanguageTranslationModule } from './shared/modules/language-translation
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        BrowserModule,
-        BrowserAnimationsModule,
-        FormsModule,
-        HttpClientModule,
-        LanguageTranslationModule,
-        AppRoutingModule,
-        NgbModule
-    ],
-    declarations: [AppComponent],
-    providers: [AuthGuard],
-    bootstrap: [AppComponent]
+  imports: [
+    CommonModule,
+    BrowserModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    HttpClientModule,
+    LanguageTranslationModule,
+    AppRoutingModule,
+    NgbModule
+  ],
+  declarations: [AppComponent],
+  providers: [AuthGuard],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}

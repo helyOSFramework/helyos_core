@@ -4,17 +4,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { SystemLogComponent } from './system-log.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: SystemLogComponent
-    }
+  {
+    path: '',
+    component: SystemLogComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [
-        RouterModule,
-        FormsModule
-    ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule
+  ]
 })
 export class SystemLogRoutingModule {}

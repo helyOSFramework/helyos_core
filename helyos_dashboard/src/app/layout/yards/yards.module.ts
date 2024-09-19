@@ -5,10 +5,10 @@ import { YardsRoutingModule } from './yards-routing.module';
 import { YardsComponent } from './yards.component';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        YardsRoutingModule
-    ],
-    declarations: [YardsComponent]
+  imports: [
+    CommonModule,
+    YardsRoutingModule
+  ],
+  declarations: [YardsComponent]
 })
 export class YardsModule {}

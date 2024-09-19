@@ -4,18 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { RunListsComponent } from './mission-queues.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: RunListsComponent
-    }
+  {
+    path: '',
+    component: RunListsComponent
+  }
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [
-        RouterModule,
-        FormsModule
-    ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule
+  ]
 })
 export class RunListsRoutingModule {}
 
