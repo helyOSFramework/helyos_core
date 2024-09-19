@@ -216,7 +216,8 @@
         ],
         "array-callback-return": "error",
         "no-class-assign": "error",
-        "no-cond-assign": "error"
+        "no-cond-assign": "error",
+        "no-const-assign": "error"
       }
     },
     {
