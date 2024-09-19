@@ -1,133 +1,185 @@
-<div class="row" style="justify-content:space-between">
-    <h1 class="w-auto">Yards </h1>
-    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
-        <button  class="btn btn-lg btn-outline-dark"  (click)="openDocs()" >
-                  Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">Yards</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
+      Documentation
+    </button>
+  </div>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header" style="display:flex; justify-content:space-between">
-        <div>Yards</div>
-        <div class="clickable" (click)="list()">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
+  <div
+    class="card-header"
+    style="display: flex; justify-content: space-between">
+    <div>Yards</div>
+    <div class="clickable" (click)="list()">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#ID</th>
-                    <th>UID</th>
-                    <th>Yard Type</th>
-                    <th>Name</th>
-                    <th>Lat</th>
-                    <th>Lon</th>
-                    <th>Alt</th>
-                    <th title="Optional: JSON data. If you have extensive map data, consider using map objects." >Map Info</th>
-                    <th>Source</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of yards" (click)="getItem(item.id)"
-                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
-                    <td>{{item.id}}</td>
-                    <td>{{item.uid}}</td>
-                    <th scope="row">{{item.yardType}}</th>
-                    <td>{{item.name}}</td>
-                    <td>{{item.lat}}</td>
-                    <td>{{item.lon}}</td>
-                    <td>{{item.alt}}</td>
-                    <td title="Optional: JSON data. If you have extensive map data, consider using map objects.">
-                        {{item.mapData.length > 200 ? item.mapData.substring(0, 200) + '...' : item.mapData}}</td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>UID</th>
+          <th>Yard Type</th>
+          <th>Name</th>
+          <th>Lat</th>
+          <th>Lon</th>
+          <th>Alt</th>
+          <th
+            title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+            Map Info
+          </th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of yards"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <td>{{ item.id }}</td>
+          <td>{{ item.uid }}</td>
+          <th scope="row">{{ item.yardType }}</th>
+          <td>{{ item.name }}</td>
+          <td>{{ item.lat }}</td>
+          <td>{{ item.lon }}</td>
+          <td>{{ item.alt }}</td>
+          <td
+            title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+            {{
+              item.mapData.length > 200
+                ? item.mapData.substring(0, 200) + "..."
+                : item.mapData
+            }}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-    <button class="btn btn-danger" [disabled]="!selectedItem" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
+<div style="text-align: right; margin-bottom: 10px">
+  <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+  <button
+    class="btn btn-danger"
+    [disabled]="!selectedItem"
+    (click)="deleteItem(selectedItem.id)"
+    type="submit">
+    Delete
+  </button>
 </div>
 
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>{{ selectedItem.name }}</h4>
 
- 
-<section class="detail-container " *ngIf="selectedItem" >
+  <form role="form" style="margin: 0 auto; max-width: 1000px">
+    <div class="row">
+      <fieldset class="form-group col-xl-6">
+        <label for="name">Name</label>
+        <input
+          id="name"
+          class="form-control"
+          [(ngModel)]="selectedItem.name"
+          name="name" />
+      </fieldset>
 
-        <h4>{{selectedItem.name}}</h4>
+      <fieldset class="form-group col-xl-3">
+        <label for="uid"> UID </label>
+        <input
+          id="uid"
+          class="form-control"
+          [(ngModel)]="selectedItem.uid"
+          name="uid"
+          placeholder="IVI001" />
+      </fieldset>
 
-        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
-            <div class="row">
-                <fieldset class="form-group col-xl-6">
-                    <label for="name">Name</label>
-                    <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
-                </fieldset>
+      <fieldset class="form-group col-xl-3">
+        <label for="yardType"> Yard type</label>
+        <input
+          id="yardType"
+          class="form-control"
+          [(ngModel)]="selectedItem.yardType"
+          name="yardType"
+          placeholder="logistic_yard" />
+      </fieldset>
+    </div>
 
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="lat">Latitude</label>
+        <input
+          id="lat"
+          type="number"
+          class="form-control"
+          [(ngModel)]="selectedItem.lat"
+          name="lat"
+          placeholder="50.232" />
+      </fieldset>
+      <fieldset class="form-group col-xl-4">
+        <label for="lon">Longitude</label>
+        <input
+          id="lon"
+          type="number"
+          class="form-control"
+          [(ngModel)]="selectedItem.lon"
+          name="lon"
+          placeholder="13.344" />
+      </fieldset>
+      <fieldset class="form-group col-xl-4">
+        <label for="alt">Altitude</label>
+        <input
+          id="alt"
+          type="number"
+          class="form-control"
+          [(ngModel)]="selectedItem.alt"
+          name="alt"
+          placeholder="0" />
+      </fieldset>
+    </div>
 
-                <fieldset class="form-group col-xl-3">
-                    <label for="uid"> UID </label>
-                    <input id="uid" class="form-control" [(ngModel)]="selectedItem.uid" name="uid"
-                    placeholder="IVI001" />
-                </fieldset>
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="dataFormat">Data format</label>
+        <input
+          id="dataFormat"
+          type="text"
+          class="form-control"
+          [(ngModel)]="selectedItem.dataFormat"
+          name="dataFormat"
+          placeholder="e.g. GeoJson-7946" />
+      </fieldset>
+    </div>
 
-                <fieldset class="form-group col-xl-3">
-                    <label for="yardType"> Yard type</label>
-                    <input id="yardType" class="form-control" [(ngModel)]="selectedItem.yardType" name="yardType"
-                    placeholder="logistic_yard" />
-                </fieldset>
+    <div class="row">
+      <fieldset
+        class="form-group col-xl-12"
+        title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+        <label for="mapData"> Map info (arbritrary JSON data) </label>
+        <textarea
+          id="mapData"
+          class="form-control"
+          [(ngModel)]="selectedItem.mapData"
+          name="mapData"></textarea>
+      </fieldset>
+    </div>
 
-            </div>
-
-
-            <div class="row" >
-
-                <fieldset class="form-group col-xl-4">
-                    <label for="lat">Latitude</label>
-                    <input id="lat" type="number" class="form-control" [(ngModel)]="selectedItem.lat"  name="lat"
-                    placeholder="50.232" />
-                </fieldset>
-                <fieldset class="form-group col-xl-4">
-                    <label for="lon">Longitude</label>
-                    <input id="lon" type="number" class="form-control" [(ngModel)]="selectedItem.lon"  name="lon"
-                    placeholder="13.344" />
-                </fieldset>
-                <fieldset  class="form-group col-xl-4">
-                    <label for="alt">Altitude</label>
-                    <input id="alt" type="number" class="form-control" [(ngModel)]="selectedItem.alt"  name="alt"
-                    placeholder="0" />
-                </fieldset>
-
-
-            </div>
-
-            <div class="row" >
-
-                <fieldset class="form-group col-xl-4">
-                    <label for="dataFormat">Data format</label>
-                    <input id="dataFormat" type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
-                    placeholder="e.g. GeoJson-7946" />
-                </fieldset>
-
-            </div>
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12" title="Optional: JSON data. If you have extensive map data, consider using map objects.">
-                    <label for="mapData"> Map info (arbritrary JSON data) </label>
-                    <textarea id="mapData" class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
-            <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-
-        </form>
-
+    <button
+      class="btn btn-primary"
+      type="submit"
+      (click)="editItem(selectedItem)">
+      Save
+    </button>
+    <button
+      class="btn btn-secondary"
+      type="reset"
+      (click)="getItem(selectedItem.id)">
+      Cancel
+    </button>
+  </form>
 </section>

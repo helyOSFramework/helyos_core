@@ -1,433 +1,643 @@
-<div class="row" style="justify-content:space-between">
-    <h1 class="w-auto">Charge Stations</h1>
-    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
-        <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-            Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">Charge Stations</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
+      Documentation
+    </button>
+  </div>
 </div>
 
-<p>
-    The charge stations belongs to the yard or field infrasctruture.</p>
+<p>The charge stations belongs to the yard or field infrasctruture.</p>
 
 <div class="card mb-3">
-    <div class="card-header" style="display:flex; justify-content:space-between">
-        <div>Charge Stations</div>
-        <div class="clickable" (click)="list()">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
+  <div
+    class="card-header"
+    style="display: flex; justify-content: space-between">
+    <div>Charge Stations</div>
+    <div class="clickable" (click)="list()">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#ID</th>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>UUID</th>
-                    <th>x</th>
-                    <th>y</th>
-                    <th>msg/sec  <br> <span style="font-size: smaller;"> 1 to 30 Hz </span> </th>
-                    <th>db updts/sec  <br> <span style="font-size: smaller;"> 1 to 5 Hz </span> </th>
-                    <th>yardId</th>
-                    <th>status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of tools" (click)="getItem(item.id)"
-                    [ngClass]="{'selected-highlight': item.id===selectedItem?.id}">
-                    <td>{{item.id}}</td>
-                    <th scope="row">{{item.agentType}}</th>
-                    <td>{{item.name}}</td>
-                    <td>{{item.uuid}}</td>
-                    <td>{{item.x}}</td>
-                    <td>{{item.y}}</td>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Type</th>
+          <th>Name</th>
+          <th>UUID</th>
+          <th>x</th>
+          <th>y</th>
+          <th>
+            msg/sec <br />
+            <span style="font-size: smaller"> 1 to 30 Hz </span>
+          </th>
+          <th>
+            db updts/sec <br />
+            <span style="font-size: smaller"> 1 to 5 Hz </span>
+          </th>
+          <th>yardId</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of tools"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <td>{{ item.id }}</td>
+          <th scope="row">{{ item.agentType }}</th>
+          <td>{{ item.name }}</td>
+          <td>{{ item.uuid }}</td>
+          <td>{{ item.x }}</td>
+          <td>{{ item.y }}</td>
 
-                    <td [ngClass]="{'bg-danger': item.msgPerSec > 30}" title="Optimal: 10Hz." >
-                        {{item.msgPerSec | number:'1.2-2' }}
-                    </td> 
-                    <td [ngClass]="{'bg-danger': item.updtPerSec > 5}"  title="Optimal: < 2 Hz" >
-                        {{item.updtPerSec | number:'1.2-2' }}
-                    </td> 
-                    <td>{{item.yardId}}</td>
-                    <td>{{item.status}}</td>
-                </tr>
-            </tbody>
-        </table>
+          <td
+            [ngClass]="{ 'bg-danger': item.msgPerSec > 30 }"
+            title="Optimal: 10Hz.">
+            {{ item.msgPerSec | number: "1.2-2" }}
+          </td>
+          <td
+            [ngClass]="{ 'bg-danger': item.updtPerSec > 5 }"
+            title="Optimal: < 2 Hz">
+            {{ item.updtPerSec | number: "1.2-2" }}
+          </td>
+          <td>{{ item.yardId }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div
+    class="card-footer"
+    style="display: flex; justify-content: space-between">
+    <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center">
+      <div class="w-auto">Instant Action Command</div>
+      <div class="col-xl-6">
+        <input
+          class="form-control"
+          style="margin: 0 6px; width: 100%"
+          placeholder="type your command"
+          [(ngModel)]="instantActionCommand"
+          name="instantAction" />
+      </div>
+      <button class="btn btn-light w-auto" (click)="sendInstantAction()">
+        SEND
+      </button>
     </div>
 
-    <div class="card-footer" style="display:flex;justify-content:space-between">
-        <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
-            <div class="w-auto">Instant Action Command</div>
-            <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
-            <button class="btn btn-light w-auto"  (click)="sendInstantAction()"> SEND </button>
-        </div>
-    
-        <div *ngIf="!selectedItem" class="form-group row col-xl-6">
-        </div>
-    
-        <div style="text-align: right; margin-bottom: 10px;">
-            <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-            <button class="btn btn-danger"  (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
-        </div>
+    <div *ngIf="!selectedItem" class="form-group row col-xl-6"></div>
+
+    <div style="text-align: right; margin-bottom: 10px">
+      <button class="btn btn-primary" (click)="create()" type="submit">
+        Add
+      </button>
+      <button
+        class="btn btn-danger"
+        (click)="deleteItem(selectedItem.id)"
+        type="submit">
+        Delete
+      </button>
     </div>
-
-
+  </div>
 </div>
 
-
 <div *ngIf="selectedItem">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
-        <li [ngbNavItem]="1">
-            <a ngbNavLink>Details</a>
-            <ng-template ngbNavContent>
-        <section class="detail-container " *ngIf="selectedItem">
-    
-            <div style="display: flex; justify-content: space-between;">
-                <h4>{{selectedItem.name}}</h4>  <div style="color: red;"> {{saveStateMsg}}</div>
+  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+    <li [ngbNavItem]="1">
+      <a ngbNavLink>Details</a>
+      <ng-template ngbNavContent>
+        <section class="detail-container" *ngIf="selectedItem">
+          <div style="display: flex; justify-content: space-between">
+            <h4>{{ selectedItem.name }}</h4>
+            <div style="color: red">{{ saveStateMsg }}</div>
+          </div>
+
+          <form role="form" style="margin: 0 auto; max-width: 1000px">
+            <h5>Identification</h5>
+            <div class="field-group">
+              <div class="row">
+                <fieldset class="form-group col-xl-3">
+                  <label for="name">Name</label>
+                  <input
+                    id="name"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.name"
+                    name="name" />
+                </fieldset>
+
+                <fieldset class="form-group col-xl-6">
+                  <label for="uuid"> UUID</label>
+                  <input
+                    id="uuid"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.uuid"
+                    name="uuid"
+                    placeholder="0000-0000-0000-0000" />
+                </fieldset>
+
+                <fieldset class="form-group col-xl-2">
+                  <label for="yardId">yard id</label>
+                  <input
+                    id="yardId"
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.yardId"
+                    name="yardId"
+                    placeholder="db index" />
+                </fieldset>
+              </div>
+
+              <div class="row">
+                <fieldset class="form-group col-xl-3">
+                  <label for="agentType"> type </label>
+                  <input
+                    id="agentType"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.agentType"
+                    name="agentType"
+                    placeholder="e.g. fast-charge" />
+                </fieldset>
+
+                <div class="w-auto row thumbnail-container">
+                  <input
+                    id="thumbnail"
+                    #fileUpload
+                    type="file"
+                    class="file-upload w-auto"
+                    (change)="onImageSelected($event)"
+                    accept=".png,.jpeg, .jpg" />
+
+                  <label for="thumbnail" class="w-auto">
+                    Thumbnail picture
+                  </label>
+
+                  <button
+                    class="btn btn-light w-auto"
+                    (click)="fileUpload.click()">
+                    Upload
+                  </button>
+                  <img
+                    *ngIf="selectedItem.picture"
+                    class="w-auto"
+                    height="100%"
+                    [src]="selectedItem.picture"
+                    alt="thumbnail" />
+                </div>
+              </div>
+
+              <div class="row">
+                <fieldset class="form-group col-xl-12">
+                  <label for="publicKey"> Public key (PEM) </label>
+                  <textarea
+                    id="publicKey"
+                    class="form-control"
+                    rows="8"
+                    [(ngModel)]="selectedItem.publicKey"
+                    name="publicKey"
+                    placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+                </fieldset>
+              </div>
+
+              <div class="row">
+                <fieldset
+                  class="form-group"
+                  style="display: flex; align-items: center">
+                  <input
+                    id="verifySignature"
+                    type="checkbox"
+                    style="height: 38px; width: 40px; margin-right: 10px"
+                    class="form-control form-check-input"
+                    [(ngModel)]="selectedItem.verifySignature"
+                    name="verifySignature" />
+                  <label for="verifySignature">
+                    Use this Public key to validate the RSA signature of the
+                    agent.
+                  </label>
+                </fieldset>
+              </div>
             </div>
 
-            <form role="form" style="margin: 0 auto; max-width: 1000px;">
-                <h5>Identification</h5>
-                <div class="field-group"> 
+            <br />
 
-                <div class="row">
-                    <fieldset class="form-group col-xl-3">
-                        <label for="name">Name</label>
-                        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
-                    </fieldset>
+            <h5>Spatial Properties</h5>
+            <div class="field-group">
+              <p>
+                The position parameters should be set according to the chosen
+                reference in your application.
+              </p>
 
-                    <fieldset class="form-group col-xl-6">
-                        <label for="uuid"> UUID</label>
-                        <input id="uuid" class="form-control" [(ngModel)]="selectedItem.uuid" name="uuid"
-                            placeholder="0000-0000-0000-0000" />
-                    </fieldset>
+              <div class="row">
+                <fieldset class="form-group col-xl-3">
+                  <label for="x">x (unit)</label>
+                  <input
+                    id="x"
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.x"
+                    name="x"
+                    placeholder="0" />
+                </fieldset>
+                <fieldset class="form-group col-xl-3">
+                  <label for="y">y (unit)</label>
+                  <input
+                    id="y"
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.y"
+                    name="y"
+                    placeholder="0" />
+                </fieldset>
+                <fieldset class="form-group col-xl-3">
+                  <label for="z">z (unit)</label>
+                  <input
+                    id="z"
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.z"
+                    name="z"
+                    placeholder="0" />
+                </fieldset>
+                <fieldset class="form-group col-xl-3">
+                  <label for="unit">unit</label>
+                  <input
+                    id="unit"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="unit"
+                    name="unit"
+                    placeholder="e.g. mm" />
+                </fieldset>
+              </div>
 
-                    <fieldset class="form-group col-xl-2">
-                        <label for="yardId">yard id</label>
-                        <input id="yardId" type="number" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId"
-                            placeholder="db index" />
-                    </fieldset>
+              <div class="row">
+                <fieldset class="form-group col-xl-4">
+                  <label for="orientation">orientation</label>
+                  <input
+                    id="orientation"
+                    type="number"
+                    step="1"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.orientation"
+                    name="orientation"
+                    placeholder="3.14" />
+                </fieldset>
+                <fieldset class="form-group col-xl-6">
+                  <label for="orientations">orientations </label>
+                  <input
+                    id="orientations"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.orientations"
+                    name="orientations"
+                    placeholder="1.57, 3.14,..." />
+                </fieldset>
+              </div>
+
+              <br />
+
+              <div class="row">
+                <fieldset class="form-group col-xl-12">
+                  <label for="geometry"> geometry (JSON)</label>
+                  <textarea
+                    id="geometry"
+                    class="form-control"
+                    rows="8"
+                    [(ngModel)]="selectedItem.geometry"
+                    name="geometry"></textarea>
+                </fieldset>
+              </div>
+            </div>
+            <br />
+
+            <h5>Mission settings</h5>
+            <div class="field-group">
+              <div class="row">
+                <fieldset
+                  (mouseover)="showAssignmentTip = 1"
+                  (focus)="showAssignmentTip = 1"
+                  class="form-group col-xl-3">
+                  <label for="isActuator"> Accept assignments </label>
+                  <input
+                    title="isActuator?"
+                    id="isActuator"
+                    type="checkbox"
+                    style="height: 38px; width: 40px"
+                    class="form-control form-check-input"
+                    [(ngModel)]="selectedItem.isActuator"
+                    name="isActuator" />
+                </fieldset>
+
+                <fieldset
+                  (mouseover)="showAssignmentTip = 2"
+                  (focus)="showAssignmentTip = 2"
+                  class="form-group col-xl-3">
+                  <label for="acknowledgeReservation">
+                    Acknowledge reservation
+                  </label>
+                  <input
+                    title="acknowledgeReservation"
+                    id="acknowledgeReservation"
+                    type="checkbox"
+                    style="height: 38px; width: 40px"
+                    class="form-control form-check-input"
+                    [(ngModel)]="selectedItem.acknowledgeReservation"
+                    name="acknowledgeReservation" />
+                </fieldset>
+
+                <div
+                  *ngIf="showAssignmentTip === 1"
+                  class="col-xl-6"
+                  style="font-size: small">
+                  Trucks, tractors, robots can receive assignments. Trailers,
+                  cameras and sensors usually do not receive assignments.
                 </div>
 
-                <div  class="row">
-
-                    <fieldset class="form-group col-xl-3">
-                        <label for="agentType"> type </label>
-                        <input id="agentType" class="form-control"  [(ngModel)]="selectedItem.agentType" name="agentType" placeholder="e.g. fast-charge" />
-                    </fieldset>
-                                
-                    <div class="w-auto row thumbnail-container" >
-                        <input id="thumbnail" #fileUpload  type="file" class="file-upload w-auto" (change)="onImageSelected($event)" 
-                        accept=".png,.jpeg, .jpg">
-                
-                        <label for="thumbnail" class="w-auto"> Thumbnail picture </label>
-                
-                        <button class="btn btn-light w-auto" (click)="fileUpload.click()"> Upload </button>
-                        <img *ngIf="selectedItem.picture" class="w-auto" height="100%" [src]="selectedItem.picture" alt="thumbnail">
-                    </div>
+                <div
+                  *ngIf="showAssignmentTip === 2"
+                  class="col-xl-6"
+                  style="font-size: small">
+                  Before a mission, agents receive a reservation request and
+                  should acknowlege their readiness.
+                  <br />
+                  Should helyOS wait for this acknowledgement before proceeding
+                  with a mission? Uncheck this box if this agent can receive
+                  consecutive assignments even while is busy.
                 </div>
+              </div>
 
+              <div class="row">
+                <fieldset class="form-group col-xl-4">
+                  <label for="dataFormat">Assignment data format</label>
+                  <input
+                    id="dataFormat"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.dataFormat"
+                    name="dataFormat"
+                    placeholder="e.g. Fhf-IVI" />
+                </fieldset>
+              </div>
+            </div>
 
+            <br />
 
-                <div class="row">
-                    <fieldset class="form-group col-xl-12">
-                        <label for="publicKey"> Public key (PEM) </label>
-                        <textarea id="publicKey" class="form-control" rows=8 [(ngModel)]="selectedItem.publicKey" name="publicKey"
-                            placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
-                    </fieldset>
+            <h5>RabbitMQ account</h5>
+            <div class="field-group">
+              <div class="row">
+                <fieldset class="form-group col-xl-6">
+                  <label for="protocol">Protocol</label>
+                  <select
+                    id="protocol"
+                    class="form-control form-select"
+                    [(ngModel)]="selectedItem.protocol"
+                    name="protocol"
+                    (ngModelChange)="changeProtocol()">
+                    <option [ngValue]="'AMQP'">AMQP (default)</option>
+                    <option [ngValue]="'MQTT'">MQTT</option>
+                  </select>
+                </fieldset>
+              </div>
+
+              <div class="row" *ngIf="selectedItem.protocol === 'AMQP'">
+                <div class="col-xl-12">
+                  <ul style="font-size: small">
+                    <li>Suitable for sensors and actuators.</li>
+                    <li>
+                      Security: helyOS and agent message senders are validated
+                      by the message broker.
+                    </li>
+                  </ul>
                 </div>
-
-                <div class="row">
-
-                    <fieldset class="form-group" style="display:flex; align-items: center;" >
-                        <input id="verifySignature" type="checkbox" style="height:38px; width: 40px; margin-right: 10px;"
-                                class="form-control form-check-input" 
-                                [(ngModel)]="selectedItem.verifySignature" name="verifySignature" />
-                        <label for="verifySignature"> Use this Public key to validate the RSA signature of the agent. </label> 
-
-                    </fieldset>
+              </div>
+              <div class="row" *ngIf="selectedItem.protocol === 'MQTT'">
+                <div class="col-xl-12">
+                  <ul style="font-size: small">
+                    <li>
+                      Suitable for sensors and actuators, but actuators must
+                      handle multiple assignments: MQTT doesn't support messages
+                      queueing.
+                    </li>
+                    <li>
+                      Security: Sender validation must be implemented within the
+                      agent. You may use the helyOS and agent RSA signatures for
+                      that.
+                    </li>
+                  </ul>
                 </div>
+              </div>
 
+              <div class="row">
+                <fieldset class="form-group col-xl-6">
+                  <label for="allowAnonymousCheckin">Registration</label>
+                  <select
+                    id="allowAnonymousCheckin"
+                    class="form-control form-select"
+                    [disabled]="selectedItem.protocol === 'MQTT'"
+                    [(ngModel)]="selectedItem.allowAnonymousCheckin"
+                    name="allowAnonymousCheckin"
+                    (ngModelChange)="changeRegistration()">
+                    <option [ngValue]="true">
+                      Let helyOS create RabbitMQ account
+                    </option>
+                    <option [ngValue]="false">Set username and password</option>
+                  </select>
+                </fieldset>
+              </div>
+
+              <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
+                <div class="col-xl-12">
+                  <br />
+                  <p>
+                    The agent can perform the check-in using the
+                    <i>anonymous</i> account *, helyOS will automatically create
+                    a RabbitMQ account and send the username and password to the
+                    agent.
+                  </p>
+                  <p style="font-size: small">
+                    * (username, password) = (anonymous, anonymous). The agent
+                    must possess the AGENT_REGISTRATION_TOKEN.
+                  </p>
                 </div>
+              </div>
 
-                <br>
+              <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
+                <fieldset class="form-group col-xl-6">
+                  <label for="rbmqUsername">username *</label>
+                  <input
+                    id="rbmqUsername"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.rbmqUsername"
+                    (ngModelChange)="rbmqAccountChange = true"
+                    name="rbmqUsername"
+                    placeholder="0000-0000-0000-0000" />
+                </fieldset>
 
-                <h5>Spatial Properties</h5>
-                <div class="field-group"> 
-
-                    <p> The position parameters should be set according to the chosen reference in your application.</p>
-
-                    <div class="row">
-                        <fieldset class="form-group col-xl-3">
-                            <label for="x">x (unit)</label>
-                            <input id="x" type="number" class="form-control" [(ngModel)]="selectedItem.x" name="x" placeholder=0 />
-                        </fieldset>
-                        <fieldset class="form-group col-xl-3">
-                            <label for="y">y (unit)</label>
-                            <input id="y" type="number" class="form-control" [(ngModel)]="selectedItem.y" name="y" placeholder=0 />
-                        </fieldset>
-                        <fieldset class="form-group col-xl-3">
-                            <label for="z">z (unit)</label>
-                            <input id="z" type="number" class="form-control" [(ngModel)]="selectedItem.z" name="z" placeholder=0 />
-                        </fieldset>
-                        <fieldset class="form-group col-xl-3">
-                            <label for="unit">unit</label>
-                            <input id="unit" type="text" class="form-control" [(ngModel)]="unit" name="unit" placeholder="e.g. mm" />
-                        </fieldset>
-
-                    </div>
-
-                    <div class="row">
-
-                        <fieldset class="form-group col-xl-4">
-                            <label for="orientation">orientation</label>
-                            <input id="orientation" type="number" step=1 class="form-control" [(ngModel)]="selectedItem.orientation" name="orientation" placeholder="3.14" />
-                        </fieldset>
-                        <fieldset class="form-group col-xl-6">
-                            <label for="orientations">orientations </label>
-                            <input id="orientations" class="form-control" [(ngModel)]="selectedItem.orientations" name="orientations" placeholder="1.57, 3.14,..." />
-                        </fieldset>
-
-                    </div>
-
-                    <br>
-
-                    <div class="row">
-                        <fieldset class="form-group col-xl-12">
-                            <label for="geometry"> geometry (JSON)</label>
-                            <textarea id="geometry" class="form-control" rows=8 [(ngModel)]="selectedItem.geometry" name="geometry"></textarea>
-                        </fieldset>
-                    </div>
-                </div>
-                <br>
-
-                <h5>Mission settings</h5>
-                <div class="field-group"> 
-
-                <div  class="row">
-
-                    <fieldset (mouseover)="showAssignmentTip=1" (focus)="showAssignmentTip=1" class="form-group col-xl-3">
-                        <label for="isActuator"> Accept assignments </label> 
-                        <input title="isActuator?" id="isActuator" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
-                                [(ngModel)]="selectedItem.isActuator" name="isActuator" />
-                    </fieldset>
-
-                    <fieldset (mouseover)="showAssignmentTip=2" (focus)="showAssignmentTip=2" class="form-group col-xl-3" >
-                        <label for="acknowledgeReservation"> Acknowledge reservation </label> 
-                        <input title="acknowledgeReservation" id="acknowledgeReservation" type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" 
-                                [(ngModel)]="selectedItem.acknowledgeReservation" name="acknowledgeReservation" />
-                    </fieldset>
-
-                    <div *ngIf="showAssignmentTip===1" class="col-xl-6"  style="font-size: small;">
-                        Trucks, tractors, robots can receive assignments. 
-                        Trailers, cameras and sensors usually do not receive assignments.
-                    </div>
-
-                    <div  *ngIf="showAssignmentTip===2" class="col-xl-6" style="font-size: small;">
-
-                        Before a mission, agents receive a reservation request and should acknowlege their readiness. 
-                        <br> Should helyOS wait for this acknowledgement before proceeding with a mission? 
-                        Uncheck this box if this agent can receive consecutive assignments even while is busy.
-                        
-                    </div>
-
-
-                </div>
-
-                <div class="row" >
-
-                    <fieldset class="form-group col-xl-4">
-                        <label for="dataFormat">Assignment data format</label>
-                        <input id="dataFormat" type="text" class="form-control" [(ngModel)]="selectedItem.dataFormat"  name="dataFormat"
-                        placeholder="e.g. Fhf-IVI" />
-                    </fieldset>
-
-
-
-                </div>
-
-                </div>
-
-                <br>
-
-                <h5>RabbitMQ account</h5>
-                <div class="field-group"> 
-                    <div class="row">
-                        <fieldset class="form-group col-xl-6">
-                            <label for="protocol">Protocol</label>
-                            <select id="protocol" class="form-control form-select" [(ngModel)]="selectedItem.protocol" name="protocol" (ngModelChange)="changeProtocol()" >
-                                <option [ngValue]="'AMQP'"> AMQP (default)</option>
-                                <option [ngValue]="'MQTT'"> MQTT </option>
-                            </select>
-                        </fieldset>
-                    </div>
-
-                    <div class="row" *ngIf="selectedItem.protocol === 'AMQP'">
-                        <div class="col-xl-12">
-                            <ul style="font-size: small;" >
-                                <li> Suitable for sensors and actuators.</li>
-                                <li> Security: helyOS and agent message senders are validated by the message broker.</li>
-                            </ul>
-                        </div>       
-                    </div>            
-                    <div class="row" *ngIf="selectedItem.protocol === 'MQTT'">
-                        <div class="col-xl-12">
-                            <ul style="font-size: small;" >
-                                <li> Suitable for sensors and actuators, but actuators must handle multiple assignments: MQTT doesn't support messages queueing.</li> 
-                                <li> Security: Sender validation must be implemented within the agent. You may use the helyOS and agent RSA signatures for that.</li>
-                            </ul>
-                        </div>       
-                    </div>
-
-                    <div class="row">
-                        <fieldset class="form-group col-xl-6">
-                            <label for="allowAnonymousCheckin">Registration</label>
-                            <select id="allowAnonymousCheckin" class="form-control form-select" [disabled]="selectedItem.protocol === 'MQTT'" [(ngModel)]="selectedItem.allowAnonymousCheckin" name="allowAnonymousCheckin" (ngModelChange)="changeRegistration()">
-                                <option [ngValue]="true"> Let helyOS create RabbitMQ account</option>
-                                <option [ngValue]="false"> Set username and password </option>
-                            </select>
-                        </fieldset>
-                    </div>
-
-                    <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
-                        <div class="col-xl-12">
-                            <br>
-                            <p> The agent can perform the check-in using the <i>anonymous</i> account *, 
-                                helyOS will automatically create a RabbitMQ account and send the username and password to the agent. 
-                            </p>
-                            <p style="font-size: small;"> * (username, password) = (anonymous, anonymous). The agent must possess the AGENT_REGISTRATION_TOKEN.
-                            </p>
-
-                        </div>
-                        
-                    </div>
-
-                    <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
-
-                            <fieldset class="form-group col-xl-6">
-                                <label for="rbmqUsername">username *</label>
-                                <input id="rbmqUsername" class="form-control" [(ngModel)]="selectedItem.rbmqUsername"  (ngModelChange)="rbmqAccountChange=true"  name="rbmqUsername" 
-                                    placeholder="0000-0000-0000-0000"  />
-                            </fieldset>
-
-                
-                            <fieldset class="form-group col-xl-6">
-                                <label for="rbmqPassword"> password </label>
-                                <input id="rbmqPassword" class="form-control" [(ngModel)]="rbmqPassword" (ngModelChange)="rbmqAccountChange=true" name="rbmqPassword"
-                                    placeholder="*********" 
-                                    />
-                            </fieldset>
-                            <p style="font-size: small;" class="col-xl-12"> * helyOS will accept messages from this agent only if the username matches the uuid.
-                            </p>
-
-                    </div>
-
-
-                </div>
-
-
-                <h5>State Properties</h5>
-                <div class="field-group"> 
-                    <p> Status and connection fields are constantly updated by helyOS and agents. You can try to ascribe them a temporary value for debugging
-                        purposes.</p>
-                    <div class="row">
-
-                        
-                        <fieldset class="form-group col-xl-4">
-                            <label for="connectionStatus">connection</label>
-                            <select id="connectionStatus" class="form-control form-select" [(ngModel)]="selectedItem.connectionStatus" name="connectionStatus">
-                                <option value="offline">offline</option>
-                                <option value="online">online</option>
-                            </select>
-                        </fieldset>
-
-
-                        <fieldset class="form-group col-xl-4">
-                            <label for="status">status</label>
-                            <select id="status" class="form-control form-select" [(ngModel)]="selectedItem.status" name="status">
-                                <option value="free">free</option>
-                                <option value="busy">busy</option>
-                                <option title="for 'ready' you need to define the work process" value="ready">ready</option>
-                            </select>
-                        </fieldset>
-
-                    </div>
-
-                    <div class="row" *ngIf="selectedItem.status!=='free'">
-                        <fieldset  class="form-group col-xl-8">
-                            <label for="wpClearance">Work process info (wp_clearance for status: {{selectedItem.status}})</label>
-                            <textarea id="wpClearance" class="form-control" rows=4 [(ngModel)]="selectedItem.wpClearance" name="wpClearance"></textarea>
-                        </fieldset>
-                    </div>
-
-                </div>
-
-
-                <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
-                <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-
-            </form>
-
-        </section>
-    </ng-template>
-        </li>
-        <li [ngbNavItem]="2">
-            <a ngbNavLink>Interconnections</a>
-            <ng-template ngbNavContent>
-            <div style="margin: 10px auto; width: 66%;">
-                <p> <b>"Interconnection"</b> refers to the establishment of a link or/and physical connection between two or more agents.
-                     This enables the <i>leader agent</i> to publish message for its <i>follower agents</i>. 
-                     For example, a truck (leader) can publish position
-                     properties for an attached trailer (follower).
+                <fieldset class="form-group col-xl-6">
+                  <label for="rbmqPassword"> password </label>
+                  <input
+                    id="rbmqPassword"
+                    class="form-control"
+                    [(ngModel)]="rbmqPassword"
+                    (ngModelChange)="rbmqAccountChange = true"
+                    name="rbmqPassword"
+                    placeholder="*********" />
+                </fieldset>
+                <p style="font-size: small" class="col-xl-12">
+                  * helyOS will accept messages from this agent only if the
+                  username matches the uuid.
                 </p>
-            </div>
-            
-            <div class="card mb-3" style="margin: 10px auto; width: 66%;">
-                <div class="card-header " style="display:flex;justify-content:space-between">
-                    <div>Agents, trailers or tools connected as follower to {{selectedItem.name}}</div> 
-                    <div class="clickable" style="width: fit-content;" (click)="interconnectionList()">
-                        <span class="reload">&#x21bb;</span>
-                        <span> RELOAD  </span>
-                    </div>
-                </div>
-                <div class="table-fix-head-hide-scrolled" ></div>
-                <div class="table-fix-head  card-body table-responsive">
-                    <table class=" table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Follower UUID</th>
-                                <th>type</th>
-                                <th>created</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let connect of interconnections">
-                                <th scope="row">{{connect.id}}</th>
-                                <td>{{connect.agentByFollowerId?.uuid}}</td>
-                                <td>{{connect.agentByFollowerId?.agentType}}</td>
-                                <td>{{connect.createdAt | date:'dd.MM.yy HH:mm:ss' }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            
+              </div>
             </div>
 
-            <div style="text-align: center; margin-bottom: 10px;">
-                <button class="btn btn-primary"  (click)="addInterconnection()" type="submit">ADD CONECTION</button>
-                <button class="btn btn-danger"  (click)="removeAllInterconnections()" type="submit">REMOVE ALL CONNECTIONS</button>
+            <h5>State Properties</h5>
+            <div class="field-group">
+              <p>
+                Status and connection fields are constantly updated by helyOS
+                and agents. You can try to ascribe them a temporary value for
+                debugging purposes.
+              </p>
+              <div class="row">
+                <fieldset class="form-group col-xl-4">
+                  <label for="connectionStatus">connection</label>
+                  <select
+                    id="connectionStatus"
+                    class="form-control form-select"
+                    [(ngModel)]="selectedItem.connectionStatus"
+                    name="connectionStatus">
+                    <option value="offline">offline</option>
+                    <option value="online">online</option>
+                  </select>
+                </fieldset>
+
+                <fieldset class="form-group col-xl-4">
+                  <label for="status">status</label>
+                  <select
+                    id="status"
+                    class="form-control form-select"
+                    [(ngModel)]="selectedItem.status"
+                    name="status">
+                    <option value="free">free</option>
+                    <option value="busy">busy</option>
+                    <option
+                      title="for 'ready' you need to define the work process"
+                      value="ready">
+                      ready
+                    </option>
+                  </select>
+                </fieldset>
+              </div>
+
+              <div class="row" *ngIf="selectedItem.status !== 'free'">
+                <fieldset class="form-group col-xl-8">
+                  <label for="wpClearance"
+                    >Work process info (wp_clearance for status:
+                    {{ selectedItem.status }})</label
+                  >
+                  <textarea
+                    id="wpClearance"
+                    class="form-control"
+                    rows="4"
+                    [(ngModel)]="selectedItem.wpClearance"
+                    name="wpClearance"></textarea>
+                </fieldset>
+              </div>
             </div>
 
+            <button
+              class="btn btn-primary"
+              type="submit"
+              (click)="editItem(selectedItem)">
+              Save
+            </button>
+            <button
+              class="btn btn-secondary"
+              type="reset"
+              (click)="getItem(selectedItem.id)">
+              Cancel
+            </button>
+          </form>
+        </section>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+      <a ngbNavLink>Interconnections</a>
+      <ng-template ngbNavContent>
+        <div style="margin: 10px auto; width: 66%">
+          <p>
+            <b>"Interconnection"</b> refers to the establishment of a link
+            or/and physical connection between two or more agents. This enables
+            the <i>leader agent</i> to publish message for its
+            <i>follower agents</i>. For example, a truck (leader) can publish
+            position properties for an attached trailer (follower).
+          </p>
+        </div>
 
-        </ng-template>
-        </li>
-    </ul>
-    
-    
-    <div [ngbNavOutlet]="nav" class="mt-2"></div>
-    </div>
-    
-    
+        <div class="card mb-3" style="margin: 10px auto; width: 66%">
+          <div
+            class="card-header"
+            style="display: flex; justify-content: space-between">
+            <div>
+              Agents, trailers or tools connected as follower to
+              {{ selectedItem.name }}
+            </div>
+            <div
+              class="clickable"
+              style="width: fit-content"
+              (click)="interconnectionList()">
+              <span class="reload">&#x21bb;</span>
+              <span> RELOAD </span>
+            </div>
+          </div>
+          <div class="table-fix-head-hide-scrolled"></div>
+          <div class="table-fix-head card-body table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Follower UUID</th>
+                  <th>type</th>
+                  <th>created</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let connect of interconnections">
+                  <th scope="row">{{ connect.id }}</th>
+                  <td>
+                    {{ connect.agentByFollowerId?.uuid }}
+                  </td>
+                  <td>
+                    {{ connect.agentByFollowerId?.agentType }}
+                  </td>
+                  <td>
+                    {{ connect.createdAt | date: "dd.MM.yy HH:mm:ss" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 10px">
+          <button
+            class="btn btn-primary"
+            (click)="addInterconnection()"
+            type="submit">
+            ADD CONECTION
+          </button>
+          <button
+            class="btn btn-danger"
+            (click)="removeAllInterconnections()"
+            type="submit">
+            REMOVE ALL CONNECTIONS
+          </button>
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+</div>
