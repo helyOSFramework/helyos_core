@@ -50,6 +50,12 @@
             ]
           },
           {
+            "selector": "enum",
+            "format": [
+              "PascalCase"
+            ]
+          },
+          {
             "selector": "enumMember",
             "format": [
               "UPPER_CASE"
