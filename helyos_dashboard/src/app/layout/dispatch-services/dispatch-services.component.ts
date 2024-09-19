@@ -75,7 +75,9 @@ export class DispatchServicesComponent implements OnInit {
   }
 
   timeDifference(date1: string, date2: string) {
-    if (!(date1 && date2)) { return ''; }
+    if (!(date1 && date2)) {
+      return '';
+    }
     const d1 = new Date(date1);
     const d2 = new Date(date2);
     return `${Math.round((d1.getTime() - d2.getTime()) / 1000)} secs`;

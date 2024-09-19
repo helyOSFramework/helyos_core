@@ -42,7 +42,9 @@ export class AgentVehiclesComponent implements OnInit {
   }
 
   changeProtocol() {
-    if (this.selectedItem.protocol === 'MQTT') { this.selectedItem.allowAnonymousCheckin = false; }
+    if (this.selectedItem.protocol === 'MQTT') {
+      this.selectedItem.allowAnonymousCheckin = false;
+    }
   }
 
   updateRabbitMQ() {

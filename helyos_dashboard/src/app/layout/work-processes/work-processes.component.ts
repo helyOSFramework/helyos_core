@@ -45,7 +45,9 @@ export class WorkProcessesComponent implements OnInit {
     this.helyosService.methods.workProcessType.get(itemId)
       .then(r => {
         this.selectedItem = r;
-        if (!r.settings) { r.settings = {}; }
+        if (!r.settings) {
+          r.settings = {};
+        }
         this.selectedItem.settings = JSON.stringify(r.settings, null, 2);
       });
   }

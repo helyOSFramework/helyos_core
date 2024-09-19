@@ -100,7 +100,9 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   }
 
   getObjectItem(itemId) {
-    if (this.selectedObjectItem && this.selectedObjectItem.id === itemId) {return;}
+    if (this.selectedObjectItem && this.selectedObjectItem.id === itemId) {
+      return;
+    }
 
     this.helyosService.methods.mapObjects.get(itemId)
       .then((o: H_MapObject) => {
@@ -241,9 +243,15 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mapObjects: any;
 
-    if (Array.isArray(yardData)) { mapObjects = yardData; }
-    if (Array.isArray(yardData['mapObjects'])) { mapObjects = yardData['mapObjects']; }
-    if (Array.isArray(yardData['map_objects'])) { mapObjects = yardData['map_objects']; }
+    if (Array.isArray(yardData)) {
+      mapObjects = yardData;
+    }
+    if (Array.isArray(yardData['mapObjects'])) {
+      mapObjects = yardData['mapObjects'];
+    }
+    if (Array.isArray(yardData['map_objects'])) {
+      mapObjects = yardData['map_objects'];
+    }
 
     if (!(mapObjects && mapObjects.length)) {
       alert('No map objects in file');
@@ -269,7 +277,9 @@ export class YardmapComponent implements OnInit, AfterViewInit {
           patch.mapData = yardData.mapData;
         }
         this.helyosService.methods.yard.patch(patch)
-          .then(() => { this.listYards(); Object.assign(this.selectedItem, patch); });
+          .then(() => {
+            this.listYards(); Object.assign(this.selectedItem, patch);
+          });
       }
     }
 

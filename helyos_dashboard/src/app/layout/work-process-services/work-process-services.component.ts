@@ -83,9 +83,13 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
         this.availableSteps = this.wpServPlan.filter(plan => {
           // ignore because of multiple types. id: string | number
           // eslint-disable-next-line eqeqeq
-          if (plan.id == r.id) {return false;}
+          if (plan.id == r.id) {
+            return false;
+          }
           const dependsOnSteps = this.returnObj(plan.dependsOnSteps); // cannot depend of itself
-          if (dependsOnSteps && dependsOnSteps.includes(r.step)) {return false;} // avoid recursive dependencies
+          if (dependsOnSteps && dependsOnSteps.includes(r.step)) {
+            return false;
+          } // avoid recursive dependencies
           return true;
         }).map(plan => plan.step);
       });
@@ -138,7 +142,9 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   }
 
   addDependency(value) {
-    if (!value) {return;}
+    if (!value) {
+      return;
+    }
     let dependsOnSteps = !this.selectedItem.dependsOnSteps ? [] : this.returnObj(this.selectedItem.dependsOnSteps);
     if (!dependsOnSteps.includes(value)) {
       dependsOnSteps.push(value);

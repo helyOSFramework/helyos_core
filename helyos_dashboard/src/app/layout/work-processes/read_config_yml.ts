@@ -180,7 +180,9 @@ const saveWorkProcessServicePlans = (
 
   // use lookup to find the missions object in the input json
   const missions = lookup(jsonObj, 'missions');
-  if (!missions[workProcessType]['recipe']) { return null; }
+  if (!missions[workProcessType]['recipe']) {
+    return null;
+  }
 
   // recipe steps array for the given work process type
   const recipeSteps = missions[workProcessType]['recipe']['steps'];
@@ -308,8 +310,11 @@ const lookup = (obj, k) => {
         // recursively call lookup on each value
         result = lookup(o, k);
         // if the result is not null, break the loop
-        if (result == null) {continue;}
-        else {break;}
+        if (result == null) {
+          continue;
+        } else {
+          break;
+        }
       }
     }
     // return the result

@@ -53,7 +53,9 @@ export class AccountsComponent implements OnInit {
     this.helyosService.methods.userAccounts.get(itemId)
       .then((r: H_UserAccount) => {
         this.selectedItem = r;
-        if (!r.metadata) { r.metadata = {}; }
+        if (!r.metadata) {
+          r.metadata = {};
+        }
         this.selectedItem.metadata = JSON.stringify(r.metadata, null, 2);
       });
   }
