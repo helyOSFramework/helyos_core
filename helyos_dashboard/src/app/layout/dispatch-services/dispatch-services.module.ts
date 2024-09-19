@@ -20,7 +20,7 @@ import { DispatchServicesComponent } from './dispatch-services.component';
   providers: [
     {
       provide: NgbDateAdapter,
-      useClass: NgbDateNativeAdapter, 
+      useClass: NgbDateNativeAdapter,
     },
   ],
 })

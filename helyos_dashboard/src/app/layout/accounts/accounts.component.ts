@@ -39,7 +39,7 @@ export class AccountsComponent implements OnInit {
   create() {
     const newItem = {
       username: 'unnamed',
-      passwordHash: " ", 
+      passwordHash: " ",
     };
     this.helyosService.methods.userAccounts.create(newItem)
       .then(r => {
@@ -67,7 +67,7 @@ export class AccountsComponent implements OnInit {
 
   editItem(item) {
     const patch: Partial<H_UserAccount> = {
-      ...item, 
+      ...item,
     };
     delete patch.createdAt;
     delete patch.modifiedAt;
@@ -99,7 +99,7 @@ export class AccountsComponent implements OnInit {
         const _ = this.modalService.open(content, {
           size: 'lg',
           centered: true,
-          backdrop: false, 
+          backdrop: false,
         });
       });
 

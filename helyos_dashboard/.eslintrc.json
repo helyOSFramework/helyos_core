@@ -195,6 +195,9 @@
           {
             "null": "ignore"
           }
+        ],
+        "no-trailing-spaces": [
+          "error"
         ]
       }
     },

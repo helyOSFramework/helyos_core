@@ -36,7 +36,7 @@ export class YardsComponent implements OnInit {
   create() {
     const newItem = {
       name: 'Unnamed',
-      source: 'manual input', 
+      source: 'manual input',
     };
     this.helyosService.methods.yard.create(newItem)
       .then(r => {
@@ -73,7 +73,7 @@ export class YardsComponent implements OnInit {
 
   editItem(item) {
     const patch = {
-      ...item, 
+      ...item,
     };
     delete patch.createdAt;
     delete patch.modifiedAt;

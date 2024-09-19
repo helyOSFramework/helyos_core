@@ -79,7 +79,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     const filter = {
       yardId: this.selectedItem.id,
       deletedAt: null,
-      ...this.filterObj, 
+      ...this.filterObj,
     };
     if (this.filterType) {
       filter['type'] = this.filterType;
@@ -135,7 +135,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
   saveObjectItem(_itemId) {
     const patch = {
-      ...this.selectedObjectItem, 
+      ...this.selectedObjectItem,
     };
     delete patch.createdAt;
     delete patch.modifiedAt;
@@ -186,12 +186,12 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   async downloadYardData() {
     const mapObjects = await this.helyosService.methods.mapObjects.list({
       yardId: this.selectedItem.id,
-      deletedAt: null, 
+      deletedAt: null,
     }, 1e9);
     const origin = {
       lat: this.selectedItem.lat,
       lon: this.selectedItem.lon,
-      alt: this.selectedItem.alt, 
+      alt: this.selectedItem.alt,
     };
     const dataFormat = this.selectedItem.dataFormat;
     const id = this.selectedItem.id;
@@ -200,7 +200,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
       id,
       mapObjects,
       origin,
-      dataFormat, 
+      dataFormat,
     }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
 
   }
@@ -208,7 +208,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
     const file = new Blob([content], {
-      type: contentType, 
+      type: contentType,
     });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
@@ -263,7 +263,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
           id: this.selectedItem.id,
           lat: yardData.origin.lat,
           lon: yardData.origin.lon,
-          alt: yardData.alt, 
+          alt: yardData.alt,
         };
         if (yardData.mapData) {
           patch.mapData = yardData.mapData;

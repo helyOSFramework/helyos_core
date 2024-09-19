@@ -10,12 +10,12 @@ const routes: Routes = [
       {
         path: '',
         redirectTo: 'all-services',
-        pathMatch: 'prefix', 
+        pathMatch: 'prefix',
       },
       {
         path: 'dashboard',
         redirectTo: 'all-services',
-        pathMatch: 'prefix', 
+        pathMatch: 'prefix',
       },
 
       {

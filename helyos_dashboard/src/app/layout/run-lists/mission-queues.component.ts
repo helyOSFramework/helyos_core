@@ -29,7 +29,7 @@ export class RunListsComponent implements OnInit {
 
   missionList() {
     return this.helyosService.methods.workProcess.list({
-      missionQueueId: this.selectedItem.id as number, 
+      missionQueueId: this.selectedItem.id as number,
     }, 99999, 0, 'RUN_ORDER_ASC')
       .then(r => this.wProcesses = r);
   }
@@ -39,7 +39,7 @@ export class RunListsComponent implements OnInit {
     const newName = 'run-list ' + now.toLocaleTimeString();
     const newItem = {
       status: 'stopped',
-      name: newName, 
+      name: newName,
     };
     this.helyosService.methods.missionQueue.create(newItem)
       .then(r => {
@@ -71,7 +71,7 @@ export class RunListsComponent implements OnInit {
     }
 
     const patch = {
-      ...item, 
+      ...item,
     };
 
     console.log(item);

@@ -119,7 +119,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
           const iterSensorSet: ISensor[] = this.getSensorsMeasures(patch.sensors[key]);
           iterSensorSets.push({
             name: key,
-            sensors: iterSensorSet, 
+            sensors: iterSensorSet,
           });
         }
         patch._iterSensors = iterSensorSets;
