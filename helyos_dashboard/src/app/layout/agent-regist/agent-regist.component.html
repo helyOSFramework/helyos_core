@@ -1,22 +1,17 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">All Agents</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
 <p>
-  In helyOS framework, any instance that communicates with helyOS core via
-  RabbitMQ is categorized as an agent.<br />
+  In helyOS framework, any instance that communicates with helyOS core via RabbitMQ is categorized as an agent.<br />
   There are three main classes of agents: 'vehicle', 'tool' and 'assistants'.
 </p>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div>Agents</div>
     <div class="clickable" (click)="list()">
       <span class="reload">&#x21bb;</span>
@@ -62,16 +57,14 @@
 
           <td
             [ngClass]="{
-              'bg-danger':
-                item.msgPerSec > 30 && item.connectionStatus === 'online',
+              'bg-danger': item.msgPerSec > 30 && item.connectionStatus === 'online',
             }"
             title="Optimal: 10Hz.">
             {{ item.msgPerSec | number: '1.2-2' }}
           </td>
           <td
             [ngClass]="{
-              'bg-danger':
-                item.updtPerSec > 5 && item.connectionStatus === 'online',
+              'bg-danger': item.updtPerSec > 5 && item.connectionStatus === 'online',
             }"
             title="Optimal: < 2 Hz">
             {{ item.updtPerSec | number: '1.2-2' }}
@@ -84,9 +77,7 @@
     </table>
   </div>
 
-  <div
-    class="card-footer"
-    style="display: flex; justify-content: space-between">
+  <div class="card-footer" style="display: flex; justify-content: space-between">
     <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center">
       <div class="w-auto">Instant Action Command</div>
       <div class="col-xl-6">
@@ -97,9 +88,7 @@
           [(ngModel)]="instantActionCommand"
           name="instantAction" />
       </div>
-      <button class="btn btn-light w-auto" (click)="sendInstantAction()">
-        SEND
-      </button>
+      <button class="btn btn-light w-auto" (click)="sendInstantAction()">SEND</button>
     </div>
 
     <div *ngIf="!selectedItem" class="form-group row col-xl-6"></div>

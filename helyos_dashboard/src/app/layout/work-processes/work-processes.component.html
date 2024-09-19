@@ -1,26 +1,19 @@
 <h1>Missions</h1>
 
-<p>
-  Each registered mission type translates to a new feature available in the
-  client applications.
-</p>
+<p>Each registered mission type translates to a new feature available in the client applications.</p>
 <p>The mission type represents a template for a task or group of tasks.</p>
 
 <ng-container *ngIf="showDescription">
   <p>
-    A mission can involve the calculation of a path, data transfers to the
-    cloud, handling of map information, or a combination of many tasks.
+    A mission can involve the calculation of a path, data transfers to the cloud, handling of map information, or a
+    combination of many tasks.
   </p>
 
-  <p>
-    A mission can be requested by the client application or by the agent
-    (vehicle).
-  </p>
+  <p>A mission can be requested by the client application or by the agent (vehicle).</p>
 
   <p>
     A dispatched mission triggers one or several
-    <a [routerLink]="['/all-services']">microservices </a>, which operate in a
-    sequential order based on the
+    <a [routerLink]="['/all-services']">microservices </a>, which operate in a sequential order based on the
     <a> <strong> Mission Recipes' </strong> </a> orchestration scheme.
   </p>
 </ng-container>
@@ -65,9 +58,7 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-  <button class="btn btn-danger" (click)="deleteItem()" type="submit">
-    Delete
-  </button>
+  <button class="btn btn-danger" (click)="deleteItem()" type="submit">Delete</button>
 </div>
 
 <section class="detail-container" *ngIf="selectedItem">
@@ -79,11 +70,7 @@
     <div class="row">
       <fieldset class="form-group col-xl-6">
         <label for="name">Name</label>
-        <input
-          id="name"
-          class="form-control"
-          [(ngModel)]="selectedItem.name"
-          name="name" />
+        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
       </fieldset>
 
       <fieldset class="form-group col-xl-4">
@@ -127,18 +114,12 @@
           [(ngModel)]="selectedItem.onAssignmentFailure"
           name="onAssignmentFailure">
           <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
-          <option value="CONTINUE_MISSION" title="CONTINUE">
-            continue the mission
-          </option>
-          <option value="RELEASE_FAILED" title="RELEASE_FAILED">
-            immediately release the failed agent
-          </option>
+          <option value="CONTINUE_MISSION" title="CONTINUE">continue the mission</option>
+          <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
         </select>
       </fieldset>
 
-      <fieldset
-        class="form-group col-xl-6"
-        title="Run mission when assignment fails.">
+      <fieldset class="form-group col-xl-6" title="Run mission when assignment fails.">
         <label for="fallbackMission">Fallback mission </label>
         <select
           id="fallbackMission"
@@ -146,11 +127,8 @@
           [(ngModel)]="selectedItem.fallbackMission"
           name="fallbackMission">
           <option [value]="''">---- ----</option>
-          <ng-container
-            *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
-            <option
-              *ngFor="let missionName of availableMissions"
-              [value]="missionName">
+          <ng-container *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
+            <option *ngFor="let missionName of availableMissions" [value]="missionName">
               {{ missionName }}
             </option>
           </ng-container>
@@ -159,8 +137,7 @@
     </div>
 
     <h5 style="margin-top: 16px">Default Settings</h5>
-    <label for="settings">Automatically included in mission request data under the key
-      "_settings".</label>
+    <label for="settings">Automatically included in mission request data under the key "_settings".</label>
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <textarea
@@ -172,24 +149,9 @@
       </fieldset>
     </div>
 
-    <button
-      class="btn btn-primary"
-      type="submit"
-      (click)="editItem(selectedItem)">
-      Save
-    </button>
-    <button
-      class="btn btn-secondary"
-      type="reset"
-      (click)="getItem(selectedItem.id)">
-      Cancel
-    </button>
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
   </form>
 </section>
 
-<input
-  style="display: none"
-  extensions=".json"
-  type="file"
-  (change)="importYML($event)"
-  #importYMLElementInput />
+<input style="display: none" extensions=".json" type="file" (change)="importYML($event)" #importYMLElementInput />

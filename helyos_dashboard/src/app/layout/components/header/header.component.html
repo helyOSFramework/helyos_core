@@ -91,10 +91,7 @@
             <i class="fa fa-fw fa-gear"></i>
             {{ 'Settings' | translate }}
           </a>
-          <a
-            (click)="onLoggedout()"
-            [routerLink]="['/login']"
-            class="dropdown-item">
+          <a (click)="onLoggedout()" [routerLink]="['/login']" class="dropdown-item">
             <i class="fa fa-fw fa-power-off"></i>
             {{ 'Log Out' | translate }}
           </a>

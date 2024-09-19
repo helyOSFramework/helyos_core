@@ -10,5 +10,6 @@
   "bracketSpacing": true,
   "bracketSameLine": true,
   "arrowParens": "always",
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "htmlWhitespaceSensitivity": "strict"
 }

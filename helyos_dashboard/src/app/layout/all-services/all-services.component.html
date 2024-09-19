@@ -2,10 +2,7 @@
   <h1 class="w-auto">Microservices</h1>
   <div class="row w-auto">
     <div class="p-0 w-auto" style="text-align: right; margin-right: 6px">
-      <button
-        class="btn btn-lg btn-outline-dark"
-        style="background-color: rgb(154, 195, 246)"
-        (click)="openPPAPIDoc()">
+      <button class="btn btn-lg btn-outline-dark" style="background-color: rgb(154, 195, 246)" (click)="openPPAPIDoc()">
         Assignment planner API
       </button>
     </div>
@@ -20,52 +17,40 @@
     </div>
 
     <div class="p-0 w-auto" style="text-align: right; margin-left: 6px">
-      <button
-        class="storage-row btn btn-lg btn-outline-dark"
-        (click)="openPPAPIDoc()">
-        Storage server API
-      </button>
+      <button class="storage-row btn btn-lg btn-outline-dark" (click)="openPPAPIDoc()">Storage server API</button>
     </div>
   </div>
 </div>
 
 <div style="width: 80%">
   <p>
-    Microservices are the building blocks used to create missions. These
-    services can be employed to create paths, convert and update maps, and
-    facilitate communication with cloud systems.
+    Microservices are the building blocks used to create missions. These services can be employed to create paths,
+    convert and update maps, and facilitate communication with cloud systems.
   </p>
   <ng-container *ngIf="showDescription">
     <p>
-      The request data to these services contains primarily the user input,
-      helyOS automatically appends a snapshot of the yard state as
-      <strong>context</strong>. This context includes infomation of map objects,
-      guidelines and agent positions.
+      The request data to these services contains primarily the user input, helyOS automatically appends a snapshot of
+      the yard state as
+      <strong>context</strong>. This context includes infomation of map objects, guidelines and agent positions.
     </p>
 
-    <li>
-      Service responses can include agent assignments or map information (see
-      API Documentation).
-    </li>
+    <li>Service responses can include agent assignments or map information (see API Documentation).</li>
     <br />
     <li>
-      <b>helyOS is agnostic regarding the map data format</b>. The Map servers
-      are responsible to provide map objects compatible with your path planner
-      and user interface.
+      <b>helyOS is agnostic regarding the map data format</b>. The Map servers are responsible to provide map objects
+      compatible with your path planner and user interface.
     </li>
     <br />
 
     <li>
-      <b>helyOS is agnostic regarding the assignment data format</b>. The
-      Assignment planners are responsible to provide assignment data compatible
-      with the agent.
+      <b>helyOS is agnostic regarding the assignment data format</b>. The Assignment planners are responsible to provide
+      assignment data compatible with the agent.
     </li>
     <br />
 
     <li>
-      helyOS orchestrates the delivery of assignments. You can use the "results"
-      field inside the service response to route data from microservices to
-      agents.
+      helyOS orchestrates the delivery of assignments. You can use the "results" field inside the service response to
+      route data from microservices to agents.
     </li>
     <br />
   </ng-container>
@@ -115,18 +100,8 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-  <button
-    class="btn btn-danger"
-    (click)="delete(selectedItem.id)"
-    type="submit">
-    Delete
-  </button>
-  <button
-    class="btn btn-secondary"
-    (click)="toggleEnable(selectedItem)"
-    type="submit">
-    Enable/Disable
-  </button>
+  <button class="btn btn-danger" (click)="delete(selectedItem.id)" type="submit">Delete</button>
+  <button class="btn btn-secondary" (click)="toggleEnable(selectedItem)" type="submit">Enable/Disable</button>
 </div>
 
 <section class="service-detail-container" *ngIf="selectedItem">
@@ -135,11 +110,7 @@
   <div class="row">
     <div class="checkbox">
       <label for="isDummy">
-        <input
-          id="isDummy"
-          type="checkbox"
-          [(ngModel)]="selectedItem.isDummy"
-          name="isDummy" />
+        <input id="isDummy" type="checkbox" [(ngModel)]="selectedItem.isDummy" name="isDummy" />
         Dummy service
       </label>
     </div>
@@ -149,11 +120,7 @@
     <div class="row">
       <fieldset class="form-group col-xl-6">
         <label for="name">Name</label>
-        <input
-          id="name"
-          class="form-control"
-          [(ngModel)]="selectedItem.name"
-          name="name" />
+        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
       </fieldset>
 
       <fieldset class="form-group col-xl-6" *ngIf="!selectedItem?.isDummy">
@@ -167,25 +134,15 @@
       </fieldset>
 
       <fieldset class="form-group col-xl-6" *ngIf="selectedItem?.isDummy">
-        <label for="serviceUrl">
-          URL is not used: response data = request data</label>
-        <input
-          id="serviceUrl"
-          class="form-control"
-          name="serviceUrl"
-          [disabled]="true"
-          placeholder="-- not used --" />
+        <label for="serviceUrl"> URL is not used: response data = request data</label>
+        <input id="serviceUrl" class="form-control" name="serviceUrl" [disabled]="true" placeholder="-- not used --" />
       </fieldset>
     </div>
 
     <div class="row">
       <fieldset class="form-group col-xl-4">
         <label for="class">Domain</label>
-        <select
-          id="class"
-          class="form-control form-select"
-          [(ngModel)]="selectedItem.class"
-          name="class">
+        <select id="class" class="form-control form-select" [(ngModel)]="selectedItem.class" name="class">
           <option value="Assignment planner">Assignment planner</option>
           <option value="Map server">Map server</option>
           <option value="Storage server">Storage server</option>
@@ -261,21 +218,17 @@
           </label>
         </div>
 
-        <div
-          class="checkbox"
-          style="margin-left: 18px"
-          *ngIf="selectedItem.requireMapData">
-          <label for="requireMapObjectsInput">
-            Specify the types of map objects to include:
-          </label>
+        <div class="checkbox" style="margin-left: 18px" *ngIf="selectedItem.requireMapData">
+          <label for="requireMapObjectsInput"> Specify the types of map objects to include: </label>
           <input
             id="requireMapObjectsInput"
             class="form-control"
             type="text"
             [(ngModel)]="requireMapObjectsInput"
             name="requireMapObjectsInput" />
-          <small class="form-text text-muted">separate each type with a comma (,). E.g: building, road,
-            parking_lot</small>
+          <small class="form-text text-muted">
+            separate each type with a comma (,). E.g: building, road, parking_lot
+          </small>
         </div>
       </fieldset>
     </div>
@@ -283,25 +236,11 @@
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="config"> Config </label>
-        <textarea
-          id="config"
-          class="form-control"
-          [(ngModel)]="selectedItem.config"
-          name="config"></textarea>
+        <textarea id="config" class="form-control" [(ngModel)]="selectedItem.config" name="config"></textarea>
       </fieldset>
     </div>
 
-    <button
-      class="btn btn-primary"
-      type="submit"
-      (click)="editItem(selectedItem)">
-      Save
-    </button>
-    <button
-      class="btn btn-secondary"
-      type="reset"
-      (click)="getItem(selectedItem.id)">
-      Cancel
-    </button>
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
   </form>
 </section>

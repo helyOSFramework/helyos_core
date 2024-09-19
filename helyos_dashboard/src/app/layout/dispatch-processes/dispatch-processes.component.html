@@ -1,16 +1,12 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Dispatched Missions</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div class="clickable" (click)="filterList(0)">
       <span class="reload">&#x21bb;</span>
       <span> RELOAD </span>
@@ -55,36 +51,19 @@
 </div>
 
 <div style="text-align: right; margin-bottom: 10px">
-  <button
-    class="btn btn-primary"
-    style="width: 100px"
-    (click)="create()"
-    type="submit">
-    Create
-  </button>
-  <button
-    [disabled]="!selectedItem"
-    class="btn btn-outline-primary"
-    (click)="duplicate()"
-    type="submit">
+  <button class="btn btn-primary" style="width: 100px" (click)="create()" type="submit">Create</button>
+  <button [disabled]="!selectedItem" class="btn btn-outline-primary" (click)="duplicate()" type="submit">
     Duplicate
   </button>
   <button
     class="btn btn-secondary"
     style="background-color: green"
-    [disabled]="
-      !(selectedItem?.workProcessTypeName && selectedItem?.yardId) ||
-      selectedItem?.status !== 'draft'
-    "
+    [disabled]="!(selectedItem?.workProcessTypeName && selectedItem?.yardId) || selectedItem?.status !== 'draft'"
     (click)="editItem(selectedItem, 'dispatched')"
     type="submit">
     Dispatch Mission
   </button>
-  <button
-    [disabled]="!selectedItem"
-    class="btn btn-danger"
-    (click)="cancelMission(selectedItem)"
-    type="submit">
+  <button [disabled]="!selectedItem" class="btn btn-danger" (click)="cancelMission(selectedItem)" type="submit">
     Cancel Mission
   </button>
 </div>
@@ -119,9 +98,7 @@
                   [ngModelOptions]="{ standalone: true }" />
               </fieldset>
 
-              <fieldset
-                class="form-group col-xl-4"
-                title="Array with the database ids, not the UUIDs.">
+              <fieldset class="form-group col-xl-4" title="Array with the database ids, not the UUIDs.">
                 <label for="agentIds">Agent Ids</label>
                 <input
                   id="agentIds"
@@ -166,9 +143,7 @@
                   name="missionQueueId" />
               </fieldset>
 
-              <fieldset
-                class="form-group col-xl-2"
-                title="blank is assigned to the last position">
+              <fieldset class="form-group col-xl-2" title="blank is assigned to the last position">
                 <label for="runOrder">Run order</label>
                 <input
                   id="runOrder"
@@ -206,24 +181,14 @@
                   class="form-control"
                   [(ngModel)]="selectedItem.onAssignmentFailure"
                   name="onAssignmentFailure">
-                  <option value="DEFAULT">
-                    to be defined by mission recipe
-                  </option>
-                  <option value="FAIL_MISSION" title="FAIL">
-                    fail the mission
-                  </option>
-                  <option value="CONTINUE_MISSION" title="CONTINUE">
-                    continue mission
-                  </option>
-                  <option value="RELEASE_FAILED" title="RELEASE_FAILED">
-                    immediately release the failed agent
-                  </option>
+                  <option value="DEFAULT">to be defined by mission recipe</option>
+                  <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
+                  <option value="CONTINUE_MISSION" title="CONTINUE">continue mission</option>
+                  <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
                 </select>
               </fieldset>
 
-              <fieldset
-                class="form-group col-xl-6"
-                title="Fallback mission when failed agent is released.">
+              <fieldset class="form-group col-xl-6" title="Fallback mission when failed agent is released.">
                 <label for="fallbackMission">Fallback mission </label>
                 <select
                   id="fallbackMission"
@@ -231,13 +196,8 @@
                   [(ngModel)]="selectedItem.fallbackMission"
                   name="fallbackMission">
                   <option [value]="''">---- ----</option>
-                  <ng-container
-                    *ngIf="
-                      selectedItem.onAssignmentFailure === 'RELEASE_FAILED'
-                    ">
-                    <option
-                      *ngFor="let missionName of availableMissions"
-                      [value]="missionName">
+                  <ng-container *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
+                    <option *ngFor="let missionName of availableMissions" [value]="missionName">
                       {{ missionName }}
                     </option>
                   </ng-container>
@@ -248,19 +208,13 @@
             <div class="row">
               <fieldset class="form-group col-xl-12">
                 <label for="data"> JSON Request data </label>
-                <textarea
-                  id="data"
-                  class="form-control"
-                  [(ngModel)]="selectedItem.data"
-                  name="data"></textarea>
+                <textarea id="data" class="form-control" [(ngModel)]="selectedItem.data" name="data"></textarea>
               </fieldset>
             </div>
 
             <div class="row">
               <fieldset class="form-group col-xl-12">
-                <label for="operationTypesRequired">
-                  Optional: Specify Required Operations for Reserved Agents
-                </label>
+                <label for="operationTypesRequired"> Optional: Specify Required Operations for Reserved Agents </label>
                 <input
                   id="operationTypesRequired"
                   class="form-control"
@@ -268,35 +222,23 @@
                   [(ngModel)]="operationTypesRequired"
                   name="operationTypesRequired" />
                 <small class="form-text text-muted">
-                  Enter the names, separate operation types with a comma (,), of
-                  the operations needed for the agent to be prepared upon
-                  reservation.</small>
+                  Enter the names, separate operation types with a comma (,), of the operations needed for the agent to
+                  be prepared upon reservation.
+                </small>
               </fieldset>
             </div>
 
             <div class="row" style="justify-content: space-between">
               <div class="w-auto">
-                <button
-                  class="btn btn-primary"
-                  type="submit"
-                  (click)="editItem(selectedItem, 'draft')">
-                  Save
-                </button>
-                <button
-                  class="btn btn-secondary"
-                  type="reset"
-                  (click)="getItem(selectedItem.id)">
-                  Cancel
-                </button>
+                <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem, 'draft')">Save</button>
+                <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
               </div>
               <div class="w-auto">
                 <button
                   class="btn btn-secondary"
                   style="background-color: green"
                   type="submit"
-                  [disabled]="
-                    !(selectedItem.workProcessTypeName && selectedItem.yardId)
-                  "
+                  [disabled]="!(selectedItem.workProcessTypeName && selectedItem.yardId)"
                   (click)="editItem(selectedItem, 'dispatched')">
                   Dispatch Mission
                 </button>
@@ -310,17 +252,12 @@
       <a ngbNavLink>Assignments</a>
       <ng-template ngbNavContent>
         <div class="card mb-3">
-          <div
-            class="card-header"
-            style="display: flex; justify-content: space-between">
+          <div class="card-header" style="display: flex; justify-content: space-between">
             <div>
               Assignments of the mission
               {{ selectedItem.workProcessTypeName }}
             </div>
-            <div
-              class="clickable"
-              style="width: fit-content"
-              (click)="assignmentList()">
+            <div class="clickable" style="width: fit-content" (click)="assignmentList()">
               <span class="reload">&#x21bb;</span>
               <span> RELOAD </span>
             </div>

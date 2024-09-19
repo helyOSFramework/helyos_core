@@ -1,9 +1,7 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Yard Map Objects</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
@@ -44,9 +42,7 @@
 
 <ng-container *ngIf="selectedItem">
   <div style="margin-top: 32px" class="card mb-3">
-    <div
-      class="card-header"
-      style="display: flex; justify-content: space-between">
+    <div class="card-header" style="display: flex; justify-content: space-between">
       <div>
         <h4 style="margin: 0px">Map Objects</h4>
       </div>
@@ -57,27 +53,16 @@
       </div>
 
       <div>
-        <span class="clickable" (click)="filterObjList(-1)">
-          &#8810; previous
-        </span>
+        <span class="clickable" (click)="filterObjList(-1)"> &#8810; previous </span>
         | {{ page }} |
         <span class="clickable" (click)="filterObjList(1)">next &#8811;</span>
       </div>
     </div>
 
-    <div
-      style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-left: 16px;
-      ">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-left: 16px">
       <div>
         <span>Filter by type: </span>
-        <input
-          style="width: 120px"
-          type="text"
-          (input)="debouncingFilterText($event)" />
+        <input style="width: 120px" type="text" (input)="debouncingFilterText($event)" />
       </div>
 
       <div>
@@ -88,18 +73,10 @@
           (click)="fileInput.click()">
           Overwrite all objects
         </button>
-        <button
-          class="btn btn-secondary"
-          style="margin: 10px 6px 0px"
-          (click)="downloadYardData()">
+        <button class="btn btn-secondary" style="margin: 10px 6px 0px" (click)="downloadYardData()">
           Download all objects
         </button>
-        <button
-          class="btn btn-primary"
-          style="margin: 10px 6px 0px"
-          (click)="addObjectItem()">
-          Add new object
-        </button>
+        <button class="btn btn-primary" style="margin: 10px 6px 0px" (click)="addObjectItem()">Add new object</button>
       </div>
     </div>
     <div style="width: 100%" class="card-body table-responsive">
@@ -128,10 +105,7 @@
                   {{ item.type }}
                 </span>
                 <span *ngIf="item.id === selectedObjectItem?.id">
-                  <input
-                    style="width: 120px"
-                    type="text"
-                    [(ngModel)]="selectedObjectItem.type" />
+                  <input style="width: 120px" type="text" [(ngModel)]="selectedObjectItem.type" />
                 </span>
               </td>
 
@@ -140,10 +114,7 @@
                   {{ item.name }}
                 </span>
                 <span *ngIf="item.id === selectedObjectItem?.id">
-                  <input
-                    style="width: 120px"
-                    type="text"
-                    [(ngModel)]="selectedObjectItem.name" />
+                  <input style="width: 120px" type="text" [(ngModel)]="selectedObjectItem.name" />
                 </span>
               </td>
 
@@ -152,10 +123,7 @@
                   {{ item.dataFormat }}
                 </span>
                 <span *ngIf="item.id === selectedObjectItem?.id">
-                  <input
-                    style="width: 120px"
-                    type="text"
-                    [(ngModel)]="selectedObjectItem.dataFormat" />
+                  <input style="width: 120px" type="text" [(ngModel)]="selectedObjectItem.dataFormat" />
                 </span>
               </td>
 
@@ -195,12 +163,8 @@
               <td></td>
               <td>
                 <div style="display: inline-table; width: 300px">
-                  <button (click)="saveObjectItem(selectedObjectItem.id)">
-                    SAVE
-                  </button>
-                  <button (click)="deleteObjectItem(selectedObjectItem.id)">
-                    DELETE
-                  </button>
+                  <button (click)="saveObjectItem(selectedObjectItem.id)">SAVE</button>
+                  <button (click)="deleteObjectItem(selectedObjectItem.id)">DELETE</button>
                 </div>
               </td>
             </tr>
@@ -211,9 +175,4 @@
   </div>
 </ng-container>
 
-<input
-  style="display: none"
-  extensions=".json"
-  type="file"
-  (change)="onFileChanged($event)"
-  #fileInput />
+<input style="display: none" extensions=".json" type="file" (change)="onFileChanged($event)" #fileInput />

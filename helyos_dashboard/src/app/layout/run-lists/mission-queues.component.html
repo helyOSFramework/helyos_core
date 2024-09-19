@@ -1,16 +1,12 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Mission Queues</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div>Mission Queues</div>
     <div class="clickable" (click)="list()">
       <span class="reload">&#x21bb;</span>
@@ -47,12 +43,7 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-  <button
-    class="btn btn-danger"
-    (click)="deleteItem(selectedItem.id)"
-    type="submit">
-    Delete
-  </button>
+  <button class="btn btn-danger" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
 </div>
 
 <section class="detail-container" *ngIf="selectedItem">
@@ -98,14 +89,9 @@
     </div>
 
     <div class="card mb-3">
-      <div
-        class="card-header"
-        style="display: flex; justify-content: space-between">
+      <div class="card-header" style="display: flex; justify-content: space-between">
         <div>Work Processes</div>
-        <div
-          class="clickable"
-          style="width: fit-content"
-          (click)="missionList()">
+        <div class="clickable" style="width: fit-content" (click)="missionList()">
           <span class="reload">&#x21bb;</span>
           <span> RELOAD </span>
         </div>
@@ -145,10 +131,7 @@
         type="submit">
         <span class="fa fa-w fa-play"></span> RUN
       </button>
-      <button
-        class="btn btn-danger"
-        (click)="stopQueue(selectedItem)"
-        type="submit">
+      <button class="btn btn-danger" (click)="stopQueue(selectedItem)" type="submit">
         <span class="fa fa-w fa-stop"></span> STOP
       </button>
     </div>
@@ -166,18 +149,8 @@
 
     <div class="row" style="justify-content: space-between">
       <div>
-        <button
-          class="btn btn-primary"
-          type="submit"
-          (click)="editItem(selectedItem)">
-          Save
-        </button>
-        <button
-          class="btn btn-secondary"
-          type="reset"
-          (click)="getItem(selectedItem.id)">
-          Cancel
-        </button>
+        <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+        <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
       </div>
     </div>
   </div>

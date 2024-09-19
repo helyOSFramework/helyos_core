@@ -1,9 +1,7 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Mission Recipes > {{ wpType?.name }}</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
@@ -44,9 +42,7 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-  <button class="btn btn-danger" (click)="deleteItem()" type="submit">
-    Delete
-  </button>
+  <button class="btn btn-danger" (click)="deleteItem()" type="submit">Delete</button>
 </div>
 
 <section class="detail-container" *ngIf="selectedItem">
@@ -56,25 +52,17 @@
     <div class="row">
       <fieldset class="form-group col-xl-3">
         <label for="step">Step</label>
-        <input
-          id="step"
-          class="form-control"
-          [(ngModel)]="selectedItem.step"
-          name="step" />
+        <input id="step" class="form-control" [(ngModel)]="selectedItem.step" name="step" />
       </fieldset>
 
-      <fieldset
-        class="form-group col-xl-3"
-        title='You can create Service Types in "Microservices"'>
+      <fieldset class="form-group col-xl-3" title='You can create Service Types in "Microservices"'>
         <label for="serviceType">Service Type</label>
         <select
           id="serviceType"
           class="form-control form-select"
           [(ngModel)]="selectedItem.serviceType"
           name="serviceType">
-          <option
-            *ngFor="let servType of availableServiceTypes"
-            [value]="servType">
+          <option *ngFor="let servType of availableServiceTypes" [value]="servType">
             {{ servType }}
           </option>
         </select>
@@ -83,9 +71,7 @@
       <fieldset class="form-group col-xl-6">
         <label for="isResultAssignment">Service response</label>
         <div class="radio">
-          <label
-            for="optionsRadios1"
-            title="result will be used as assignment or yard update.">
+          <label for="optionsRadios1" title="result will be used as assignment or yard update.">
             <input
               [checked]="selectedItem.isResultAssignment"
               id="optionsRadios1"
@@ -96,9 +82,7 @@
           </label>
         </div>
         <div class="radio">
-          <label
-            for="optionsRadios2"
-            title="result will be used by subsequent microservice.">
+          <label for="optionsRadios2" title="result will be used by subsequent microservice.">
             <input
               [checked]="!selectedItem?.isResultAssignment"
               id="optionsRadios2"
@@ -136,19 +120,12 @@
             style="width: 20%"
             [(ngModel)]="addedDep"
             name="avlbSteps">
-            <option
-              *ngFor="let avlbSteps of availableSteps"
-              [value]="avlbSteps">
+            <option *ngFor="let avlbSteps of availableSteps" [value]="avlbSteps">
               {{ avlbSteps }}
             </option>
             <option value=""></option>
           </select>
-          <div
-            class="click-to-add"
-            style="width: 5%"
-            (click)="addDependency(addedDep)">
-            >>
-          </div>
+          <div class="click-to-add" style="width: 5%" (click)="addDependency(addedDep)">>></div>
           <input
             class="form-control"
             style="width: 65%"
@@ -157,13 +134,8 @@
         </div>
       </fieldset>
 
-      <fieldset
-        (mouseover)="showAssignmentTip = 2"
-        (focus)="showAssignmentTip = 2"
-        class="form-group col-xl-4">
-        <label for="waitDependenciesAssignments">
-          Wait dependencies assignments
-        </label>
+      <fieldset (mouseover)="showAssignmentTip = 2" (focus)="showAssignmentTip = 2" class="form-group col-xl-4">
+        <label for="waitDependenciesAssignments"> Wait dependencies assignments </label>
         <input
           id="waitDependenciesAssignments"
           title="acknowledgeReservation"
@@ -179,15 +151,8 @@
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="_defaultConfig"> Server Config data </label>
-        <label
-          for="_defaultConfig"
-          style="margin-left: 20px"
-          title="it will clear your custom config.">
-          <input
-            id="_defaultConfig"
-            type="checkbox"
-            [(ngModel)]="selectedItem._defaultConfig"
-            name="_defaultConfig" />
+        <label for="_defaultConfig" style="margin-left: 20px" title="it will clear your custom config.">
+          <input id="_defaultConfig" type="checkbox" [(ngModel)]="selectedItem._defaultConfig" name="_defaultConfig" />
           use the default for this service.
         </label>
 
@@ -199,17 +164,7 @@
       </fieldset>
     </div>
 
-    <button
-      class="btn btn-primary"
-      type="submit"
-      (click)="editItem(selectedItem)">
-      Save
-    </button>
-    <button
-      class="btn btn-secondary"
-      type="reset"
-      (click)="getItem(selectedItem.id)">
-      Cancel
-    </button>
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
   </form>
 </section>

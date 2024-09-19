@@ -1,16 +1,12 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Yards</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div>Yards</div>
     <div class="clickable" (click)="list()">
       <span class="reload">&#x21bb;</span>
@@ -28,10 +24,7 @@
           <th>Lat</th>
           <th>Lon</th>
           <th>Alt</th>
-          <th
-            title="Optional: JSON data. If you have extensive map data, consider using map objects.">
-            Map Info
-          </th>
+          <th title="Optional: JSON data. If you have extensive map data, consider using map objects.">Map Info</th>
           <th>Source</th>
         </tr>
       </thead>
@@ -49,13 +42,8 @@
           <td>{{ item.lat }}</td>
           <td>{{ item.lon }}</td>
           <td>{{ item.alt }}</td>
-          <td
-            title="Optional: JSON data. If you have extensive map data, consider using map objects.">
-            {{
-            item.mapData.length > 200
-            ? item.mapData.substring(0, 200) + '...'
-            : item.mapData
-            }}
+          <td title="Optional: JSON data. If you have extensive map data, consider using map objects.">
+            {{ item.mapData.length > 200 ? item.mapData.substring(0, 200) + '...' : item.mapData }}
           </td>
           <td></td>
         </tr>
@@ -66,11 +54,7 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-  <button
-    class="btn btn-danger"
-    [disabled]="!selectedItem"
-    (click)="deleteItem(selectedItem.id)"
-    type="submit">
+  <button class="btn btn-danger" [disabled]="!selectedItem" (click)="deleteItem(selectedItem.id)" type="submit">
     Delete
   </button>
 </div>
@@ -82,21 +66,12 @@
     <div class="row">
       <fieldset class="form-group col-xl-6">
         <label for="name">Name</label>
-        <input
-          id="name"
-          class="form-control"
-          [(ngModel)]="selectedItem.name"
-          name="name" />
+        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
       </fieldset>
 
       <fieldset class="form-group col-xl-3">
         <label for="uid"> UID </label>
-        <input
-          id="uid"
-          class="form-control"
-          [(ngModel)]="selectedItem.uid"
-          name="uid"
-          placeholder="IVI001" />
+        <input id="uid" class="form-control" [(ngModel)]="selectedItem.uid" name="uid" placeholder="IVI001" />
       </fieldset>
 
       <fieldset class="form-group col-xl-3">
@@ -133,13 +108,7 @@
       </fieldset>
       <fieldset class="form-group col-xl-4">
         <label for="alt">Altitude</label>
-        <input
-          id="alt"
-          type="number"
-          class="form-control"
-          [(ngModel)]="selectedItem.alt"
-          name="alt"
-          placeholder="0" />
+        <input id="alt" type="number" class="form-control" [(ngModel)]="selectedItem.alt" name="alt" placeholder="0" />
       </fieldset>
     </div>
 
@@ -161,25 +130,11 @@
         class="form-group col-xl-12"
         title="Optional: JSON data. If you have extensive map data, consider using map objects.">
         <label for="mapData"> Map info (arbritrary JSON data) </label>
-        <textarea
-          id="mapData"
-          class="form-control"
-          [(ngModel)]="selectedItem.mapData"
-          name="mapData"></textarea>
+        <textarea id="mapData" class="form-control" [(ngModel)]="selectedItem.mapData" name="mapData"></textarea>
       </fieldset>
     </div>
 
-    <button
-      class="btn btn-primary"
-      type="submit"
-      (click)="editItem(selectedItem)">
-      Save
-    </button>
-    <button
-      class="btn btn-secondary"
-      type="reset"
-      (click)="getItem(selectedItem.id)">
-      Cancel
-    </button>
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
   </form>
 </section>

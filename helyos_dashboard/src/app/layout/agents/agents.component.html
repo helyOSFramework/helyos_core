@@ -4,18 +4,10 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">
-          helyOS-native Sensor Format
-        </h4>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"></button>
+        <h4 class="modal-title" id="modal-basic-title">helyOS-native Sensor Format</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <a
-        href="https://app.swaggerhub.com/apis-docs/helyOS/helyos_agent_comm/2.0.7#/SensorSet"
-        target="_blank">
+      <a href="https://app.swaggerhub.com/apis-docs/helyOS/helyos_agent_comm/2.0.7#/SensorSet" target="_blank">
         &nbsp;&nbsp; Swagger (external link)
       </a>
       <div class="modal-body" style="max-height: 80vh; overflow: auto">
@@ -37,26 +29,17 @@
     agent.sensors =
     {{ example }}
 
-                </pre>
+        </pre>
       </div>
       <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-outline-dark"
-          data-bs-dismiss="modal">
-          Ok
-        </button>
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Ok</button>
       </div>
     </div>
   </div>
 </div>
 
 <div style="text-align: right; margin-bottom: 6px">
-  <button
-    type="button"
-    class="btn btn-lg btn-outline-dark"
-    data-bs-toggle="modal"
-    data-bs-target="#mymodal">
+  <button type="button" class="btn btn-lg btn-outline-dark" data-bs-toggle="modal" data-bs-target="#mymodal">
     helyOS-native Sensor Format
   </button>
 </div>
@@ -64,9 +47,7 @@
 <!-- END MODAL WINDOW -->
 
 <div class="checkbox">
-  <label>
-    <input type="checkbox" [(ngModel)]="seeRaw" name="isDummy" /> See raw data
-  </label>
+  <label> <input type="checkbox" [(ngModel)]="seeRaw" name="isDummy" /> See raw data </label>
 </div>
 
 <div class="row">
@@ -83,15 +64,9 @@
           }">
           {{ agent.status }}
         </span>
-        <img
-          *ngIf="agent.picture"
-          [src]="agent.picture"
-          style="width: 100%"
-          alt="picture" />
+        <img *ngIf="agent.picture" [src]="agent.picture" style="width: 100%" alt="picture" />
 
-        <p [ngClass]="{ 'bg-danger': agent.msgPerSec > 12 }">
-          messages: {{ agent.msgPerSec }}/s
-        </p>
+        <p [ngClass]="{ 'bg-danger': agent.msgPerSec > 12 }">messages: {{ agent.msgPerSec }}/s</p>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -109,14 +84,7 @@
           </tbody>
         </table>
 
-        <textarea
-          *ngIf="seeRaw"
-          [ngModel]="agent._sensorString"
-          name=""
-          id=""
-          cols="30"
-          rows="10">
-        </textarea>
+        <textarea *ngIf="seeRaw" [ngModel]="agent._sensorString" name="" id="" cols="30" rows="10"> </textarea>
 
         <ng-container *ngIf="!seeRaw && agent._iterSensors">
           <div *ngFor="let sensorSet of agent._iterSensors" class="column">

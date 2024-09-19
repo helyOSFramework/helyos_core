@@ -1,23 +1,18 @@
 <div class="row" style="justify-content: space-between">
   <h1 class="w-auto">Agent Tools</h1>
   <div class="w-auto" style="text-align: right; margin-bottom: 6px">
-    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-      Documentation
-    </button>
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
   </div>
 </div>
 
 <p>
-  Agent tools are physical devices that can be linked to vehicle or robot
-  agents, either equipped with their own embedded computing units or relying on
-  the primary agent unit for communication with helyOS. <br />
+  Agent tools are physical devices that can be linked to vehicle or robot agents, either equipped with their own
+  embedded computing units or relying on the primary agent unit for communication with helyOS. <br />
   For example, a truck trailer is an agent tool.
 </p>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div>Tools</div>
     <div class="clickable" (click)="list()">
       <span class="reload">&#x21bb;</span>
@@ -62,16 +57,14 @@
 
           <td
             [ngClass]="{
-              'bg-danger':
-                item.msgPerSec > 30 && item.connectionStatus === 'online',
+              'bg-danger': item.msgPerSec > 30 && item.connectionStatus === 'online',
             }"
             title="Optimal: 10Hz.">
             {{ item.msgPerSec | number: '1.2-2' }}
           </td>
           <td
             [ngClass]="{
-              'bg-danger':
-                item.updtPerSec > 5 && item.connectionStatus === 'online',
+              'bg-danger': item.updtPerSec > 5 && item.connectionStatus === 'online',
             }"
             title="Optimal: < 2 Hz">
             {{ item.updtPerSec | number: '1.2-2' }}
@@ -83,9 +76,7 @@
     </table>
   </div>
 
-  <div
-    class="card-footer"
-    style="display: flex; justify-content: space-between">
+  <div class="card-footer" style="display: flex; justify-content: space-between">
     <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center">
       <div class="w-auto">Instant Action Command</div>
       <div class="col-xl-6">
@@ -96,23 +87,14 @@
           [(ngModel)]="instantActionCommand"
           name="instantAction" />
       </div>
-      <button class="btn btn-light w-auto" (click)="sendInstantAction()">
-        SEND
-      </button>
+      <button class="btn btn-light w-auto" (click)="sendInstantAction()">SEND</button>
     </div>
 
     <div *ngIf="!selectedItem" class="form-group row col-xl-6"></div>
 
     <div style="text-align: right; margin-bottom: 10px">
-      <button class="btn btn-primary" (click)="create()" type="submit">
-        Add
-      </button>
-      <button
-        class="btn btn-danger"
-        (click)="deleteItem(selectedItem.id)"
-        type="submit">
-        Delete
-      </button>
+      <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+      <button class="btn btn-danger" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
     </div>
   </div>
 </div>
@@ -134,11 +116,7 @@
               <div class="row">
                 <fieldset class="form-group col-xl-3">
                   <label for="name">Name</label>
-                  <input
-                    id="name"
-                    class="form-control"
-                    [(ngModel)]="selectedItem.name"
-                    name="name" />
+                  <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
                 </fieldset>
 
                 <fieldset class="form-group col-xl-6">
@@ -183,15 +161,9 @@
                     (change)="onImageSelected($event)"
                     accept=".png,.jpeg, .jpg" />
 
-                  <label for="thumbnail" class="w-auto">
-                    Thumbnail picture
-                  </label>
+                  <label for="thumbnail" class="w-auto"> Thumbnail picture </label>
 
-                  <button
-                    class="btn btn-light w-auto"
-                    (click)="fileUpload.click()">
-                    Upload
-                  </button>
+                  <button class="btn btn-light w-auto" (click)="fileUpload.click()">Upload</button>
                   <img
                     *ngIf="selectedItem.picture"
                     class="w-auto"
@@ -215,9 +187,7 @@
               </div>
 
               <div class="row">
-                <fieldset
-                  class="form-group"
-                  style="display: flex; align-items: center">
+                <fieldset class="form-group" style="display: flex; align-items: center">
                   <input
                     id="verifySignature"
                     type="checkbox"
@@ -225,10 +195,7 @@
                     class="form-control form-check-input"
                     [(ngModel)]="selectedItem.verifySignature"
                     name="verifySignature" />
-                  <label for="verifySignature">
-                    Use this Public key to validate the RSA signature of the
-                    agent.
-                  </label>
+                  <label for="verifySignature"> Use this Public key to validate the RSA signature of the agent. </label>
                 </fieldset>
               </div>
             </div>
@@ -237,10 +204,7 @@
 
             <h5>Spatial Properties</h5>
             <div class="field-group">
-              <p>
-                The position parameters should be set according to the chosen
-                reference in your application.
-              </p>
+              <p>The position parameters should be set according to the chosen reference in your application.</p>
 
               <div class="row">
                 <fieldset class="form-group col-xl-3">
@@ -347,9 +311,7 @@
                   (mouseover)="showAssignmentTip = 2"
                   (focus)="showAssignmentTip = 2"
                   class="form-group col-xl-3">
-                  <label for="acknowledgeReservation">
-                    Acknowledge reservation
-                  </label>
+                  <label for="acknowledgeReservation"> Acknowledge reservation </label>
                   <input
                     id="acknowledgeReservation"
                     title="acknowledgeReservation"
@@ -361,24 +323,16 @@
                     name="acknowledgeReservation" />
                 </fieldset>
 
-                <div
-                  *ngIf="showAssignmentTip === 1"
-                  class="col-xl-6"
-                  style="font-size: small">
-                  Trucks, tractors, robots can receive assignments. Trailers,
-                  cameras and sensors usually do not receive assignments.
+                <div *ngIf="showAssignmentTip === 1" class="col-xl-6" style="font-size: small">
+                  Trucks, tractors, robots can receive assignments. Trailers, cameras and sensors usually do not receive
+                  assignments.
                 </div>
 
-                <div
-                  *ngIf="showAssignmentTip === 2"
-                  class="col-xl-6"
-                  style="font-size: small">
-                  Before a mission, agents receive a reservation request and
-                  should acknowlege their readiness.
+                <div *ngIf="showAssignmentTip === 2" class="col-xl-6" style="font-size: small">
+                  Before a mission, agents receive a reservation request and should acknowlege their readiness.
                   <br />
-                  Should helyOS wait for this acknowledgement before proceeding
-                  with a mission? Uncheck this box if this agent can receive
-                  consecutive assignments even while is busy.
+                  Should helyOS wait for this acknowledgement before proceeding with a mission? Uncheck this box if this
+                  agent can receive consecutive assignments even while is busy.
                 </div>
               </div>
 
@@ -419,10 +373,7 @@
                 <div class="col-xl-12">
                   <ul style="font-size: small">
                     <li>Suitable for sensors and actuators.</li>
-                    <li>
-                      Security: helyOS and agent message senders are validated
-                      by the message broker.
-                    </li>
+                    <li>Security: helyOS and agent message senders are validated by the message broker.</li>
                   </ul>
                 </div>
               </div>
@@ -430,14 +381,12 @@
                 <div class="col-xl-12">
                   <ul style="font-size: small">
                     <li>
-                      Suitable for sensors and actuators, but actuators must
-                      handle multiple assignments: MQTT doesn't support messages
-                      queueing.
+                      Suitable for sensors and actuators, but actuators must handle multiple assignments: MQTT doesn't
+                      support messages queueing.
                     </li>
                     <li>
-                      Security: Sender validation must be implemented within the
-                      agent. You may use the helyOS and agent RSA signatures for
-                      that.
+                      Security: Sender validation must be implemented within the agent. You may use the helyOS and agent
+                      RSA signatures for that.
                     </li>
                   </ul>
                 </div>
@@ -453,9 +402,7 @@
                     [(ngModel)]="selectedItem.allowAnonymousCheckin"
                     name="allowAnonymousCheckin"
                     (ngModelChange)="changeRegistration()">
-                    <option [ngValue]="true">
-                      Let helyOS create RabbitMQ account
-                    </option>
+                    <option [ngValue]="true">Let helyOS create RabbitMQ account</option>
                     <option [ngValue]="false">Set username and password</option>
                   </select>
                 </fieldset>
@@ -466,13 +413,12 @@
                   <br />
                   <p>
                     The agent can perform the check-in using the
-                    <i>anonymous</i> account *, helyOS will automatically create
-                    a RabbitMQ account and send the username and password to the
-                    agent.
+                    <i>anonymous</i> account *, helyOS will automatically create a RabbitMQ account and send the
+                    username and password to the agent.
                   </p>
                   <p style="font-size: small">
-                    * (username, password) = (anonymous, anonymous). The agent
-                    must possess the AGENT_REGISTRATION_TOKEN.
+                    * (username, password) = (anonymous, anonymous). The agent must possess the
+                    AGENT_REGISTRATION_TOKEN.
                   </p>
                 </div>
               </div>
@@ -500,8 +446,7 @@
                     placeholder="*********" />
                 </fieldset>
                 <p style="font-size: small" class="col-xl-12">
-                  * helyOS will accept messages from this agent only if the
-                  username matches the uuid.
+                  * helyOS will accept messages from this agent only if the username matches the uuid.
                 </p>
               </div>
             </div>
@@ -509,9 +454,8 @@
             <h5>State Properties</h5>
             <div class="field-group">
               <p>
-                Status and connection fields are constantly updated by helyOS
-                and agents. You can try to ascribe them a temporary value for
-                debugging purposes.
+                Status and connection fields are constantly updated by helyOS and agents. You can try to ascribe them a
+                temporary value for debugging purposes.
               </p>
               <div class="row">
                 <fieldset class="form-group col-xl-4">
@@ -528,26 +472,19 @@
 
                 <fieldset class="form-group col-xl-4">
                   <label for="status">status</label>
-                  <select
-                    id="status"
-                    class="form-control form-select"
-                    [(ngModel)]="selectedItem.status"
-                    name="status">
+                  <select id="status" class="form-control form-select" [(ngModel)]="selectedItem.status" name="status">
                     <option value="free">free</option>
                     <option value="busy">busy</option>
-                    <option
-                      title="for 'ready' you need to define the work process"
-                      value="ready">
-                      ready
-                    </option>
+                    <option title="for 'ready' you need to define the work process" value="ready">ready</option>
                   </select>
                 </fieldset>
               </div>
 
               <div class="row" *ngIf="selectedItem.status !== 'free'">
                 <fieldset class="form-group col-xl-8">
-                  <label for="wpClearance">Work process info (wp_clearance for status:
-                    {{ selectedItem.status }})</label>
+                  <label for="wpClearance">
+                    Work process info (wp_clearance for status: {{ selectedItem.status }})
+                  </label>
                   <textarea
                     id="wpClearance"
                     class="form-control"
@@ -560,12 +497,7 @@
 
             <div style="display: flex; align-items: center">
               <h5>Other Properties</h5>
-              <div
-                class="clickable"
-                style="margin-left: 6px"
-                (click)="showOthers = !showOthers">
-                &#x25BC;
-              </div>
+              <div class="clickable" style="margin-left: 6px" (click)="showOthers = !showOthers">&#x25BC;</div>
             </div>
             <div class="field-group" *ngIf="showOthers">
               <p>Add here other relevant data about the agent.</p>
@@ -584,18 +516,8 @@
             </div>
 
             <div style="margin-top: 12px; text-align: end">
-              <button
-                class="btn btn-primary"
-                type="submit"
-                (click)="editItem(selectedItem)">
-                Save
-              </button>
-              <button
-                class="btn btn-secondary"
-                type="reset"
-                (click)="getItem(selectedItem.id)">
-                Cancel
-              </button>
+              <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+              <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
             </div>
           </form>
         </section>
@@ -606,26 +528,19 @@
       <ng-template ngbNavContent>
         <div style="margin: 10px auto; width: 66%">
           <p>
-            <b>"Interconnection"</b> refers to the establishment of a link
-            or/and physical connection between two or more agents. This enables
-            the <i>leader agent</i> to publish message for its
-            <i>follower agents</i>. For example, a truck (leader) can publish
-            position properties for an attached trailer (follower).
+            <b>"Interconnection"</b> refers to the establishment of a link or/and physical connection between two or
+            more agents. This enables the <i>leader agent</i> to publish message for its <i>follower agents</i>. For
+            example, a truck (leader) can publish position properties for an attached trailer (follower).
           </p>
         </div>
 
         <div class="card mb-3" style="margin: 10px auto; width: 66%">
-          <div
-            class="card-header"
-            style="display: flex; justify-content: space-between">
+          <div class="card-header" style="display: flex; justify-content: space-between">
             <div>
               Agents, trailers or tools connected as follower to
               {{ selectedItem.name }}
             </div>
-            <div
-              class="clickable"
-              style="width: fit-content"
-              (click)="interconnectionList()">
+            <div class="clickable" style="width: fit-content" (click)="interconnectionList()">
               <span class="reload">&#x21bb;</span>
               <span> RELOAD </span>
             </div>
@@ -660,16 +575,8 @@
         </div>
 
         <div style="text-align: center; margin-bottom: 10px">
-          <button
-            class="btn btn-primary"
-            (click)="addInterconnection()"
-            type="submit">
-            ADD CONECTION
-          </button>
-          <button
-            class="btn btn-danger"
-            (click)="removeAllInterconnections()"
-            type="submit">
+          <button class="btn btn-primary" (click)="addInterconnection()" type="submit">ADD CONECTION</button>
+          <button class="btn btn-danger" (click)="removeAllInterconnections()" type="submit">
             REMOVE ALL CONNECTIONS
           </button>
         </div>

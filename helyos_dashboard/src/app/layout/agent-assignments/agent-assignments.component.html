@@ -27,9 +27,7 @@
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div class="clickable" (click)="filterList(0)">
       <span class="reload">&#x21bb;</span>
       <span> RELOAD </span>
@@ -75,12 +73,7 @@
 
 <div style="text-align: right; margin-bottom: 10px">
   <!-- <button class="btn btn-primary" (click)="create()" type="submit">Add</button>-->
-  <button
-    class="btn btn-danger"
-    (click)="sendCancelSignal(selectedItem)"
-    type="submit">
-    Send Cancel Signal
-  </button>
+  <button class="btn btn-danger" (click)="sendCancelSignal(selectedItem)" type="submit">Send Cancel Signal</button>
 </div>
 
 <section class="detail-container" *ngIf="selectedItem">
@@ -90,20 +83,12 @@
     <div class="row">
       <fieldset class="form-group col-xl-4">
         <label for="workProcessId">Work Proc ID </label>
-        <input
-          id="workProcessId"
-          class="form-control"
-          [(ngModel)]="selectedItem.workProcessId"
-          name="workProcessId" />
+        <input id="workProcessId" class="form-control" [(ngModel)]="selectedItem.workProcessId" name="workProcessId" />
       </fieldset>
 
       <fieldset class="form-group col-xl-4">
         <label for="yardId">Yard ID </label>
-        <input
-          id="yardId"
-          class="form-control"
-          [(ngModel)]="selectedItem.yardId"
-          name="yardId" />
+        <input id="yardId" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId" />
       </fieldset>
 
       <fieldset class="form-group col-xl-4">
@@ -130,42 +115,26 @@
             name="dp"
             ngbDatepicker
             placeholder="yyyy-mm-dd" />
-          <input
-            *ngIf="!showInput"
-            type="text"
-            [value]="selectedItem.startTimeStamp"
-            readonly />
-          <button
-            (click)="d.toggle(); showInput = true"
-            class="input-group-addon"
-            type="button">
+          <input *ngIf="!showInput" type="text" [value]="selectedItem.startTimeStamp" readonly />
+          <button (click)="d.toggle(); showInput = true" class="input-group-addon" type="button">
             <span class="fa fa-calendar"></span>
           </button>
         </div>
       </div>
 
-      <ngb-timepicker
-        [hidden]="!showInput"
-        [(ngModel)]="selectedItem.startTimeStamp"></ngb-timepicker>
+      <ngb-timepicker [hidden]="!showInput" [(ngModel)]="selectedItem.startTimeStamp"></ngb-timepicker>
     </div>
 
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="result"> Assignment resulting data </label>
-        <textarea
-          id="result"
-          rows="4"
-          class="form-control"
-          [(ngModel)]="selectedItem.result"
-          name="result"></textarea>
+        <textarea id="result" rows="4" class="form-control" [(ngModel)]="selectedItem.result" name="result"></textarea>
       </fieldset>
     </div>
 
     <div class="row">
       <fieldset class="form-group col-xl-12">
-        <label for="context">
-          Assignment context (results from precedent assignments)
-        </label>
+        <label for="context"> Assignment context (results from precedent assignments) </label>
         <textarea
           id="context"
           rows="4"
@@ -178,34 +147,17 @@
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="data"> Assignment order </label>
-        <textarea
-          id="data"
-          rows="4"
-          class="form-control"
-          [(ngModel)]="selectedItem.data"
-          name="data"></textarea>
+        <textarea id="data" rows="4" class="form-control" [(ngModel)]="selectedItem.data" name="data"></textarea>
       </fieldset>
     </div>
 
     <div class="row" style="justify-content: space-between">
       <div class="w-auto">
-        <button
-          class="btn btn-primary"
-          type="submit"
-          (click)="editItem(selectedItem, 'draft')">
-          Save
-        </button>
-        <button
-          class="btn btn-secondary"
-          type="reset"
-          (click)="getItem(selectedItem.id)">
-          Cancel
-        </button>
+        <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem, 'draft')">Save</button>
+        <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
       </div>
       <div class="w-auto">
-        <button class="btn btn-danger" type="submit" (click)="downloadData()">
-          Download order
-        </button>
+        <button class="btn btn-danger" type="submit" (click)="downloadData()">Download order</button>
       </div>
     </div>
   </form>

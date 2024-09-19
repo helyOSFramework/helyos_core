@@ -27,9 +27,7 @@
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div class="clickable" (click)="filterList(0)">
       <span class="reload">&#x21bb;</span>
       <span> RELOAD </span>
@@ -95,24 +93,14 @@
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="request"> JSON Request data </label>
-        <textarea
-          id="request"
-          class="form-control"
-          [ngModel]="selectedItem.request"
-          name="request"
-          readonly></textarea>
+        <textarea id="request" class="form-control" [ngModel]="selectedItem.request" name="request" readonly></textarea>
       </fieldset>
     </div>
 
     <div class="row">
       <fieldset class="form-group col-xl-12">
         <label for="config"> JSON Config data </label>
-        <textarea
-          id="config"
-          class="form-control"
-          [ngModel]="selectedItem.config"
-          name="config"
-          readonly></textarea>
+        <textarea id="config" class="form-control" [ngModel]="selectedItem.config" name="config" readonly></textarea>
       </fieldset>
     </div>
 
@@ -126,8 +114,8 @@
       <div class="row">
         <fieldset class="form-group col-xl-12">
           <label for="selectedItemYardContext">
-            JSON Map and Agents (snapshot of the yard state at the moment the
-            service is called)</label>
+            JSON Map and Agents (snapshot of the yard state at the moment the service is called)
+          </label>
           <textarea
             id="selectedItemYardContext"
             class="form-control"
@@ -139,9 +127,7 @@
 
       <div class="row">
         <fieldset class="form-group col-xl-12">
-          <label for="selectedItemDepsContext">
-            JSON Dependencies (responses from previous linked services)
-          </label>
+          <label for="selectedItemDepsContext"> JSON Dependencies (responses from previous linked services) </label>
           <textarea
             id="selectedItemDepsContext"
             class="form-control"
@@ -169,12 +155,7 @@
     <div class="row" *ngIf="wprocess">
       <fieldset class="form-group col-xl-2">
         <label for="id">ID </label>
-        <input
-          id="id"
-          class="form-control"
-          [ngModel]="wprocess.id"
-          name="id"
-          readonly />
+        <input id="id" class="form-control" [ngModel]="wprocess.id" name="id" readonly />
       </fieldset>
       <fieldset class="form-group col-xl-3">
         <label for="workProcessTypeName">Work type </label>
@@ -188,12 +169,7 @@
 
       <fieldset class="form-group col-xl-3">
         <label for="yardId">Yard id </label>
-        <input
-          id="yardId"
-          class="form-control"
-          [ngModel]="wprocess.yardId"
-          name="yardId"
-          readonly />
+        <input id="yardId" class="form-control" [ngModel]="wprocess.yardId" name="yardId" readonly />
       </fieldset>
 
       <fieldset class="form-group col-xl-4">

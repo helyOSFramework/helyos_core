@@ -5,31 +5,17 @@
 <div class="row" style="align-items: flex-end">
   <fieldset class="form-group col-xl-3">
     <label for="filterWprocId">Work process id</label>
-    <input
-      id="filterWprocId"
-      type="number"
-      class="form-control"
-      [(ngModel)]="filterWprocId"
-      name="filterWprocId" />
+    <input id="filterWprocId" type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId" />
   </fieldset>
 
   <fieldset class="form-group col-xl-4">
     <label for="filterAgentUuid">Agent UUID</label>
-    <input
-      id="filterAgentUuid"
-      type="text"
-      class="form-control"
-      [(ngModel)]="filterAgentUuid"
-      name="filterAgentUuid" />
+    <input id="filterAgentUuid" type="text" class="form-control" [(ngModel)]="filterAgentUuid" name="filterAgentUuid" />
   </fieldset>
 
   <fieldset class="form-group col-xl-4">
     <label for="filterOrigin">Origin</label>
-    <select
-      id="filterOrigin"
-      class="form-control form-select"
-      [(ngModel)]="filterOrigin"
-      name="filterOrigin">
+    <select id="filterOrigin" class="form-control form-select" [(ngModel)]="filterOrigin" name="filterOrigin">
       <option value="agent">agent</option>
       <option value="microservice">microservice</option>
       <option value="helyos_core">helyOS</option>
@@ -47,21 +33,14 @@
 </div>
 
 <div class="card mb-3">
-  <div
-    class="card-header"
-    style="display: flex; justify-content: space-between">
+  <div class="card-header" style="display: flex; justify-content: space-between">
     <div style="display: flex">
       <div class="clickable" (click)="filterList(0)">
         <span class="reload">&#x21bb;</span>
         <span> RELOAD </span>
       </div>
       <div>
-        <input
-          id="autoReload"
-          type="checkbox"
-          style="margin-right: 10px"
-          [(ngModel)]="autoReload"
-          name="autoReload" />
+        <input id="autoReload" type="checkbox" style="margin-right: 10px" [(ngModel)]="autoReload" name="autoReload" />
         <label for="autoReload"> Auto Reload </label>
       </div>
     </div>
