@@ -16,8 +16,8 @@
     "lint:ci": "npm run lint:eslint && npm run lint:stylelint && npm run lint:prettier:html -- --check && npm run lint:prettier:style -- --check",
     "lint:eslint": "ng lint",
     "lint:stylelint": "stylelint 'src/**/*.{css,scss}'",
-    "lint:prettier:html": "prettier --parser=angular src/**/*.html",
-    "lint:prettier:style": "prettier src/**/*.{css,scss}"
+    "lint:prettier:html": "prettier --parser=angular --log-level=warn src/**/*.html",
+    "lint:prettier:style": "prettier --log-level=warn src/**/*.{css,scss}"
   },
   "private": true,
   "dependencies": {
