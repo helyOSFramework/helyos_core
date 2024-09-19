@@ -33,7 +33,10 @@ export class AccountsComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.userAccounts.list({})
-      .then(r => this.items = r);
+      .then(r => {
+        this.items = r;
+        return this.items;
+      });
   }
 
   create() {
@@ -109,7 +112,10 @@ export class AccountsComponent implements OnInit {
 
   copyText() {
     navigator.clipboard.writeText(this.accountToken)
-      .then(() => this.copyLabel = String.fromCharCode(10003) + ' Copied');
+      .then(() => {
+        this.copyLabel = String.fromCharCode(10003) + ' Copied';
+        return this.copyLabel;
+      });
 
   }
 

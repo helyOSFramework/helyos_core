@@ -41,7 +41,10 @@ export class SidebarComponent implements OnInit, AfterViewInit {
   workProcTypesList() {
     try {
       return this.helyosService.methods.workProcessType.list({})
-        .then(r => this.wpTypes = r);
+        .then(r => {
+          this.wpTypes = r;
+          return this.wpTypes;
+        });
 
     } catch (error) {
       return;

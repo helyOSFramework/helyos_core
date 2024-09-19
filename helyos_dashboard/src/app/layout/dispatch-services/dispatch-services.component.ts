@@ -32,7 +32,10 @@ export class DispatchServicesComponent implements OnInit {
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.servciceRequests.list(this.filterObj, this.first, offset)
-      .then(r => this.items = r);
+      .then(r => {
+        this.items = r;
+        return this.items;
+      });
   }
 
   filterList(pageDelta: number = 0) {
@@ -68,7 +71,10 @@ export class DispatchServicesComponent implements OnInit {
       }
       if (this.selectedItem.workProcessId) {
         this.helyosService.methods.workProcess.get(this.selectedItem.workProcessId.toString())
-          .then(wp => this.wprocess = wp);
+          .then(wp => {
+            this.wprocess = wp;
+            return this.wprocess;
+          });
       }
     });
 

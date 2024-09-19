@@ -24,7 +24,10 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.sub = this.activatedroute.paramMap.subscribe(params => {
       this.wpTypeId = parseInt(params.get('id'));
-      this.helyosService.methods.workProcessType.get(params.get('id')).then(r => this.wpType = r);
+      this.helyosService.methods.workProcessType.get(params.get('id')).then(r => {
+        this.wpType = r;
+        return this.wpType;
+      });
       this.list();
     });
 
@@ -47,7 +50,10 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
     return this.helyosService.methods.workProcessServicePlan.list({
       'workProcessTypeId': this.wpTypeId,
     })
-      .then(r => this.wpServPlan = r);
+      .then(r => {
+        this.wpServPlan = r;
+        return this.wpServPlan;
+      });
   }
 
   create() {

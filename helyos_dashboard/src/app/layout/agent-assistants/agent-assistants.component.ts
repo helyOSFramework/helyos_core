@@ -31,7 +31,10 @@ export class AgentAssistantsComponent implements OnInit {
     return this.helyosService.methods.agents.list({
       agentClass: this.agentClass,
     })
-      .then(r => this.tools = r);
+      .then(r => {
+        this.tools = r;
+        return this.tools;
+      });
   }
 
   changeRegistration() {
@@ -106,7 +109,10 @@ export class AgentAssistantsComponent implements OnInit {
         this.helyosService.methods.toolsInterconnections.list({
           leaderId: leaderId,
         })
-          .then(r => this.interconnections = r);
+          .then(r => {
+            this.interconnections = r;
+            return this.interconnections;
+          });
       });
   }
 
@@ -210,7 +216,10 @@ export class AgentAssistantsComponent implements OnInit {
     return this.helyosService.methods.toolsInterconnections.list({
       leaderId: leaderId,
     })
-      .then(r => this.interconnections = r);
+      .then(r => {
+        this.interconnections = r;
+        return this.interconnections;
+      });
   }
 
   addInterconnection() {

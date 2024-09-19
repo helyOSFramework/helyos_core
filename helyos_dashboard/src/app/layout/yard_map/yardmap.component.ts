@@ -288,9 +288,15 @@ export class YardmapComponent implements OnInit, AfterViewInit {
         .then(() => this.helyosService.methods.mapObjects.createMany(_shapes))
         .then(() => {
           this.filterObjList(0)
-            .finally(() => this.disableUploadButton = false);
+            .finally(() => {
+              this.disableUploadButton = false;
+              return this.disableUploadButton;
+            });
         })
-        .finally(() => this.disableUploadButton = false);
+        .finally(() => {
+          this.disableUploadButton = false;
+          return this.disableUploadButton;
+        });
     }
 
   }

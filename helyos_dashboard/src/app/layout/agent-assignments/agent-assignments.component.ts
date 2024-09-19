@@ -28,7 +28,10 @@ export class AgentAssignmentsComponent implements OnInit {
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.assignments.list(this.filterObj, this.first, offset)
-      .then(r => this.assignments = r);
+      .then(r => {
+        this.assignments = r;
+        return this.assignments;
+      });
   }
 
   filterList(pageDelta: number = 0) {

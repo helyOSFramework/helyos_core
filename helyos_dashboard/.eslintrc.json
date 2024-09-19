@@ -248,7 +248,11 @@
         "no-extra-boolean-cast": "error",
         "no-implied-eval": "error",
         "no-lonely-if": "error",
-        "no-multi-assign": "error"
+        "no-multi-assign": "error",
+        "no-return-assign": [
+          "error",
+          "always"
+        ]
       }
     },
     {

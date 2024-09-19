@@ -23,7 +23,10 @@ export class AllServicesComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.extServices.list({})
-      .then(r => this.services = r);
+      .then(r => {
+        this.services = r;
+        return this.services;
+      });
   }
 
   create() {

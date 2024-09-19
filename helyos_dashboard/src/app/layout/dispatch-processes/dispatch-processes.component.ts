@@ -39,7 +39,10 @@ export class DispatchProcessesComponent implements OnInit {
   list() {
     const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.workProcess.list(this.filterObj, this.first, offset)
-      .then(r => this.wProcesses = r);
+      .then(r => {
+        this.wProcesses = r;
+        return this.wProcesses;
+      });
   }
 
   filterList(pageDelta: number = 0) {
@@ -188,7 +191,10 @@ export class DispatchProcessesComponent implements OnInit {
     this.helyosService.methods.assignments.list({
       workProcessId: workProcessId,
     })
-      .then(r => this.assignments = r);
+      .then(r => {
+        this.assignments = r;
+        return this.assignments;
+      });
 
   }
 

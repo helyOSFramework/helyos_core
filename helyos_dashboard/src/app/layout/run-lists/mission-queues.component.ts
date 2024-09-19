@@ -24,14 +24,20 @@ export class RunListsComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.missionQueue.list({})
-      .then(r => this.mQueues = r);
+      .then(r => {
+        this.mQueues = r;
+        return this.mQueues;
+      });
   }
 
   missionList() {
     return this.helyosService.methods.workProcess.list({
       missionQueueId: this.selectedItem.id as number,
     }, 99999, 0, 'RUN_ORDER_ASC')
-      .then(r => this.wProcesses = r);
+      .then(r => {
+        this.wProcesses = r;
+        return this.wProcesses;
+      });
   }
 
   create() {

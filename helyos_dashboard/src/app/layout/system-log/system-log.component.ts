@@ -37,7 +37,10 @@ export class SystemLogComponent implements OnInit, OnDestroy {
     try {
       const offset = (this.page - 1) * this.first;
       return this.helyosService.methods.systemLogs.list(this.filterObj, this.first, offset)
-        .then(r => this.logs = r)
+        .then(r => {
+          this.logs = r;
+          return this.logs;
+        })
         .catch(() => { });
 
     } catch (error) {

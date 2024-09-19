@@ -37,7 +37,10 @@ export class AgentChargeStationsComponent implements OnInit {
   list() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, object-curly-newline
     return this.helyosService.methods.agents.list({ agentClass: this.agentClass as any })
-      .then(r => this.tools = r);
+      .then(r => {
+        this.tools = r;
+        return this.tools;
+      });
   }
 
   changeRegistration() {
@@ -113,7 +116,10 @@ export class AgentChargeStationsComponent implements OnInit {
         this.helyosService.methods.toolsInterconnections.list({
           leaderId: leaderId,
         })
-          .then(r => this.interconnections = r);
+          .then(r => {
+            this.interconnections = r;
+            return this.interconnections;
+          });
       });
   }
 
@@ -231,7 +237,10 @@ export class AgentChargeStationsComponent implements OnInit {
     return this.helyosService.methods.toolsInterconnections.list({
       leaderId: leaderId,
     })
-      .then(r => this.interconnections = r);
+      .then(r => {
+        this.interconnections = r;
+        return this.interconnections;
+      });
   }
 
   addInterconnection() {
