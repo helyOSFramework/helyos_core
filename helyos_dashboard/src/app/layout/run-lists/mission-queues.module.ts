@@ -21,4 +21,4 @@ import { RunListsComponent } from './mission-queues.component';
     { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ]
 })
-export class RunListsModule {}
+export class RunListsModule { }

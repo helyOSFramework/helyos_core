@@ -11,4 +11,4 @@ import { SystemLogComponent } from './system-log.component';
   ],
   declarations: [SystemLogComponent]
 })
-export class SystemLogModule {}
+export class SystemLogModule { }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {  H_Service } from 'helyosjs-sdk';
+import { H_Service } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 
 @Component({
@@ -24,23 +24,23 @@ export class AllServicesComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.extServices.list({})
-      .then( r => this.services = r );
+      .then(r => this.services = r);
   }
 
 
   create() {
-    const newItem={name:'Unnamed'}
+    const newItem = { name: 'Unnamed' };
     this.helyosService.methods.extServices.create(newItem)
-      .then( r=> {
-        console.log(r)
-        this.list().then( () =>  this.getItem(r.id) )
-           
+      .then(r => {
+        console.log(r);
+        this.list().then(() => this.getItem(r.id));
+
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.extServices.get(itemId)
-      .then( r=> {
+      .then(r => {
         this.selectedItem = r;
         this.requireMapObjectsInput = r.requireMapObjects.join(', ');
 
@@ -50,12 +50,12 @@ export class AllServicesComponent implements OnInit {
   delete(itemId) {
     if (confirm('Are you sure you want to delete?')) {
       this.helyosService.methods.extServices.delete(itemId)
-        .then( (_) =>  this.list());
+        .then((_) => this.list());
     }
   }
 
   editItem(item) {
-    const patch = {...item};
+    const patch = { ...item };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch.requireMapObjects;
@@ -67,31 +67,31 @@ export class AllServicesComponent implements OnInit {
         const jsonArray = this.requireMapObjectsInput.split(',').map(element => element.trim());
         patch['requireMapObjects'] = jsonArray;
       } catch (error) {
-        alert('error: requireMapObjects must be an array of strings.')
+        alert('error: requireMapObjects must be an array of strings.');
         return;
       }
-    } 
+    }
 
 
     this.helyosService.methods.extServices.patch(patch)
-      .then( (_) =>  {
+      .then((_) => {
         this.list();
         alert('changes saved');
       });
   }
 
 
-  openMapAPIDoc(){
+  openMapAPIDoc() {
     window.open('/api-docs/map_api.html', '_blank');
   }
 
-  openPPAPIDoc(){
+  openPPAPIDoc() {
     window.open('/api-docs/path_api.html', '_blank');
   }
 
   toggleEnable(item) {
-    return this.helyosService.methods.extServices.patch({id: item.id, enabled: !item.enabled})
-      .then( (_) => {
+    return this.helyosService.methods.extServices.patch({ id: item.id, enabled: !item.enabled })
+      .then((_) => {
         item.enabled = !item.enabled;
         this.list();
       });

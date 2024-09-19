@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
   public runlocal: boolean = false;
 
 
-  constructor(public router: Router, private helyosService : HelyosService) {
+  constructor(public router: Router, private helyosService: HelyosService) {
     this.runlocal = window.location.href.includes('localhost');
   }
 
@@ -28,27 +28,27 @@ export class LoginComponent implements OnInit {
       this.gqlPort = window.sessionStorage.getItem('gqlPort');
       this.wsPort = window.sessionStorage.getItem('wsPort');
       this.runlocal = true;
-    } 
+    }
   }
 
   onLoggedin() {
 
-    if (this.runlocal){
+    if (this.runlocal) {
       this.helyosService.instantiateService(this.gqlPort, this.wsPort);
       window.sessionStorage.setItem('runlocally', 'true');
-      window.sessionStorage.setItem('gqlPort',this.gqlPort);
+      window.sessionStorage.setItem('gqlPort', this.gqlPort);
       window.sessionStorage.setItem('wsPort', this.wsPort);
     } else {
-      window.sessionStorage.setItem('runlocally',"false");
+      window.sessionStorage.setItem('runlocally', "false");
       this.helyosService.instantiateService();
     }
 
     return this.helyosService.methods.login(this.username, this.password)
-      .then( response => {
-        console.log("response login", response);         
+      .then(response => {
+        console.log("response login", response);
 
-        if (response && response.jwtToken){
-          return  this.helyosService.methods.connect()
+        if (response && response.jwtToken) {
+          return this.helyosService.methods.connect()
             .then(() => {
               window.sessionStorage.setItem('token', response.jwtToken);
               console.log("helyos connected");
@@ -62,18 +62,18 @@ export class LoginComponent implements OnInit {
               return false;
             });
         } else {
-          if (response && response.graphQLErrors && response.graphQLErrors.length > 0){
+          if (response && response.graphQLErrors && response.graphQLErrors.length > 0) {
             alert('Username or password is incorrect');
           }
           return false;
-        } 
+        }
 
       })
       .catch(errorLogin => console.log(errorLogin));
-        
+
   }
 
-  changingServerMode(){
+  changingServerMode() {
     this.runlocal = !this.runlocal;
     window.sessionStorage.removeItem('isLoggedin');
   }

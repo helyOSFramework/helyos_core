@@ -7,4 +7,4 @@ import { StatComponent } from './stat.component';
   declarations: [StatComponent],
   exports: [StatComponent]
 })
-export class StatModule {}
+export class StatModule { }

@@ -17,4 +17,4 @@ const routes: Routes = [
     FormsModule
   ]
 })
-export class AccountsRoutingModule {}
+export class AccountsRoutingModule { }

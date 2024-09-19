@@ -11,4 +11,4 @@ import { YardsComponent } from './yards.component';
   ],
   declarations: [YardsComponent]
 })
-export class YardsModule {}
+export class YardsModule { }

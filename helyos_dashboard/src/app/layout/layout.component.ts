@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
 export class LayoutComponent {
   collapedSideBar: boolean;
 
-  constructor() {}
+  constructor() { }
 
   receiveCollapsed($event) {
     this.collapedSideBar = $event;

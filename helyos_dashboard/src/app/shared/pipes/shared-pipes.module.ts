@@ -5,4 +5,4 @@ import { NgModule } from '@angular/core';
   imports: [CommonModule],
   declarations: []
 })
-export class SharedPipesModule {}
+export class SharedPipesModule { }

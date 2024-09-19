@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { H_UserAccount } from 'helyosjs-sdk/dist/helyos.models';
 import { HelyosService } from '../../services/helyos.service';
-import { NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-accounts',
@@ -31,26 +31,26 @@ export class AccountsComponent implements OnInit {
     this.list();
   }
 
- 
+
   list() {
     return this.helyosService.methods.userAccounts.list({})
-      .then( r => this.items = r );
+      .then(r => this.items = r);
   }
 
 
   create() {
-    const newItem={username:'unnamed', passwordHash:" "};
+    const newItem = { username: 'unnamed', passwordHash: " " };
     this.helyosService.methods.userAccounts.create(newItem)
-      .then( r=> {
-        console.log(r)
-        this.list().then( () =>  this.getItem(r.id) )
-           
+      .then(r => {
+        console.log(r);
+        this.list().then(() => this.getItem(r.id));
+
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.userAccounts.get(itemId)
-      .then( (r: H_UserAccount)=> {
+      .then((r: H_UserAccount) => {
         this.selectedItem = r;
         if (!r.metadata) { r.metadata = {}; }
         this.selectedItem.metadata = JSON.stringify(r.metadata, null, 2);
@@ -65,12 +65,12 @@ export class AccountsComponent implements OnInit {
   }
 
   editItem(item) {
-    const patch: Partial<H_UserAccount> = {...item};
+    const patch: Partial<H_UserAccount> = { ...item };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch.passwordHash;
     delete patch.userId;
-        
+
     try {
       patch.metadata = JSON.parse(patch.metadata);
     } catch (error) {
@@ -89,21 +89,21 @@ export class AccountsComponent implements OnInit {
   }
 
 
-  getToken(content){
+  getToken(content) {
     this.copyLabel = ' Copy ';
     this.helyosService.methods.adminGetUserAuthToken(this.selectedItem.username)
-      .then( r => {
+      .then(r => {
         this.accountToken = `Bearer ${r.jwtToken}`;
-        const _ = this.modalService.open(content,  { size: 'lg', centered: true, backdrop: false });
-      })
+        const _ = this.modalService.open(content, { size: 'lg', centered: true, backdrop: false });
+      });
 
   }
 
 
   copyText() {
-    navigator.clipboard.writeText( this.accountToken)
-      .then(() => this.copyLabel =  String.fromCharCode(10003) + ' Copied');
-        
+    navigator.clipboard.writeText(this.accountToken)
+      .then(() => this.copyLabel = String.fromCharCode(10003) + ' Copied');
+
   }
 
   setPassword() {
@@ -121,7 +121,7 @@ export class AccountsComponent implements OnInit {
 
   }
 
-  openDocs(){
+  openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/3-helyos-and-client-apps/application-accounts.html', '_blank');
   }
 

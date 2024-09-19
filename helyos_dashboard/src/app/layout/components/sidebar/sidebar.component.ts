@@ -15,79 +15,79 @@ export class SidebarComponent implements OnInit, AfterViewInit {
   showMenu: string;
   pushRightClass: string;
 
-    @Output() collapsedEvent = new EventEmitter<boolean>();
+  @Output() collapsedEvent = new EventEmitter<boolean>();
 
-    public wpTypes: H_WorkProcessType[];
+  public wpTypes: H_WorkProcessType[];
 
 
-    constructor(private helyosService: HelyosService, private translate: TranslateService, public router: Router, ) {
-      this.router.events.subscribe((val) => {
-        if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
-          this.toggleSidebar();
-        }
-      });
-    }
-
-    ngOnInit() {
-      this.isActive = false;
-      this.collapsed = false;
-      this.showMenu = '';
-      this.pushRightClass = 'push-right';
-    }
-
-    ngAfterViewInit(): void {
-      this.workProcTypesList();        
-    }
-
-    workProcTypesList(){
-      try {
-        return this.helyosService.methods.workProcessType.list({})
-          .then( r => this.wpTypes = r );
-            
-      } catch (error) {
-        return
+  constructor(private helyosService: HelyosService, private translate: TranslateService, public router: Router,) {
+    this.router.events.subscribe((val) => {
+      if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
+        this.toggleSidebar();
       }
+    });
+  }
 
+  ngOnInit() {
+    this.isActive = false;
+    this.collapsed = false;
+    this.showMenu = '';
+    this.pushRightClass = 'push-right';
+  }
+
+  ngAfterViewInit(): void {
+    this.workProcTypesList();
+  }
+
+  workProcTypesList() {
+    try {
+      return this.helyosService.methods.workProcessType.list({})
+        .then(r => this.wpTypes = r);
+
+    } catch (error) {
+      return;
     }
 
-    eventCalled() {
-      this.isActive = !this.isActive;
-    }
+  }
 
-    addExpandClass(element: string) {
-      if (element === this.showMenu) {
-        this.showMenu = '0';
-      } else {
-        this.showMenu = element;
-      }
-      this.workProcTypesList();
-    }
+  eventCalled() {
+    this.isActive = !this.isActive;
+  }
 
-    toggleCollapsed() {
-      this.collapsed = !this.collapsed;
-      this.collapsedEvent.emit(this.collapsed);
+  addExpandClass(element: string) {
+    if (element === this.showMenu) {
+      this.showMenu = '0';
+    } else {
+      this.showMenu = element;
     }
+    this.workProcTypesList();
+  }
 
-    isToggled(): boolean {
-      const dom: Element = document.querySelector('body');
-      return dom.classList.contains(this.pushRightClass);
-    }
+  toggleCollapsed() {
+    this.collapsed = !this.collapsed;
+    this.collapsedEvent.emit(this.collapsed);
+  }
 
-    toggleSidebar() {
-      const dom = document.querySelector('body');
-      dom.classList.toggle(this.pushRightClass);
-    }
+  isToggled(): boolean {
+    const dom: Element = document.querySelector('body');
+    return dom.classList.contains(this.pushRightClass);
+  }
 
-    rltAndLtr() {
-      const dom = document.querySelector('body');
-      dom.classList.toggle('rtl');
-    }
+  toggleSidebar() {
+    const dom = document.querySelector('body');
+    dom.classList.toggle(this.pushRightClass);
+  }
 
-    changeLang(language: string) {
-      this.translate.use(language);
-    }
+  rltAndLtr() {
+    const dom = document.querySelector('body');
+    dom.classList.toggle('rtl');
+  }
 
-    onLoggedout() {
-      window.sessionStorage.removeItem('isLoggedin');
-    }
+  changeLang(language: string) {
+    this.translate.use(language);
+  }
+
+  onLoggedout() {
+    window.sessionStorage.removeItem('isLoggedin');
+  }
 }

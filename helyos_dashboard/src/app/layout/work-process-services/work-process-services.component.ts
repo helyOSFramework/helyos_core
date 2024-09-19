@@ -21,26 +21,26 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   public addedDep: string;
 
   constructor(private helyosService: HelyosService,
-                private activatedroute:ActivatedRoute,
+    private activatedroute: ActivatedRoute,
   ) { }
 
 
   ngOnInit() {
-    this.sub=this.activatedroute.paramMap.subscribe(params => { 
-      this.wpTypeId = parseInt(params.get('id')); 
-      this.helyosService.methods.workProcessType.get(params.get('id')).then( r => this.wpType = r);
+    this.sub = this.activatedroute.paramMap.subscribe(params => {
+      this.wpTypeId = parseInt(params.get('id'));
+      this.helyosService.methods.workProcessType.get(params.get('id')).then(r => this.wpType = r);
       this.list();
     });
 
-    this.helyosService.methods.extServices.list({}).then( r => {
+    this.helyosService.methods.extServices.list({}).then(r => {
       this.availableServiceTypes = [];
       r.forEach((service: H_Service) => {
         if (!this.availableServiceTypes.includes(service.serviceType)) {
-          this.availableServiceTypes.push(service.serviceType)
+          this.availableServiceTypes.push(service.serviceType);
         }
       });
 
-    })
+    });
   }
 
   ngOnDestroy() {
@@ -48,17 +48,17 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   }
 
   list() {
-    return this.helyosService.methods.workProcessServicePlan.list({'workProcessTypeId':this.wpTypeId})
-      .then( r => this.wpServPlan = r );
+    return this.helyosService.methods.workProcessServicePlan.list({ 'workProcessTypeId': this.wpTypeId })
+      .then(r => this.wpServPlan = r);
   }
 
 
   create() {
-    const newItem={step:'X', workProcessTypeId: this.wpTypeId }
+    const newItem = { step: 'X', workProcessTypeId: this.wpTypeId };
     this.helyosService.methods.workProcessServicePlan.create(newItem)
-      .then( r=> {
+      .then(r => {
         console.log(r);
-        this.list().then( () => this.getItem(r.id));
+        this.list().then(() => this.getItem(r.id));
       });
   }
 
@@ -67,7 +67,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   returnObj(objString) {
     try {
       return JSON.parse(objString);
-            
+
     } catch (error) {
       return objString;
     }
@@ -75,19 +75,19 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
   getItem(itemId) {
     this.helyosService.methods.workProcessServicePlan.get(itemId)
-      .then( r=> {
+      .then(r => {
         this.selectedItem = r;
         this.selectedItem['_defaultConfig'] = !this.selectedItem.serviceConfig;
-        if (!this.selectedItem['_defaultConfig']){
+        if (!this.selectedItem['_defaultConfig']) {
           this.selectedItem.serviceConfig = JSON.stringify(this.selectedItem.serviceConfig);
         }
         this.addedDep = '';
-        this.availableSteps = this.wpServPlan.filter( plan => {
-          if ( plan.id == r.id) return false;
+        this.availableSteps = this.wpServPlan.filter(plan => {
+          if (plan.id == r.id) return false;
           const dependsOnSteps = this.returnObj(plan.dependsOnSteps); // cannot depend of itself
           if (dependsOnSteps && dependsOnSteps.includes(r.step)) return false; // avoid recursive dependencies
           return true;
-        }).map( plan =>  plan.step);
+        }).map(plan => plan.step);
       });
   }
 
@@ -95,21 +95,21 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   deleteItem() {
     if (this.selectedItem) {
       this.helyosService.methods.workProcessServicePlan.delete(this.selectedItem.id as string)
-        .then( (_) => {
+        .then((_) => {
           this.list();
         });
     }
   }
 
   editItem(item) {
-    const patch = {...item};
+    const patch = { ...item };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch._defaultConfig;
 
-    if (item['_defaultConfig']){
+    if (item['_defaultConfig']) {
       patch.serviceConfig = null;
-    } 
+    }
 
     if (!patch.serviceConfig) {
       patch.serviceConfig = null;
@@ -117,13 +117,13 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
       try {
         patch['serviceConfig'] = JSON.parse(item['serviceConfig']);
       } catch (error) {
-        alert('error: serviceConfig is not a valid JSON.')
+        alert('error: serviceConfig is not a valid JSON.');
         return;
       }
-    } 
+    }
 
     this.helyosService.methods.workProcessServicePlan.patch(patch)
-      .then( (_) => {
+      .then((_) => {
         this.list();
       });
   }
@@ -134,7 +134,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   }
 
   isAssignmentResult(ev) {
-    console.log(ev)
+    console.log(ev);
   }
 
 
@@ -150,7 +150,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
     }
   }
 
-  openDocs(){
+  openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/2-helyos-configuration/admin-dashboard.html#missions-recipes-view', '_blank');
   }
 

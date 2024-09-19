@@ -13,4 +13,4 @@ import { WorkProcessServicesComponent } from './work-process-services.component'
   ],
   declarations: [WorkProcessServicesComponent]
 })
-export class WorkProcessServicesModule {}
+export class WorkProcessServicesModule { }

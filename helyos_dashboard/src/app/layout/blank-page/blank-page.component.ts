@@ -6,6 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./blank-page.component.scss']
 })
 export class BlankPageComponent {
-  constructor() {}
+  constructor() { }
 
 }

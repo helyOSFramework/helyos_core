@@ -21,4 +21,4 @@ import { DispatchProcessesComponent } from './dispatch-processes.component';
     { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ]
 })
-export class DispatchProcessesModule {}
+export class DispatchProcessesModule { }

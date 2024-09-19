@@ -36,19 +36,19 @@ export class SystemLogComponent implements OnInit, OnDestroy {
 
   list() {
     try {
-      const offset = (this.page - 1)*this.first;
+      const offset = (this.page - 1) * this.first;
       return this.helyosService.methods.systemLogs.list(this.filterObj, this.first, offset)
-        .then( r => this.logs = r )
-        .catch(()=>{});
-            
+        .then(r => this.logs = r)
+        .catch(() => { });
+
     } catch (error) {
       return;
     }
 
   }
 
-  reloadLoop(){
-    this.reloadTimer = setInterval(()=> {      
+  reloadLoop() {
+    this.reloadTimer = setInterval(() => {
       if (this.autoReload) {
         this.list();
       }
@@ -59,9 +59,9 @@ export class SystemLogComponent implements OnInit, OnDestroy {
 
   }
 
-  filterList(pageDelta:number=0) {
+  filterList(pageDelta: number = 0) {
     this.page += pageDelta;
-    if (this.page < 1){
+    if (this.page < 1) {
       this.page = 1;
     }
     this.filterObj = {};

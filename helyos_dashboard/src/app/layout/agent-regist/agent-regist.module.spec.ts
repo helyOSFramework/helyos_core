@@ -10,5 +10,5 @@ describe('AgentRegistModule', () => {
   it('should create an instance', () => {
     expect(agentRegistModule).toBeTruthy();
   });
-    
+
 });

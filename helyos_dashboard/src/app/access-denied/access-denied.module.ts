@@ -11,4 +11,4 @@ import { AccessDeniedComponent } from './access-denied.component';
   ],
   declarations: [AccessDeniedComponent]
 })
-export class AccessDeniedModule {}
+export class AccessDeniedModule { }

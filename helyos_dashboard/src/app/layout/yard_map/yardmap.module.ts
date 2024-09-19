@@ -10,4 +10,4 @@ import { YardmapComponent } from './yardmap.component';
   ],
   declarations: [YardmapComponent]
 })
-export class YardmapModule {}
+export class YardmapModule { }

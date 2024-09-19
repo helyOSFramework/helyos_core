@@ -48,25 +48,25 @@ const ymlToWorkProcessServicePlanTableMap = {
 
 
 
-export const exportToYML = async ( wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN ) => {
+export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN) => {
   // Template JSON to populate data from tables
   const workprocessTypes: H_WorkProcessType[] = await wpTypeMethods.list({});
   const workprocessPlans: H_WorkProcessServicePlan[] = await wpServPlanMethods.list({});
 
-  const dataJSON = {'version':'2.0', 'missions':{}};
+  const dataJSON = { 'version': '2.0', 'missions': {} };
   workprocessTypes.forEach((wpType) => {
 
     // parse properites of work_process_type into missions
-    dataJSON['missions'][wpType.name] = {}
+    dataJSON['missions'][wpType.name] = {};
     for (const key in wpType) {
       if (Object.prototype.hasOwnProperty.call(WorkProcessTypeTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpType, key)) {
-        if(key == "settings" || key == "dispatchOrder"){ // JSON.stringify() is used to preserve list brackets
-          if(wpType[key] != null){
-            dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key])
+        if (key == "settings" || key == "dispatchOrder") { // JSON.stringify() is used to preserve list brackets
+          if (wpType[key] != null) {
+            dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key]);
           }
-                    
-        } else{
-          dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = wpType[key]
+
+        } else {
+          dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = wpType[key];
         }
       }
     }
@@ -74,68 +74,68 @@ export const exportToYML = async ( wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMe
     // parse wp_plans into mission steps
     const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId == wpType.id);
     const formatedSteps = wpTypeRecipeSteps.map((wpStep) => {
-      const formatedStep = {}
+      const formatedStep = {};
       for (const key in wpStep) {
         if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
-          if(key == "dependsOnSteps"){  // JSON.stringify() is used to preserve list brackets
-            if(wpStep[key] != null){
-              formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key])
+          if (key == "dependsOnSteps") {  // JSON.stringify() is used to preserve list brackets
+            if (wpStep[key] != null) {
+              formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key]);
             }
           } else {
-            formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = wpStep[key]
+            formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = wpStep[key];
           }
         }
       }
 
       // add dummy override_config if not present
-      if(!Object.prototype.hasOwnProperty.call(formatedStep, 'override_config')){
-        formatedStep['override_config'] = "{}"
+      if (!Object.prototype.hasOwnProperty.call(formatedStep, 'override_config')) {
+        formatedStep['override_config'] = "{}";
       }
 
       return formatedStep;
     });
 
-    if (formatedSteps.length > 0){
-      dataJSON.missions[wpType.name]['recipe'] = {'steps' : formatedSteps};
+    if (formatedSteps.length > 0) {
+      dataJSON.missions[wpType.name]['recipe'] = { 'steps': formatedSteps };
     }
 
   });
 
-    
+
   // convert JSON to yml
   const ymlData = yaml.dump(dataJSON);
   return Promise.resolve(ymlData);
 
-}
+};
 
 /**
- * registerMissions(missionsYmlPath) 
+ * registerMissions(missionsYmlPath)
  * Parse the missions.yml files and populate the database.
  *
  * @param {string} missionsYmlPath
  * @returns {boolean}
  */
-export const importFromYML = (rawdata:string, wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN ) => {    
-  try{
-        
+export const importFromYML = (rawdata: string, wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN) => {
+  try {
+
     const missions = yaml.load(rawdata);
-    console.log(flattenMissionsData(missions))
+    console.log(flattenMissionsData(missions));
     const promises = flattenMissionsData(missions).map(
       async (wprocess) => {
         const workProcessTypeName = wprocess['name'];
         // create or update work process
-        const oldWprocesses = await  wpTypeMethods.list({name:workProcessTypeName});
+        const oldWprocesses = await wpTypeMethods.list({ name: workProcessTypeName });
         let wprocId;
         if (oldWprocesses.length === 0) {
           const newWPType = await wpTypeMethods.create(wprocess);
           wprocId = newWPType.id;
         } else {
           wprocId = oldWprocesses[0].id;
-          await wpTypeMethods.patch({id: wprocId, ...wprocess});
+          await wpTypeMethods.patch({ id: wprocId, ...wprocess });
         }
         // update the mission recipe of the work process
 
-        return saveWorkProcessServicePlans(wpServPlanMethods, wprocess['name'],parseInt(wprocId),missions);
+        return saveWorkProcessServicePlans(wpServPlanMethods, wprocess['name'], parseInt(wprocId), missions);
       });
 
     return Promise.all(promises);
@@ -143,8 +143,8 @@ export const importFromYML = (rawdata:string, wpTypeMethods: WORKPROCESS_TYPE, w
     console.log('importFromYML error', error);
     return Promise.reject(error);
   }
-	
-}
+
+};
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
@@ -163,7 +163,7 @@ const saveWorkProcessServicePlans = (
   jsonObj: any
 ) => {
 
-  const deletePromises = (wprocTypeId) => serviceMethods.list({workProcessTypeId: wprocTypeId})
+  const deletePromises = (wprocTypeId) => serviceMethods.list({ workProcessTypeId: wprocTypeId })
     .then((wprocSteps) => {
       const promises = wprocSteps.map((wprocStep) => serviceMethods.delete(wprocStep.id));
       return Promise.all(promises);
@@ -171,13 +171,13 @@ const saveWorkProcessServicePlans = (
 
   // use lookup to find the missions object in the input json
   const missions = lookup(jsonObj, 'missions');
-  if (!missions[workProcessType]['recipe']) { return null}
+  if (!missions[workProcessType]['recipe']) { return null; }
 
   // recipe steps array for the given work process type
   const recipeSteps = missions[workProcessType]['recipe']['steps'];
 
   // loop through the recipe steps array
-  const promiseSequence = []
+  const promiseSequence = [];
   promiseSequence.push(deletePromises(workProcessTypeId));
   for (const [_index, step] of recipeSteps.entries()) {
     // initialize arrays to store the column names and values
@@ -192,29 +192,29 @@ const saveWorkProcessServicePlans = (
         colValues2.push(value2);
       }
     }
-    
+
     // check if the depends_on_steps column is missing
     const dependsOnStepsIndex = colNames2.indexOf(ymlToWorkProcessServicePlanTableMap['dependencies']);
-    
+
     if (dependsOnStepsIndex === -1) {
       // add the depends_on_steps column with a default value of an empty array
       colNames2.push(ymlToWorkProcessServicePlanTableMap['dependencies']);
       colValues2.push('[]');
     }
-    
+
     // initialize an empty object to store the flattened step
     const patchFlat = {};
-    
+
     // loop through the column names and assign them to the flattened step object with their values
     for (const [index, val] of colNames2.entries()) {
       patchFlat[val] = colValues2[index];
     }
-    
+
     // insert value to work_process_service_plan table
     promiseSequence.push(serviceMethods.create(patchFlat));
   }
 
-  return  Promise.all(promiseSequence);
+  return Promise.all(promiseSequence);
 };
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -245,8 +245,8 @@ const flattenMissionsData = (jsonObj) => {
           // push the corresponding column name and value to the arrays
           colNames.push(ymlToWorkProcessTypeTableMap[key2]);
 
-          if (key2 == "settings" || key2 == "extraParams" || key2 == "dependencies" || key2 == "serviceConfig"){
-            if(value2 != null){
+          if (key2 == "settings" || key2 == "extraParams" || key2 == "dependencies" || key2 == "serviceConfig") {
+            if (value2 != null) {
               colValues.push(JSON.parse(value2));
             } else {
               colValues.push(null);

@@ -27,14 +27,14 @@ export class AgentAssignmentsComponent implements OnInit {
 
 
   list() {
-    const offset = (this.page - 1)*this.first;
+    const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.assignments.list(this.filterObj, this.first, offset)
-      .then( r => this.assignments = r );
+      .then(r => this.assignments = r);
   }
 
-  filterList(pageDelta:number=0) {
+  filterList(pageDelta: number = 0) {
     this.page += pageDelta;
-    if (this.page < 1){
+    if (this.page < 1) {
       this.page = 1;
     }
     this.filterObj = {};
@@ -46,40 +46,40 @@ export class AgentAssignmentsComponent implements OnInit {
   }
 
   create() {
-    const newItem={status: 'draft'}
+    const newItem = { status: 'draft' };
     this.helyosService.methods.assignments.create(newItem)
-      .then( r=> {
+      .then(r => {
         console.log(r);
-        this.list().then( () =>  this.getItem(r.id) );
+        this.list().then(() => this.getItem(r.id));
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.assignments.get(itemId)
-      .then( (r: H_Assignment)=> {
-        this.selectedItem = r;   
+      .then((r: H_Assignment) => {
+        this.selectedItem = r;
         this.selectedItem['data'] = JSON.stringify(r['data'], undefined, 4);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.selectedItem['context'] = JSON.stringify(r['context'], undefined, 4) as any;
         this.selectedItem['result'] = JSON.stringify(r['result'], undefined, 4);
 
-      })
+      });
 
   }
 
-  sendCancelSignal(item){
+  sendCancelSignal(item) {
     if (confirm(`Canceling an assigment may disrupt the current mission, ` +
-                     `resulting in an inconsistent state. It is advisable to cancel the mission instead. ` +
-                     `Press OK to continue.`)){ 
+      `resulting in an inconsistent state. It is advisable to cancel the mission instead. ` +
+      `Press OK to continue.`)) {
       this.editItem(item, "canceling");
     }
   }
 
-  editItem(item, status=null) {
+  editItem(item, status = null) {
     if (status) {
       item.status = status;
     }
-    const patch = {...item};
+    const patch = { ...item };
 
     if (item['data']) {
       try {
@@ -88,7 +88,7 @@ export class AgentAssignmentsComponent implements OnInit {
         alert('error: Data is not a valid JSON.');
         return;
       }
-    } 
+    }
 
     if (item['context']) {
       try {
@@ -115,7 +115,7 @@ export class AgentAssignmentsComponent implements OnInit {
     this.helyosService.methods.assignments.patch(patch)
       .then((_) => {
         this.list();
-      }).catch( e => {
+      }).catch(e => {
         alert(JSON.stringify(e));
       });
   }
@@ -124,13 +124,13 @@ export class AgentAssignmentsComponent implements OnInit {
 
   downloadData() {
     this.downloadObject(this.selectedItem.data,
-                                 `assignment_data_${this.selectedItem.id}.json`,
-                                 'application/json');
+      `assignment_data_${this.selectedItem.id}.json`,
+      'application/json');
   }
 
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
-    const file = new Blob([content], {type: contentType});
+    const file = new Blob([content], { type: contentType });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();

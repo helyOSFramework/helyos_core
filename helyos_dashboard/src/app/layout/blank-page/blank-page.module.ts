@@ -11,4 +11,4 @@ import { BlankPageComponent } from './blank-page.component';
   ],
   declarations: [BlankPageComponent]
 })
-export class BlankPageModule {}
+export class BlankPageModule { }

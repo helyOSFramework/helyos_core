@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HelyosServices} from 'helyosjs-sdk';
+import { HelyosServices } from 'helyosjs-sdk';
 import { environment } from '../../environments/environment';
 
 
@@ -10,7 +10,7 @@ export class HelyosService {
   helyosURL: string;
   methods: HelyosServices;
 
-  constructor() {    
+  constructor() {
     const httpOrhttps = window.location.protocol;
     this.helyosURL = `${httpOrhttps}//${location.hostname}`; //'http://localhost';
 
@@ -25,27 +25,27 @@ export class HelyosService {
     this.instantiateService(gqlPort, wsPort);
 
     if (window.sessionStorage.getItem('isLoggedin') === 'true') {
-      const token =  window.sessionStorage.getItem('token');
+      const token = window.sessionStorage.getItem('token');
       if (token) {
-        this.methods.token =  token;
+        this.methods.token = token;
         this.methods.connect()
           .then(() => {
             console.log("helyos connected");
-            return(true);
-        
-          }).catch(errorConnect =>console.log(errorConnect));
+            return (true);
+
+          }).catch(errorConnect => console.log(errorConnect));
       }
     }
 
-    console.log(this.methods)
+    console.log(this.methods);
   }
 
 
-  instantiateService(gqlPort=null, socketPort=null){
-    if(!gqlPort) { gqlPort = environment['gqlPort']}
-    if(!socketPort) { socketPort = environment['socketPort']}
-    this.methods = new HelyosServices(this.helyosURL, {socketPort, gqlPort});
-  } 
+  instantiateService(gqlPort = null, socketPort = null) {
+    if (!gqlPort) { gqlPort = environment['gqlPort']; }
+    if (!socketPort) { socketPort = environment['socketPort']; }
+    this.methods = new HelyosServices(this.helyosURL, { socketPort, gqlPort });
+  }
 
 
 

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthGuard {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   canActivate() {
     if (window.sessionStorage.getItem('isLoggedin')) {

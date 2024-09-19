@@ -21,4 +21,4 @@ import { LayoutComponent } from './layout.component';
     HeaderComponent
   ]
 })
-export class LayoutModule {}
+export class LayoutModule { }

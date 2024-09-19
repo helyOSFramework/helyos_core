@@ -18,4 +18,4 @@ import { FormsModule } from '@angular/forms';
     { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ]
 })
-export class AgentRegistModule {}
+export class AgentRegistModule { }

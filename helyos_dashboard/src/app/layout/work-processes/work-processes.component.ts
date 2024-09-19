@@ -27,26 +27,26 @@ export class WorkProcessesComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.workProcessType.list({})
-      .then( r => {
+      .then(r => {
         this.wpTypes = r;
-        this.availableMissions = r.map( wp => wp.name);
+        this.availableMissions = r.map(wp => wp.name);
       });
   }
 
 
   create() {
-    const newItem={name:'Unnamed'}
+    const newItem = { name: 'Unnamed' };
     this.helyosService.methods.workProcessType.create(newItem)
-      .then( r=> {
-        console.log(r)
-        this.list().then( () =>  this.getItem(r.id) )
-           
+      .then(r => {
+        console.log(r);
+        this.list().then(() => this.getItem(r.id));
+
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.workProcessType.get(itemId)
-      .then( r=> {
+      .then(r => {
         this.selectedItem = r;
         if (!r.settings) { r.settings = {}; }
         this.selectedItem.settings = JSON.stringify(r.settings, null, 2);
@@ -57,14 +57,14 @@ export class WorkProcessesComponent implements OnInit {
   deleteItem() {
     if (this.selectedItem) {
       this.helyosService.methods.workProcessType.delete(this.selectedItem.id as string)
-        .then( (_) => {
+        .then((_) => {
           this.list();
         });
     }
   }
 
   editItem(item) {
-    const patch = {...item};
+    const patch = { ...item };
     delete patch.createdAt;
     delete patch.modifiedAt;
 
@@ -76,7 +76,7 @@ export class WorkProcessesComponent implements OnInit {
     }
 
     this.helyosService.methods.workProcessType.patch(patch)
-      .then( (_) => {
+      .then((_) => {
         this.list();
         alert('changes saved');
       });
@@ -85,42 +85,42 @@ export class WorkProcessesComponent implements OnInit {
 
   browser_yard_shapes() {
     const uploadBtn = document.getElementById('fileup');
-    uploadBtn.click()
+    uploadBtn.click();
 
   }
 
 
-  importYML(event){
+  importYML(event) {
     const selectedFile = event.target.files[0];
     const reader = new FileReader();
     reader.readAsText(selectedFile, "UTF-8");
-     
+
     reader.onload = (_) => {
       // convert yml to DB data and save it.
       const data = reader.result as string;
       importFromYML(data, this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
-        .then( () => {
+        .then(() => {
           this.list();
           alert('changes saved');
         });
-    }
+    };
   }
 
-  exportYML(){
+  exportYML() {
     // convert DB data to yml
     exportToYML(this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
-      .then( ymlData => {
-        this.download_object(ymlData, 'missions.yml','application/x-yaml');
+      .then(ymlData => {
+        this.download_object(ymlData, 'missions.yml', 'application/x-yaml');
       });
   }
 
   download_object(content, fileName, contentType) {
     const a = document.createElement("a");
-    const file = new Blob([content], {type: contentType});
+    const file = new Blob([content], { type: contentType });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
   }
-    
+
 
 }

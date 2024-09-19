@@ -19,10 +19,10 @@ export class YardsComponent implements OnInit {
     this.list();
   }
 
- 
+
   list() {
     return this.helyosService.methods.yard.list({})
-      .then( r => {
+      .then(r => {
         this.yards = r.map(yard => {
           try {
             yard.mapData = JSON.stringify(yard.mapData, null, 2);
@@ -36,18 +36,18 @@ export class YardsComponent implements OnInit {
 
 
   create() {
-    const newItem={name:'Unnamed', source: 'manual input'}
+    const newItem = { name: 'Unnamed', source: 'manual input' };
     this.helyosService.methods.yard.create(newItem)
-      .then( r=> {
-        console.log(r)
-        this.list().then( () =>  this.getItem(r.id) )
-           
+      .then(r => {
+        console.log(r);
+        this.list().then(() => this.getItem(r.id));
+
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.yard.get(itemId)
-      .then( (r: H_Yard)=> {
+      .then((r: H_Yard) => {
         this.selectedItem = r;
         try {
           this.selectedItem.mapData = JSON.stringify(this.selectedItem.mapData, null, 2);
@@ -59,19 +59,19 @@ export class YardsComponent implements OnInit {
 
   deleteItem(itemId) {
     this.helyosService.methods.yard.delete(itemId)
-      .then( r=> {
-        if (r.message){
+      .then(r => {
+        if (r.message) {
           const message = r.message;
           alert(message);
         } else {
           this.list();
         }
-      })
-        
+      });
+
   }
 
   editItem(item) {
-    const patch = {...item};
+    const patch = { ...item };
     delete patch.createdAt;
     delete patch.modifiedAt;
 
@@ -83,8 +83,8 @@ export class YardsComponent implements OnInit {
     }
 
     this.helyosService.methods.yard.patch(patch)
-      .then( r=> {
-        if (r.message){
+      .then(r => {
+        if (r.message) {
           const message = r.message;
           alert(message);
         } else {
@@ -95,7 +95,7 @@ export class YardsComponent implements OnInit {
       });
   }
 
-  openDocs(){
+  openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/1-the-helyos-framework/data-formats.html#yard-and-map-formats', '_blank');
   }
 

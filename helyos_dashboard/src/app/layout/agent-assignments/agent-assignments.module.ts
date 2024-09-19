@@ -21,4 +21,4 @@ import { AgentAssignmentsComponent } from './agent-assignments.component';
     { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ]
 })
-export class AgentAssignmentsModule {}
+export class AgentAssignmentsModule { }

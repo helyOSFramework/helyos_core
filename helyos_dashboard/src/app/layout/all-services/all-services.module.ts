@@ -13,4 +13,4 @@ import { AllServicesComponent } from './all-services.component';
   ],
   declarations: [AllServicesComponent]
 })
-export class AllServicesModule {}
+export class AllServicesModule { }

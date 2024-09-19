@@ -25,39 +25,39 @@ export class RunListsComponent implements OnInit {
 
   list() {
     return this.helyosService.methods.missionQueue.list({})
-      .then( r => this.mQueues = r );
+      .then(r => this.mQueues = r);
   }
 
   missionList() {
-    return this.helyosService.methods.workProcess.list({missionQueueId:this.selectedItem.id as number}, 99999, 0,'RUN_ORDER_ASC')
-      .then( r => this.wProcesses = r );
+    return this.helyosService.methods.workProcess.list({ missionQueueId: this.selectedItem.id as number }, 99999, 0, 'RUN_ORDER_ASC')
+      .then(r => this.wProcesses = r);
   }
-    
+
 
   create() {
     const now = new Date();
     const newName = 'run-list ' + now.toLocaleTimeString();
-    const newItem={status: 'stopped', name: newName }
+    const newItem = { status: 'stopped', name: newName };
     this.helyosService.methods.missionQueue.create(newItem)
-      .then( r=> {
-        console.log(r)
-        this.list().then( () =>  this.getItem(r.id) )
+      .then(r => {
+        console.log(r);
+        this.list().then(() => this.getItem(r.id));
       });
   }
 
   getItem(itemId) {
     this.helyosService.methods.missionQueue.get(itemId)
-      .then( (r: H_WorkProcess)=> {
-        this.selectedItem = r;   
+      .then((r: H_WorkProcess) => {
+        this.selectedItem = r;
         this.missionList();
-      })
+      });
 
   }
 
 
   deleteItem(itemId) {
     this.helyosService.methods.missionQueue.delete(itemId)
-      .then( (_) => {
+      .then((_) => {
         this.list();
         this.selectedItem = null;
       });
@@ -65,38 +65,38 @@ export class RunListsComponent implements OnInit {
 
 
 
-  editItem(item, status=null) {
+  editItem(item, status = null) {
     if (status) {
       item.status = status;
     }
 
-    const patch = {...item};
+    const patch = { ...item };
 
-    console.log(item)
+    console.log(item);
 
     delete patch.createdAt;
     delete patch.modifiedAt;
 
     this.helyosService.methods.missionQueue.patch(patch)
-      .then( (_) => {
+      .then((_) => {
         this.list();
-      }).catch( e => {
+      }).catch(e => {
         alert(JSON.stringify(e));
       });
   }
 
 
-  onStatusChange(ev){
+  onStatusChange(ev) {
     const newValue = ev.target.value;
-    if (newValue!=='running' && newValue!=='stopped'){
+    if (newValue !== 'running' && newValue !== 'stopped') {
       this.selectedItem.status = newValue;
-    } else{
-      ev.target.value= this.selectedItem.status;
+    } else {
+      ev.target.value = this.selectedItem.status;
     }
   }
 
 
-  openDocs(){
+  openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/4-helyos-and-microservices/helyos-request.html#mission-request', '_blank');
   }
 }

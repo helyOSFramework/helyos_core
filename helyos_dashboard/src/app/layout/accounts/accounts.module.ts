@@ -11,4 +11,4 @@ import { AccountsComponent } from './accounts.component';
   ],
   declarations: [AccountsComponent]
 })
-export class AccountsModule {}
+export class AccountsModule { }

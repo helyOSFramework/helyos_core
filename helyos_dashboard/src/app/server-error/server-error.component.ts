@@ -6,6 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./server-error.component.scss']
 })
 export class ServerErrorComponent {
-  constructor() {}
+  constructor() { }
 
 }

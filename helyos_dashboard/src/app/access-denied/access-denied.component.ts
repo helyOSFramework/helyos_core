@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./access-denied.component.scss']
 })
 export class AccessDeniedComponent {
-  constructor() {}
+  constructor() { }
 }

@@ -7,8 +7,8 @@ import packageJson from '../../package.json';
 export const environment = {
   production: false,
   gqlPort: '5000',
-  socketPort:'5002',
-  version: packageJson.version 
+  socketPort: '5002',
+  version: packageJson.version
 };
 
 /*

@@ -11,4 +11,4 @@ import { WorkProcessesComponent } from './work-processes.component';
     WorkProcessesRoutingModule],
   declarations: [WorkProcessesComponent]
 })
-export class WorkProcessesModule {}
+export class WorkProcessesModule { }

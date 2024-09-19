@@ -12,5 +12,5 @@ import { AgentsComponent } from './agents.component';
   ],
   declarations: [AgentsComponent]
 })
-export class AgentsModule {}
+export class AgentsModule { }
 

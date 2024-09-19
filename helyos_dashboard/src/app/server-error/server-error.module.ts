@@ -11,4 +11,4 @@ import { ServerErrorComponent } from './server-error.component';
   ],
   declarations: [ServerErrorComponent]
 })
-export class ServerErrorModule {}
+export class ServerErrorModule { }

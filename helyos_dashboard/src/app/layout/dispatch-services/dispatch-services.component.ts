@@ -31,14 +31,14 @@ export class DispatchServicesComponent implements OnInit {
 
 
   list() {
-    const offset = (this.page - 1)*this.first;
+    const offset = (this.page - 1) * this.first;
     return this.helyosService.methods.servciceRequests.list(this.filterObj, this.first, offset)
-      .then( r => this.items = r );
+      .then(r => this.items = r);
   }
-    
-  filterList(pageDelta:number=0) {
+
+  filterList(pageDelta: number = 0) {
     this.page += pageDelta;
-    if (this.page < 1){
+    if (this.page < 1) {
       this.page = 1;
     }
     this.filterObj = {};
@@ -51,30 +51,30 @@ export class DispatchServicesComponent implements OnInit {
 
   getItem(itemId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.helyosService.methods.servciceRequests.get(itemId).then( (r: any)=> {
-      this.selectedItem = r;  
-      console.log(r) 
+    this.helyosService.methods.servciceRequests.get(itemId).then((r: any) => {
+      this.selectedItem = r;
+      console.log(r);
       this.selectedItem['agentIds'] = JSON.stringify(r['agentIds']);
       try {
         const context = JSON.parse(this.selectedItem.context);
-        this.selectedItemYardContext = JSON.stringify({'map':context.map, 'agents': context.agents}, null, 3);
-        this.selectedItemDepsContext = JSON.stringify({'dependencies':context.dependencies}, null, 3);
+        this.selectedItemYardContext = JSON.stringify({ 'map': context.map, 'agents': context.agents }, null, 3);
+        this.selectedItemDepsContext = JSON.stringify({ 'dependencies': context.dependencies }, null, 3);
       } catch (error) {
         return;
       }
-      if(this.selectedItem.workProcessId) {
+      if (this.selectedItem.workProcessId) {
         this.helyosService.methods.workProcess.get(this.selectedItem.workProcessId.toString())
           .then(wp => this.wprocess = wp);
       }
-    })
+    });
 
   }
 
-  timeDifference(date1:string, date2:string) {
-    if (!(date1 && date2)) {return ''}
+  timeDifference(date1: string, date2: string) {
+    if (!(date1 && date2)) { return ''; }
     const d1 = new Date(date1);
     const d2 = new Date(date2);
-    return `${Math.round((d1.getTime() - d2.getTime())/1000)} secs`;
+    return `${Math.round((d1.getTime() - d2.getTime()) / 1000)} secs`;
   }
 
 
