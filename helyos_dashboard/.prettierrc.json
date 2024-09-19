@@ -10,6 +10,5 @@
   "bracketSpacing": true,
   "bracketSameLine": true,
   "arrowParens": "always",
-  "endOfLine": "auto",
-  "parser": "angular"
+  "endOfLine": "auto"
 }
