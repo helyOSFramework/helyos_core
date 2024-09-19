@@ -198,6 +198,10 @@
         ],
         "no-trailing-spaces": [
           "error"
+        ],
+        "curly": [
+          "error",
+          "all"
         ]
       }
     },

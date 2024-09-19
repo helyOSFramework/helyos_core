@@ -100,7 +100,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   }
 
   getObjectItem(itemId) {
-    if (this.selectedObjectItem && this.selectedObjectItem.id === itemId) return;
+    if (this.selectedObjectItem && this.selectedObjectItem.id === itemId) {return;}
 
     this.helyosService.methods.mapObjects.get(itemId)
       .then((o: H_MapObject) => {

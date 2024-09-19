@@ -308,8 +308,8 @@ const lookup = (obj, k) => {
         // recursively call lookup on each value
         result = lookup(o, k);
         // if the result is not null, break the loop
-        if (result == null) continue;
-        else break;
+        if (result == null) {continue;}
+        else {break;}
       }
     }
     // return the result

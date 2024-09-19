@@ -59,7 +59,7 @@ export class DispatchProcessesComponent implements OnInit {
           throw new Error("No yard");
         }
         this.availableYardIds = yards.map(y => y.id);
-        if (!this.availableYardIds.includes(this.yardId)) this.yardId = this.availableYardIds[0];
+        if (!this.availableYardIds.includes(this.yardId)) {this.yardId = this.availableYardIds[0];}
       })
       .then(() => {
         const id = this.yardId;
