@@ -31,24 +31,24 @@
           (click)="onLoggedin()"
           [routerLink]="['/all-services']"
           class="btn rounded-btn">
-          {{ "Log in" | translate }}
+          {{ 'Log in' | translate }}
         </a>
         &nbsp;
         <a [routerLink]="['/signup']" class="btn rounded-btn">{{
-          "Change password" | translate
+          'Change password' | translate
         }}</a>
         &nbsp;
         <a
           (click)="changingServerMode()"
           *ngIf="!runlocal"
           class="btn rounded-btn"
-          >{{ "Use custom ports" | translate }}</a
+          >{{ 'Use custom ports' | translate }}</a
         >
         <a
           (click)="changingServerMode()"
           *ngIf="runlocal"
           class="btn rounded-btn"
-          >{{ "Use default ports" | translate }}</a
+          >{{ 'Use default ports' | translate }}</a
         >
       </form>
 

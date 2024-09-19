@@ -66,7 +66,7 @@
           }">
           <th scope="row">{{ item.id }}</th>
           <td>{{ item.serviceUrl }}</td>
-          <td>{{ item.dispatchedAt | date: "dd.MM.yy HH:mm:ss" }}</td>
+          <td>{{ item.dispatchedAt | date: 'dd.MM.yy HH:mm:ss' }}</td>
           <td>
             {{ timeDifference(item.resultAt, item.dispatchedAt) }}
           </td>
@@ -119,7 +119,7 @@
     <h5>Context data</h5>
     <p>This data is automatically appended by helyOS to the request data.</p>
     <p>
-      <i> {{ " context:\{map,agents,dependencies\} " }} </i>
+      <i> {{ ' context:\{map,agents,dependencies\} ' }} </i>
     </p>
 
     <div>

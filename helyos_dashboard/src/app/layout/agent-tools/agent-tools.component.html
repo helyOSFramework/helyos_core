@@ -66,7 +66,7 @@
                 item.msgPerSec > 30 && item.connectionStatus === 'online',
             }"
             title="Optimal: 10Hz.">
-            {{ item.msgPerSec | number: "1.2-2" }}
+            {{ item.msgPerSec | number: '1.2-2' }}
           </td>
           <td
             [ngClass]="{
@@ -74,7 +74,7 @@
                 item.updtPerSec > 5 && item.connectionStatus === 'online',
             }"
             title="Optimal: < 2 Hz">
-            {{ item.updtPerSec | number: "1.2-2" }}
+            {{ item.updtPerSec | number: '1.2-2' }}
           </td>
           <td>{{ item.yardId }}</td>
           <td>{{ item.status }}</td>
@@ -653,7 +653,7 @@
                     {{ connect.agentByFollowerId?.agentType }}
                   </td>
                   <td>
-                    {{ connect.createdAt | date: "dd.MM.yy HH:mm:ss" }}
+                    {{ connect.createdAt | date: 'dd.MM.yy HH:mm:ss' }}
                   </td>
                 </tr>
               </tbody>
