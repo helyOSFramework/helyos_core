@@ -48,7 +48,7 @@ This project uses:
 
 - **[ESLint](https://eslint.org/)** for HTML and TypeScript linting (`.eslintrc.json`).
 - **[Stylelint](https://stylelint.io/)** for CSS, SCSS linting (`.stylelintrc.json`).
-- **[Prettier](https://prettier.io/)** for HTML, CSS, SCSS linting (`.prettierrc.json`).
+- **[Prettier](https://prettier.io/)** for CSS, SCSS linting (`.prettierrc.json`).
 
 To check for linting issues across JavaScript/TypeScript, CSS/SCSS and HTML files, run the following command:
 
