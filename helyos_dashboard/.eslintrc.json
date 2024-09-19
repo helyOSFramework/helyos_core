@@ -220,7 +220,8 @@
         "no-const-assign": "error",
         "no-constant-condition": "error",
         "no-debugger": "error",
-        "no-dupe-else-if": "error"
+        "no-dupe-else-if": "error",
+        "no-dupe-keys": "error"
       }
     },
     {
