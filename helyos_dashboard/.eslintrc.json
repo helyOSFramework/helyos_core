@@ -215,7 +215,8 @@
           "always"
         ],
         "array-callback-return": "error",
-        "no-class-assign": "error"
+        "no-class-assign": "error",
+        "no-cond-assign": "error"
       }
     },
     {
