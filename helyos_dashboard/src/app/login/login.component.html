@@ -36,20 +36,16 @@
         &nbsp;
         <a [routerLink]="['/signup']" class="btn rounded-btn">{{
           'Change password' | translate
-        }}</a>
+          }}</a>
         &nbsp;
         <a
           (click)="changingServerMode()"
           *ngIf="!runlocal"
-          class="btn rounded-btn"
-          >{{ 'Use custom ports' | translate }}</a
-        >
+          class="btn rounded-btn">{{ 'Use custom ports' | translate }}</a>
         <a
           (click)="changingServerMode()"
           *ngIf="runlocal"
-          class="btn rounded-btn"
-          >{{ 'Use default ports' | translate }}</a
-        >
+          class="btn rounded-btn">{{ 'Use default ports' | translate }}</a>
       </form>
 
       <div>
