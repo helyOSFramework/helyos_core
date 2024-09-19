@@ -16,6 +16,8 @@
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
   "html.format.enable": true,
+  "html.format.extraLiners": "",
+  "html.format.indentInnerHtml": true,
   "html.format.wrapAttributes": "preserve",
   "html.format.wrapLineLength": 120,
   "typescript.format.enable": true,
