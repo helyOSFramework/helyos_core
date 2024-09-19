@@ -40,9 +40,9 @@ npm run start
 
 The server will start on a local port, and the app will be accessible via your browser.
 
-### Linting
+#### Linting
 
-#### Check for Linting Issues
+##### Check for Linting Issues
 
 This project uses:
 
@@ -56,7 +56,7 @@ To check for linting issues across JavaScript/TypeScript, CSS/SCSS and HTML file
 npm run lint
 ```
 
-#### Auto-Fix Issues
+##### Auto-Fix Issues
 
 To auto-fix linting issues, run:
 
