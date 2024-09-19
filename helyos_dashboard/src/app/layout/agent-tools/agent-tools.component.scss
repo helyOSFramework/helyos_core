@@ -1,7 +1,6 @@
 .file-upload {
-    display: none;
-  }
-
+  display: none;
+}
 
 .thumbnail-container {
   align-items: flex-start;
@@ -14,19 +13,19 @@
   }
 
   img {
-      margin: 3px;
-      height: 100%;
+    margin: 3px;
+    height: 100%;
   }
 }
 
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
 }
 
 .field-group {
   border: solid 0.5px rgba(0, 0, 0, 0.125);
-  border-radius: 10px; 
-  padding: 18px; 
+  border-radius: 10px;
+  padding: 18px;
   margin-bottom: 30px;
 }

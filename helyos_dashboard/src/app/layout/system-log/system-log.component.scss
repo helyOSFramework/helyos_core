@@ -1,50 +1,47 @@
 table {
-    width: 100%;
-    border: 1px solid #333;
-    table-layout: fixed;
+  width: 100%;
+  border: 1px solid #333;
+  table-layout: fixed;
 }
 
 td {
-    overflow: hidden;
-    max-width: 25%;
-    word-wrap: break-word;
+  overflow: hidden;
+  max-width: 25%;
+  word-wrap: break-word;
 }
 
-
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
 }
 
 .reload {
-    font-family: "Lucida Sans Unicode", sans-serif;
-    font-size: 20px;
-    font-weight: 400;
-}
-  
-
-.error-row{
-    color: red !important;
+  font-family: 'Lucida Sans Unicode', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
 }
 
+.error-row {
+  color: red !important;
+}
 
-.warn-row{
-    color: rgb(132, 132, 0) !important;
+.warn-row {
+  color: rgb(132, 132, 0) !important;
 }
 
 .datetime-column {
-    width: 140px;
+  width: 140px;
 }
 
-.type-column{
-    width: 100px;
+.type-column {
+  width: 100px;
 }
 
 .wproc-column {
-    width: 95px;
-    text-align: center;
+  width: 95px;
+  text-align: center;
 }
 
 .agent-column {
-    width: 145px;
+  width: 145px;
 }

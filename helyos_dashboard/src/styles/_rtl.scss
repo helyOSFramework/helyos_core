@@ -1,85 +1,85 @@
 .rtl {
-    .sidebar {
-        left: auto !important;
-        right: 0 !important;
-        text-align: right;
+  .sidebar {
+    left: auto !important;
+    right: 0 !important;
+    text-align: right;
 
-        > ul.list-group {
-            padding: 0;
-        }
+    > ul.list-group {
+      padding: 0;
     }
+  }
 
-    .main-container {
-        margin-left: 0 !important;
-        margin-right: 235px;
-    }
+  .main-container {
+    margin-left: 0 !important;
+    margin-right: 235px;
+  }
 
-    /* rtl dropdown items correction */
-    .dropdown-menu {
-        text-align: right;
-    }
+  /* rtl dropdown items correction */
+  .dropdown-menu {
+    text-align: right;
+  }
+
+  * {
+    direction: rtl;
+  }
+
+  .navbar * {
+    direction: ltr;
+  }
+
+  .sidebar * {
+    direction: rtl;
+  }
+
+  .navbar .dropdown-menu {
+    text-align: left;
+  }
+
+  .breadcrumb {
+    direction: ltr;
+    justify-content: flex-end;
 
     * {
-        direction: rtl;
+      direction: ltr;
     }
+  }
 
-    .navbar * {
+  .datepicker-input {
+    direction: ltr;
+
+    .dropdown-menu {
+      direction: ltr;
+
+      * {
         direction: ltr;
+      }
     }
+  }
 
-    .sidebar * {
-        direction: rtl;
-    }
-
-    .navbar .dropdown-menu {
-        text-align: left;
-    }
-
-    .breadcrumb {
-        direction: ltr;
-        justify-content: flex-end;
-
-        * {
-            direction: ltr;
-        }
-    }
-
-    .datepicker-input {
-        direction: ltr;
-
-        .dropdown-menu {
-            direction: ltr;
-
-            * {
-                direction: ltr;
-            }
-        }
-    }
-
-    .input-group {
-        direction: ltr;
-    }
+  .input-group {
+    direction: ltr;
+  }
 }
 
 @media screen and (max-width: 992px) {
-    .rtl {
-        .navbar-brand {
-            direction: ltr;
-        }
-
-        .sidebar {
-            right: -235px !important;
-        }
-
-        .main-container {
-            margin-right: 0;
-        }
-
-        &.push-right {
-            .sidebar {
-                left: auto !important;
-                right: 0 !important;
-            }
-        }
+  .rtl {
+    .navbar-brand {
+      direction: ltr;
     }
+
+    .sidebar {
+      right: -235px !important;
+    }
+
+    .main-container {
+      margin-right: 0;
+    }
+
+    &.push-right {
+      .sidebar {
+        left: auto !important;
+        right: 0 !important;
+      }
+    }
+  }
 }

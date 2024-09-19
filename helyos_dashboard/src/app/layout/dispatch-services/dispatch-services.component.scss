@@ -5,32 +5,31 @@
 //     display:block;
 //   }
 
-
 .table-fix-head {
-    overflow-y: auto;
-    height: 300px;
-    padding-top: 0;
+  overflow-y: auto;
+  height: 300px;
+  padding-top: 0;
 }
 
 .table-fix-head thead th {
-    position: sticky;
-    top: 0;
-    background-color: white;
+  position: sticky;
+  top: 0;
+  background-color: white;
 }
 
 .table-fix-head-hide-scrolled {
-    height:20px;
-    background-color: white;
-    z-index: 999;
-    padding: 0;
-    width: 100%;
-    margin-bottom: -1px;
-    margin-left: 20px;
-    margin-right: 20px;
-    border-bottom: solid 0.5px lightgray;
+  height: 20px;
+  background-color: white;
+  z-index: 999;
+  padding: 0;
+  width: 100%;
+  margin-bottom: -1px;
+  margin-left: 20px;
+  margin-right: 20px;
+  border-bottom: solid 0.5px lightgray;
 }
 
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
 }
