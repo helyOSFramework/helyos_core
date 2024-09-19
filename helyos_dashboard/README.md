@@ -40,17 +40,26 @@ The server will start on a local port, and the app will be accessible via your b
 
 ### Linting
 
-This project uses:
-- **[ESLint](https://eslint.org/)** for HTML and TypeScript linting.
-- **[Stylelint](https://stylelint.io/)** for CSS and SCSS linting.
+#### Check for Linting Issues
 
-To check for linting issues across both JavaScript/TypeScript and CSS/SCSS files, run the following command:
+This project uses:
+- **[ESLint](https://eslint.org/)** for HTML and TypeScript linting (`.eslintrc.json`). 
+- **[Prettier](https://prettier.io/)** for HTML linting (`.prettierrc.json`).
+- **[Stylelint](https://stylelint.io/)** for CSS and SCSS linting (`.stylelintrc.json`).
+
+To check for linting issues across JavaScript/TypeScript, CSS/SCSS and HTML files, run the following command:
 
 ```bash
 npm run lint
 ```
 
-This will execute linting for both **ESLint** and **Stylelint** based on the configured rules in the respective configuration files (`.eslintrc.json` and `.stylelintrc.json`).
+#### Auto-Fix Issues
+
+To auto-fix linting issues, run:
+
+```bash
+npm run lint:fix
+```
 
 #### Running Tests
 
