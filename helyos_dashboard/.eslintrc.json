@@ -239,9 +239,16 @@
         "no-unsafe-negation": "error",
         "no-unsafe-optional-chaining": "error",
         "no-unused-private-class-members": "error",
-        // "no-useless-assignment": "error",
         "use-isnan": "error",
-        "valid-typeof": "error"
+        "valid-typeof": "error",
+        "default-case": "error",
+        "default-case-last": "error",
+        "default-param-last": "error",
+        "no-eval": "error",
+        "no-extra-boolean-cast": "error",
+        "no-implied-eval": "error",
+        "no-lonely-if": "error",
+        "no-multi-assign": "error"
       }
     },
     {
