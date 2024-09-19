@@ -127,7 +127,7 @@ export class AgentChargeStationsComponent implements OnInit {
       alert('RabbitMQ password is empty');
       return false;
     }
-    if (!username || username.indexOf(' ') != -1) {
+    if (!username || username.indexOf(' ') !== -1) {
       alert('RabbitMQ username is not valid - we recommend to use the agent UUID');
       return false;
     }
@@ -139,7 +139,7 @@ export class AgentChargeStationsComponent implements OnInit {
       alert('UUID cannot be blank. UUID V4 is recommended.');
       return false;
     }
-    if (uuid.indexOf(' ') != -1) {
+    if (uuid.indexOf(' ') !== -1) {
       alert('UUID cannot contain spaces. UUID V4 is recommended.');
       return false;
     }

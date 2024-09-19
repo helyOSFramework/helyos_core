@@ -18,7 +18,7 @@ export class SignupComponent {
   constructor(public router: Router, private helyosService: HelyosService) { }
 
   changePassword() {
-    if (this.confirmedPassword != this.password) {
+    if (this.confirmedPassword !== this.password) {
       alert('Password does not match');
     }
 

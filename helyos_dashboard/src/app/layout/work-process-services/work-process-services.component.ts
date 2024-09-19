@@ -45,7 +45,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
   list() {
     return this.helyosService.methods.workProcessServicePlan.list({
-      'workProcessTypeId': this.wpTypeId, 
+      'workProcessTypeId': this.wpTypeId,
     })
       .then(r => this.wpServPlan = r);
   }
@@ -53,7 +53,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   create() {
     const newItem = {
       step: 'X',
-      workProcessTypeId: this.wpTypeId, 
+      workProcessTypeId: this.wpTypeId,
     };
     this.helyosService.methods.workProcessServicePlan.create(newItem)
       .then(r => {
@@ -81,6 +81,8 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
         }
         this.addedDep = '';
         this.availableSteps = this.wpServPlan.filter(plan => {
+          // ignore because of multiple types. id: string | number
+          // eslint-disable-next-line eqeqeq
           if (plan.id == r.id) return false;
           const dependsOnSteps = this.returnObj(plan.dependsOnSteps); // cannot depend of itself
           if (dependsOnSteps && dependsOnSteps.includes(r.step)) return false; // avoid recursive dependencies
@@ -100,7 +102,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
 
   editItem(item) {
     const patch = {
-      ...item, 
+      ...item,
     };
     delete patch.createdAt;
     delete patch.modifiedAt;

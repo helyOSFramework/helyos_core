@@ -52,7 +52,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
 
   const dataJSON = {
     'version': '2.0',
-    'missions': {}, 
+    'missions': {},
   };
   workprocessTypes.forEach((wpType) => {
 
@@ -60,8 +60,9 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
     dataJSON['missions'][wpType.name] = {};
     for (const key in wpType) {
       if (Object.prototype.hasOwnProperty.call(WorkProcessTypeTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpType, key)) {
-        if (key == "settings" || key == "dispatchOrder") { // JSON.stringify() is used to preserve list brackets
-          if (wpType[key] != null) {
+        if (key === "settings" || key === "dispatchOrder") {
+          // JSON.stringify() is used to preserve list brackets
+          if (wpType[key] !== null) {
             dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key]);
           }
 
@@ -72,12 +73,12 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
     }
 
     // parse wp_plans into mission steps
-    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId == wpType.id);
+    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId === wpType.id);
     const formatedSteps = wpTypeRecipeSteps.map((wpStep) => {
       const formatedStep = {};
       for (const key in wpStep) {
         if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
-          if (key == "dependsOnSteps") {  // JSON.stringify() is used to preserve list brackets
+          if (key === "dependsOnSteps") {  // JSON.stringify() is used to preserve list brackets
             if (wpStep[key] != null) {
               formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key]);
             }
@@ -97,7 +98,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
 
     if (formatedSteps.length > 0) {
       dataJSON.missions[wpType.name]['recipe'] = {
-        'steps': formatedSteps, 
+        'steps': formatedSteps,
       };
     }
 
@@ -126,7 +127,7 @@ export const importFromYML = (rawdata: string, wpTypeMethods: WORKPROCESS_TYPE, 
         const workProcessTypeName = wprocess['name'];
         // create or update work process
         const oldWprocesses = await wpTypeMethods.list({
-          name: workProcessTypeName, 
+          name: workProcessTypeName,
         });
         let wprocId;
         if (oldWprocesses.length === 0) {
@@ -136,7 +137,7 @@ export const importFromYML = (rawdata: string, wpTypeMethods: WORKPROCESS_TYPE, 
           wprocId = oldWprocesses[0].id;
           await wpTypeMethods.patch({
             id: wprocId,
-            ...wprocess, 
+            ...wprocess,
           });
         }
         // update the mission recipe of the work process
@@ -170,7 +171,7 @@ const saveWorkProcessServicePlans = (
 ) => {
 
   const deletePromises = (wprocTypeId) => serviceMethods.list({
-    workProcessTypeId: wprocTypeId, 
+    workProcessTypeId: wprocTypeId,
   })
     .then((wprocSteps) => {
       const promises = wprocSteps.map((wprocStep) => serviceMethods.delete(wprocStep.id));
@@ -252,7 +253,7 @@ const flattenMissionsData = (jsonObj) => {
           // push the corresponding column name and value to the arrays
           colNames.push(ymlToWorkProcessTypeTableMap[key2]);
 
-          if (key2 == "settings" || key2 == "extraParams" || key2 == "dependencies" || key2 == "serviceConfig") {
+          if (key2 === "settings" || key2 === "extraParams" || key2 === "dependencies" || key2 === "serviceConfig") {
             if (value2 != null) {
               colValues.push(JSON.parse(value2));
             } else {
@@ -294,7 +295,7 @@ function to search for nested objects by their keys.
 const lookup = (obj, k) => {
   try {
     // check if the input is an object
-    if (typeof obj != 'object') {
+    if (typeof obj !== 'object') {
       return null;
     }
     let result = null;

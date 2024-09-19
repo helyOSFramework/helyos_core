@@ -63,7 +63,7 @@ export class AgentRegistComponent implements OnInit {
     const newItem = {
       name: 'Unnamed',
       yardId: 1,
-      status: 'checked out', 
+      status: 'checked out',
     };
     this.helyosService.methods.agents.create(newItem)
       .then(r => {
@@ -101,7 +101,7 @@ export class AgentRegistComponent implements OnInit {
         const id = r.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
         this.helyosService.methods.toolsInterconnections.list({
-          leaderId: leaderId, 
+          leaderId: leaderId,
         })
           .then(r => this.interconnections = r);
       });
@@ -119,7 +119,7 @@ export class AgentRegistComponent implements OnInit {
       alert('RabbitMQ password is empty');
       return false;
     }
-    if (!username || username.indexOf(' ') != -1) {
+    if (!username || username.indexOf(' ') !== -1) {
       alert('RabbitMQ username is not valid - we recommend to use the agent UUID');
       return false;
     }
@@ -131,7 +131,7 @@ export class AgentRegistComponent implements OnInit {
       alert('UUID cannot be blank. UUID V4 is recommended.');
       return false;
     }
-    if (uuid.indexOf(' ') != -1) {
+    if (uuid.indexOf(' ') !== -1) {
       alert('UUID cannot contain spaces. UUID V4 is recommended.');
       return false;
     }
@@ -140,7 +140,7 @@ export class AgentRegistComponent implements OnInit {
 
   editItem(item) {
     const patch = {
-      ...item, 
+      ...item,
     };
     delete patch.createdAt;
     delete patch.modifiedAt;
@@ -205,7 +205,7 @@ export class AgentRegistComponent implements OnInit {
     const id = this.selectedItem.id;
     const leaderId = typeof id === 'string' ? Number(id) : id;
     return this.helyosService.methods.toolsInterconnections.list({
-      leaderId: leaderId, 
+      leaderId: leaderId,
     })
       .then(r => this.interconnections = r);
   }
@@ -222,7 +222,7 @@ export class AgentRegistComponent implements OnInit {
     }
 
     this.helyosService.methods.agents.list({
-      uuid: followerUUID, 
+      uuid: followerUUID,
     })
       .then(r => {
         if (!r.length) {
@@ -234,7 +234,7 @@ export class AgentRegistComponent implements OnInit {
         const leaderId = typeof id === 'string' ? Number(id) : id;
         this.helyosService.methods.toolsInterconnections.create({
           followerId: r[0].id,
-          leaderId: leaderId, 
+          leaderId: leaderId,
         })
           .then((r) => {
             if (r.message) {
@@ -254,7 +254,7 @@ export class AgentRegistComponent implements OnInit {
       const promisses = this.interconnections.map(e => this.helyosService.methods.toolsInterconnections.delete(e.id));
       const updtPromises = this.interconnections.map(tool => this.helyosService.methods.agents.patch({
         id: tool.followerId,
-        rbmqUsername: '', 
+        rbmqUsername: '',
       }));
       return Promise.all(promisses).then(() => Promise.all(updtPromises)).then(() => this.interconnectionList());
     }
