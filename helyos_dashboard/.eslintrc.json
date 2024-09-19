@@ -209,6 +209,10 @@
           {
             "allowSingleLine": false
           }
+        ],
+        "semi": [
+          "error",
+          "always"
         ]
       }
     },
