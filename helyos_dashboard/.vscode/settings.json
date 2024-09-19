@@ -20,7 +20,8 @@
   "html.format.wrapLineLength": 120,
   "typescript.format.enable": true,
   "typescript.format.semicolons": "insert",
-  "javascript.format.enable": false,
-  "css.format.enable": false,
-  "scss.format.enable": false
+  "javascript.format.enable": true,
+  "javascript.format.semicolons": "insert",
+  "scss.format.enable": false,
+  "css.format.enable": false
 }

@@ -48,17 +48,26 @@
           "error",
           2,
           {
-          "SwitchCase": 1,
-          "VariableDeclarator": 1,
-          "outerIIFEBody": 1,
-          "MemberExpression": 1,
-          "FunctionDeclaration": { "parameters": 1, "body": 1 },
-          "FunctionExpression": { "parameters": 1, "body": 1 },
-          "ArrayExpression": 1,
-          "ObjectExpression": 1,
-          "ignoredNodes": ["TemplateLiteral"],
-          "ignoreComments": false
-        }]
+            "SwitchCase": 1,
+            "VariableDeclarator": 1,
+            "outerIIFEBody": 1,
+            "MemberExpression": 1,
+            "FunctionDeclaration": {
+              "parameters": 1,
+              "body": 1
+            },
+            "FunctionExpression": {
+              "parameters": 1,
+              "body": 1
+            },
+            "ArrayExpression": 1,
+            "ObjectExpression": 1,
+            "ignoredNodes": [
+              "TemplateLiteral"
+            ],
+            "ignoreComments": false
+          }
+        ]
       }
     },
     {
