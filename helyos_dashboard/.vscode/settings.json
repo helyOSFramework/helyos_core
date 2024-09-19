@@ -1,7 +1,7 @@
 // https://code.visualstudio.com/docs/getstarted/settings#_default-settings
 {
-    "files.exclude": {
-        ".angular/": true,
-        "node_modules/": true
-    }
+  "files.exclude": {
+    ".angular/": true,
+    "node_modules/": true
+  }
 }
