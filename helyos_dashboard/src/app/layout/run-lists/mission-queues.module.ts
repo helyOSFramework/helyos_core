@@ -18,7 +18,10 @@ import { RunListsComponent } from './mission-queues.component';
   ],
   declarations: [RunListsComponent],
   providers: [
-    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter },
+    {
+      provide: NgbDateAdapter,
+      useClass: NgbDateNativeAdapter, 
+    },
   ],
 })
 export class RunListsModule { }

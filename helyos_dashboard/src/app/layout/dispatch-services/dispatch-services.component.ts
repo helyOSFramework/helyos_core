@@ -57,8 +57,13 @@ export class DispatchServicesComponent implements OnInit {
       this.selectedItem['agentIds'] = JSON.stringify(r['agentIds']);
       try {
         const context = JSON.parse(this.selectedItem.context);
-        this.selectedItemYardContext = JSON.stringify({ 'map': context.map, 'agents': context.agents }, null, 3);
-        this.selectedItemDepsContext = JSON.stringify({ 'dependencies': context.dependencies }, null, 3);
+        this.selectedItemYardContext = JSON.stringify({
+          'map': context.map,
+          'agents': context.agents, 
+        }, null, 3);
+        this.selectedItemDepsContext = JSON.stringify({
+          'dependencies': context.dependencies, 
+        }, null, 3);
       } catch (error) {
         return;
       }

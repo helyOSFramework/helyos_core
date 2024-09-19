@@ -35,7 +35,9 @@ export class WorkProcessesComponent implements OnInit {
 
 
   create() {
-    const newItem = { name: 'Unnamed' };
+    const newItem = {
+      name: 'Unnamed', 
+    };
     this.helyosService.methods.workProcessType.create(newItem)
       .then(r => {
         console.log(r);
@@ -64,7 +66,9 @@ export class WorkProcessesComponent implements OnInit {
   }
 
   editItem(item) {
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
 
@@ -116,7 +120,9 @@ export class WorkProcessesComponent implements OnInit {
 
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
-    const file = new Blob([content], { type: contentType });
+    const file = new Blob([content], {
+      type: contentType, 
+    });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();

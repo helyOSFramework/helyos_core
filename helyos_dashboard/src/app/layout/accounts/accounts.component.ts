@@ -39,7 +39,10 @@ export class AccountsComponent implements OnInit {
 
 
   create() {
-    const newItem = { username: 'unnamed', passwordHash: " " };
+    const newItem = {
+      username: 'unnamed',
+      passwordHash: " ", 
+    };
     this.helyosService.methods.userAccounts.create(newItem)
       .then(r => {
         console.log(r);
@@ -65,7 +68,9 @@ export class AccountsComponent implements OnInit {
   }
 
   editItem(item) {
-    const patch: Partial<H_UserAccount> = { ...item };
+    const patch: Partial<H_UserAccount> = {
+      ...item, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch.passwordHash;
@@ -94,7 +99,11 @@ export class AccountsComponent implements OnInit {
     this.helyosService.methods.adminGetUserAuthToken(this.selectedItem.username)
       .then(r => {
         this.accountToken = `Bearer ${r.jwtToken}`;
-        const _ = this.modalService.open(content, { size: 'lg', centered: true, backdrop: false });
+        const _ = this.modalService.open(content, {
+          size: 'lg',
+          centered: true,
+          backdrop: false, 
+        });
       });
 
   }

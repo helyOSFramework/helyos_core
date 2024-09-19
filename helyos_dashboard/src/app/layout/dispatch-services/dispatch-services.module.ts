@@ -18,7 +18,10 @@ import { DispatchServicesComponent } from './dispatch-services.component';
   ],
   declarations: [DispatchServicesComponent],
   providers: [
-    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter },
+    {
+      provide: NgbDateAdapter,
+      useClass: NgbDateNativeAdapter, 
+    },
   ],
 })
 export class DispatchServicesModule { }

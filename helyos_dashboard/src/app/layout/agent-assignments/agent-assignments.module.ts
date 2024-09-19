@@ -18,7 +18,10 @@ import { AgentAssignmentsComponent } from './agent-assignments.component';
   ],
   declarations: [AgentAssignmentsComponent],
   providers: [
-    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter },
+    {
+      provide: NgbDateAdapter,
+      useClass: NgbDateNativeAdapter, 
+    },
   ],
 })
 export class AgentAssignmentsModule { }

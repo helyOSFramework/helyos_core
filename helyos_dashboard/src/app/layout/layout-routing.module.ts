@@ -7,8 +7,16 @@ const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'all-services', pathMatch: 'prefix' },
-      { path: 'dashboard', redirectTo: 'all-services', pathMatch: 'prefix' },
+      {
+        path: '',
+        redirectTo: 'all-services',
+        pathMatch: 'prefix', 
+      },
+      {
+        path: 'dashboard',
+        redirectTo: 'all-services',
+        pathMatch: 'prefix', 
+      },
 
       {
         path: 'blank-page',

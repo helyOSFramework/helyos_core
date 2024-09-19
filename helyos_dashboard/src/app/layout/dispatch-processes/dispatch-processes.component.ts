@@ -66,7 +66,11 @@ export class DispatchProcessesComponent implements OnInit {
       .then(() => {
         const id = this.yardId;
         const yardId = typeof id === 'string' ? Number(id) : id;
-        const newItem = { status: 'draft', workProcessTypeName: 'undefined', yardId: yardId };
+        const newItem = {
+          status: 'draft',
+          workProcessTypeName: 'undefined',
+          yardId: yardId, 
+        };
         this.helyosService.methods.workProcess.create(newItem)
           .then(r => {
             console.log("helyosService.methods.workProcess.create", r);
@@ -80,7 +84,10 @@ export class DispatchProcessesComponent implements OnInit {
     const workProcessId = `${this.selectedItem.id}`;
     this.helyosService.methods.workProcess.get(workProcessId)
       .then(wprocess => {
-        const newItem = { ...wprocess, status: 'draft' };
+        const newItem = {
+          ...wprocess,
+          status: 'draft', 
+        };
         delete newItem.id;
         delete newItem.__typename;
         this.helyosService.methods.workProcess.create(newItem)
@@ -126,7 +133,9 @@ export class DispatchProcessesComponent implements OnInit {
       item.status = status;
     }
 
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
     delete patch.operationTypesRequired;
 
 
@@ -183,7 +192,9 @@ export class DispatchProcessesComponent implements OnInit {
   assignmentList() {
     const id = this.selectedItem.id;
     const workProcessId = typeof id === 'string' ? Number(id) : id;
-    this.helyosService.methods.assignments.list({ workProcessId: workProcessId })
+    this.helyosService.methods.assignments.list({
+      workProcessId: workProcessId, 
+    })
       .then(r => this.assignments = r);
 
   }

@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
   providers: [
     {
       provide: NgbDateAdapter,
-      useClass: NgbDateNativeAdapter
+      useClass: NgbDateNativeAdapter,
     },
   ],
 })

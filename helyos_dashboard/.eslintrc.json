@@ -157,6 +157,29 @@
             "exports": "always-multiline",
             "functions": "never"
           }
+        ],
+        "object-property-newline": [
+          "error",
+          {
+            "allowAllPropertiesOnSameLine": false
+          }
+        ],
+        "object-curly-newline": [
+          "error",
+          {
+            "ObjectExpression": {
+              "multiline": true,
+              "minProperties": 1
+            },
+            "ObjectPattern": {
+              "multiline": true,
+              "minProperties": 1
+            },
+            "ExportDeclaration": {
+              "multiline": true,
+              "minProperties": 1
+            }
+          }
         ]
       }
     },

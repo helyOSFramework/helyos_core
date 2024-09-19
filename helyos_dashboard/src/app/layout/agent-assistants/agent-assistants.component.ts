@@ -30,7 +30,9 @@ export class AgentAssistantsComponent implements OnInit {
 
 
   list() {
-    return this.helyosService.methods.agents.list({ agentClass: this.agentClass })
+    return this.helyosService.methods.agents.list({
+      agentClass: this.agentClass, 
+    })
       .then(r => this.tools = r);
   }
 
@@ -109,7 +111,9 @@ export class AgentAssistantsComponent implements OnInit {
         this.saveStateMsg = '';
         const id = r.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
-        this.helyosService.methods.toolsInterconnections.list({ leaderId: leaderId })
+        this.helyosService.methods.toolsInterconnections.list({
+          leaderId: leaderId, 
+        })
           .then(r => this.interconnections = r);
       });
   }
@@ -149,7 +153,9 @@ export class AgentAssistantsComponent implements OnInit {
 
 
   editItem(item) {
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch.sensors;
@@ -212,7 +218,9 @@ export class AgentAssistantsComponent implements OnInit {
   interconnectionList() {
     const id = this.selectedItem.id;
     const leaderId = typeof id === 'string' ? Number(id) : id;
-    return this.helyosService.methods.toolsInterconnections.list({ leaderId: leaderId })
+    return this.helyosService.methods.toolsInterconnections.list({
+      leaderId: leaderId, 
+    })
       .then(r => this.interconnections = r);
   }
 
@@ -227,7 +235,9 @@ export class AgentAssistantsComponent implements OnInit {
       return;
     }
 
-    this.helyosService.methods.agents.list({ uuid: followerUUID })
+    this.helyosService.methods.agents.list({
+      uuid: followerUUID, 
+    })
       .then(r => {
         if (!r.length) {
           alert("Agent does not exist!");
@@ -236,7 +246,10 @@ export class AgentAssistantsComponent implements OnInit {
 
         const id = this.selectedItem.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
-        this.helyosService.methods.toolsInterconnections.create({ followerId: r[0].id, leaderId: leaderId })
+        this.helyosService.methods.toolsInterconnections.create({
+          followerId: r[0].id,
+          leaderId: leaderId, 
+        })
           .then((r) => {
             if (r.message) {
               alert(r.message);
@@ -254,7 +267,10 @@ export class AgentAssistantsComponent implements OnInit {
   removeAllInterconnections() {
     if (confirm(`Remove all connections to the agents ${this.selectedItem.name}`)) {
       const promisses = this.interconnections.map(e => this.helyosService.methods.toolsInterconnections.delete(e.id));
-      const updtPromises = this.interconnections.map(tool => this.helyosService.methods.agents.patch({ id: tool.followerId, rbmqUsername: '' }));
+      const updtPromises = this.interconnections.map(tool => this.helyosService.methods.agents.patch({
+        id: tool.followerId,
+        rbmqUsername: '', 
+      }));
       return Promise.all(promisses).then(() => Promise.all(updtPromises)).then(() => this.interconnectionList());
     }
   }

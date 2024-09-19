@@ -46,13 +46,18 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   }
 
   list() {
-    return this.helyosService.methods.workProcessServicePlan.list({ 'workProcessTypeId': this.wpTypeId })
+    return this.helyosService.methods.workProcessServicePlan.list({
+      'workProcessTypeId': this.wpTypeId, 
+    })
       .then(r => this.wpServPlan = r);
   }
 
 
   create() {
-    const newItem = { step: 'X', workProcessTypeId: this.wpTypeId };
+    const newItem = {
+      step: 'X',
+      workProcessTypeId: this.wpTypeId, 
+    };
     this.helyosService.methods.workProcessServicePlan.create(newItem)
       .then(r => {
         console.log(r);
@@ -100,7 +105,9 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   }
 
   editItem(item) {
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch._defaultConfig;

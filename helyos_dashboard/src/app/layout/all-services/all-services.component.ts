@@ -29,7 +29,9 @@ export class AllServicesComponent implements OnInit {
 
 
   create() {
-    const newItem = { name: 'Unnamed' };
+    const newItem = {
+      name: 'Unnamed', 
+    };
     this.helyosService.methods.extServices.create(newItem)
       .then(r => {
         console.log(r);
@@ -55,7 +57,9 @@ export class AllServicesComponent implements OnInit {
   }
 
   editItem(item) {
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
     delete patch.requireMapObjects;
@@ -90,7 +94,10 @@ export class AllServicesComponent implements OnInit {
   }
 
   toggleEnable(item) {
-    return this.helyosService.methods.extServices.patch({ id: item.id, enabled: !item.enabled })
+    return this.helyosService.methods.extServices.patch({
+      id: item.id,
+      enabled: !item.enabled, 
+    })
       .then((_) => {
         item.enabled = !item.enabled;
         this.list();

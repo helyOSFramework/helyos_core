@@ -53,7 +53,10 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   const workprocessTypes: H_WorkProcessType[] = await wpTypeMethods.list({});
   const workprocessPlans: H_WorkProcessServicePlan[] = await wpServPlanMethods.list({});
 
-  const dataJSON = { 'version': '2.0', 'missions': {} };
+  const dataJSON = {
+    'version': '2.0',
+    'missions': {}, 
+  };
   workprocessTypes.forEach((wpType) => {
 
     // parse properites of work_process_type into missions
@@ -96,7 +99,9 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
     });
 
     if (formatedSteps.length > 0) {
-      dataJSON.missions[wpType.name]['recipe'] = { 'steps': formatedSteps };
+      dataJSON.missions[wpType.name]['recipe'] = {
+        'steps': formatedSteps, 
+      };
     }
 
   });
@@ -124,14 +129,19 @@ export const importFromYML = (rawdata: string, wpTypeMethods: WORKPROCESS_TYPE, 
       async (wprocess) => {
         const workProcessTypeName = wprocess['name'];
         // create or update work process
-        const oldWprocesses = await wpTypeMethods.list({ name: workProcessTypeName });
+        const oldWprocesses = await wpTypeMethods.list({
+          name: workProcessTypeName, 
+        });
         let wprocId;
         if (oldWprocesses.length === 0) {
           const newWPType = await wpTypeMethods.create(wprocess);
           wprocId = newWPType.id;
         } else {
           wprocId = oldWprocesses[0].id;
-          await wpTypeMethods.patch({ id: wprocId, ...wprocess });
+          await wpTypeMethods.patch({
+            id: wprocId,
+            ...wprocess, 
+          });
         }
         // update the mission recipe of the work process
 
@@ -163,7 +173,9 @@ const saveWorkProcessServicePlans = (
   jsonObj: any
 ) => {
 
-  const deletePromises = (wprocTypeId) => serviceMethods.list({ workProcessTypeId: wprocTypeId })
+  const deletePromises = (wprocTypeId) => serviceMethods.list({
+    workProcessTypeId: wprocTypeId, 
+  })
     .then((wprocSteps) => {
       const promises = wprocSteps.map((wprocStep) => serviceMethods.delete(wprocStep.id));
       return Promise.all(promises);

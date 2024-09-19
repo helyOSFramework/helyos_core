@@ -84,7 +84,11 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     }
     this.filterObj = {};
     const offset = (this.page - 1) * this.first;
-    const filter = { yardId: this.selectedItem.id, deletedAt: null, ...this.filterObj };
+    const filter = {
+      yardId: this.selectedItem.id,
+      deletedAt: null,
+      ...this.filterObj, 
+    };
     if (this.filterType) {
       filter['type'] = this.filterType;
     }
@@ -140,7 +144,9 @@ export class YardmapComponent implements OnInit, AfterViewInit {
   }
 
   saveObjectItem(_itemId) {
-    const patch = { ...this.selectedObjectItem };
+    const patch = {
+      ...this.selectedObjectItem, 
+    };
     delete patch.createdAt;
     delete patch.modifiedAt;
     try {
@@ -192,19 +198,33 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
 
   async downloadYardData() {
-    const mapObjects = await this.helyosService.methods.mapObjects.list({ yardId: this.selectedItem.id, deletedAt: null }, 1e9);
-    const origin = { lat: this.selectedItem.lat, lon: this.selectedItem.lon, alt: this.selectedItem.alt };
+    const mapObjects = await this.helyosService.methods.mapObjects.list({
+      yardId: this.selectedItem.id,
+      deletedAt: null, 
+    }, 1e9);
+    const origin = {
+      lat: this.selectedItem.lat,
+      lon: this.selectedItem.lon,
+      alt: this.selectedItem.alt, 
+    };
     const dataFormat = this.selectedItem.dataFormat;
     const id = this.selectedItem.id;
     alert(`${mapObjects.length} objects to download`);
-    this.downloadObject(JSON.stringify({ id, mapObjects, origin, dataFormat }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
+    this.downloadObject(JSON.stringify({
+      id,
+      mapObjects,
+      origin,
+      dataFormat, 
+    }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
 
   }
 
 
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
-    const file = new Blob([content], { type: contentType });
+    const file = new Blob([content], {
+      type: contentType, 
+    });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
@@ -255,7 +275,12 @@ export class YardmapComponent implements OnInit, AfterViewInit {
 
     if (yardData.origin) {
       if (confirm('This file contains new reference coordinates for the yard. Are you sure you want to update them?')) {
-        const patch: Partial<H_Yard> = { id: this.selectedItem.id, lat: yardData.origin.lat, lon: yardData.origin.lon, alt: yardData.alt };
+        const patch: Partial<H_Yard> = {
+          id: this.selectedItem.id,
+          lat: yardData.origin.lat,
+          lon: yardData.origin.lon,
+          alt: yardData.alt, 
+        };
         if (yardData.mapData) {
           patch.mapData = yardData.mapData;
         }

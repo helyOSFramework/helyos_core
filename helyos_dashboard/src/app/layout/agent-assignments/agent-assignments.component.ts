@@ -46,7 +46,9 @@ export class AgentAssignmentsComponent implements OnInit {
   }
 
   create() {
-    const newItem = { status: 'draft' };
+    const newItem = {
+      status: 'draft', 
+    };
     this.helyosService.methods.assignments.create(newItem)
       .then(r => {
         console.log(r);
@@ -79,7 +81,9 @@ export class AgentAssignmentsComponent implements OnInit {
     if (status) {
       item.status = status;
     }
-    const patch = { ...item };
+    const patch = {
+      ...item, 
+    };
 
     if (item['data']) {
       try {
@@ -130,7 +134,9 @@ export class AgentAssignmentsComponent implements OnInit {
 
   downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
-    const file = new Blob([content], { type: contentType });
+    const file = new Blob([content], {
+      type: contentType, 
+    });
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
