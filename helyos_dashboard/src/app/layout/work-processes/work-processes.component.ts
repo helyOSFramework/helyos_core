@@ -83,7 +83,7 @@ export class WorkProcessesComponent implements OnInit {
   }
 
 
-  browser_yard_shapes() {
+  browserYardShapes() {
     const uploadBtn = document.getElementById('fileup');
     uploadBtn.click();
 
@@ -110,11 +110,11 @@ export class WorkProcessesComponent implements OnInit {
     // convert DB data to yml
     exportToYML(this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
       .then(ymlData => {
-        this.download_object(ymlData, 'missions.yml', 'application/x-yaml');
+        this.downloadObject(ymlData, 'missions.yml', 'application/x-yaml');
       });
   }
 
-  download_object(content, fileName, contentType) {
+  downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
     const file = new Blob([content], { type: contentType });
     a.href = URL.createObjectURL(file);

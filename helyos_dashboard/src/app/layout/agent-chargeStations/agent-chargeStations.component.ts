@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { H_InstantAction, H_AgentInterconnection, H_Agent } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
+import { AgentClass } from 'helyosjs-sdk/dist/helyos.models';
 
-
-enum AgentClass {
-  Vehicle = 'vehicle',
-  Assistant = 'assistant',
-  Tool = 'tool',
-  ChargeStation = 'charge_station'
+enum AgentClassExtended {
+  VEHICLE = AgentClass.Vehicle,
+  ASSISTANT = AgentClass.Assistant,
+  TOOL = AgentClass.Tool,
+  CHARGESTATION = 'charge_station'
 }
 
 @Component({
@@ -23,7 +23,7 @@ export class AgentChargeStationsComponent implements OnInit {
   private rbmqAccountChange: boolean = false;
   public rbmqPassword = '';
   public active = 1;
-  private agentClass: AgentClass = AgentClass.ChargeStation;
+  private agentClass: AgentClassExtended = AgentClassExtended.CHARGESTATION;
   public saveStateMsg: string = '';
 
   constructor(private helyosService: HelyosService) {

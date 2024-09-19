@@ -197,12 +197,12 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     const dataFormat = this.selectedItem.dataFormat;
     const id = this.selectedItem.id;
     alert(`${mapObjects.length} objects to download`);
-    this.download_object(JSON.stringify({ id, mapObjects, origin, dataFormat }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
+    this.downloadObject(JSON.stringify({ id, mapObjects, origin, dataFormat }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
 
   }
 
 
-  download_object(content, fileName, contentType) {
+  downloadObject(content, fileName, contentType) {
     const a = document.createElement("a");
     const file = new Blob([content], { type: contentType });
     a.href = URL.createObjectURL(file);
@@ -210,7 +210,7 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     a.click();
   }
 
-  browser_yard_shapes() {
+  browserYardShapes() {
     const uploadBtn = document.getElementById('fileup');
     uploadBtn.click();
 
