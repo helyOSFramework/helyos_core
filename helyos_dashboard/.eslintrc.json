@@ -213,7 +213,8 @@
         "semi": [
           "error",
           "always"
-        ]
+        ],
+        "array-callback-return": "error"
       }
     },
     {
