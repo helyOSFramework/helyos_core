@@ -11,11 +11,13 @@
   "editor.autoClosingBrackets": "always",
   "editor.trimAutoWhitespace": true,
   "editor.rulers": [
-    80
+    120
   ],
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
-  "html.format.enable": false,
+  "html.format.enable": true,
+  "html.format.wrapAttributes": "preserve",
+  "html.format.wrapLineLength": 120,
   "typescript.format.enable": false,
   "javascript.format.enable": false,
   "css.format.enable": false,
