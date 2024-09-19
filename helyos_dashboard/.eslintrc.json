@@ -15,6 +15,80 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "variable",
+            "format": [
+              "camelCase"
+            ],
+            "prefix": [
+              "_"
+            ],
+            "filter": {
+              "regex": "^_",
+              "match": true
+            }
+          },
+          {
+            "selector": "parameter",
+            "format": [
+              "camelCase"
+            ],
+            "prefix": [
+              "_"
+            ],
+            "filter": {
+              "regex": "^_",
+              "match": true
+            }
+          },
+          {
+            "selector": "method",
+            "format": [
+              "camelCase"
+            ]
+          },
+          {
+            "selector": "enumMember",
+            "format": [
+              "UPPER_CASE"
+            ]
+          },
+          {
+            "selector": "class",
+            "format": [
+              "PascalCase"
+            ]
+          },
+          {
+            "selector": "interface",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "I"
+            ]
+          },
+          {
+            "selector": "typeAlias",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "T"
+            ]
+          },
+          {
+            "selector": "typeParameter",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "T"
+            ]
+          }
+        ],
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unused-vars": [
           "error",

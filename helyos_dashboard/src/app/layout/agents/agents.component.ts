@@ -3,12 +3,12 @@ import { H_Agent } from 'helyosjs-sdk';
 import { ModalDismissReasons, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { HelyosService } from '../../services/helyos.service';
 
-interface sensor { }
+interface ISensor { }
 
-interface patch { }
+interface IPatch { }
 
 class AgentModel extends H_Agent {
-  _iterSensors: sensor[];
+  _iterSensors: ISensor[];
 }
 
 @Component({
@@ -43,12 +43,12 @@ export class AgentsComponent implements OnInit, OnDestroy {
         this.appendSensorFormatToPatchObject(this.agents);
       });
 
-    socket.on('new_agent_poses', (updates: patch[]) => {
+    socket.on('new_agent_poses', (updates: IPatch[]) => {
       updates = this.appendSensorFormatToPatchObject(updates);
       this.updateItems(updates, this.agents);
     });
 
-    socket.on('change_agent_status', (updates: patch[]) => {
+    socket.on('change_agent_status', (updates: IPatch[]) => {
       this.updateItems(updates, this.agents);
 
     });
@@ -119,9 +119,9 @@ export class AgentsComponent implements OnInit, OnDestroy {
     // This function modifies the input parameter for better performance.
     updates.forEach(patch => {
       if (patch.sensors) {
-        const iterSensorSets: { name: string; sensors: sensor[]; }[] = [];
+        const iterSensorSets: { name: string; sensors: ISensor[]; }[] = [];
         for (const key in patch.sensors) {
-          const iterSensorSet: sensor[] = this.getSensorsMeasures(patch.sensors[key]);
+          const iterSensorSet: ISensor[] = this.getSensorsMeasures(patch.sensors[key]);
           iterSensorSets.push({ name: key, sensors: iterSensorSet });
         }
         patch._iterSensors = iterSensorSets;
