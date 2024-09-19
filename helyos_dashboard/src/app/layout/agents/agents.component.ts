@@ -14,7 +14,7 @@ class AgentModel extends H_Agent {
 @Component({
   selector: 'app-agents',
   templateUrl: './agents.component.html',
-  styleUrls: ['./agents.component.scss']
+  styleUrls: ['./agents.component.scss'],
 })
 export class AgentsComponent implements OnInit, OnDestroy {
   public agents: H_Agent[];
@@ -182,7 +182,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
           description: "battery used for backlight system",
           unit: "%",
           minimum: 0,
-          maximum: 100
+          maximum: 100,
         },
 
         "bat_2": {
@@ -192,8 +192,8 @@ export class AgentsComponent implements OnInit, OnDestroy {
           description: "battery used for truck engine",
           unit: "%",
           minimum: 0,
-          maximum: 100
-        }
+          maximum: 100,
+        },
       },
       "sensor_set_2": {
 
@@ -203,7 +203,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
           type: "number",
           unit: "km/h",
           minimum: 0,
-          maximum: 200
+          maximum: 200,
         },
 
         "back_door_status": {
@@ -212,9 +212,9 @@ export class AgentsComponent implements OnInit, OnDestroy {
           type: "string",
           unit: "km/h",
           minLength: 5,
-          maxLength: 10
-        }
-      }
+          maxLength: 10,
+        },
+      },
     };
 
 

@@ -14,8 +14,8 @@ describe('SignupComponent', () => {
       imports: [
         SignupModule,
         RouterTestingModule,
-        BrowserAnimationsModule
-      ]
+        BrowserAnimationsModule,
+      ],
     }).compileComponents();
   }));
 

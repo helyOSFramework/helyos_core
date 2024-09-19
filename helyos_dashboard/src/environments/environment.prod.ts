@@ -4,5 +4,5 @@ export const environment = {
   production: true,
   gqlPort: '443',
   socketPort: '443',
-  version: packageJson.version
+  version: packageJson.version,
 };

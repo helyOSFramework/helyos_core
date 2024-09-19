@@ -8,7 +8,7 @@ describe('DispatchServicesComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DispatchServicesComponent]
+      declarations: [DispatchServicesComponent],
     }).compileComponents();
   }));
 

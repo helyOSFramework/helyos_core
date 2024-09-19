@@ -6,16 +6,16 @@ import { DispatchProcessesComponent } from './dispatch-processes.component';
 const routes: Routes = [
   {
     path: '',
-    component: DispatchProcessesComponent
-  }
+    component: DispatchProcessesComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class DispatchProcessesRoutingModule { }
 

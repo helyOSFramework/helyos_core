@@ -6,16 +6,16 @@ import { RunListsComponent } from './mission-queues.component';
 const routes: Routes = [
   {
     path: '',
-    component: RunListsComponent
-  }
+    component: RunListsComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class RunListsRoutingModule { }
 

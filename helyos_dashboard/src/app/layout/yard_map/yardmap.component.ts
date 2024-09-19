@@ -6,7 +6,7 @@ import { H_MapObject } from 'helyosjs-sdk/dist/helyos.models';
 @Component({
   selector: 'app-yardmap',
   templateUrl: './yardmap.component.html',
-  styleUrls: ['./yardmap.component.scss']
+  styleUrls: ['./yardmap.component.scss'],
 })
 export class YardmapComponent implements OnInit, AfterViewInit {
   public yardmap: H_Yard[];

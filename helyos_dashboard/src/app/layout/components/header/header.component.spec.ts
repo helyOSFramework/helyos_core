@@ -14,8 +14,8 @@ describe('HeaderComponent', () => {
       imports: [
         LayoutModule,
         RouterTestingModule,
-        TranslateModule.forRoot()
-      ]
+        TranslateModule.forRoot(),
+      ],
     }).compileComponents();
   }));
 

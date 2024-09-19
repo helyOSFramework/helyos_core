@@ -6,15 +6,15 @@ import { SystemLogComponent } from './system-log.component';
 const routes: Routes = [
   {
     path: '',
-    component: SystemLogComponent
-  }
+    component: SystemLogComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class SystemLogRoutingModule { }

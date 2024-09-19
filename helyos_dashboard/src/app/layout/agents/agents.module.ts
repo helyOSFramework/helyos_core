@@ -8,9 +8,9 @@ import { AgentsComponent } from './agents.component';
 @NgModule({
   imports: [
     CommonModule,
-    AgentsRoutingModule
+    AgentsRoutingModule,
   ],
-  declarations: [AgentsComponent]
+  declarations: [AgentsComponent],
 })
 export class AgentsModule { }
 

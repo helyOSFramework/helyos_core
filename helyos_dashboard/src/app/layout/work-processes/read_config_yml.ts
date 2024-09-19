@@ -9,7 +9,7 @@ const WorkProcessTypeTableToYmlMap = {
   numMaxAgents: 'maxagents',
   dispatchOrder: 'dispatch_order',
   settings: 'settings',
-  extraParams: 'extra_params'
+  extraParams: 'extra_params',
 };
 
 const ymlToWorkProcessTypeTableMap = {

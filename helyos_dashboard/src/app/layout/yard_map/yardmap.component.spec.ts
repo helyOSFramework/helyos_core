@@ -8,7 +8,7 @@ describe('YardmapComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [YardmapComponent]
+      declarations: [YardmapComponent],
     }).compileComponents();
   }));
 

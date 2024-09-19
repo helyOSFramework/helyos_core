@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 @Component({
   selector: 'app-stat',
   templateUrl: './stat.component.html',
-  styleUrls: ['./stat.component.scss']
+  styleUrls: ['./stat.component.scss'],
 })
 export class StatComponent {
   @Input() bgClass: string;

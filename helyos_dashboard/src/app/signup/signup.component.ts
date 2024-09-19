@@ -7,7 +7,7 @@ import { HelyosService } from '../services/helyos.service';
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
-  animations: [routerTransition()]
+  animations: [routerTransition()],
 })
 export class SignupComponent {
   public username: string;

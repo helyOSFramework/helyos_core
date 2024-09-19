@@ -7,7 +7,7 @@ import { AgentClass } from 'helyosjs-sdk/dist/helyos.models';
 @Component({
   selector: 'app-agent-assistants',
   templateUrl: './agent-assistants.component.html',
-  styleUrls: ['./agent-assistants.component.scss']
+  styleUrls: ['./agent-assistants.component.scss'],
 })
 export class AgentAssistantsComponent implements OnInit {
   public tools: H_Agent[];
@@ -87,7 +87,7 @@ export class AgentAssistantsComponent implements OnInit {
       'agentId': this.selectedItem.id as number,
       'agentUuid': this.selectedItem['uuid'],
       'command': this.instantActionCommand,
-      'sender': 'helyOS dashboard'
+      'sender': 'helyOS dashboard',
     };
     this.helyosService.methods.instantActions.create(instantAction)
       .then((_) => alert('command sent'));

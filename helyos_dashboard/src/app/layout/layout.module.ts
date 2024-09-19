@@ -13,12 +13,12 @@ import { LayoutComponent } from './layout.component';
     CommonModule,
     LayoutRoutingModule,
     TranslateModule,
-    NgbDropdownModule
+    NgbDropdownModule,
   ],
   declarations: [
     LayoutComponent,
     SidebarComponent,
-    HeaderComponent
-  ]
+    HeaderComponent,
+  ],
 })
 export class LayoutModule { }

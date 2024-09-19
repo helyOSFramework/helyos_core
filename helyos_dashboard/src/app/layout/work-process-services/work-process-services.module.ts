@@ -9,8 +9,8 @@ import { WorkProcessServicesComponent } from './work-process-services.component'
   imports: [
     CommonModule,
     FormsModule,
-    WorkProcessServicesRoutingModule
+    WorkProcessServicesRoutingModule,
   ],
-  declarations: [WorkProcessServicesComponent]
+  declarations: [WorkProcessServicesComponent],
 })
 export class WorkProcessServicesModule { }

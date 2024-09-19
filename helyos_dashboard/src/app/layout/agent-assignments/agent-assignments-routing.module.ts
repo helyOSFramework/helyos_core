@@ -6,16 +6,16 @@ import { AgentAssignmentsComponent } from './agent-assignments.component';
 const routes: Routes = [
   {
     path: '',
-    component: AgentAssignmentsComponent
-  }
+    component: AgentAssignmentsComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class AgentAssignmentsRoutingModule { }
 

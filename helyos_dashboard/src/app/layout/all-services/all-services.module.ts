@@ -9,8 +9,8 @@ import { AllServicesComponent } from './all-services.component';
   imports: [
     CommonModule,
     FormsModule,
-    AllServicesRoutingModule
+    AllServicesRoutingModule,
   ],
-  declarations: [AllServicesComponent]
+  declarations: [AllServicesComponent],
 })
 export class AllServicesModule { }

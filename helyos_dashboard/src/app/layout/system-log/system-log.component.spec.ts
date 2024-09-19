@@ -8,7 +8,7 @@ describe('SystemLogComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [SystemLogComponent]
+      declarations: [SystemLogComponent],
     }).compileComponents();
   }));
 

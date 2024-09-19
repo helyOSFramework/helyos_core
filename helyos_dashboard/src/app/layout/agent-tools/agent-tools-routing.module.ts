@@ -6,15 +6,15 @@ import { AgentToolsComponent } from './agent-tools.component';
 const routes: Routes = [
   {
     path: '',
-    component: AgentToolsComponent
-  }
+    component: AgentToolsComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class AgentToolsRoutingModule { }

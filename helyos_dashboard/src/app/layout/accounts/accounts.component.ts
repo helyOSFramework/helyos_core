@@ -6,7 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-accounts',
   templateUrl: './accounts.component.html',
-  styleUrls: ['./accounts.component.scss']
+  styleUrls: ['./accounts.component.scss'],
 })
 export class AccountsComponent implements OnInit {
   public items: H_UserAccount[];
@@ -14,7 +14,7 @@ export class AccountsComponent implements OnInit {
   public USER_ROLE = [
     'administration',
     'application',
-    'visualization'
+    'visualization',
   ];
   public password: string;
   public confirmedPassword: string;

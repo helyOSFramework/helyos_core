@@ -6,15 +6,15 @@ import { YardsComponent } from './yards.component';
 const routes: Routes = [
   {
     path: '',
-    component: YardsComponent
-  }
+    component: YardsComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class YardsRoutingModule { }

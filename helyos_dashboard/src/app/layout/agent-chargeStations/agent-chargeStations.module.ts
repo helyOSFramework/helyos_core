@@ -11,11 +11,14 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     AgentChargeStationsRoutingModule,
     FormsModule,
-    NgbModule
+    NgbModule,
   ],
   declarations: [AgentChargeStationsComponent],
   providers: [
-    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
-  ]
+    {
+      provide: NgbDateAdapter,
+      useClass: NgbDateNativeAdapter
+    },
+  ],
 })
 export class AgentChargeStationsModule { }

@@ -5,7 +5,7 @@ import { HelyosService } from '../../services/helyos.service';
 @Component({
   selector: 'app-yards',
   templateUrl: './yards.component.html',
-  styleUrls: ['./yards.component.scss']
+  styleUrls: ['./yards.component.scss'],
 })
 export class YardsComponent implements OnInit {
   public yards: H_Yard[];

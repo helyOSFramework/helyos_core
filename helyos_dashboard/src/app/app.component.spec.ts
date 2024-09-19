@@ -11,7 +11,10 @@ describe('AppComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [AppModule],
-      providers: [{ provide: APP_BASE_HREF, useValue: '/' }]
+      providers: [{
+        provide: APP_BASE_HREF,
+        useValue: '/',
+      }],
     }).compileComponents();
   }));
 

@@ -20,10 +20,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     HttpClientModule,
     LanguageTranslationModule,
     AppRoutingModule,
-    NgbModule
+    NgbModule,
   ],
   declarations: [AppComponent],
   providers: [AuthGuard],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

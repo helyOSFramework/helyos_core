@@ -7,7 +7,7 @@ import { exportToYML, importFromYML } from './read_config_yml';
 @Component({
   selector: 'app-work-processes',
   templateUrl: './work-processes.component.html',
-  styleUrls: ['./work-processes.component.scss']
+  styleUrls: ['./work-processes.component.scss'],
 })
 export class WorkProcessesComponent implements OnInit {
   public wpTypes: H_WorkProcessType[];

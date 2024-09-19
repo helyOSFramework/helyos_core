@@ -5,6 +5,6 @@ import { StatComponent } from './stat.component';
 @NgModule({
   imports: [CommonModule],
   declarations: [StatComponent],
-  exports: [StatComponent]
+  exports: [StatComponent],
 })
 export class StatModule { }

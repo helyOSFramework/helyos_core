@@ -5,7 +5,7 @@ import { HelyosService } from '../../services/helyos.service';
 @Component({
   selector: 'app-system-log',
   templateUrl: './system-log.component.html',
-  styleUrls: ['./system-log.component.scss']
+  styleUrls: ['./system-log.component.scss'],
 })
 export class SystemLogComponent implements OnInit, OnDestroy {
   public logs: H_SystemLog[];

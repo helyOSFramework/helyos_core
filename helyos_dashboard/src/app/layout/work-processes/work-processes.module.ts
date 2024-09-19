@@ -9,6 +9,6 @@ import { WorkProcessesComponent } from './work-processes.component';
   imports: [CommonModule,
     FormsModule,
     WorkProcessesRoutingModule],
-  declarations: [WorkProcessesComponent]
+  declarations: [WorkProcessesComponent],
 })
 export class WorkProcessesModule { }

@@ -6,8 +6,8 @@ import { YardmapComponent } from './yardmap.component';
 @NgModule({
   imports: [
     CommonModule,
-    YardmapRoutingModule
+    YardmapRoutingModule,
   ],
-  declarations: [YardmapComponent]
+  declarations: [YardmapComponent],
 })
 export class YardmapModule { }

@@ -5,12 +5,12 @@ import { BlankPageComponent } from './blank-page.component';
 const routes: Routes = [
   {
     path: '',
-    component: BlankPageComponent
-  }
+    component: BlankPageComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class BlankPageRoutingModule { }

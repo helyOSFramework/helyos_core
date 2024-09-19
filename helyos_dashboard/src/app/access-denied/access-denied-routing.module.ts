@@ -5,12 +5,12 @@ import { AccessDeniedComponent } from './access-denied.component';
 const routes: Routes = [
   {
     path: '',
-    component: AccessDeniedComponent
-  }
+    component: AccessDeniedComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AccessDeniedRoutingModule { }

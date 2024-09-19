@@ -8,7 +8,7 @@ describe('YardsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [YardsComponent]
+      declarations: [YardsComponent],
     }).compileComponents();
   }));
 

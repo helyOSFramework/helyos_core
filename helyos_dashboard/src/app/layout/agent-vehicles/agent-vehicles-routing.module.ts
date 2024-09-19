@@ -6,15 +6,15 @@ import { AgentVehiclesComponent } from './agent-vehicles.component';
 const routes: Routes = [
   {
     path: '',
-    component: AgentVehiclesComponent
-  }
+    component: AgentVehiclesComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class AgentVehiclesRoutingModule { }

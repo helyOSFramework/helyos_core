@@ -5,7 +5,7 @@ import { HelyosService } from '../../services/helyos.service';
 @Component({
   selector: 'app-agent-regist',
   templateUrl: './agent-regist.component.html',
-  styleUrls: ['./agent-regist.component.scss']
+  styleUrls: ['./agent-regist.component.scss'],
 })
 export class AgentRegistComponent implements OnInit {
   public tools: H_Agent[];
@@ -83,7 +83,7 @@ export class AgentRegistComponent implements OnInit {
       'agentId': this.selectedItem.id as number,
       'agentUuid': this.selectedItem['uuid'],
       'command': this.instantActionCommand,
-      'sender': 'helyOS dashboard'
+      'sender': 'helyOS dashboard',
     };
     this.helyosService.methods.instantActions.create(instantAction)
       .then((_) => alert('command sent'));

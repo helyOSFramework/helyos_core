@@ -6,7 +6,7 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-mission-queues',
   templateUrl: './mission-queues.component.html',
-  styleUrls: ['./mission-queues.component.scss']
+  styleUrls: ['./mission-queues.component.scss'],
 })
 export class RunListsComponent implements OnInit {
   public mQueues: H_MissionQueue[];

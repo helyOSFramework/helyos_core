@@ -7,9 +7,9 @@ import { PageHeaderComponent } from './page-header.component';
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
   ],
   declarations: [PageHeaderComponent],
-  exports: [PageHeaderComponent]
+  exports: [PageHeaderComponent],
 })
 export class PageHeaderModule { }

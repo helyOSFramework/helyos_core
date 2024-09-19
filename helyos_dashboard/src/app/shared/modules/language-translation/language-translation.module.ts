@@ -21,11 +21,11 @@ export function HttpLoaderFactory(http: HttpClient) {
       loader: {
         provide: TranslateLoader,
         useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      }
-    })
+        deps: [HttpClient],
+      },
+    }),
   ],
-  exports: [TranslateModule]
+  exports: [TranslateModule],
 })
 export class LanguageTranslationModule {
   constructor(private translate: TranslateService) {
@@ -38,7 +38,7 @@ export class LanguageTranslationModule {
       'it',
       'fa',
       'de',
-      'zh-CHS'
+      'zh-CHS',
     ]);
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();

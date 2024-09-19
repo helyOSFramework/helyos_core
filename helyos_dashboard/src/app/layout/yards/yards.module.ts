@@ -7,8 +7,8 @@ import { YardsComponent } from './yards.component';
 @NgModule({
   imports: [
     CommonModule,
-    YardsRoutingModule
+    YardsRoutingModule,
   ],
-  declarations: [YardsComponent]
+  declarations: [YardsComponent],
 })
 export class YardsModule { }

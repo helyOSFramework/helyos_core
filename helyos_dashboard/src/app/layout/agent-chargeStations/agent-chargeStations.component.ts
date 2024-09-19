@@ -13,7 +13,7 @@ enum AgentClassExtended {
 @Component({
   selector: 'app-agent-chargestations',
   templateUrl: './agent-chargeStations.component.html',
-  styleUrls: ['./agent-chargeStations.component.scss']
+  styleUrls: ['./agent-chargeStations.component.scss'],
 })
 export class AgentChargeStationsComponent implements OnInit {
   public tools: H_Agent[];
@@ -95,7 +95,7 @@ export class AgentChargeStationsComponent implements OnInit {
       'agentId': this.selectedItem.id as number,
       'agentUuid': this.selectedItem['uuid'],
       'command': this.instantActionCommand,
-      'sender': 'helyOS dashboard'
+      'sender': 'helyOS dashboard',
     };
     this.helyosService.methods.instantActions.create(instantAction)
       .then((_) => alert('command sent'));

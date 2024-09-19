@@ -12,8 +12,8 @@ describe('PageHeaderComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         PageHeaderModule,
-        RouterTestingModule
-      ]
+        RouterTestingModule,
+      ],
     }).compileComponents();
   }));
 

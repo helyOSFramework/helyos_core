@@ -7,8 +7,8 @@ import { AccessDeniedComponent } from './access-denied.component';
 @NgModule({
   imports: [
     CommonModule,
-    AccessDeniedRoutingModule
+    AccessDeniedRoutingModule,
   ],
-  declarations: [AccessDeniedComponent]
+  declarations: [AccessDeniedComponent],
 })
 export class AccessDeniedModule { }

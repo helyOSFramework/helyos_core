@@ -7,7 +7,7 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-dispatch-services',
   templateUrl: './dispatch-services.component.html',
-  styleUrls: ['./dispatch-services.component.scss']
+  styleUrls: ['./dispatch-services.component.scss'],
 })
 export class DispatchServicesComponent implements OnInit {
   public items: H_ServiceRequest[];

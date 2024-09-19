@@ -6,15 +6,15 @@ import { AgentChargeStationsComponent } from './agent-chargeStations.component';
 const routes: Routes = [
   {
     path: '',
-    component: AgentChargeStationsComponent
-  }
+    component: AgentChargeStationsComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [
     RouterModule,
-    FormsModule
-  ]
+    FormsModule,
+  ],
 })
 export class AgentChargeStationsRoutingModule { }

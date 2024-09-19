@@ -6,7 +6,7 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-agent-assignments',
   templateUrl: './agent-assignments.component.html',
-  styleUrls: ['./agent-assignments.component.scss']
+  styleUrls: ['./agent-assignments.component.scss'],
 })
 export class AgentAssignmentsComponent implements OnInit {
   public assignments: H_Assignment[];

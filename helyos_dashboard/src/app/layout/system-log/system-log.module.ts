@@ -7,8 +7,8 @@ import { SystemLogComponent } from './system-log.component';
 @NgModule({
   imports: [
     CommonModule,
-    SystemLogRoutingModule
+    SystemLogRoutingModule,
   ],
-  declarations: [SystemLogComponent]
+  declarations: [SystemLogComponent],
 })
 export class SystemLogModule { }

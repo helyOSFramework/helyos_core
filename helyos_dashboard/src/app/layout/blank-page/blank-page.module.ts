@@ -7,8 +7,8 @@ import { BlankPageComponent } from './blank-page.component';
 @NgModule({
   imports: [
     CommonModule,
-    BlankPageRoutingModule
+    BlankPageRoutingModule,
   ],
-  declarations: [BlankPageComponent]
+  declarations: [BlankPageComponent],
 })
 export class BlankPageModule { }

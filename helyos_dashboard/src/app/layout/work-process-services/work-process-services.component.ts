@@ -8,7 +8,7 @@ import { HelyosService } from '../../services/helyos.service';
 @Component({
   selector: 'app-work-process-services',
   templateUrl: './work-process-services.component.html',
-  styleUrls: ['./work-process-services.component.scss']
+  styleUrls: ['./work-process-services.component.scss'],
 })
 export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   public wpServPlan: H_WorkProcessServicePlan[];
@@ -20,9 +20,7 @@ export class WorkProcessServicesComponent implements OnInit, OnDestroy {
   public availableSteps: string[];
   public addedDep: string;
 
-  constructor(private helyosService: HelyosService,
-    private activatedroute: ActivatedRoute,
-  ) { }
+  constructor(private helyosService: HelyosService, private activatedroute: ActivatedRoute) { }
 
 
   ngOnInit() {

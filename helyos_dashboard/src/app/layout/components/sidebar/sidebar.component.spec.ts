@@ -14,8 +14,8 @@ describe('SidebarComponent', () => {
       imports: [
         LayoutModule,
         RouterTestingModule,
-        TranslateModule.forRoot()
-      ]
+        TranslateModule.forRoot(),
+      ],
     }).compileComponents();
   }));
 

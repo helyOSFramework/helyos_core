@@ -7,7 +7,7 @@ import { HelyosService } from '../services/helyos.service';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  animations: [routerTransition()]
+  animations: [routerTransition()],
 })
 export class LoginComponent implements OnInit {
   public username: string;

@@ -6,7 +6,7 @@ import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-dispatch-processes',
   templateUrl: './dispatch-processes.component.html',
-  styleUrls: ['./dispatch-processes.component.scss']
+  styleUrls: ['./dispatch-processes.component.scss'],
 })
 export class DispatchProcessesComponent implements OnInit {
   public wProcesses: H_WorkProcess[];

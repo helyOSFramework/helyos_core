@@ -14,8 +14,8 @@ describe('LoginComponent', () => {
       imports: [
         LoginModule,
         RouterTestingModule,
-        BrowserAnimationsModule
-      ]
+        BrowserAnimationsModule,
+      ],
     }).compileComponents();
   }));
 
