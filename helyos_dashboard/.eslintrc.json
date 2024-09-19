@@ -218,7 +218,8 @@
         "no-class-assign": "error",
         "no-cond-assign": "error",
         "no-const-assign": "error",
-        "no-constant-condition": "error"
+        "no-constant-condition": "error",
+        "no-debugger": "error"
       }
     },
     {
