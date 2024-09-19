@@ -3,5 +3,21 @@
   "files.exclude": {
     ".angular/": true,
     "node_modules/": true
-  }
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": null, // Ensure no default formatter is enforcing its own style
+  "editor.autoClosingBrackets": "always",
+  "editor.trimAutoWhitespace": true,
+  "editor.rulers": [
+    80
+  ],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "html.format.enable": false,
+  "typescript.format.enable": false,
+  "javascript.format.enable": false,
+  "css.format.enable": false,
+  "scss.format.enable": false
 }
