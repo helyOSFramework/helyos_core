@@ -11,7 +11,7 @@ This project is originally derived from the [SB Admin rewritten in Angular 17 an
 Make sure you have the following versions installed:
 
 | Technology | Version |
-|------------|---------|
+| ---------- | ------- |
 | Node.js    | 18.18.2 |
 | npm        | 9.8.1   |
 
@@ -33,21 +33,41 @@ Make sure you have the following versions installed:
 #### Start Development Server
 
 To run the development server, execute:
+
 ```bash
 npm run start
 ```
+
 The server will start on a local port, and the app will be accessible via your browser.
 
 #### Linting
 
-To check for linting issues, run:
+##### Check for Linting Issues
+
+This project uses:
+
+- **[ESLint](https://eslint.org/)** for HTML and TypeScript linting (`.eslintrc.json`).
+- **[Stylelint](https://stylelint.io/)** for CSS, SCSS linting (`.stylelintrc.json`).
+- **[Prettier](https://prettier.io/)** for HTML, CSS, SCSS linting (`.prettierrc.json`).
+
+To check for linting issues across JavaScript/TypeScript, CSS/SCSS and HTML files, run the following command:
+
 ```bash
 npm run lint
+```
+
+##### Auto-Fix Issues
+
+To auto-fix linting issues, run:
+
+```bash
+npm run lint:fix
 ```
 
 #### Running Tests
 
 Execute the following command to run the test cases:
+
 ```bash
 npm run test
 ```
@@ -63,4 +83,4 @@ npm run test
   npm run build
   ```
 
---- 
+---

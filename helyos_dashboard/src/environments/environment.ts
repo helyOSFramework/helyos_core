@@ -2,11 +2,13 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import packageJson from '../../package.json';
+
 export const environment = {
-    production: false,
-    gqlPort: '5000',
-    socketPort:'5002',
-    version: require('../../package.json').version 
+  production: false,
+  gqlPort: '5000',
+  socketPort: '5002',
+  version: packageJson.version,
 };
 
 /*

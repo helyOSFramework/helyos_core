@@ -7,10 +7,18 @@ import { NgbDateAdapter, NgbDateNativeAdapter, NgbModule } from '@ng-bootstrap/n
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
-    imports: [CommonModule, AgentChargeStationsRoutingModule, FormsModule, NgbModule],
-    declarations: [AgentChargeStationsComponent],
-    providers: [
-        { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
-      ]
+  imports: [
+    CommonModule,
+    AgentChargeStationsRoutingModule,
+    FormsModule,
+    NgbModule,
+  ],
+  declarations: [AgentChargeStationsComponent],
+  providers: [
+    {
+      provide: NgbDateAdapter,
+      useClass: NgbDateNativeAdapter,
+    },
+  ],
 })
-export class AgentChargeStationsModule {}
+export class AgentChargeStationsModule { }

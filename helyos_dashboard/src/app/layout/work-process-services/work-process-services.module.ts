@@ -6,7 +6,11 @@ import { WorkProcessServicesRoutingModule } from './work-process-services-routin
 import { WorkProcessServicesComponent } from './work-process-services.component';
 
 @NgModule({
-    imports: [CommonModule, FormsModule, WorkProcessServicesRoutingModule],
-    declarations: [WorkProcessServicesComponent]
+  imports: [
+    CommonModule,
+    FormsModule,
+    WorkProcessServicesRoutingModule,
+  ],
+  declarations: [WorkProcessServicesComponent],
 })
-export class WorkProcessServicesModule {}
+export class WorkProcessServicesModule { }

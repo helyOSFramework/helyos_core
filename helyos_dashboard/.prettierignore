@@ -45,3 +45,21 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
+
+# root files
+.browserslistrc
+.editorconfig
+.eslintrc.json
+.gitignore
+.prettierignore
+.prettierrc.json
+.stylelintrc.json
+angular.json
+karma.conf.js
+package-lock.json
+package.json
+test.ts
+tsconfig.app.json
+tsconfig.json
+tsconfig.spec.json
+tslint.json

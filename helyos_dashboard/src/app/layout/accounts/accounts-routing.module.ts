@@ -4,14 +4,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { AccountsComponent } from './accounts.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: AccountsComponent
-    }
+  {
+    path: '',
+    component: AccountsComponent,
+  },
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule, FormsModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule,
+  ],
 })
-export class AccountsRoutingModule {}
+export class AccountsRoutingModule { }

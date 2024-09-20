@@ -1,65 +1,62 @@
 <div [@routerTransition] class="login-page">
-    <div class="row justify-content-md-center align-items-center h-100">
-        <div class="col-md-4">
-            <img class="user-avatar" src="assets/images/logo.png" [style.width.px]="150" alt="logo" />
-            <h1>helyOS Dashboard</h1>
-            <form role="form">
-                <div class="form-content">
-                    <div class="form-group">
-                        <input
-                            [placeholder]="'Username' | translate"
-                            class="form-control input-underline input-lg"
-                            type="text"
-                            name="username"
-                            [(ngModel)]="username"
-                        />
-                    </div>
+  <div class="row justify-content-md-center align-items-center h-100">
+    <div class="col-md-4">
+      <img class="user-avatar" src="assets/images/logo.png" [style.width.px]="150" alt="logo" />
+      <h1>helyOS Dashboard</h1>
+      <form role="form">
+        <div class="form-content">
+          <div class="form-group">
+            <input
+              [placeholder]="'Username' | translate"
+              class="form-control input-underline input-lg"
+              type="text"
+              name="username"
+              [(ngModel)]="username" />
+          </div>
 
-                    <div class="form-group">
-                        <input
-                            [placeholder]="'Password' | translate"
-                            class="form-control input-underline input-lg"
-                            type="password"
-                            name="password"
-                            [(ngModel)]="password"
-                        />
-                    </div>
-
-
-                </div>
-                <a (click)="onLoggedin()" [routerLink]="['/all-services']" class="btn rounded-btn">
-                    {{ 'Log in' | translate }}
-                </a>
-                &nbsp;
-                <a [routerLink]="['/signup']" class="btn rounded-btn">{{ 'Change password' | translate }}</a>
-                &nbsp;
-                <a (click)="changingServerMode()" *ngIf="!runlocal" class="btn rounded-btn">{{ 'Use custom ports' | translate }}</a>
-                <a (click)="changingServerMode()" *ngIf="runlocal"  class="btn rounded-btn">{{ 'Use default ports' | translate }}</a>
-
-            </form>
-
-            <div>
-                
-            <div *ngIf="runlocal" class="form-group" style="margin-top: 6px;">
-                <label>Custom ports </label>
-
-                <input
-                    [placeholder]="'GQL PORT' | translate"
-                    class="form-control input-underline input-lg"
-                    type="text"
-                    name="gqlPort"
-                    [(ngModel)]="gqlPort"
-                />
-                <input
-                    [placeholder]="'WS PORT' | translate"
-                    class="form-control input-underline input-lg"
-                    type="text"
-                    name="wsPort"
-                    [(ngModel)]="wsPort"
-                    />
-            </div>
-            
-            </div>
+          <div class="form-group">
+            <input
+              [placeholder]="'Password' | translate"
+              class="form-control input-underline input-lg"
+              type="password"
+              name="password"
+              [(ngModel)]="password" />
+          </div>
         </div>
+        <a (click)="onLoggedin()" [routerLink]="['/all-services']" class="btn rounded-btn">
+          {{ 'Log in' | translate }}
+        </a>
+        &nbsp;
+        <a [routerLink]="['/signup']" class="btn rounded-btn">
+          {{ 'Change password' | translate }}
+        </a>
+        &nbsp;
+        <a (click)="changingServerMode()" *ngIf="!runlocal" class="btn rounded-btn">
+          {{ 'Use custom ports' | translate }}
+        </a>
+        <a (click)="changingServerMode()" *ngIf="runlocal" class="btn rounded-btn">
+          {{ 'Use default ports' | translate }}
+        </a>
+      </form>
+
+      <div>
+        <div *ngIf="runlocal" class="form-group" style="margin-top: 6px">
+          <span>Custom ports </span>
+
+          <input
+            [placeholder]="'GQL PORT' | translate"
+            class="form-control input-underline input-lg"
+            type="text"
+            name="gqlPort"
+            [(ngModel)]="gqlPort" />
+          <input
+            [placeholder]="'WS PORT' | translate"
+            class="form-control input-underline input-lg"
+            type="text"
+            name="wsPort"
+            [(ngModel)]="wsPort" />
+        </div>
+      </div>
     </div>
+  </div>
 </div>

@@ -1,19 +1,18 @@
-
 <!-- MODAL WINDOW -->
 
 <div class="modal fade" id="mymodal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="modal-basic-title">helyOS-native Sensor Format</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <a href="https://app.swaggerhub.com/apis-docs/helyOS/helyos_agent_comm/2.0.7#/SensorSet" target="_blank">
-                &nbsp;&nbsp; Swagger (external link) 
-            </a>
-            <div class="modal-body" style="max-height: 80vh; overflow: auto ">
-                <pre>
-    [field_id: string]: 
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">helyOS-native Sensor Format</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <a href="https://app.swaggerhub.com/apis-docs/helyOS/helyos_agent_comm/2.0.7#/SensorSet" target="_blank">
+        &nbsp;&nbsp; Swagger (external link)
+      </a>
+      <div class="modal-body" style="max-height: 80vh; overflow: auto">
+        <pre>
+    [field_id: string]:
                 "value" : string | number, required
                 "title" : string, required
                 "type" :  string = "string" or "number", required
@@ -26,104 +25,92 @@
 
     -----------------------------------------------
 
-    Example:    
+    Example:
     agent.sensors =
-    {{example}}
-    
-                </pre>
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Ok</button>
-            </div>
-        </div>
+    {{ example }}
+
+        </pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Ok</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<div style="text-align: right; margin-bottom: 6px;">
-    <button type="button" class="btn btn-lg btn-outline-dark" data-bs-toggle="modal" data-bs-target="#mymodal">helyOS-native Sensor Format</button>
+<div style="text-align: right; margin-bottom: 6px">
+  <button type="button" class="btn btn-lg btn-outline-dark" data-bs-toggle="modal" data-bs-target="#mymodal">
+    helyOS-native Sensor Format
+  </button>
 </div>
 
 <!-- END MODAL WINDOW -->
 
 <div class="checkbox">
-    <label> <input type="checkbox" [(ngModel)]="seeRaw"  name="isDummy" /> See raw data </label>
+  <label> <input type="checkbox" [(ngModel)]="seeRaw" name="isDummy" /> See raw data </label>
 </div>
-
-
-
 
 <div class="row">
-    <div *ngFor="let agent of agents" class="col-sm-4">
-        <div class="card bg-light mb-3" >
-            <div class="card-header">{{agent.uuid}}</div>
-            <div class="card-body">
+  <div *ngFor="let agent of agents" class="col-sm-4">
+    <div class="card bg-light mb-3">
+      <div class="card-header">{{ agent.uuid }}</div>
+      <div class="card-body">
+        <h4 class="card-title">{{ agent.name }}</h4>
+        <p class="card-text">Type : {{ agent.agentType }}</p>
+        <span
+          [ngClass]="{
+            'bg-danger': agent.status === 'busy',
+            'text-white': agent.status === 'busy',
+          }">
+          {{ agent.status }}
+        </span>
+        <img *ngIf="agent.picture" [src]="agent.picture" style="width: 100%" alt="picture" />
 
-                <h4 class="card-title">{{agent.name}}</h4>
-                <p class="card-text">
-                    Type : {{agent.agentType}}
-                </p>
-                <span [ngClass]="{'bg-danger': agent.status==='busy', 'text-white': agent.status==='busy' }">
-                     {{agent.status}}
-                </span>
-                <img  [src]="agent.picture" style="width: 100%">
+        <p [ngClass]="{ 'bg-danger': agent.msgPerSec > 12 }">messages: {{ agent.msgPerSec }}/s</p>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>X</th>
+              <th>Y</th>
+              <th>Theta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ agent.x }}</td>
+              <td>{{ agent.y }}</td>
+              <td>{{ agent.orientation }}</td>
+            </tr>
+          </tbody>
+        </table>
 
-                <p  [ngClass]="{'bg-danger': agent.msgPerSec > 12}">messages:  {{agent.msgPerSec}}/s</p>
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>X</th>
-                            <th>Y</th>
-                            <th>Theta</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td> {{agent.x}}</td>
-                            <td>{{agent.y}}</td>
-                            <td>{{agent.orientation}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <textarea *ngIf="seeRaw" [ngModel]="agent._sensorString" name="" id="" cols="30" rows="10"> </textarea>
 
-                <textarea *ngIf="seeRaw" [ngModel]="agent._sensorString"  name="" id="" cols="30" rows="10">
-                </textarea>
-                
+        <ng-container *ngIf="!seeRaw && agent._iterSensors">
+          <div *ngFor="let sensorSet of agent._iterSensors" class="column">
+            <h4>{{ sensorSet.name }}</h4>
+            <div *ngFor="let sensor of sensorSet.sensors">
+              <div class="row" style="justify-content: space-between">
+                <div class="w-auto">{{ sensor.title }} :</div>
+                <div class="w-auto">{{ sensor.value }} {{ sensor.unit }}</div>
+              </div>
 
-                <ng-container *ngIf="!seeRaw && agent._iterSensors">
-
-                    <div *ngFor="let sensorSet of agent._iterSensors" class="column">
-                           <h4>{{sensorSet.name}} </h4>
-                            <div *ngFor="let sensor of sensorSet.sensors" >
-
-                                <div class="row" style="justify-content:space-between" > 
-                                    <div class="w-auto"> {{sensor.title}} :  </div>
-                                    <div class="w-auto"> {{sensor.value}} {{sensor.unit}}</div>
-                                </div>
-
-                                <div *ngIf="sensor.perc" class=" sensor-progress-container">
-                                    <span  class="sensor-progress-label"> {{sensor.perc}}% </span>
-                                     <div  
-                                        aria-valuemax="sensor.maximum"
-                                        aria-valuemin="sensor.minimum"
-                                        aria-valuenow="sensor.value"
-                                        class="sensor-progress-bar"
-                                        role="progressbar"
-                                        [ngStyle]="{'width': sensor.progressBar}"
-                                     ></div>
-                                </div>
-
-
-                            </div>
-                        
-                    </div>
-
-                </ng-container>
-
-
+              <div *ngIf="sensor.perc" class="sensor-progress-container">
+                <span class="sensor-progress-label"> {{ sensor.perc }}% </span>
+                <div
+                  [aria-valuemax]="sensor.maximum"
+                  [aria-valuemin]="sensor.minimum"
+                  [aria-valuenow]="sensor.value"
+                  class="sensor-progress-bar"
+                  role="progressbar"
+                  [ngStyle]="{
+                    width: sensor.progressBar,
+                  }"></div>
+              </div>
             </div>
-        </div>
+          </div>
+        </ng-container>
+      </div>
     </div>
-
+  </div>
 </div>
-
-

@@ -6,55 +6,52 @@
 @import 'responsive';
 
 @media print {
-    .breadcrumb {
-        display: none !important;
-    }
+  .breadcrumb {
+    display: none !important;
+  }
 }
 
 @mixin nav-divider($color: #e5e5e5) {
-    height: 0;
-    margin: calc($spacer / 2) 0;
-    overflow: hidden;
-    border-top: 1px solid $color;
+  height: 0;
+  margin: calc($spacer / 2) 0;
+  overflow: hidden;
+  border-top: 1px solid $color;
 }
 
 .nav-divider {
-    @include nav-divider;
+  @include nav-divider;
 }
-
-
 
 tr {
-    max-width: 100px;
+  max-width: 100px;
 }
-
 
 .td {
-    max-width: 100px;
+  max-width: 100px;
 }
 
-.selectedHighlight {
-    --bs-table-bg: #ced4da;
-    border-left: solid 1px;
+.selected-highlight {
+  --bs-table-bg: #ced4da;
+  border-left: solid 1px;
 }
 
-.detail-container{
-    border-radius: 10px;
-    border: solid 0.5px lightgray;
-    padding: 20px;
+.detail-container {
+  border-radius: 10px;
+  border: solid 0.5px lightgray;
+  padding: 20px;
 }
 
 .map {
-    height: 100%;
-    padding: 0;
-  }
+  height: 100%;
+  padding: 0;
+}
 
-  .click-show{
-    cursor: pointer;
-    color:blue;
+.click-show {
+  cursor: pointer;
+  color: blue;
 }
 
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
 }

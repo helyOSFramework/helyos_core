@@ -1,68 +1,82 @@
-<div class="row" style="justify-content:space-between">
-    <h1 class="w-auto">Dispatched Services </h1>
-    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
-        <button  class="btn btn-lg btn-outline-dark" >
-                  Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">Dispatched Services</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark">Documentation</button>
+  </div>
 </div>
 
-<div class="row" style="align-items:flex-end">
-    <fieldset class="form-group col-xl-3">
-        <label>Work process id</label>
-        <input type="number" class="form-control" [(ngModel)]="filterWprocId" name="filterWprocId"  (keydown.enter)="filterList(0)" />
-    </fieldset>
+<div class="row" style="align-items: flex-end">
+  <fieldset class="form-group col-xl-3">
+    <label for="filterWprocId">Work process id</label>
+    <input
+      id="filterWprocId"
+      type="number"
+      class="form-control"
+      [(ngModel)]="filterWprocId"
+      name="filterWprocId"
+      (keydown.enter)="filterList(0)" />
+  </fieldset>
 
-    <button style="margin-bottom:16px; height: fit-content;" class="btn btn-primary w-auto" (click)="filterList(0)" type="submit">APPLY</button>
+  <button
+    style="margin-bottom: 16px; height: fit-content"
+    class="btn btn-primary w-auto"
+    (click)="filterList(0)"
+    type="submit">
+    APPLY
+  </button>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header" style="display: flex; justify-content: space-between;">
-        <div class="clickable" (click)="filterList(0)">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
-        <div>
-            <span  class="clickable" (click)="filterList(-1)" > &#8810; previous </span>
-             | {{page}} |
-            <span class="clickable" (click)="filterList(1)" >next &#8811;</span>
-        </div>
+  <div class="card-header" style="display: flex; justify-content: space-between">
+    <div class="clickable" (click)="filterList(0)">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-    
-    <div class="tableFixHeadHideScrolled" ></div>
-    <div class="tableFixHead  card-body table-responsive">
-        <table class=" table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Service URL</th>
-                    <th>Dispatched</th>
-                    <th>Time</th>
-                    <th>Work Proc ID</th>
-                    <th>Step</th>
-                    <th>Processed</th>
-                    <th>Fetched</th>
-                    <th>Status</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of items" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <th scope="row">{{item.id}}</th>
-                    <td>{{item.serviceUrl}}</td>
-                    <td>{{item.dispatchedAt | date:'dd.MM.yy HH:mm:ss' }}</td>
-                    <td>{{timeDifference(item.resultAt, item.dispatchedAt)}}</td>
-                    <td>{{item.workProcessId}}</td>
-                    <td>{{item.step}}</td>
-                    <td>{{item.processed}}</td>
-                    <td>{{item.fetched}}</td>
-                    <td>{{item.status}}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div>
+      <span class="clickable" (click)="filterList(-1)"> &#8810; previous </span>
+      | {{ page }} |
+      <span class="clickable" (click)="filterList(1)">next &#8811;</span>
     </div>
+  </div>
 
+  <div class="table-fix-head-hide-scrolled"></div>
+  <div class="table-fix-head card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Service URL</th>
+          <th>Dispatched</th>
+          <th>Time</th>
+          <th>Work Proc ID</th>
+          <th>Step</th>
+          <th>Processed</th>
+          <th>Fetched</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of items"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <th scope="row">{{ item.id }}</th>
+          <td>{{ item.serviceUrl }}</td>
+          <td>{{ item.dispatchedAt | date: 'dd.MM.yy HH:mm:ss' }}</td>
+          <td>
+            {{ timeDifference(item.resultAt, item.dispatchedAt) }}
+          </td>
+          <td>{{ item.workProcessId }}</td>
+          <td>{{ item.step }}</td>
+          <td>{{ item.processed }}</td>
+          <td>{{ item.fetched }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- <div style="text-align: right; margin-bottom: 10px;">
@@ -70,90 +84,107 @@
     <button class="btn btn-danger"  type="submit">Cancel</button>
 </div> -->
 
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>ID: {{ selectedItem.id }}</h4>
 
- 
-<section class="detail-container " *ngIf="selectedItem" >
+  <form role="form" style="margin: 0 auto; max-width: 1000px">
+    <h3>Input data</h3>
 
-        <h4> ID: {{selectedItem.id}}</h4>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="request"> JSON Request data </label>
+        <textarea id="request" class="form-control" [ngModel]="selectedItem.request" name="request" readonly></textarea>
+      </fieldset>
+    </div>
 
-        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="config"> JSON Config data </label>
+        <textarea id="config" class="form-control" [ngModel]="selectedItem.config" name="config" readonly></textarea>
+      </fieldset>
+    </div>
 
-            <h3> Input data </h3>
+    <h5>Context data</h5>
+    <p>This data is automatically appended by helyOS to the request data.</p>
+    <p>
+      <i> {{ ' context:\{map,agents,dependencies\} ' }} </i>
+    </p>
 
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> JSON Request data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.request" name="request" readonly
-                    ></textarea>
-                </fieldset>
-            </div>
+    <div>
+      <div class="row">
+        <fieldset class="form-group col-xl-12">
+          <label for="selectedItemYardContext">
+            JSON Map and Agents (snapshot of the yard state at the moment the service is called)
+          </label>
+          <textarea
+            id="selectedItemYardContext"
+            class="form-control"
+            [ngModel]="selectedItemYardContext"
+            name="selectedItemYardContext"
+            readonly></textarea>
+        </fieldset>
+      </div>
 
+      <div class="row">
+        <fieldset class="form-group col-xl-12">
+          <label for="selectedItemDepsContext"> JSON Dependencies (responses from previous linked services) </label>
+          <textarea
+            id="selectedItemDepsContext"
+            class="form-control"
+            [ngModel]="selectedItemDepsContext"
+            name="selectedItemDepsContext"
+            readonly></textarea>
+        </fieldset>
+      </div>
+    </div>
+    <h3>Output data</h3>
 
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> JSON Config data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.config" name="config" readonly
-                    ></textarea>
-                </fieldset>
-            </div>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="response"> JSON Response data </label>
+        <textarea
+          id="response"
+          class="form-control"
+          [ngModel]="selectedItem.response"
+          name="response"
+          readonly></textarea>
+      </fieldset>
+    </div>
 
-            <h5> Context data </h5>
-            <p> This data is automatically appended by helyOS to the request data.</p><p> <i> {{" context:\{map,agents,dependencies\} "}} </i></p>
+    <h3>Parent work process</h3>
+    <div class="row" *ngIf="wprocess">
+      <fieldset class="form-group col-xl-2">
+        <label for="id">ID </label>
+        <input id="id" class="form-control" [ngModel]="wprocess.id" name="id" readonly />
+      </fieldset>
+      <fieldset class="form-group col-xl-3">
+        <label for="workProcessTypeName">Work type </label>
+        <input
+          id="workProcessTypeName"
+          class="form-control"
+          [ngModel]="wprocess.workProcessTypeName"
+          name="workProcessTypeName"
+          readonly />
+      </fieldset>
 
-            <div>
-                <div class="row" >
-                    <fieldset class="form-group col-xl-12">
-                        <label> JSON Map and Agents (snapshot of the yard state at the moment the service is called)</label>
-                        <textarea class="form-control" [ngModel]="selectedItemYardContext" name="selectedItemYardContext" readonly
-                        ></textarea>
-                    </fieldset>
-                </div>
+      <fieldset class="form-group col-xl-3">
+        <label for="yardId">Yard id </label>
+        <input id="yardId" class="form-control" [ngModel]="wprocess.yardId" name="yardId" readonly />
+      </fieldset>
 
-                <div class="row" >
-                    <fieldset class="form-group col-xl-12">
-                        <label> JSON Dependencies (responses from previous linked services) </label>
-                        <textarea class="form-control" [ngModel]="selectedItemDepsContext" name="selectedItemDepsContext" readonly
-                        ></textarea>
-                    </fieldset>
-                </div>
+      <fieldset class="form-group col-xl-4">
+        <label for="agentIds">Agent Ids</label>
+        <input
+          id="agentIds"
+          class="form-control"
+          [ngModel]="wprocess.agentIds"
+          name="agentIds"
+          readonly
+          placeholder="e.g. [2, 4, 5]" />
+      </fieldset>
+    </div>
 
-            </div>
-            <h3> Output data </h3>
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> JSON Response data </label>
-                    <textarea class="form-control" [ngModel]="selectedItem.response" name="response" readonly
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <h3> Parent work process</h3>
-            <div class="row" *ngIf="wprocess">
-                <fieldset class="form-group col-xl-2">
-                    <label>ID </label>
-                    <input class="form-control" [ngModel]="wprocess.id" name="id" readonly/>
-                </fieldset>
-                <fieldset class="form-group col-xl-3">
-                    <label>Work type </label>
-                    <input class="form-control" [ngModel]="wprocess.workProcessTypeName" name="workProcessTypeName" readonly/>
-                </fieldset>
-
-                <fieldset class="form-group col-xl-3">
-                    <label>Yard id </label>
-                    <input class="form-control" [ngModel]="wprocess.yardId" name="yardId" readonly />
-                </fieldset>
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Agent Ids</label>
-                    <input class="form-control" [ngModel]="wprocess.agentIds"  name="agentIds" readonly
-                    placeholder="e.g. [2, 4, 5]" />
-                </fieldset>
-
-            </div>
-
-<!-- 
+    <!--
             <div class="row" style="justify-content:space-between;">
                 <div>
                     <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem, 'draft')">Save</button>
@@ -163,6 +194,5 @@
                     <button  class="btn btn-danger" type="submit" [disabled]="!(selectedItem.workProcessTypeName && selectedItem.yardId)"  (click)="editItem(selectedItem, 'dispatched')">Dispatch</button>
                 </div>
             </div> -->
-        </form>
-
+  </form>
 </section>

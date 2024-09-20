@@ -1,150 +1,157 @@
-<div class="row" style="justify-content:space-between">
-    <h1 class="w-auto">Mission Queues </h1>
-    <div class="w-auto" style="text-align: right; margin-bottom: 6px;">
-        <button  class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-                  Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">Mission Queues</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
+  </div>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header " style="display:flex;justify-content:space-between" >
-        <div>Mission Queues</div> 
-        <div class="clickable" (click)="list()">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
+  <div class="card-header" style="display: flex; justify-content: space-between">
+    <div>Mission Queues</div>
+    <div class="clickable" (click)="list()">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-    <div class="tableFixHeadHideScrolled" ></div>
-    <div class="tableFixHead  card-body table-responsive">
-        <table class=" table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>created</th>
-                    <th>status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of mQueues" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <th scope="row">{{item.id}}</th>
-                    <td>{{item.name}}</td>
-                    <td>{{item.createdAt}}</td>
-                    <td>{{item.status}}</td>
-                </tr>
-            </tbody>
+  </div>
+  <div class="table-fix-head-hide-scrolled"></div>
+  <div class="table-fix-head card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>created</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of mQueues"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <th scope="row">{{ item.id }}</th>
+          <td>{{ item.name }}</td>
+          <td>{{ item.createdAt }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="text-align: right; margin-bottom: 10px">
+  <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+  <button class="btn btn-danger" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
+</div>
+
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>ID: {{ selectedItem.id }} - {{ selectedItem.name }}</h4>
+
+  <div role="form" style="margin: 0 auto; max-width: 1000px">
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="name">Name </label>
+        <input
+          id="name"
+          class="form-control"
+          [(ngModel)]="selectedItem.name"
+          name="name"
+          [ngModelOptions]="{ standalone: true }" />
+      </fieldset>
+
+      <fieldset class="form-group col-xl-3">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          class="form-control form-select"
+          [ngModel]="selectedItem.status"
+          (change)="onStatusChange($event)"
+          name="status">
+          <option value="stop">stop</option>
+          <option value="run">run</option>
+          <option value="stopped" disabled>stopped</option>
+          <option value="running" disabled>running</option>
+        </select>
+      </fieldset>
+
+      <fieldset class="form-group col-xl-3">
+        <label for="stopOnFailure"> Stop on mission failure </label>
+        <input
+          id="stopOnFailure"
+          type="checkbox"
+          style="height: 38px; width: 40px"
+          class="form-control form-check-input"
+          [(ngModel)]="selectedItem.stopOnFailure"
+          name="stopOnFailure" />
+      </fieldset>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header" style="display: flex; justify-content: space-between">
+        <div>Work Processes</div>
+        <div class="clickable" style="width: fit-content" (click)="missionList()">
+          <span class="reload">&#x21bb;</span>
+          <span> RELOAD </span>
+        </div>
+      </div>
+      <div class="table-fix-head-hide-scrolled"></div>
+      <div class="table-fix-head card-body table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Run Order</th>
+              <th>ID</th>
+              <th>Mission Type</th>
+              <th>Yard ID</th>
+              <th>Agent IDs</th>
+              <th>status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mission of wProcesses" (click)="getItem(item.id)">
+              <th>{{ mission.runOrder }}</th>
+              <td>{{ mission.id }}</td>
+              <td>{{ mission.workProcessTypeName }}</td>
+              <td>{{ mission.yardId }}</td>
+              <td>{{ mission.agentIds }}</td>
+              <td>{{ mission.status }}</td>
+            </tr>
+          </tbody>
         </table>
+      </div>
     </div>
 
-</div>
+    <div style="text-align: right; margin-bottom: 10px">
+      <button
+        class="btn btn-secondary"
+        style="background-color: green"
+        (click)="editItem(selectedItem, 'run')"
+        type="submit">
+        <span class="fa fa-w fa-play"></span> RUN
+      </button>
+      <button class="btn btn-danger" (click)="stopQueue(selectedItem)" type="submit">
+        <span class="fa fa-w fa-stop"></span> STOP
+      </button>
+    </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-    <button class="btn btn-danger" (click)="deleteItem(selectedItem.id)"  type="submit">Delete</button>
-</div>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="description"> Description </label>
+        <textarea
+          id="description"
+          class="form-control"
+          [(ngModel)]="selectedItem.description"
+          name="description"></textarea>
+      </fieldset>
+    </div>
 
-
-<section class="detail-container " *ngIf="selectedItem" >
-
-        <h4> ID: {{selectedItem.id}} - {{selectedItem.name}}</h4>
-        
-
-        <div role="form"  style="margin: 0 auto; max-width: 1000px;">
-            <div class="row">
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Name </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" 
-                    [ngModelOptions]="{standalone: true}"
-                    />
-                </fieldset>
-
-                <fieldset class="form-group col-xl-3">
-                    <label>Status</label>
-                    <select class="form-control form-select" [ngModel]="selectedItem.status" (change)="onStatusChange($event)" 
-                            name="status">
-                        <option value="stop"> stop </option>
-                        <option value="run"> run </option>
-                        <option value="stopped" disabled> stopped </option>
-                        <option value="running" disabled> running </option>
-                    </select> 
-                </fieldset>
-
-                <fieldset class="form-group col-xl-3">
-                    <label > Stop on mission failure </label>
-                    <input   type="checkbox" style="height:38px; width: 40px;" class="form-control form-check-input" [(ngModel)]="selectedItem.stopOnFailure" name="stopOnFailure" />
-                </fieldset>
-    
-
-            </div>
-
-
-
-            <div class="card mb-3">
-                <div class="card-header " style="display:flex;justify-content:space-between">
-                    <div>Work Processes</div> 
-                    <div class="clickable" style="width: fit-content;" (click)="missionList()">
-                        <span class="reload">&#x21bb;</span>
-                        <span> RELOAD  </span>
-                    </div>
-                </div>
-                <div class="tableFixHeadHideScrolled" ></div>
-                <div class="tableFixHead  card-body table-responsive">
-                    <table class=" table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Run Order</th>
-                                <th>ID</th>
-                                <th>Mission Type</th>
-                                <th>Yard ID</th>
-                                <th>Agent IDs</th>
-                                <th>status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let mission of wProcesses" (click)="getItem(item.id)">
-                                <th>{{mission.runOrder}}</th>
-                                <td>{{mission.id}}</td>
-                                <td>{{mission.workProcessTypeName}}</td>
-                                <td>{{mission.yardId}}</td>
-                                <td>{{mission.agentIds}}</td>
-                                <td>{{mission.status}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            
-            </div>
-            
-            <div style="text-align: right; margin-bottom: 10px;">
-                <button class="btn btn-secondary" style="background-color: green;" (click)="editItem(selectedItem, 'run')" 
-                        type="submit"> <span class="fa fa-w fa-play"></span>  RUN
-                </button>
-                <button class="btn btn-danger" (click)="stopQueue(selectedItem)"  type="submit"> 
-                    <span class="fa fa-w fa-stop"></span>  STOP
-                 </button>
-            </div>
-                        
-
-            
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.description" name="description"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <div class="row" style="justify-content:space-between;">
-                <div>
-                    <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
-                    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-                </div>
-            </div>
-        </div>
-
+    <div class="row" style="justify-content: space-between">
+      <div>
+        <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+        <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
+      </div>
+    </div>
+  </div>
 </section>
