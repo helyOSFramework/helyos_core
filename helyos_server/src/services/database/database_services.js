@@ -92,7 +92,7 @@ const service_requests = new DatabaseLayer(mainClient, 'public.service_requests'
 const assignments = new DatabaseLayer(mainClient,'public.assignments');
 const work_processes = new DatabaseLayer(mainClient, 'public.work_processes');
 const mission_queue = new DatabaseLayer(mainClient, 'public.mission_queue');
-const map = new DatabaseLayer(mainClient, 'public.map_objects');
+const map_objects = new DatabaseLayer(mainClient, 'public.map_objects');
 const sysLogs = new DatabaseLayer(mainClient, 'public.system_logs');
 const targets = new DatabaseLayer(mainClient, 'public.targets');
 const work_process_type = new DatabaseLayer(mainClient, 'public.work_process_type');
@@ -110,7 +110,7 @@ module.exports.pgNotifications = pgNotifications;
 module.exports.shortTimeClient = shortTimeClient;
 module.exports.getNewClient = getNewClient;
 
-module.exports.map = map;
+module.exports.map_objects = map_objects;
 module.exports.agents = agents;
 module.exports.agents_interconnections = agents_interconnections;
 module.exports.targets = targets;

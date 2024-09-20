@@ -53,30 +53,30 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 break;
 
             case 'allMapObjects':
-                response = await databaseServices.mapObjects.select(objMsg.body['conditions'] || {});
+                response = await databaseServices.map_objects.select(objMsg.body['conditions'] || {});
                 break;             
         }
 
         switch (objMsg.body['mutation']) {
 
             case 'createMapObjects':       
-                response = await databaseServices.mapObjects.insertMany(objMsg.body['data'])
+                response = await databaseServices.map_objects.insertMany(objMsg.body['data'])
                 .then( async (newIds) => {
                     console.log(r);
-                    const newObjects = await databaseServices.mapObjects.list_in(newIds);
+                    const newObjects = await databaseServices.map_objects.list_in(newIds);
                     newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date(), 'realtime'); });
                 });
                 break;    
 
             case 'deleteMapObjects':       
-                response = await databaseServices.mapObjects.delete(objMsg.body['condition'])
+                response = await databaseServices.map_objects.delete(objMsg.body['condition'])
                 .then( (r) => {
                     console.log(r);
                 });
                 break;    
 
             case 'deleteMapObjectByIds':       
-                response = await databaseServices.mapObjects.deleteByIds(objMsg.body['condition']['ids'])
+                response = await databaseServices.map_objects.deleteByIds(objMsg.body['condition']['ids'])
                 .then( (r) => {
                     objMsg.body['condition']['ids'].forEach( id => { inMemDB.delete('map_objects', 'id', id); });
                 });
