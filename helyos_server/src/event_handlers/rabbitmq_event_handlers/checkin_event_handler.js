@@ -231,31 +231,11 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
 
 
     if ('factsheet' in checkinData){
-        factSheet =  checkinData['factsheet']; // VDA5050
+        agentUpdate['factsheet'] =  checkinData['factsheet'];
     } 
     
     if ('geometry' in checkinData) {
-        vehicleGeometry =  checkinData['geometry'];  
-    }
-
-    if (vehicleGeometry){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(vehicleGeometry)) {
-            agentUpdate['geometry'] =  JSON.stringify(vehicleGeometry); // Backward compatibility: 
-        } else {
-            agentUpdate['geometry'] = vehicleGeometry; // Backward compatibility: 
-        }
-        //
-    }
-
-    if (factSheet){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(factSheet)) {
-            agentUpdate['factsheet'] =  JSON.stringify(factSheet);
-        } else {
-            agentUpdate['factsheet'] = factSheet;
-        }
-        //
+        agentUpdate['geometry'] =  checkinData['geometry'];  
     }
 
     inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
