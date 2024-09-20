@@ -78,44 +78,22 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
         agentUpdate['wp_clearance'] = objMsg['wp_clearance'];
     }
 
-    let vehicleGeometry, factSheet;
 
     if ('factsheet' in msgBody){
-        factSheet =  msgBody['factsheet']; // VDA 5050
+        agentUpdate['factsheet'] =  msgBody['factsheet'];
     } 
 
     if ('geometry' in msgBody) {
-        vehicleGeometry = msgBody['geometry'];
+        agentUpdate['geometry'] =  msgBody['geometry'];
     }
 
     if ('followers' in msgBody) {
         connectFollowersToLeader(uuid,  msgBody['followers']);
     }
 
-    // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-    let JSONGeometry;
-    if (vehicleGeometry) {
-        if (Array.isArray(vehicleGeometry)) {
-            agentUpdate['geometry'] =  JSON.stringify(vehicleGeometry); // Backward compatibility: 
-            JSONGeometry = vehicleGeometry;
-
-        } else {
-            agentUpdate['geometry'] = vehicleGeometry; // Backward compatibility:
-            JSONGeometry = JSON.parse(vehicleGeometry);
-        }
-    }
-
-    if (factSheet){
-        if (Array.isArray(factSheet)) {
-            agentUpdate['factsheet'] =  JSON.stringify(factSheet);
-        } else {
-            agentUpdate['factsheet'] = factSheet;
-        }
-        //
-    }
 
 
-    if (JSONGeometry){
+    if (msgBody['geometry']){
         const qryToolData = await databaseServices.agents.get('uuid', uuid, ['id', 'status']);
         if (qryToolData.length) {
             const toolData = qryToolData[0];
