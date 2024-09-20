@@ -252,7 +252,15 @@
         "no-return-assign": [
           "error",
           "always"
-        ]
+        ],
+        "no-unneeded-ternary": "error",
+        "no-var": "error",
+        "one-var": [
+          "error",
+          "never"
+        ],
+        "prefer-const": "error",
+        "prefer-exponentiation-operator": "error"
       }
     },
     {
