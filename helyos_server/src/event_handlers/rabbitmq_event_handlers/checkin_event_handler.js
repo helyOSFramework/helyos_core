@@ -30,7 +30,7 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
 
             return databaseServices.yards.get_byId(agent.yard_id, ['id', 'lat', 'lon', 'alt', 'map_data'])
             .then(yard => {
-                    return  databaseServices.map.get('yard_id', yard.id)
+                    return  databaseServices.map_objects.get('yard_id', yard.id)
                     .then(map_objects => {
                             const _map_objects = map_objects.map(s => ({
                                 type: s.type,

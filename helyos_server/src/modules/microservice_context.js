@@ -23,7 +23,7 @@ function generateFullYardContext(yardId){
 		context.map.origin.alt  = yard.alt;
 		context.map.map_data  = yard.map_data;
 		context.map.data_format = yard.data_format;
-		return databaseServices.map.select({ 'yard_id': yardId, 'deleted_at': null});
+		return databaseServices.map_objects.select({ 'yard_id': yardId, 'deleted_at': null});
 	})
 	.then((map_objects) => {
 			context.map.map_objects = map_objects;

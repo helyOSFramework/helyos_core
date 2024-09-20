@@ -16,7 +16,7 @@ async function yardAutoUpdate(objMsg, uuid, bufferPeriod=0) {
 
     // Check the map object id only once and save in in-memory table.
     if (!inMemDB.map_objects[objMsg['id']] ){
-        const mapObject = await databaseServices.map.get_byId(objMsg['id']);
+        const mapObject = await databaseServices.map_objects.get_byId(objMsg['id']);
         if (!mapObject) {
             logData.addLog('agent', {uuid}, 'error', `agent is trying to update inexistent map object: ${objMsg.id}`);
             inMemDB.update('map_objects', 'id', {id: objMsg['id'] }, objUpdate['last_message_time'] + 10000); // try again in 10 seconds
