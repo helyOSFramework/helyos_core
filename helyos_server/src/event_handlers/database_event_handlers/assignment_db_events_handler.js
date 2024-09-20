@@ -31,7 +31,6 @@ function processAssignmentEvents(msg) {
 
     switch (msg.channel) {
             case 'assignments_status_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 assignment_status = payload['status'];
 
                 if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){
@@ -136,7 +135,6 @@ function processAssignmentEvents(msg) {
                 break;
 
             case 'assignments_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 assignment_status = payload['status'];
                 if(assignment_status){  
                     if(assignment_status == ASSIGNMENT_STATUS.TO_DISPATCH){

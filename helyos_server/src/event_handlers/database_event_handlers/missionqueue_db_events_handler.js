@@ -12,7 +12,6 @@ const blMicroservice = require('../../modules/microservice_orchestration.js');
 const databaseServices = require('../../services/database/database_services.js');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const { MISSION_QUEUE_STATUS, MISSION_STATUS } = require('../../modules/data_models.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 // Callbacks to database changes
@@ -24,7 +23,6 @@ function processRunListEvents(msg) {
         switch (msg.channel) {
 
             case 'mission_queue_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 status = payload['status'];
 
 
@@ -46,7 +44,6 @@ function processRunListEvents(msg) {
 
 
             case 'mission_queue_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 status = payload['status'];
 
 
