@@ -120,7 +120,7 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
         if (qryToolData.length) {
             const toolData = qryToolData[0];
             let webSocketNotification = {'id': toolData.id, 'uuid': uuid, 'geometry': JSONGeometry, 'status': toolData.status};
-            bufferNotifications.pushNotificationToFrontEnd('change_agent_status', webSocketNotification);
+            bufferNotifications.pushNotificationToBuffer('change_agent_status', webSocketNotification);
         }
     }
 

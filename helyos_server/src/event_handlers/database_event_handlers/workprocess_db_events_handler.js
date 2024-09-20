@@ -11,10 +11,8 @@
 const blAssignm = require('../../modules/assignment_orchestration.js');
 const blMicroservice = require('../../modules/microservice_orchestration');
 const databaseServices = require('../../services/database/database_services.js');
-const webSocketCommunicaton = require('../../modules/communication/web_socket_communication.js');
 const {MISSION_STATUS, ASSIGNMENT_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS } = require('../../modules/data_models.js');
 const { logData } = require('../../modules/systemlog.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 // Callbacks to database changes
@@ -26,7 +24,6 @@ function processWorkProcessEvents(msg) {
         switch (msg.channel) {
 
             case 'work_processes_insertion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 workProcessId = payload['id'];
                 workProcessStatus = payload['status'];
                 let prepareWPData = Promise.resolve();
@@ -72,8 +69,6 @@ function processWorkProcessEvents(msg) {
 
 
             case 'work_processes_update':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
-                bufferNotifications.pushNotificationToFrontEnd('change_work_processes', payload); // keep for compatibility with old JS SDK versions.
                 workProcessStatus = payload['status'];
                 console.log(`WORKPROCESS ${payload['id']} STATUS: `, workProcessStatus);
                 switch (workProcessStatus) {

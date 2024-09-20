@@ -22,10 +22,68 @@ const { inMemDB } = require('../services/in_mem_database/mem_database_service.js
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
+
+function broadcastPriorityNotification(channel, payload){
+    switch (channel) {
+
+        case 'change_agent_status': // Changes originate from agents.
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'assignments_status_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'mission_queue_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+
+        case 'work_processes_update':
+            bufferNotifications.publishToFrontEnd(channel, payload);
+            break;
+    }
+}
+
+function broadcastNotifications(channel, payload) {
+    switch (channel) {
+
+            case 'agent_deletion': // Changes originate from applications (e.g. dashboard).
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+            case 'assignments_insertion':
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+            case  'mission_queue_insertion':
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+            case 'service_requests_update':
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+            case 'service_requests_insertion':
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+            case 'work_processes_insertion':
+                bufferNotifications.pushNotificationToBuffer(channel, payload);
+                break;
+
+    }
+}
+
+
+
+
 // Subscribe to database changes
 function handleDatabaseMessages(client) {
     client.on('notification', function (msg) {
         let payload = JSON.parse(msg.payload);
+
+        broadcastPriorityNotification(msg.channel, JSON.parse(msg.payload));
+        broadcastNotifications(msg.channel, JSON.parse(msg.payload));
 
         switch (msg.channel) {
         // AGENT TABLES TRIGGERS
@@ -41,14 +99,12 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'agent_deletion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 inMemDB.delete('agents','uuid', payload['uuid']);
                 removeAgentRbmqAccount(payload);
                 logData.addLog('agent', payload, 'normal', `agent deleted`);
                 break;
 
             case 'change_agent_status':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
                 logData.addLog('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
                 break;
 

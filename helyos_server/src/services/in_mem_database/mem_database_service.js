@@ -409,7 +409,17 @@ class UpdateStats {
 
 
 // Singleton instance of the in-memory database.
-const inMemDB = new InMemDB(LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+let inMemDB = new InMemDB(LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+async function getInstance() {
+  if (!inMemDB) {
+    console.log('====> Creating In Memory Database Service instance')
+
+    inMemDB = new InMemDB(LONG_TIMEOUT,SHORT_TIMEOUT, MAX_PENDING_UPDATES);
+    console.log('====> In Memory Database Service created')
+  }
+  return inMemDB;
+}
 
 module.exports.inMemDB = inMemDB;
 module.exports.DataRetriever = DataRetriever;
+module.exports.getInstance = getInstance;
