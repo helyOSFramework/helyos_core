@@ -260,7 +260,8 @@
           "never"
         ],
         "prefer-const": "error",
-        "prefer-exponentiation-operator": "error"
+        "prefer-exponentiation-operator": "error",
+        "sort-imports": "error"
       }
     },
     {

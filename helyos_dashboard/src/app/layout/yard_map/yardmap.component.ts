@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, AfterViewInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { H_Yard } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { H_MapObject } from 'helyosjs-sdk/dist/helyos.models';

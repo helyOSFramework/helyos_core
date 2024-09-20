@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { H_InstantAction, H_AgentInterconnection, H_Agent } from 'helyosjs-sdk';
+import { H_Agent, H_AgentInterconnection, H_InstantAction } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { AgentClass } from 'helyosjs-sdk/dist/helyos.models';
 
