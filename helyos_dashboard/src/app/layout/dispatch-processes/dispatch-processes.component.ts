@@ -30,9 +30,11 @@ export class DispatchProcessesComponent implements OnInit {
     this.list();
     this.helyosService.methods.yard.list().then(yards => {
       this.availableYardIds = yards.map(y => y.id);
+      return this.availableYardIds;
     });
     this.helyosService.methods.workProcessType.list({}).then(wpTypes => {
       this.availableMissions = wpTypes.map(wp => wp.name);
+      return this.availableMissions;
     });
   }
 
