@@ -14,6 +14,7 @@
     "color-function-notation": "legacy",
     "alpha-value-notation": "number",
     "no-descending-specificity": null,
-    "color-hex-length": "long"
+    "color-hex-length": "long",
+    "import-notation": "string"
   }
 }
