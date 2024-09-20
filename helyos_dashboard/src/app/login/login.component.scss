@@ -1,4 +1,4 @@
-$topnav-background-color: #222;
+$topnav-background-color: #222222;
 
 :host {
   display: block;
@@ -10,7 +10,7 @@ $topnav-background-color: #222;
   overflow: auto;
   background: $topnav-background-color;
   text-align: center;
-  color: #fff;
+  color: #ffffff;
   padding: 3em;
 
   .col-lg-4 {
@@ -30,12 +30,12 @@ $topnav-background-color: #222;
     border: none;
     box-shadow: none;
     border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-    color: #fff;
+    color: #ffffff;
     border-radius: 0;
   }
 
   .input-underline:focus {
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid #ffffff;
     box-shadow: none;
   }
 
@@ -99,6 +99,6 @@ $topnav-background-color: #222;
   .user-avatar {
     -webkit-border-radius: 50%;
     border-radius: 50%;
-    border: 2px solid #fff;
+    border: 2px solid #ffffff;
   }
 }

@@ -1,4 +1,4 @@
-$topnav-background-color: #222;
+$topnav-background-color: #222222;
 
 :host {
   .navbar {
@@ -7,15 +7,15 @@ $topnav-background-color: #222;
     --bs-navbar-padding-x: 1rem;
 
     .navbar-brand {
-      color: #fff;
+      color: #ffffff;
       width: 235px;
     }
 
     .nav-item > a {
-      color: #999;
+      color: #999999;
 
       &:hover {
-        color: #fff;
+        color: #ffffff;
       }
     }
 
@@ -28,7 +28,7 @@ $topnav-background-color: #222;
     width: 300px;
 
     .media {
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #dddddd;
       padding: 5px 10px;
 
       &:last-child {
