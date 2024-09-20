@@ -92,6 +92,7 @@ async function connectToDB () {
 // 3) RabbitMQ Client setup -  Agent -> RabbitMQ ->  Nodejs(Rbmq-client) -> Postgres 
 // ----------------------------------------------------------------------------
 const rabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
+const rabbitMQTopology = require('./rbmq_topology.js');
 
 
 async function connectToRabbitMQ() {
@@ -102,7 +103,7 @@ async function connectToRabbitMQ() {
                                                                             recoverCallback: initialization.helyosConsumingMessages
                                                                         });
       // SET RABBITMQ EXCHANGE/QUEUES SCHEMA AND THEN SUBSCRIBE TO QUEUES
-      await initialization.configureRabbitMQSchema(dataChannels);
+      await rabbitMQTopology.configureRabbitMQSchema(dataChannels);
       return dataChannels;
 
 }
