@@ -105,7 +105,7 @@ This recursive routine checks if the set admin account is valid and try to creat
 */
 function initializeRabbitMQAccounts() {
     if(CREATE_RBMQ_ACCOUNTS!=='True'){ return Promise.resolve(null)}
-    logData.addLog('helyos_core', null, 'warn', 'Trying connecting using admin account...' );
+    logData.addLog('helyos_core', null, 'warn', 'Trying connecting to RabbitMQ using admin account...' );
     return rbmqServices.connect_as_admin_and_create_accounts()
             .catch(e => {
                 logData.addLog('helyos_core', null, 'warn', 'Trying guest account...' );
@@ -129,16 +129,16 @@ function initializeRabbitMQAccounts() {
                     `\n ================= SUBSCRIBE TO HELYOS' QUEUES ==================`+
                     `\n ================================================================`);
 
-        mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(CHECK_IN_QUEUE, message), { noAck: true});
-        mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(AGENT_STATE_QUEUE, message), { noAck: true});
-        mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(AGENT_UPDATE_QUEUE, message), { noAck: true});
-        mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(AGENT_MISSION_QUEUE, message), { noAck: true});
-        secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(AGENT_VISUALIZATION_QUEUE, message), { noAck: true});
-        secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(YARD_VISUALIZATION_QUEUE, message), { noAck: true});
+        mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(CHECK_IN_QUEUE, message), { noAck: true, priority: 5});
+        mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(AGENT_STATE_QUEUE, message), { noAck: true, priority: 10});
+        mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(AGENT_UPDATE_QUEUE, message), { noAck: true, priority: 5});
+        mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(AGENT_MISSION_QUEUE, message), { noAck: true, priority: 5});
+        secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(AGENT_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
+        secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(YARD_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
 
 
         mainChannel.consume(SUMMARY_REQUESTS_QUEUE, (message) => handleBrokerMessages(SUMMARY_REQUESTS_QUEUE, message), { noAck: true});
-        return dataChannels;
+        return dataChannels;    
     }
 
 

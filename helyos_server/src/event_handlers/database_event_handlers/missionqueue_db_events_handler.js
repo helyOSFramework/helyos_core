@@ -15,12 +15,11 @@ const { MISSION_QUEUE_STATUS, MISSION_STATUS } = require('../../modules/data_mod
 
 
 // Callbacks to database changes
-function processRunListEvents(msg) {
-        let payload = JSON.parse(msg.payload);
+function processRunListEvents(channel, payload) {
         const queueId = payload['id'];
         let status;
 
-        switch (msg.channel) {
+        switch (channel) {
 
             case 'mission_queue_insertion':
                 status = payload['status'];

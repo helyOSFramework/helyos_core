@@ -25,11 +25,10 @@ function wrapUpAssignment(assignment) {
 
 
 // Subscribe to database changes
-function processAssignmentEvents(msg) {
-    let payload = JSON.parse(msg.payload);
+function processAssignmentEvents(channel, payload) {
     let assignment_status;
 
-    switch (msg.channel) {
+    switch (channel) {
             case 'assignments_status_update':
                 assignment_status = payload['status'];
 

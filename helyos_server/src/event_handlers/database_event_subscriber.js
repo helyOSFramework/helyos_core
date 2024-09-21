@@ -79,13 +79,23 @@ function broadcastNotifications(channel, payload) {
 
 // Subscribe to database changes
 function handleDatabaseMessages(client) {
-    client.on('notification', function (msg) {
-        let payload = JSON.parse(msg.payload);
+    client.on('notification', async function (msg) {
+        let channel = msg.channel;
+        let payload = null
 
-        broadcastPriorityNotification(msg.channel, JSON.parse(msg.payload));
-        broadcastNotifications(msg.channel, JSON.parse(msg.payload));
+        const res = await client.query("DELETE FROM events_queue USING ( SELECT * FROM events_queue LIMIT 1 FOR UPDATE SKIP LOCKED) q WHERE q.id = events_queue.id RETURNING events_queue.*;");
+        if (res.rows.length){
+            payload = JSON.parse(res.rows[0].payload)
+            channel = res.rows[0].event_name;
+            broadcastPriorityNotification(channel, payload);
+            broadcastNotifications(channel, payload);
 
-        switch (msg.channel) {
+        } else {
+            console.log(`last event ${channel}. No events to process...`);
+            return false;
+        }
+
+        switch (channel) {
         // AGENT TABLES TRIGGERS
 
             case 'new_agent_poses':
@@ -116,29 +126,29 @@ function handleDatabaseMessages(client) {
 
             default:
 
-                if (msg.channel.includes('service_request')) {
-                    processMicroserviceEvents(msg);
+                if (channel.includes('service_request')) {
+                    processMicroserviceEvents(channel, payload);
                     break;
                 }
 
 
-                if (msg.channel.includes('work_process')) {
-                    processWorkProcessEvents(msg);
+                if (channel.includes('work_process')) {
+                    processWorkProcessEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('assignments')) {
-                    processAssignmentEvents(msg);
+                if (channel.includes('assignments')) {
+                    processAssignmentEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('instant_action')) {
-                    processInstantActionEvents(msg);
+                if (channel.includes('instant_action')) {
+                    processInstantActionEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('mission_queue')) {
-                    processRunListEvents(msg);
+                if (channel.includes('mission_queue')) {
+                    processRunListEvents(channel, payload);
                     break;
                 }
 

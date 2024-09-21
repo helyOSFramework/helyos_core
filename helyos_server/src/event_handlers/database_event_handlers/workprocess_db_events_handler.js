@@ -16,12 +16,11 @@ const { logData } = require('../../modules/systemlog.js');
 
 
 // Callbacks to database changes
-function processWorkProcessEvents(msg) {
-        let payload = JSON.parse(msg.payload);
+function processWorkProcessEvents(channel, payload) {
         let workProcessId;
         let workProcessStatus;
 
-        switch (msg.channel) {
+        switch (channel) {
 
             case 'work_processes_insertion':
                 workProcessId = payload['id'];
