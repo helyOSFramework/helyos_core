@@ -2,7 +2,7 @@
   <a class="navbar-brand" href="#">helyOS Dashboard</a>
   <button (click)="toggleSidebar()" class="navbar-toggler" type="button">
     <!-- <span class="navbar-toggler-icon"></span> -->
-    <i aria-hidden="true" class="fa fa-bars text-secondary"></i>
+    <i aria-hidden="true" class="fa-solid fa-bars text-secondary"></i>
   </button>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav ml-auto">
@@ -28,7 +28,7 @@
 
       <!-- <li class="nav-item dropdown" ngbDropdown>
                 <a class="nav-link" href="javascript:void(0)" ngbDropdownToggle>
-                    <i class="fa fa-bell"></i> <b class="caret"></b><span class="sr-only">(current)</span>
+                    <i class="fa-solid fa-bell"></i> <b class="caret"></b><span class="sr-only">(current)</span>
                 </a>
                 <div class="dropdown-menu-right" ngbDropdownMenu>
                     <a class="dropdown-item" href="javascript:void(0)">
@@ -48,7 +48,7 @@
             </li> -->
       <!-- <li class="nav-item dropdown" ngbDropdown>
                 <a class="nav-link" href="javascript:void(0)" ngbDropdownToggle>
-                    <i class="fa fa-language"></i> {{ 'Language' | translate }} <b class="caret"></b>
+                    <i class="fa-solid fa-language"></i> {{ 'Language' | translate }} <b class="caret"></b>
                 </a>
                 <div class="dropdown-menu-right" ngbDropdownMenu>
                     <a (click)="changeLang('en')" class="dropdown-item" href="javascript:void(0)">
@@ -79,20 +79,20 @@
             </li> -->
       <li class="nav-item dropdown" ngbDropdown>
         <a class="nav-link" href="javascript:void(0)" ngbDropdownToggle>
-          <i class="fa fa-user"></i> Administrator
+          <i class="fa-solid fa-user"></i> Administrator
           <b class="caret"></b>
         </a>
         <div class="dropdown-menu-right" ngbDropdownMenu>
           <a class="dropdown-item" href="javascript:void(0)">
-            <i class="fa fa-fw fa-user"></i>
+            <i class="fa-solid fa-fw fa-user"></i>
             {{ 'Profile' | translate }}
           </a>
           <a class="dropdown-item" href="javascript:void(0)">
-            <i class="fa fa-fw fa-gear"></i>
+            <i class="fa-solid fa-fw fa-gear"></i>
             {{ 'Settings' | translate }}
           </a>
           <a (click)="onLoggedout()" [routerLink]="['/login']" class="dropdown-item">
-            <i class="fa fa-fw fa-power-off"></i>
+            <i class="fa-solid fa-fw fa-power-off"></i>
             {{ 'Log Out' | translate }}
           </a>
         </div>
