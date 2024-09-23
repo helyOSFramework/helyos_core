@@ -1,4 +1,13 @@
-.x-svgrepo-icon {
-  width: 20px;
-  height: 20px;
+.list-group-item {
+  .x-svgrepo-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover,
+  &.router-link-active {
+    .x-svgrepo-icon {
+      filter: brightness(200%);
+    }
+  }
 }
