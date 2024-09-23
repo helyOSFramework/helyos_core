@@ -1,4 +1,8 @@
 $topnav-background-color: #222222;
+$idle-text-color: #999999;
+$active-text-color: #ffffff;
+$active-background: darken($topnav-background-color, 5%);
+$active-filter: brightness(200%);
 
 .sidebar {
   border-radius: 0;
@@ -26,7 +30,7 @@ $topnav-background-color: #222222;
       background: $topnav-background-color;
       border: 0;
       border-radius: 0;
-      color: #999999;
+      color: $idle-text-color;
       text-decoration: none;
 
       .fa-solid {
@@ -35,20 +39,20 @@ $topnav-background-color: #222222;
     }
 
     a:hover {
-      background: darken($topnav-background-color, 5%);
-      color: #ffffff;
+      background: $active-background;
+      color: $active-text-color;
 
       .x-svgrepo-icon {
-        filter: brightness(200%);
+        filter: $active-filter;
       }
     }
 
     a.router-link-active {
-      background: darken($topnav-background-color, 5%);
-      color: #ffffff;
+      background: $active-background;
+      color: $active-text-color;
 
       .x-svgrepo-icon {
-        filter: brightness(200%);
+        filter: $active-filter;
       }
     }
 
@@ -73,7 +77,7 @@ $topnav-background-color: #222222;
       margin-bottom: 0;
 
       a {
-        color: #999999;
+        color: $idle-text-color;
         text-decoration: none;
         font-weight: 400;
         background: $topnav-background-color;
@@ -88,14 +92,14 @@ $topnav-background-color: #222222;
 
       a:hover,
       a:focus {
-        color: #ffffff;
+        color: $active-text-color;
         outline: none;
         outline-offset: -2px;
       }
     }
 
     .panel-title:hover {
-      background: darken($topnav-background-color, 5%);
+      background: $active-background;
     }
 
     .panel-collapse {
@@ -109,16 +113,16 @@ $topnav-background-color: #222222;
           border: 0 solid transparent;
 
           a {
-            color: #999999;
+            color: $idle-text-color;
           }
 
           a:hover {
-            color: #ffffff;
+            color: $active-text-color;
           }
         }
 
         .list-group-item:hover {
-          background: darken($topnav-background-color, 5%);
+          background: $active-background;
         }
       }
     }
@@ -148,7 +152,7 @@ $topnav-background-color: #222222;
 
       li {
         a {
-          color: #ffffff;
+          color: $active-text-color;
           padding: 10px;
           display: block;
           text-decoration: none;
@@ -198,9 +202,9 @@ $topnav-background-color: #222222;
   cursor: pointer;
   padding: 12px;
   bottom: 0;
-  color: #999999;
+  color: $idle-text-color;
   background: #212529;
-  border-top: 1px solid #999999;
+  border-top: 1px solid $idle-text-color;
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
   -ms-transition: all 0.2s ease-in-out;
@@ -212,8 +216,8 @@ $topnav-background-color: #222222;
   }
 
   &:hover {
-    background: darken($topnav-background-color, 5%);
-    color: #ffffff;
+    background: $active-background;
+    color: $active-text-color;
   }
 }
 
