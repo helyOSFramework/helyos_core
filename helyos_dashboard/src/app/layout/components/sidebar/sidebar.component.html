@@ -102,7 +102,9 @@
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agent-assignments']" class="list-group-item">
-      <i class="fa-solid fa-fw fa-play-circle"></i>&nbsp;
+      <i class="fa-solid fa-fw">
+        <img src="assets/icons/assignment-svgrepo-com.svg" class="x-svgrepo-icon" alt="Assignment Icon">
+      </i>&nbsp;
       <span>{{ 'Agent Assignments' | translate }}</span>
     </a>
 
