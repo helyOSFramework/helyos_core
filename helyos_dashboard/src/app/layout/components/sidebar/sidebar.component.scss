@@ -37,11 +37,19 @@ $topnav-background-color: #222222;
     a:hover {
       background: darken($topnav-background-color, 5%);
       color: #ffffff;
+
+      .x-svgrepo-icon {
+        filter: brightness(200%);
+      }
     }
 
     a.router-link-active {
       background: darken($topnav-background-color, 5%);
       color: #ffffff;
+
+      .x-svgrepo-icon {
+        filter: brightness(200%);
+      }
     }
 
     .header-fields {
