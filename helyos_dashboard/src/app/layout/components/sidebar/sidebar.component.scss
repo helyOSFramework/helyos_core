@@ -1,8 +1,9 @@
 $topnav-background-color: #222222;
 $idle-text-color: #999999;
 $active-text-color: #ffffff;
-$active-background: darken($topnav-background-color, 5%);
+$active-background-color: darken($topnav-background-color, 5%);
 $active-filter: brightness(200%);
+$transition-time: 0.3s;
 
 .sidebar {
   border-radius: 0;
@@ -27,11 +28,12 @@ $active-filter: brightness(200%);
 
   .list-group {
     a.list-group-item {
-      background: $topnav-background-color;
+      background-color: $topnav-background-color;
       border: 0;
       border-radius: 0;
       color: $idle-text-color;
       text-decoration: none;
+      transition: background-color $transition-time;
 
       .fa-solid {
         margin-right: 10px;
@@ -39,7 +41,7 @@ $active-filter: brightness(200%);
     }
 
     a:hover {
-      background: $active-background;
+      background-color: $active-background-color;
       color: $active-text-color;
 
       .x-svgrepo-icon {
@@ -48,7 +50,7 @@ $active-filter: brightness(200%);
     }
 
     a.router-link-active {
-      background: $active-background;
+      background-color: $active-background-color;
       color: $active-text-color;
 
       .x-svgrepo-icon {
@@ -80,7 +82,7 @@ $active-filter: brightness(200%);
         color: $idle-text-color;
         text-decoration: none;
         font-weight: 400;
-        background: $topnav-background-color;
+        background-color: $topnav-background-color;
 
         span {
           position: relative;
@@ -99,7 +101,7 @@ $active-filter: brightness(200%);
     }
 
     .panel-title:hover {
-      background: $active-background;
+      background-color: $active-background-color;
     }
 
     .panel-collapse {
@@ -122,7 +124,7 @@ $active-filter: brightness(200%);
         }
 
         .list-group-item:hover {
-          background: $active-background;
+          background-color: $active-background-color;
         }
       }
     }
@@ -203,7 +205,7 @@ $active-filter: brightness(200%);
   padding: 12px;
   bottom: 0;
   color: $idle-text-color;
-  background: #212529;
+  background-color: #212529;
   border-top: 1px solid $idle-text-color;
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
@@ -216,7 +218,7 @@ $active-filter: brightness(200%);
   }
 
   &:hover {
-    background: $active-background;
+    background-color: $active-background-color;
     color: $active-text-color;
   }
 }
