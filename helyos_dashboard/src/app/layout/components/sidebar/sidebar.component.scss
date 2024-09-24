@@ -34,10 +34,6 @@ $transition-time: 0.3s;
       color: $idle-text-color;
       text-decoration: none;
       transition: background-color $transition-time;
-
-      .fa-solid {
-        margin-right: 10px;
-      }
     }
 
     a:hover {
@@ -112,14 +108,14 @@ $transition-time: 0.3s;
         .list-group-item {
           border-radius: 0;
           background-color: $topnav-background-color;
-          border: 0 solid transparent;
+          border: 0;
 
           a {
             color: $idle-text-color;
-          }
 
-          a:hover {
-            color: $active-text-color;
+            &:hover {
+              color: $active-text-color;
+            }
           }
         }
 
