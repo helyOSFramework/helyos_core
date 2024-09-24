@@ -125,39 +125,9 @@
           <i class="mx-2 fa-solid fa-caret-down"></i>
         </a>
         <ul [class.expand]="showMenu === 'languages'" class="nested submenu">
-          <li>
-            <a class="list-group-item" (click)="changeLang('en')">
-              {{ 'English' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('fr')">
-              {{ 'French' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('ur')">
-              {{ 'Urdu' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('es')">
-              {{ 'Spanish' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('it')">
-              {{ 'Italian' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('fa')">
-              {{ 'Farsi' | translate }}
-            </a>
-          </li>
-          <li>
-            <a class="list-group-item" (click)="changeLang('de')">
-              {{ 'German' | translate }}
+          <li *ngFor="let language of languages">
+            <a class="list-group-item" (click)="changeLang(language.code)">
+              {{ language.language | translate }}
             </a>
           </li>
         </ul>

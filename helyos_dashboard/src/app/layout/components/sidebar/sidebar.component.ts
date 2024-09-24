@@ -5,6 +5,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { HelyosService } from '../../../services/helyos.service';
 import { AppService } from 'src/app/services/app.service';
 
+interface ILanguage {
+  language: string;
+  code: string;
+}
+
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -15,6 +20,15 @@ export class SidebarComponent implements OnInit, AfterViewInit {
   collapsed: boolean;
   showMenu: string;
   pushRightClass: string;
+  languages: ILanguage[] = [
+    { language: 'English', code: 'en' },
+    { language: 'French', code: 'fr' },
+    { language: 'Urdu', code: 'ur' },
+    { language: 'Spanish', code: 'es' },
+    { language: 'Italian', code: 'it' },
+    { language: 'Farsi', code: 'fa' },
+    { language: 'German', code: 'de' },
+  ];
 
   @Output() collapsedEvent = new EventEmitter<boolean>();
 
