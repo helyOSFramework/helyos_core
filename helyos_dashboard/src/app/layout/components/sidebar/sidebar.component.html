@@ -23,8 +23,8 @@
         [routerLinkActive]="['router-link-active']">
         <span>{{ 'Agents' | translate }}</span>
       </a>
-      <ul>
-        <li [class.expand]="true" class="nested">
+      <ul [class.expand]="true" class="nested">
+        <li>
           <a
             [routerLinkActive]="['router-link-active']"
             [routerLink]="['/vehicles-registry']"
@@ -70,9 +70,11 @@
         <span>{{ 'Register Missions' | translate }}</span>
       </a>
       <ul [class.expand]="showMenu === 'pages'" class="nested submenu">
-        <li><a> Mission Recipes:</a></li>
         <li>
-          <a *ngFor="let wpType of wpTypes" href="javascript:void(0)" [routerLink]="['/work-processes', wpType.id]">
+          <a class="list-group-item"> Mission Recipes:</a>
+        </li>
+        <li *ngFor="let wpType of wpTypes">
+          <a class="list-group-item" [routerLink]="['/work-processes', wpType.id]">
             <i class="me-2 fa-solid fa-fw fa-cog"></i>
             <span>{{ wpType.name | translate }}</span>
           </a>

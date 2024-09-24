@@ -128,10 +128,6 @@ $transition-time: 0.3s;
 }
 
 .nested-menu {
-  .list-group-item {
-    cursor: pointer;
-  }
-
   .nested {
     list-style-type: none;
   }
@@ -142,17 +138,10 @@ $transition-time: 0.3s;
 
     &.expand {
       display: block;
-      list-style-type: none;
       height: auto;
-      padding-left: 3rem;
 
-      li {
-        a {
-          color: $active-text-color;
-          padding: 10px;
-          display: block;
-          text-decoration: none;
-        }
+      li:not(:first-child) {
+        cursor: pointer;
       }
     }
   }
