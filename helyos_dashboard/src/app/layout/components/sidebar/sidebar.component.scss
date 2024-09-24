@@ -139,10 +139,8 @@ $transition-time: 0.3s;
   ul.submenu {
     display: none;
     height: 0;
-  }
 
-  & .expand {
-    ul.submenu {
+    &.expand {
       display: block;
       list-style-type: none;
       height: auto;
