@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AppService {
 
@@ -11,8 +11,8 @@ export class AppService {
   enableTooltips(): any[] {
     const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => {
-      new bootstrap.Tooltip(tooltipTriggerEl, {
-        trigger: 'hover'
+      return new bootstrap.Tooltip(tooltipTriggerEl, {
+        trigger: 'hover',
       });
     });
     return tooltipList;
