@@ -32,10 +32,14 @@
             <i class="me-2 fa-solid fa-fw fa-truck"></i>
             <span>{{ 'Vehicles' | translate }}</span>
           </a>
+        </li>
+        <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/tools-registry']" class="list-group-item">
             <i class="me-2 fa-solid fa-fw fa-trailer"></i>
             <span>{{ 'Tools & Trailers' | translate }}</span>
           </a>
+        </li>
+        <li>
           <a
             [routerLinkActive]="['router-link-active']"
             [routerLink]="['/chargeStations-registry']"
@@ -43,6 +47,8 @@
             <i class="me-2 fa-solid fa-fw fa-charging-station"></i>
             <span>{{ 'Charge Stations' | translate }}</span>
           </a>
+        </li>
+        <li>
           <a
             [routerLinkActive]="['router-link-active']"
             [routerLink]="['/assistants-registry']"
@@ -50,6 +56,8 @@
             <i class="me-2 fa-solid fa-fw fa-robot"></i>
             <span>{{ 'Assistants' | translate }}</span>
           </a>
+        </li>
+        <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agents']" class="list-group-item">
             <i class="me-2 fa-solid fa-fw">
               <img src="assets/icons/data-viewer-svgrepo-27503.svg" class="x-svgrepo-icon" alt="Data Viewer Icon">
@@ -71,7 +79,7 @@
       </a>
       <ul [class.expand]="showMenu === 'pages'" class="nested submenu">
         <li>
-          <a class="list-group-item"> Mission Recipes:</a>
+          <a class="list-group-item cursor-auto"> Mission Recipes:</a>
         </li>
         <li *ngFor="let wpType of wpTypes">
           <a class="list-group-item" [routerLink]="['/work-processes', wpType.id]">
@@ -120,81 +128,83 @@
 
     <div class="header-fields">
       <a (click)="rltAndLtr()" class="list-group-item">
-        <span><i class="me-2 fa-solid fa-fw fa-arrows-h"></i> RTL/LTR</span>
+        <i class="me-2 fa-solid fa-fw fa-arrows-h"></i>
+        <span>RTL/LTR</span>
       </a>
       <div class="nested-menu">
         <a (click)="addExpandClass('languages')" class="list-group-item">
-          <span><i class="me-2 fa-solid fa-fw fa-language"></i> {{ 'Language' | translate }} <b
-              class="caret"></b></span>
+          <i class="me-2 fa-solid fa-fw fa-language"></i>
+          <span>{{ 'Language' | translate }} <b class="caret"></b></span>
         </a>
-        <li [class.expand]="showMenu === 'languages'" class="nested">
-          <ul class="submenu">
-            <li>
-              <a (click)="changeLang('en')" href="javascript:void(0)">
-                {{ 'English' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('fr')" href="javascript:void(0)">
-                {{ 'French' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('ur')" href="javascript:void(0)">
-                {{ 'Urdu' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('es')" href="javascript:void(0)">
-                {{ 'Spanish' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('it')" href="javascript:void(0)">
-                {{ 'Italian' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('fa')" href="javascript:void(0)">
-                {{ 'Farsi' | translate }}
-              </a>
-            </li>
-            <li>
-              <a (click)="changeLang('de')" href="javascript:void(0)">
-                {{ 'German' | translate }}
-              </a>
-            </li>
-          </ul>
-        </li>
+        <ul [class.expand]="showMenu === 'languages'" class="nested submenu">
+          <li>
+            <a class="list-group-item" (click)="changeLang('en')">
+              {{ 'English' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('fr')">
+              {{ 'French' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('ur')">
+              {{ 'Urdu' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('es')">
+              {{ 'Spanish' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('it')">
+              {{ 'Italian' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('fa')">
+              {{ 'Farsi' | translate }}
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="changeLang('de')">
+              {{ 'German' | translate }}
+            </a>
+          </li>
+        </ul>
       </div>
       <div class="nested-menu">
         <a (click)="addExpandClass('profile')" class="list-group-item">
-          <span><i class="me-2 fa-solid fa-fw fa-user"></i> Administrator</span>
+          <i class="me-2 fa-solid fa-fw fa-user"></i>
+          <span>Administrator</span>
         </a>
-        <li [class.expand]="showMenu === 'profile'" class="nested">
-          <ul class="submenu">
-            <li>
-              <a href="javascript:void(0)">
-                <span><i class="me-2 fa-solid fa-fw fa-user"></i> {{ 'Profile' | translate }}</span>
-              </a>
-            </li>
-            <li>
-              <a href="javascript:void(0)">
-                <span><i class="me-2 fa-solid fa-fw fa-envelope"></i> {{ 'Inbox' | translate }}</span>
-              </a>
-            </li>
-            <li>
-              <a href="javascript:void(0)">
-                <span><i class="me-2 fa-solid fa-fw fa-gear"></i> {{ 'Settings' | translate }}</span>
-              </a>
-            </li>
-            <li>
-              <a (click)="onLoggedout()" [routerLink]="['/login']">
-                <span><i class="me-2 fa-solid fa-fw fa-power-off"></i> {{ 'Log Out' | translate }}</span>
-              </a>
-            </li>
-          </ul>
-        </li>
+        <ul [class.expand]="showMenu === 'profile'" class="nested submenu">
+          <li>
+            <a class="list-group-item">
+              <i class="me-2 fa-solid fa-fw fa-user"></i>
+              <span>{{ 'Profile' | translate }}</span>
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item">
+              <i class="me-2 fa-solid fa-fw fa-envelope"></i>
+              <span>{{ 'Inbox' | translate }}</span>
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item">
+              <i class="me-2 fa-solid fa-fw fa-gear"></i>
+              <span>{{ 'Settings' | translate }}</span>
+            </a>
+          </li>
+          <li>
+            <a class="list-group-item" (click)="onLoggedout()" [routerLink]="['/login']">
+              <i class="me-2 fa-solid fa-fw fa-power-off"></i>
+              <span>{{ 'Log Out' | translate }}</span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

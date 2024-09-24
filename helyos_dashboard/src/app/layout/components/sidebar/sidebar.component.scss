@@ -34,6 +34,7 @@ $transition-time: 0.3s;
       color: $idle-text-color;
       text-decoration: none;
       transition: background-color $transition-time;
+      cursor: pointer;
     }
 
     a:hover {
@@ -139,10 +140,6 @@ $transition-time: 0.3s;
     &.expand {
       display: block;
       height: auto;
-
-      li:not(:first-child) {
-        cursor: pointer;
-      }
     }
   }
 }
