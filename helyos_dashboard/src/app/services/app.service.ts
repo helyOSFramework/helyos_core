@@ -11,7 +11,9 @@ export class AppService {
   enableTooltips(): any[] {
     const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+      new bootstrap.Tooltip(tooltipTriggerEl, {
+        trigger: 'hover'
+      });
     });
     return tooltipList;
   }
