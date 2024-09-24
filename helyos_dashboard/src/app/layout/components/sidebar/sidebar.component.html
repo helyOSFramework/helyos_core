@@ -1,17 +1,17 @@
 <nav [ngClass]="{ sidebarPushRight: isActive, collapsed: collapsed }" class="sidebar">
   <div class="list-group">
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/accounts']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-users"></i>
+      <i class="mx-2 fa-solid fa-fw fa-users"></i>
       <span>{{ 'Register Apps' | translate }}</span>
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/yards']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-warehouse"></i>
+      <i class="mx-2 fa-solid fa-fw fa-warehouse"></i>
       <span>{{ 'Register Yards' | translate }}</span>
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/yardmap']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-map-location-dot"></i>
+      <i class="mx-2 fa-solid fa-fw fa-map-location-dot"></i>
       <span>{{ 'Map Objects' | translate }}</span>
     </a>
 
@@ -23,33 +23,33 @@
       <ul [class.expand]="true" class="nested">
         <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/vehicles-registry']" class="list-group-item">
-            <i class="me-2 fa-solid fa-fw fa-truck"></i>
+            <i class="mx-2 fa-solid fa-fw fa-truck"></i>
             <span>{{ 'Vehicles' | translate }}</span>
           </a>
         </li>
         <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/tools-registry']" class="list-group-item">
-            <i class="me-2 fa-solid fa-fw fa-trailer"></i>
+            <i class="mx-2 fa-solid fa-fw fa-trailer"></i>
             <span>{{ 'Tools & Trailers' | translate }}</span>
           </a>
         </li>
         <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/chargeStations-registry']"
             class="list-group-item">
-            <i class="me-2 fa-solid fa-fw fa-charging-station"></i>
+            <i class="mx-2 fa-solid fa-fw fa-charging-station"></i>
             <span>{{ 'Charge Stations' | translate }}</span>
           </a>
         </li>
         <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/assistants-registry']"
             class="list-group-item">
-            <i class="me-2 fa-solid fa-fw fa-robot"></i>
+            <i class="mx-2 fa-solid fa-fw fa-robot"></i>
             <span>{{ 'Assistants' | translate }}</span>
           </a>
         </li>
         <li>
           <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agents']" class="list-group-item">
-            <i class="me-2 fa-solid fa-fw">
+            <i class="mx-2 fa-solid fa-fw">
               <img src="assets/icons/data-viewer-svgrepo-27503.svg" class="x-svgrepo-icon" alt="Data Viewer Icon">
             </i>
             <span>{{ 'Track Agents' | translate }}</span>
@@ -61,7 +61,7 @@
     <div class="nested-menu">
       <a (click)="addExpandClass('pages')" [routerLinkActive]="['router-link-active']"
         [routerLink]="['/work-processes']" class="list-group-item">
-        <i class="me-2 fa-solid fa-fw fa-cogs"></i>
+        <i class="mx-2 fa-solid fa-fw fa-cogs"></i>
         <span>{{ 'Register Missions' | translate }}</span>
       </a>
       <ul [class.expand]="showMenu === 'pages'" class="nested submenu">
@@ -70,7 +70,7 @@
         </li>
         <li *ngFor="let wpType of wpTypes">
           <a class="list-group-item" [routerLink]="['/work-processes', wpType.id]">
-            <i class="me-2 fa-solid fa-fw fa-cog"></i>
+            <i class="mx-2 fa-solid fa-fw fa-cog"></i>
             <span>{{ wpType.name | translate }}</span>
           </a>
         </li>
@@ -78,24 +78,24 @@
     </div>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/all-services']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-cubes"></i>
+      <i class="mx-2 fa-solid fa-fw fa-cubes"></i>
       <span>{{ 'Microservices' | translate }}</span>
     </a>
 
     <div class="nav-divider"></div>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/dispatch-processes']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-paper-plane"></i>
+      <i class="mx-2 fa-solid fa-fw fa-paper-plane"></i>
       <span>{{ 'Dispatched Missions' | translate }}</span>
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/dispatch-services']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-cloud-arrow-up"></i>
+      <i class="mx-2 fa-solid fa-fw fa-cloud-arrow-up"></i>
       <span>{{ 'Dispatched Services' | translate }}</span>
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agent-assignments']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw">
+      <i class="mx-2 fa-solid fa-fw">
         <img src="assets/icons/assignment-svgrepo-501100.svg" class="x-svgrepo-icon" alt="Assignment Icon">
       </i>
       <span>{{ 'Agent Assignments' | translate }}</span>
@@ -104,24 +104,25 @@
     <div class="nav-divider"></div>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/run-lists']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-circle-play"></i>
+      <i class="mx-2 fa-solid fa-fw fa-circle-play"></i>
       <span>{{ 'Mission Queues' | translate }}</span>
     </a>
 
     <a [routerLinkActive]="['router-link-active']" [routerLink]="['/system-log']" class="list-group-item">
-      <i class="me-2 fa-solid fa-fw fa-clipboard-list"></i>
+      <i class="mx-2 fa-solid fa-fw fa-clipboard-list"></i>
       <span>{{ 'System Log' | translate }}</span>
     </a>
 
     <div class="header-fields">
       <a (click)="rltAndLtr()" class="list-group-item">
-        <i class="me-2 fa-solid fa-fw fa-arrows-h"></i>
+        <i class="mx-2 fa-solid fa-fw fa-arrows-h"></i>
         <span>RTL/LTR</span>
       </a>
       <div class="nested-menu">
         <a (click)="addExpandClass('languages')" class="list-group-item">
-          <i class="me-2 fa-solid fa-fw fa-language"></i>
-          <span>{{ 'Language' | translate }} <b class="caret"></b></span>
+          <i class="mx-2 fa-solid fa-fw fa-language"></i>
+          <span>{{ 'Language' | translate }}</span>
+          <i class="mx-2 fa-solid fa-caret-down"></i>
         </a>
         <ul [class.expand]="showMenu === 'languages'" class="nested submenu">
           <li>
@@ -163,31 +164,31 @@
       </div>
       <div class="nested-menu">
         <a (click)="addExpandClass('profile')" class="list-group-item">
-          <i class="me-2 fa-solid fa-fw fa-user"></i>
+          <i class="mx-2 fa-solid fa-fw fa-user"></i>
           <span>Administrator</span>
         </a>
         <ul [class.expand]="showMenu === 'profile'" class="nested submenu">
           <li>
             <a class="list-group-item">
-              <i class="me-2 fa-solid fa-fw fa-user"></i>
+              <i class="mx-2 fa-solid fa-fw fa-user"></i>
               <span>{{ 'Profile' | translate }}</span>
             </a>
           </li>
           <li>
             <a class="list-group-item">
-              <i class="me-2 fa-solid fa-fw fa-envelope"></i>
+              <i class="mx-2 fa-solid fa-fw fa-envelope"></i>
               <span>{{ 'Inbox' | translate }}</span>
             </a>
           </li>
           <li>
             <a class="list-group-item">
-              <i class="me-2 fa-solid fa-fw fa-gear"></i>
+              <i class="mx-2 fa-solid fa-fw fa-gear"></i>
               <span>{{ 'Settings' | translate }}</span>
             </a>
           </li>
           <li>
             <a class="list-group-item" (click)="onLoggedout()" [routerLink]="['/login']">
-              <i class="me-2 fa-solid fa-fw fa-power-off"></i>
+              <i class="mx-2 fa-solid fa-fw fa-power-off"></i>
               <span>{{ 'Log Out' | translate }}</span>
             </a>
           </li>
@@ -196,7 +197,7 @@
     </div>
   </div>
   <div (click)="toggleCollapsed()" [ngClass]="{ collapsed: collapsed }" class="toggle-button">
-    <i class="me-2 fa-solid fa-fw fa-angle-double-{{ collapsed ? 'right' : 'left' }}"></i>
+    <i class="mx-2 fa-solid fa-fw fa-angle-double-{{ collapsed ? 'right' : 'left' }}"></i>
     <span>{{ 'Collapse Sidebar' | translate }}</span>
   </div>
 </nav>
