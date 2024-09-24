@@ -68,7 +68,7 @@
         [routerLink]="['/work-processes']"
         class="list-group-item"
         [routerLinkActive]="['router-link-active']">
-        <i class="fa-solid fa-cogs"></i>&nbsp;
+        <i class="fa-solid fa-fw fa-cogs"></i>&nbsp;
         <span>{{ 'Register Missions' | translate }}</span>
       </a>
       <li [class.expand]="showMenu === 'pages'" class="nested">
@@ -76,7 +76,7 @@
           <li><a> Mission Recipes:</a></li>
           <li>
             <a *ngFor="let wpType of wpTypes" href="javascript:void(0)" [routerLink]="['/work-processes', wpType.id]">
-              <i class="fa-solid fa-cog"></i>&nbsp;
+              <i class="fa-solid fa-fw fa-cog"></i>&nbsp;
               <span>{{ wpType.name | translate }}</span>
             </a>
           </li>
@@ -85,7 +85,7 @@
     </div>
 
     <a [routerLink]="['/all-services']" class="list-group-item" [routerLinkActive]="['router-link-active']">
-      <i class="fa-solid fa-cubes"></i>&nbsp;
+      <i class="fa-solid fa-fw fa-cubes"></i>&nbsp;
       <span>{{ 'Microservices' | translate }}</span>
     </a>
 
@@ -122,11 +122,12 @@
 
     <div class="header-fields">
       <a (click)="rltAndLtr()" class="list-group-item">
-        <span><i class="fa-solid fa-arrows-h"></i>&nbsp; RTL/LTR</span>
+        <span><i class="fa-solid fa-fw fa-arrows-h"></i>&nbsp; RTL/LTR</span>
       </a>
       <div class="nested-menu">
         <a (click)="addExpandClass('languages')" class="list-group-item">
-          <span><i class="fa-solid fa-language"></i>&nbsp; {{ 'Language' | translate }} <b class="caret"></b></span>
+          <span><i class="fa-solid fa-fw fa-language"></i>&nbsp; {{ 'Language' | translate }} <b
+              class="caret"></b></span>
         </a>
         <li [class.expand]="showMenu === 'languages'" class="nested">
           <ul class="submenu">
@@ -170,7 +171,7 @@
       </div>
       <div class="nested-menu">
         <a (click)="addExpandClass('profile')" class="list-group-item">
-          <span><i class="fa-solid fa-user"></i>&nbsp; Administrator</span>
+          <span><i class="fa-solid fa-fw fa-user"></i>&nbsp; Administrator</span>
         </a>
         <li [class.expand]="showMenu === 'profile'" class="nested">
           <ul class="submenu">
