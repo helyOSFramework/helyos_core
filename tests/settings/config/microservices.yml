@@ -58,3 +58,11 @@ services:
 
 
 
+    instantActionPlanner: 
+      is_dummy: false
+      domain: "Assignment planner"  # Assignment planner | Map Server | Storage server
+      type: "instantActionPlanner"
+      url: http://instant_action_planner:9002/api/plan_job/
+      enable: true
+      apikey: "CN783V9SygdG0deHgfesdfsaeNuCqwbm"
+      timeout: 6

@@ -146,3 +146,15 @@ missions:
           apply_result: true
           override_config: "{}"
           dependencies: '["A"]'
+
+
+
+  instantActionMission:
+    description: "pause/resume assignment"    
+    recipe:
+      steps:
+        - step: "A"
+          service_type: "instantActionPlanner"
+          request_order: 1
+          apply_result: true
+          override_config: "{}"

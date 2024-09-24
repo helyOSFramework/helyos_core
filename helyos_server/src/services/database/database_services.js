@@ -89,6 +89,7 @@ subscribeToDatabaseEvents = async (client, channelNames=[]) => {
 
 const services = new DatabaseLayer(mainClient, 'public.services');
 const service_requests = new DatabaseLayer(mainClient, 'public.service_requests');
+const instant_actions = new DatabaseLayer(mainClient, 'public.instant_actions');
 const assignments = new DatabaseLayer(mainClient,'public.assignments');
 const work_processes = new DatabaseLayer(mainClient, 'public.work_processes');
 const mission_queue = new DatabaseLayer(mainClient, 'public.mission_queue');
@@ -112,6 +113,7 @@ module.exports.getNewClient = getNewClient;
 
 module.exports.map_objects = map_objects;
 module.exports.agents = agents;
+module.exports.instant_actions = instant_actions;
 module.exports.agents_interconnections = agents_interconnections;
 module.exports.targets = targets;
 module.exports.work_processes = work_processes;

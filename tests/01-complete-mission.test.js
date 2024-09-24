@@ -35,6 +35,14 @@ describe('01 Test Complete Mission',   () =>  {
         expect(result).toEqual(true);
     });
 
+
+    it('Assignment is completed', async () => {
+        await helyosApplication.createNewMissionForInstantAction(); // pause
+        await helyosApplication.createNewMissionForInstantAction(); // resume
+        const result = await helyosApplication.waitAssignmentStatus(1, 'completed');
+        expect(result).toEqual(true);
+    });
+
     it('Mission is marked as finished', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
         expect(result).toEqual(true);
@@ -45,13 +53,15 @@ describe('01 Test Complete Mission',   () =>  {
         expect(result).toEqual(true);
     });
 
-    it('Check Reserve/Release sent to the agent', async () => {
+    it('Check Reserve/Release and custom instant actions sent to the agent', async () => {
         const logs = await helyosApplication.getAgentRelatedLogs('Ab34069fc5-fdgs-434b-b87e-f19c5435113');
         const reservationsSent = logs.filter(log => log.msg.includes('Sending reserve')).length;
         const releasesSent = logs.filter(log => log.msg.includes('Sending release')).length;
+        const customInstantActionsSent = logs.filter(log => log.msg.includes('instant action')).length;
 
         expect(reservationsSent).toEqual(1);
         expect(releasesSent).toEqual(1);
+        expect(customInstantActionsSent).toEqual(2);
     });  
 
   });
