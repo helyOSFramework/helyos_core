@@ -1,29 +1,24 @@
 import { Injectable } from '@angular/core';
 
-declare var bootstrap: any;
-
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
-  private tooltipList = new Array<any>();
 
   constructor() {
   }
 
-  enableTooltip() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipListNewTooltips = tooltipTriggerList.map(tooltipTriggerEl => {
+  enableTooltips(): any[] {
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    console.log(tooltipListNewTooltips);
-    this.tooltipList.push(...tooltipListNewTooltips);
+    return tooltipList;
   }
 
-  hideAllTooltips() {
-    for (const tooltip of this.tooltipList) {
+  hideAllTooltips(tooltipList: any[]) {
+    for (const tooltip of tooltipList) {
       tooltip.dispose();
     }
-    this.tooltipList = new Array<any>();
   }
 }

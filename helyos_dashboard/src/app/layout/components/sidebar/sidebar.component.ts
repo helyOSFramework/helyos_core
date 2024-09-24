@@ -33,7 +33,7 @@ export class SidebarComponent implements OnInit, AfterViewInit {
     this.collapsed = false;
     this.showMenu = '';
     this.pushRightClass = 'push-right';
-    this.appService.enableTooltip();
+    this.appService.enableTooltips();
   }
 
   ngAfterViewInit(): void {
