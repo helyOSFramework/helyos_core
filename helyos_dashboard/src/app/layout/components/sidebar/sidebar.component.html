@@ -21,38 +21,19 @@
         <span>{{ 'Agents' | translate }}</span>
       </a>
       <ul [class.expand]="true" class="nested">
-        <li>
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="['/vehicles-registry']" class="list-group-item">
-            <i class="mx-2 fa-solid fa-fw fa-truck"></i>
-            <span>{{ 'Vehicles' | translate }}</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="['/tools-registry']" class="list-group-item">
-            <i class="mx-2 fa-solid fa-fw fa-trailer"></i>
-            <span>{{ 'Tools & Trailers' | translate }}</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="['/chargeStations-registry']"
-            class="list-group-item">
-            <i class="mx-2 fa-solid fa-fw fa-charging-station"></i>
-            <span>{{ 'Charge Stations' | translate }}</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="['/assistants-registry']"
-            class="list-group-item">
-            <i class="mx-2 fa-solid fa-fw fa-robot"></i>
-            <span>{{ 'Assistants' | translate }}</span>
-          </a>
-        </li>
-        <li>
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agents']" class="list-group-item">
-            <i class="mx-2 fa-solid fa-fw">
-              <img src="assets/icons/data-viewer-svgrepo-27503.svg" class="x-svgrepo-icon" alt="Data Viewer Icon">
-            </i>
-            <span>{{ 'Track Agents' | translate }}</span>
+        <li *ngFor="let agent of agents">
+          <a [routerLinkActive]="['router-link-active']" [routerLink]="[agent.route]" class="list-group-item">
+            <ng-container *ngIf="agent.icon.endsWith('.svg'); else fontawesomeIcon">
+              <i class="mx-2 fa-solid fa-fw">
+                <img [src]="'assets/icons/'+agent.icon" class="x-svgrepo-icon">
+              </i>
+            </ng-container>
+
+            <ng-template #fontawesomeIcon>
+              <i class="mx-2 fa-solid fa-fw" [ngClass]="agent.icon"></i>
+            </ng-template>
+
+            <span>{{ agent.name | translate }}</span>
           </a>
         </li>
       </ul>
