@@ -137,12 +137,9 @@ function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
             }
 
             // if metadata is instant action  
-            if (metadata.tool_uuid){   // Deprecated
-                hac_data.uuid = metadata.tool_uuid; // Deprecated
-            }
 
-            if (metadata.agent_uuid){
-                hac_data.uuid = metadata.agent_uuid;
+            if (metadata.agent_uuid || metadata.agentUuid ){
+                hac_data.uuid = metadata.agent_uuid || metadata.agentUuid;
             }
 
             new_log_instance = { 

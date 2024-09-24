@@ -20,19 +20,19 @@ async function processInstantActionEvents(msg) {
                 let agentUuid = payload['agent_uuid'];
 
                 if  (agentId && !agentUuid) {
-                    const uuids = await databaseServices.agents.getIds([payload['uuid']]);
+                    const uuids = await databaseServices.agents.getUuids([agentId]);
                     agentUuid = uuids[0];
                  };
 
-                if  (!agentId && payload.uuid) {
-                   const agentIds = await databaseServices.agents.getIds([payload['uuid']]);
+                if  (!agentId && agentUuid) {
+                   const agentIds = await databaseServices.agents.getIds([agentUuid]);
                    agentId = agentIds[0];
                 };
 
                 if (agentId) {
                     agentComm.sendCustomInstantActionToAgent(agentId, payload['command']);
                 }
-                const log = {...payload, agentId: agentId, agentUuid: agentUuid};
+                const log = { agent_id: agentId, agent_uuid: agentUuid, sender: payload.sender};
                 logData.addLog('agent', log, 'normal', `send custom instant action to agent`);	
 
                 break;

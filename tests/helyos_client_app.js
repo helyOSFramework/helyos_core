@@ -117,6 +117,17 @@ class HelyOSClientApplication {
         });
     }
 
+
+    createNewMissionForInstantAction(missionType = 'instantActionMission', agentUuids=[]) {
+        return this.helyosService.workProcess.create({
+            agentUuids: agentUuids,   //  is the agent uuid. 
+            yardId: 1,       // the yard where the agent has checked in.
+            workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
+            data: { },        // this data format depends on the microservice.
+            status: 'dispatched',            // status = 'draft' will save the mission but no dispatch it.
+        });
+    }
+
     createMissionForQueue(missionType = 'driving', queueId = null, runOrder = 1) {
         return this.helyosService.workProcess.create({
             agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 

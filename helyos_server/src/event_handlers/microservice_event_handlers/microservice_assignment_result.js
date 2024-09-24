@@ -22,7 +22,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 		workProcess.sched_start_at = new Date();
 	}
 	const start_stamp = workProcess.sched_start_at.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-	let assigmentInputs = [];
+	let assigmentInputs = [], instantActionsInput = [];
 	let dispatch_order = servResponse.dispatch_order;  
 
 	if (servResponse.results) {
@@ -47,24 +47,36 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 				throw new Error(`Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
 			}
 
-			if (!agentIds.includes(parseInt(agent_id))){
+			if (!agentIds.includes(parseInt(agent_id)) && !result.instant_action){
 				logData.addLog('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not included in the work_process ${workProcess.id} agent_ids.`+
 				` In future versions, this will block the mission execution.`);
 			}
 
 
+			if(result.instant_action) {
+				instantActionsInput.push({
+					yard_id: yardId,
+					agent_id: agent_id,
+					sender: `micoservice request: ${serviceRequest.id}`,
+					command:  result.instant_action.command,
+					status: 'dispatched'
+				});
+			}
 
+			if (result.assignment || result.result) {
+				assigmentInputs.push({
+					yard_id: yardId,
+					work_process_id: workProcess.id,
+					agent_id: agent_id, 
+					service_request_id: serviceRequestId,
+					status: 'not_ready_to_dispatch',
+					start_time_stamp: start_stamp,
+					on_assignment_failure: result.on_assignment_failure  || result.onAssignmentFailure, 
+					fallback_mission: result.fallback_mission || result.fallbackMission,
+					data: JSON.stringify(result.result || result.assignment)});
 
-			assigmentInputs.push({
-				yard_id: yardId,
-				work_process_id: workProcess.id,
-				agent_id: agent_id, 
-				service_request_id: serviceRequestId,
-				status: 'not_ready_to_dispatch',
-				start_time_stamp: start_stamp,
-				on_assignment_failure: result.on_assignment_failure  || result.onAssignmentFailure, 
-				fallback_mission: result.fallback_mission || result.fallbackMission,
-				data: JSON.stringify(result.result || result.assignment)});
+			}
+
 		}
 			
 	} else {  // keep compatibility: in old versions of external services, one assigment is sent to all agent Ids.
@@ -84,6 +96,10 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 										data: data}
 		));
 	}
+
+	// create and dispatch instant actions
+	const instActPromises = instantActionsInput.map( input => databaseServices.instant_actions.insert(input).then( newId => newId));
+	await Promise.all(instActPromises);
 
 	// create assignments
 	const insertPromises = assigmentInputs.map( input => databaseServices.assignments.insert(input).then( newId => newId));
