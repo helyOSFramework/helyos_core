@@ -253,6 +253,7 @@ const flattenServicesData = (jsonObj) => {
         timeout: "result_timeout",
         availability_timeout: "availability_timeout",
         health_endpoint: "health_endpoint",
+        description: "description",
         context: {
                     all_agents_data: "require_agents_data",
                     mission_agents_data: "require_mission_agents_data",
