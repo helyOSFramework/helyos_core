@@ -22,7 +22,9 @@
       <a (click)="addExpandClass('agents')" [routerLinkActive]="['router-link-active']"
         [routerLink]="['/agents-registry']" class="list-group-item"
         data-bs-toggle="tooltip" data-bs-placement="right" title="Agents">
-        <i class="mx-2 fa-solid fa-fw fa-android"></i>
+        <i class="mx-2 fa-solid fa-fw">
+          <img src="assets/icons/team-robots-svgrepo-198498.svg" class="x-svgrepo-icon">
+        </i>
         <span>{{ 'Agents' | translate }}</span>
       </a>
       <ul [class.expand]="true" class="nested" *ngIf="!collapsed">
