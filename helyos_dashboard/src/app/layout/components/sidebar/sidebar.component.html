@@ -25,7 +25,7 @@
         <i class="mx-2 fa-solid fa-fw fa-users"></i>
         <span>{{ 'Agents' | translate }}</span>
       </a>
-      <ul [class.expand]="true" class="nested">
+      <ul [class.expand]="true" class="nested" *ngIf="!collapsed">
         <li *ngFor="let agent of agents">
           <a [routerLinkActive]="['router-link-active']" [routerLink]="[agent.route]" class="list-group-item"
             data-bs-toggle="tooltip" data-bs-placement="right" [title]="agent.name">
@@ -52,7 +52,7 @@
         <i class="mx-2 fa-solid fa-fw fa-cogs"></i>
         <span>{{ 'Register Missions' | translate }}</span>
       </a>
-      <ul [class.expand]="showMenu === 'pages'" class="nested submenu">
+      <ul [class.expand]="showMenu === 'pages'" class="nested submenu" *ngIf="!collapsed">
         <li>
           <a class="list-group-item cursor-auto"> Mission Recipes:</a>
         </li>
