@@ -10,6 +10,7 @@ services:
       enable: true
       apikey: "CN783V9SygdG0deHgfesdfsaeNuCqwbm"
       timeout: 300
+      description: ""
       
       context:
         map_data: true
@@ -31,6 +32,7 @@ services:
       enable: true
       apikey: "ABy40lwSsdfafasdBiCbvU2hVEeY7t"
       timeout: 180
+      description: ""
       
       context:
         map_data: true
