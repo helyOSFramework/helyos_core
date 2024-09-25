@@ -27,20 +27,61 @@ export class SidebarComponent implements OnInit, AfterViewInit {
   showMenu: string;
   pushRightClass: string;
   agents: IAgent[] = [
-    { name: 'Vehicles', icon: 'fa-truck', route: '/vehicles-registry' },
-    { name: 'Tools & Trailers', icon: 'fa-trailer', route: '/tools-registry' },
-    { name: 'Charge Stations', icon: 'fa-charging-station', route: '/chargeStations-registry' },
-    { name: 'Assistants', icon: 'fa-robot', route: '/assistants-registry' },
-    { name: 'Track Agents', icon: 'data-viewer-svgrepo-27503.svg', route: '/agents' },
+    {
+      name: 'Vehicles',
+      icon: 'fa-truck',
+      route: '/vehicles-registry',
+    },
+    {
+      name: 'Tools & Trailers',
+      icon: 'fa-trailer',
+      route: '/tools-registry',
+    },
+    {
+      name: 'Charge Stations',
+      icon: 'fa-charging-station',
+      route: '/chargeStations-registry',
+    },
+    {
+      name: 'Assistants',
+      icon: 'fa-robot',
+      route: '/assistants-registry',
+    },
+    {
+      name: 'Track Agents',
+      icon: 'data-viewer-svgrepo-27503.svg',
+      route: '/agents',
+    },
   ];
   languages: ILanguage[] = [
-    { language: 'English', code: 'en' },
-    { language: 'French', code: 'fr' },
-    { language: 'Urdu', code: 'ur' },
-    { language: 'Spanish', code: 'es' },
-    { language: 'Italian', code: 'it' },
-    { language: 'Farsi', code: 'fa' },
-    { language: 'German', code: 'de' },
+    {
+      language: 'English',
+      code: 'en',
+    },
+    {
+      language: 'French',
+      code: 'fr',
+    },
+    {
+      language: 'Urdu',
+      code: 'ur',
+    },
+    {
+      language: 'Spanish',
+      code: 'es',
+    },
+    {
+      language: 'Italian',
+      code: 'it',
+    },
+    {
+      language: 'Farsi',
+      code: 'fa',
+    },
+    {
+      language: 'German',
+      code: 'de',
+    },
   ];
 
   @Output() collapsedEvent = new EventEmitter<boolean>();

@@ -1,39 +1,64 @@
 <nav [ngClass]="{ sidebarPushRight: isActive, collapsed: collapsed }" class="sidebar">
   <div class="list-group">
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/accounts']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Register Apps">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/accounts']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Register Apps">
       <i class="mx-2 fa-solid fa-fw fa-users"></i>
       <span>{{ 'Register Apps' | translate }}</span>
     </a>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/yards']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Register Yards">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/yards']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Register Yards">
       <i class="mx-2 fa-solid fa-fw fa-warehouse"></i>
       <span>{{ 'Register Yards' | translate }}</span>
     </a>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/yardmap']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Map Objects">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/yardmap']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Map Objects">
       <i class="mx-2 fa-solid fa-fw fa-map-location-dot"></i>
       <span>{{ 'Map Objects' | translate }}</span>
     </a>
 
     <div class="nested-menu">
-      <a (click)="addExpandClass('agents')" [routerLinkActive]="['router-link-active']"
-        [routerLink]="['/agents-registry']" class="list-group-item"
-        data-bs-toggle="tooltip" data-bs-placement="right" title="Agents">
+      <a
+        (click)="addExpandClass('agents')"
+        [routerLinkActive]="['router-link-active']"
+        [routerLink]="['/agents-registry']"
+        class="list-group-item"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="Agents">
         <i class="mx-2 fa-solid fa-fw">
-          <img src="assets/icons/team-robots-svgrepo-198498.svg" class="x-svgrepo-icon">
+          <img src="assets/icons/team-robots-svgrepo-198498.svg" class="x-svgrepo-icon" alt="icon" />
         </i>
         <span>{{ 'Agents' | translate }}</span>
       </a>
       <ul [class.expand]="true" class="nested" *ngIf="!collapsed">
         <li *ngFor="let agent of agents">
-          <a [routerLinkActive]="['router-link-active']" [routerLink]="[agent.route]" class="list-group-item"
-            data-bs-toggle="tooltip" data-bs-placement="right" [title]="agent.name">
+          <a
+            [routerLinkActive]="['router-link-active']"
+            [routerLink]="[agent.route]"
+            class="list-group-item"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            [title]="agent.name">
             <ng-container *ngIf="agent.icon.endsWith('.svg'); else fontawesomeIcon">
               <i class="mx-2 fa-solid fa-fw">
-                <img [src]="'assets/icons/'+agent.icon" class="x-svgrepo-icon">
+                <img [src]="'assets/icons/' + agent.icon" class="x-svgrepo-icon" alt="icon" />
               </i>
             </ng-container>
 
@@ -48,9 +73,14 @@
     </div>
 
     <div class="nested-menu">
-      <a (click)="addExpandClass('pages')" [routerLinkActive]="['router-link-active']"
-        [routerLink]="['/work-processes']" class="list-group-item"
-        data-bs-toggle="tooltip" data-bs-placement="right" title="Register Missions">
+      <a
+        (click)="addExpandClass('pages')"
+        [routerLinkActive]="['router-link-active']"
+        [routerLink]="['/work-processes']"
+        class="list-group-item"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="Register Missions">
         <i class="mx-2 fa-solid fa-fw fa-cogs"></i>
         <span>{{ 'Register Missions' | translate }}</span>
       </a>
@@ -67,100 +97,148 @@
       </ul>
     </div>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/all-services']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Microservices">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/all-services']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Microservices">
       <i class="mx-2 fa-solid fa-fw fa-cubes"></i>
       <span>{{ 'Microservices' | translate }}</span>
     </a>
 
     <div class="nav-divider"></div>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/dispatch-processes']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Dispatched Missions">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/dispatch-processes']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Dispatched Missions">
       <i class="mx-2 fa-solid fa-fw fa-paper-plane"></i>
       <span>{{ 'Dispatched Missions' | translate }}</span>
     </a>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/dispatch-services']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Dispatched Services">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/dispatch-services']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Dispatched Services">
       <i class="mx-2 fa-solid fa-fw fa-cloud-arrow-up"></i>
       <span>{{ 'Dispatched Services' | translate }}</span>
     </a>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/agent-assignments']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Agent Assignments">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/agent-assignments']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Agent Assignments">
       <i class="mx-2 fa-solid fa-fw">
-        <img src="assets/icons/assignment-svgrepo-501100.svg" class="x-svgrepo-icon" alt="Assignment Icon">
+        <img src="assets/icons/assignment-svgrepo-501100.svg" class="x-svgrepo-icon" alt="icon" />
       </i>
       <span>{{ 'Agent Assignments' | translate }}</span>
     </a>
 
     <div class="nav-divider"></div>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/run-lists']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="Mission Queues">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/run-lists']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="Mission Queues">
       <i class="mx-2 fa-solid fa-fw fa-circle-play"></i>
       <span>{{ 'Mission Queues' | translate }}</span>
     </a>
 
-    <a [routerLinkActive]="['router-link-active']" [routerLink]="['/system-log']" class="list-group-item"
-      data-bs-toggle="tooltip" data-bs-placement="right" title="System Log">
+    <a
+      [routerLinkActive]="['router-link-active']"
+      [routerLink]="['/system-log']"
+      class="list-group-item"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="System Log">
       <i class="mx-2 fa-solid fa-fw fa-clipboard-list"></i>
       <span>{{ 'System Log' | translate }}</span>
     </a>
 
     <div class="header-fields">
-      <a (click)="rltAndLtr()" class="list-group-item"
-        data-bs-toggle="tooltip" data-bs-placement="right" title="RTL/LTR">
+      <a
+        (click)="rltAndLtr()"
+        class="list-group-item"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title="RTL/LTR">
         <i class="mx-2 fa-solid fa-fw fa-arrows-h"></i>
         <span>RTL/LTR</span>
       </a>
       <div class="nested-menu">
-        <a (click)="addExpandClass('languages')" class="list-group-item"
-          data-bs-toggle="tooltip" data-bs-placement="right" title="Language">
+        <a
+          (click)="addExpandClass('languages')"
+          class="list-group-item"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="Language">
           <i class="mx-2 fa-solid fa-fw fa-language"></i>
           <span>{{ 'Language' | translate }}</span>
         </a>
         <ul [class.expand]="showMenu === 'languages'" class="nested submenu">
           <li *ngFor="let language of languages">
-            <a class="list-group-item" (click)="changeLang(language.code)"
-              data-bs-toggle="tooltip" data-bs-placement="right" [title]="language.language">
+            <a
+              class="list-group-item"
+              (click)="changeLang(language.code)"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              [title]="language.language">
               {{ language.language | translate }}
             </a>
           </li>
         </ul>
       </div>
       <div class="nested-menu">
-        <a (click)="addExpandClass('profile')" class="list-group-item"
-          data-bs-toggle="tooltip" data-bs-placement="right" title="Administrator">
+        <a
+          (click)="addExpandClass('profile')"
+          class="list-group-item"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="Administrator">
           <i class="mx-2 fa-solid fa-fw fa-user"></i>
           <span>Administrator</span>
         </a>
         <ul [class.expand]="showMenu === 'profile'" class="nested submenu">
           <li>
-            <a class="list-group-item"
-              data-bs-toggle="tooltip" data-bs-placement="right" title="Profile">
+            <a class="list-group-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Profile">
               <i class="mx-2 fa-solid fa-fw fa-user"></i>
               <span>{{ 'Profile' | translate }}</span>
             </a>
           </li>
           <li>
-            <a class="list-group-item"
-              data-bs-toggle="tooltip" data-bs-placement="right" title="Inbox">
+            <a class="list-group-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Inbox">
               <i class="mx-2 fa-solid fa-fw fa-envelope"></i>
               <span>{{ 'Inbox' | translate }}</span>
             </a>
           </li>
           <li>
-            <a class="list-group-item"
-              data-bs-toggle="tooltip" data-bs-placement="right" title="Settings">
+            <a class="list-group-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Settings">
               <i class="mx-2 fa-solid fa-fw fa-gear"></i>
               <span>{{ 'Settings' | translate }}</span>
             </a>
           </li>
           <li>
-            <a class="list-group-item" (click)="onLoggedout()" [routerLink]="['/login']"
-              data-bs-toggle="tooltip" data-bs-placement="right" title="Log Out">
+            <a
+              class="list-group-item"
+              (click)="onLoggedout()"
+              [routerLink]="['/login']"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Log Out">
               <i class="mx-2 fa-solid fa-fw fa-power-off"></i>
               <span>{{ 'Log Out' | translate }}</span>
             </a>
