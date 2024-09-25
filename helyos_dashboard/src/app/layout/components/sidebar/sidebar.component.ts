@@ -91,11 +91,17 @@ export class SidebarComponent implements OnInit, AfterViewInit {
     } else {
       this.showMenu = element;
     }
+    this.showSidebar();
     this.workProcTypesList();
   }
 
   toggleCollapsed() {
     this.collapsed = !this.collapsed;
+    this.collapsedEvent.emit(this.collapsed);
+  }
+
+  showSidebar() {
+    this.collapsed = false;
     this.collapsedEvent.emit(this.collapsed);
   }
 
