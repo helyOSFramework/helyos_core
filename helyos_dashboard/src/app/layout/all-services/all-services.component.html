@@ -240,6 +240,17 @@
       </fieldset>
     </div>
 
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="description"> Description </label>
+        <textarea
+          id="description"
+          class="form-control"
+          [(ngModel)]="selectedItem.description"
+          name="description"></textarea>
+      </fieldset>
+    </div>
+
     <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
     <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
   </form>
