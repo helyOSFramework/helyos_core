@@ -3,6 +3,18 @@ import { NavigationEnd, Router } from '@angular/router';
 import { H_WorkProcessType } from 'helyosjs-sdk';
 import { TranslateService } from '@ngx-translate/core';
 import { HelyosService } from '../../../services/helyos.service';
+import { AppService } from 'src/app/services/app.service';
+
+interface IAgent {
+  name: string;
+  icon: string;
+  route: string;
+}
+
+interface ILanguage {
+  language: string;
+  code: string;
+}
 
 @Component({
   selector: 'app-sidebar',
@@ -14,12 +26,69 @@ export class SidebarComponent implements OnInit, AfterViewInit {
   collapsed: boolean;
   showMenu: string;
   pushRightClass: string;
+  agents: IAgent[] = [
+    {
+      name: 'Vehicles',
+      icon: 'fa-truck',
+      route: '/vehicles-registry',
+    },
+    {
+      name: 'Tools & Trailers',
+      icon: 'fa-trailer',
+      route: '/tools-registry',
+    },
+    {
+      name: 'Charge Stations',
+      icon: 'fa-charging-station',
+      route: '/chargeStations-registry',
+    },
+    {
+      name: 'Assistants',
+      icon: 'fa-robot',
+      route: '/assistants-registry',
+    },
+    {
+      name: 'Track Agents',
+      icon: 'data-viewer-svgrepo-27503.svg',
+      route: '/agents',
+    },
+  ];
+  languages: ILanguage[] = [
+    {
+      language: 'English',
+      code: 'en',
+    },
+    {
+      language: 'French',
+      code: 'fr',
+    },
+    {
+      language: 'Urdu',
+      code: 'ur',
+    },
+    {
+      language: 'Spanish',
+      code: 'es',
+    },
+    {
+      language: 'Italian',
+      code: 'it',
+    },
+    {
+      language: 'Farsi',
+      code: 'fa',
+    },
+    {
+      language: 'German',
+      code: 'de',
+    },
+  ];
 
   @Output() collapsedEvent = new EventEmitter<boolean>();
 
   public wpTypes: H_WorkProcessType[];
 
-  constructor(private helyosService: HelyosService, private translate: TranslateService, public router: Router) {
+  constructor(private helyosService: HelyosService, private translate: TranslateService, public router: Router, private appService: AppService) {
     this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
         this.toggleSidebar();
@@ -36,6 +105,7 @@ export class SidebarComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.workProcTypesList();
+    this.appService.enableTooltips();
   }
 
   workProcTypesList() {
@@ -62,11 +132,17 @@ export class SidebarComponent implements OnInit, AfterViewInit {
     } else {
       this.showMenu = element;
     }
+    this.showSidebar();
     this.workProcTypesList();
   }
 
   toggleCollapsed() {
     this.collapsed = !this.collapsed;
+    this.collapsedEvent.emit(this.collapsed);
+  }
+
+  showSidebar() {
+    this.collapsed = false;
     this.collapsedEvent.emit(this.collapsed);
   }
 

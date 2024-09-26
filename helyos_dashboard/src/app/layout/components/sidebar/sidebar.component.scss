@@ -1,4 +1,9 @@
 $topnav-background-color: #222222;
+$idle-text-color: #999999;
+$active-text-color: #ffffff;
+$active-background-color: darken($topnav-background-color, 5%);
+$active-filter: brightness(200%);
+$transition-time: 0.3s;
 
 .sidebar {
   border-radius: 0;
@@ -23,25 +28,31 @@ $topnav-background-color: #222222;
 
   .list-group {
     a.list-group-item {
-      background: $topnav-background-color;
+      background-color: $topnav-background-color;
       border: 0;
       border-radius: 0;
-      color: #999999;
+      color: $idle-text-color;
       text-decoration: none;
-
-      .fa {
-        margin-right: 10px;
-      }
+      transition: background-color $transition-time;
+      cursor: pointer;
     }
 
     a:hover {
-      background: darken($topnav-background-color, 5%);
-      color: #ffffff;
+      background-color: $active-background-color;
+      color: $active-text-color;
+
+      .x-svgrepo-icon {
+        filter: $active-filter;
+      }
     }
 
     a.router-link-active {
-      background: darken($topnav-background-color, 5%);
-      color: #ffffff;
+      background-color: $active-background-color;
+      color: $active-text-color;
+
+      .x-svgrepo-icon {
+        filter: $active-filter;
+      }
     }
 
     .header-fields {
@@ -65,10 +76,10 @@ $topnav-background-color: #222222;
       margin-bottom: 0;
 
       a {
-        color: #999999;
+        color: $idle-text-color;
         text-decoration: none;
         font-weight: 400;
-        background: $topnav-background-color;
+        background-color: $topnav-background-color;
 
         span {
           position: relative;
@@ -80,14 +91,14 @@ $topnav-background-color: #222222;
 
       a:hover,
       a:focus {
-        color: #ffffff;
+        color: $active-text-color;
         outline: none;
         outline-offset: -2px;
       }
     }
 
     .panel-title:hover {
-      background: darken($topnav-background-color, 5%);
+      background-color: $active-background-color;
     }
 
     .panel-collapse {
@@ -98,19 +109,19 @@ $topnav-background-color: #222222;
         .list-group-item {
           border-radius: 0;
           background-color: $topnav-background-color;
-          border: 0 solid transparent;
+          border: 0;
 
           a {
-            color: #999999;
-          }
+            color: $idle-text-color;
 
-          a:hover {
-            color: #ffffff;
+            &:hover {
+              color: $active-text-color;
+            }
           }
         }
 
         .list-group-item:hover {
-          background: darken($topnav-background-color, 5%);
+          background-color: $active-background-color;
         }
       }
     }
@@ -118,10 +129,6 @@ $topnav-background-color: #222222;
 }
 
 .nested-menu {
-  .list-group-item {
-    cursor: pointer;
-  }
-
   .nested {
     list-style-type: none;
   }
@@ -129,23 +136,10 @@ $topnav-background-color: #222222;
   ul.submenu {
     display: none;
     height: 0;
-  }
 
-  & .expand {
-    ul.submenu {
+    &.expand {
       display: block;
-      list-style-type: none;
       height: auto;
-      padding-left: 3rem;
-
-      li {
-        a {
-          color: #ffffff;
-          padding: 10px;
-          display: block;
-          text-decoration: none;
-        }
-      }
     }
   }
 }
@@ -190,9 +184,9 @@ $topnav-background-color: #222222;
   cursor: pointer;
   padding: 12px;
   bottom: 0;
-  color: #999999;
-  background: #212529;
-  border-top: 1px solid #999999;
+  color: $idle-text-color;
+  background-color: #212529;
+  border-top: 1px solid $idle-text-color;
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
   -ms-transition: all 0.2s ease-in-out;
@@ -204,13 +198,13 @@ $topnav-background-color: #222222;
   }
 
   &:hover {
-    background: darken($topnav-background-color, 5%);
-    color: #ffffff;
+    background-color: $active-background-color;
+    color: $active-text-color;
   }
 }
 
 .collapsed {
-  width: 60px;
+  width: 70px;
 
   span {
     display: none;
