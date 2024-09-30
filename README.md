@@ -78,7 +78,7 @@ This demo showcases the use of helyOS Core in the integration of logistics cente
 
 ## Installation
 
-While the helyOS Core can be directly hosted on a Linux machine using Node.js, the easiest way to run the server is using the Docker image, , as demonstrated in the `demo/docker-compose.yml` file.
+While the helyOS Core can be directly hosted on a Linux machine using Node.js (check out the folder `/scripts`), the easiest way to run the server is using the Docker image, as demonstrated in the `demo/docker-compose.yml` file.
 You can build your own image using `packaging/build.sh` or retrieve it from [Docker Hub](https://hub.docker.com/r/helyosframework/helyos_core/tags). When the helyOS core is running locally, you should be able to access the dashboard at http://localhost:8080 and the GraphQL interactive interface at http://localhost:5000/graphiql.
 
 
@@ -113,7 +113,7 @@ in the terminal:
 
 
 ```bash
-    docker-compose run --rm helyos_core_service "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
+    docker compose run --rm helyos_core_service "/usr/local/helyos_core/helyos_database/db_commands/migrate.sh" 
 ```
 
 Note that when migrating to a new database schema, it is crucial to assess how these changes will impact the application. 
