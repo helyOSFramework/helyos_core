@@ -52,8 +52,8 @@ class BufferNotifications {
                     if(!mapObject) {
                         mapObject =  inMemDB.map_objects[key];                
                     } 
-                    const webSocketNotification = {'map_object': mapObject };
-                    this.pushNotificationToBuffer('yard_updates', webSocketNotification);
+                    const webSocketNotification =  mapObject;
+                    this.pushNotificationToBuffer('map_objects_updates', webSocketNotification);
                 }
             }
 

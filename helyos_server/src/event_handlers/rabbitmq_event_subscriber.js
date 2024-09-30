@@ -56,7 +56,7 @@ const isAgentLeader = (leaderUUID, followerUUID) => {
 function identifyMessageSender(objMsg, routingKey) {
     // 1st option: search uuid in message. 2nd option: search uuid in the routing key
     let uuid = objMsg && objMsg.obj['uuid'];
-    if (!uuid && routingKey.startsWith('agent')) {
+    if (!uuid && (routingKey.startsWith('agent.') || routingKey.startsWith('yard.')) ) {
         try {
             uuid = routingKey.split('.').reverse()[1];
             if (!uuid){
@@ -272,8 +272,6 @@ function handleBrokerMessages(channelOrQueue, message)   {
             switch (channelOrQueue) {
                 
                     case SUMMARY_REQUESTS_QUEUE:
-                        console.log('SUMMARY_REQUESTS_QUEUE')
-
                         if (objMsg.obj.body){
                             return queryDataBase(uuid, objMsg.obj, msgProps);
                         } else {

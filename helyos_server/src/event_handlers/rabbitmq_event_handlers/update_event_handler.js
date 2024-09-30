@@ -107,7 +107,10 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
         statsLabel = 'realtime';
     }
     inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel);
-    return inMemDB.flush('agents', 'uuid', databaseServices.agents, bufferPeriod);
+    if (bufferPeriod === 0) {
+        return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0);
+    }
+    return Promise.resolve(null);
 }
 
 

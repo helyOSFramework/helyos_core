@@ -8,7 +8,7 @@ const { setDBTimeout } = require("../database/database_services");
 
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
-
+const MAX_DELAY = 100;
 let MAX_PENDING_UPDATES = LONG_TIMEOUT / DB_BUFFER_TIME;
 MAX_PENDING_UPDATES = MAX_PENDING_UPDATES > 5 ? MAX_PENDING_UPDATES : 5;
 const SHORT_TIMEOUT = DB_BUFFER_TIME / 2;
@@ -93,7 +93,8 @@ class InMemDB {
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    update(tableName,indexName, data, timeStamp, statsLabel='buffered') {
+    update(tableName,indexName, data, storeTimeStamp, statsLabel='buffered', msgTimeStamp=0) {
+        if (!msgTimeStamp) msgTimeStamp = storeTimeStamp;
         const table = this[tableName];
         const tableStats = this[`${tableName}_stats`];
         let instance = table[data[indexName]];
@@ -116,11 +117,11 @@ class InMemDB {
         }
 
         // Update Instance if the message is newer
-        if (instance['last_message_time'] < timeStamp || statsLabel === 'realtime'){ 
+        if ((storeTimeStamp - msgTimeStamp) < MAX_DELAY || statsLabel === 'realtime' ){ 
             Object.assign(instance, data);
             data.id = instance.id;
-            instance['last_message_time'] = timeStamp;
-            this.updateBuffer(tableName,indexName, data, timeStamp);
+            instance['last_message_time'] = storeTimeStamp;
+            this.updateBuffer(tableName,indexName, data, storeTimeStamp);
             return true;
         }
 
@@ -162,10 +163,6 @@ class InMemDB {
         // Damaging control: if the number of pending promisses is too big, reduce the update timeout and accept the losts.
         this._dynamicallyChooseTimeout();
 
-        if ((now - this.lastFlushTime) < maxAge) { 
-            return Promise.resolve(); // Do not flush if the data is too recent.
-        }
-        
         this.lastFlushTime = new Date();
         const objArray = Object.keys(this[tableBufferName])
                             .map(key => { 
@@ -179,7 +176,10 @@ class InMemDB {
                                 this[tableBufferName][key]['updt_per_sec'] = updtPerSecond;
                                 if (tableName !== 'agents') {
                                     delete this[tableName][key]['last_message_time'];
+                                    delete this[tableBufferName][key]['updt_per_sec'];
+                                    delete this[tableBufferName][key]['msg_per_sec'];
                                     delete this[tableBufferName][key]['_leaderAgents'];
+                                    this[tableBufferName][key]['type']= "obstacle";
                                 }
                                 return this[tableBufferName][key];
                             });

@@ -3,11 +3,13 @@ const { logData} = require('./modules/systemlog.js');
 const rbmqServices = require('./services/message_broker/rabbitMQ_services.js'); 
 const databaseServices = require('./services/database/database_services.js');
 const agentComm = require('./modules/communication/agent_communication.js');
-const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js')
+const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js');
+const inMemDBWatcher = require('./event_handlers/in_mem_db_watcher.js');
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
 
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
@@ -27,6 +29,7 @@ HELYOS_REPLICA = HELYOS_REPLICA === 'True';
 const initWatchers = () => {
     agentComm.watchWhoIsOnline(AGENT_IDLE_TIME_OFFLINE);
     microserviceWatcher.initWatcher();
+    inMemDBWatcher.initWatcher(DB_BUFFER_TIME);
 };
 
 

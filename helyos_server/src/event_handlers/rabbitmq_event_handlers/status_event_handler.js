@@ -97,7 +97,7 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
         }
 
         inMemDB.update('agents','uuid', toolUpdate, toolUpdate.last_message_time, 'realtime');
-        inMemDB.flush('agents', 'uuid', databaseServices.agents, bufferPeriod);
+        inMemDB.flush('agents', 'uuid', databaseServices.agents, 0);
         
         if (objMsg.body.assignment){
             return updateAgentMission(objMsg.body.assignment, uuid);
