@@ -5,9 +5,14 @@ const memDBServices = require('../services/in_mem_database/mem_database_service.
 
 
 const moveMemDataToDB = async () => {
-    const inMemDB = await memDBServices.getInstance();
-    inMemDB.flush('agents', 'uuid', databaseServices.agents, -1).catch(error => console.log("push cache to db", error));
-    inMemDB.flush('map_objects', 'id', databaseServices.map_objects, -1).catch(error => console.log("push cache to db", error));
+    try {
+        const inMemDB = await memDBServices.getInstance();
+        const p1 = inMemDB.flush('agents', 'uuid', databaseServices.agents, -1).catch(error => console.log("push cache to db", error));
+        const p2 = inMemDB.flush('map_objects', 'id', databaseServices.map_objects, -1).catch(error => console.log("push cache to db", error));
+        await Promise.all([p1,p2]);
+    } catch (error) {
+        console.error('Error occurred during inMemDB Flushing:', error);
+    }
 };
 
 
