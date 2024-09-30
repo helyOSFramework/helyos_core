@@ -32,7 +32,7 @@ services:
     # ----------------- HelyOS Core -----------------
 
     helyos_core:
-        image: helyosframework/helyos_core:2.1.0
+        image: helyosframework/helyos_core:test
 
         ports:
             - 5002:5002 # Websocket
