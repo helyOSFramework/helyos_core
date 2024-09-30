@@ -2,10 +2,10 @@
 const databaseServices = require('../../services/database/database_services.js');
 const {inMemDB } = require('../../services/in_mem_database/mem_database_service.js');
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 
 
 async function queryDataBase(uuid, objMsg, msgProps) {
-    console.log(objMsg, msgProps);
     inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
     
     let replyTo = msgProps.replyTo?  msgProps.replyTo : uuid;
@@ -65,8 +65,19 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                     console.log(r);
                     const newObjects = await databaseServices.map_objects.list_in(newIds);
                     newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date(), 'realtime'); });
+                    return newIds;
                 });
                 break;    
+
+                
+            case 'updateMapObjects': 
+                const patches = objMsg.body['data'];    
+                patches.forEach( patch => {
+                    inMemDB.update('map_objects', 'id', patch, new Date());
+                });
+                response = "data saved";
+                break;    
+
 
             case 'deleteMapObjects':       
                 response = await databaseServices.map_objects.delete(objMsg.body['condition'])

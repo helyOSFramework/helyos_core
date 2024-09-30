@@ -11,23 +11,21 @@ const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 async function yardAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     
     // OBJECT UPDATE
-    let objUpdate = {id: objMsg['id'], ...objMsg};
+    let objUpdate = {id: objMsg.body['id'], ...objMsg};
     objUpdate['last_message_time'] = new Date();
 
-    // Check the map object id only once and save in in-memory table.
-    if (!inMemDB.map_objects[objMsg['id']] ){
-        const mapObject = await databaseServices.map_objects.get_byId(objMsg['id']);
-        if (!mapObject) {
-            logData.addLog('agent', {uuid}, 'error', `agent is trying to update inexistent map object: ${objMsg.id}`);
-            inMemDB.update('map_objects', 'id', {id: objMsg['id'] }, objUpdate['last_message_time'] + 10000); // try again in 10 seconds
-            return;
-        }
+
+    if (objMsg.body && objMsg.body.map_object) {
+        return inMemDB.update('map_objects','id', objMsg.body.map_object, new Date());
     }
 
-    inMemDB.update('map_objects','id', objUpdate, objUpdate.last_message_time);
-    return inMemDB.flush('map_objects', 'id', databaseServices.map_objects, bufferPeriod);
+    if (objMsg.body && objMsg.body.map_objects) {
+        return objMsg.body.map_objects.map(map_object => {
+                    inMemDB.update('map_objects','id', map_object, new Date());
+                });
+    }
+          
 }
-
 
 
 module.exports.yardAutoUpdate = yardAutoUpdate;
