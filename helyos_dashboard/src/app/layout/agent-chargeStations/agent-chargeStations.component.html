@@ -54,7 +54,7 @@
           <td
             [ngClass]="{
               'bg-danger': item.msgPerSec > 30,
-              'disabled': item.connectionStatus === 'offline',
+              disabled: item.connectionStatus === 'offline',
             }"
             title="Optimal: 10Hz.">
             {{ item.msgPerSec | number: '1.2-2' }}
@@ -62,7 +62,7 @@
           <td
             [ngClass]="{
               'bg-danger': item.updtPerSec > 5,
-              'disabled': item.connectionStatus === 'offline',
+              disabled: item.connectionStatus === 'offline',
             }"
             title="Optimal: < 2 Hz">
             {{ item.updtPerSec | number: '1.2-2' }}
@@ -70,7 +70,7 @@
           <td>{{ item.yardId }}</td>
           <td
             [ngClass]="{
-              'disabled': item.connectionStatus === 'offline',
+              disabled: item.connectionStatus === 'offline',
             }">
             {{ item.status }}
           </td>
