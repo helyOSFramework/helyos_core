@@ -5,13 +5,64 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directories:
-        - "/helyos_dashboard"
-        - "/helyos_server"
-        - "/tests"
+    directory: "/helyos_dashboard"
     schedule:
       interval: "weekly"
       day: "sunday"
       time: "23:00"
     commit-message:
-      prefix: "deps"  # Custom prefix for the PR titles
+      prefix: "[helyos_dashboard] "
+      include: "scope"
+    groups:
+      helyos-dashboard-deps:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "npm"
+      - "dependencies"
+      - "helyos_dashboard"
+
+  - package-ecosystem: "npm"
+    directory: "/helyos_server"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "23:00"
+    commit-message:
+      prefix: "[helyos_server] "
+      include: "scope"
+    groups:
+      helyos-server-deps:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "npm"
+      - "dependencies"
+      - "helyos_server"
+
+  - package-ecosystem: "npm"
+    directory: "/tests"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "23:00"
+    commit-message:
+      prefix: "[tests] "
+      include: "scope"
+    groups:
+      tests-deps:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "npm"
+      - "dependencies"
+      - "tests"
