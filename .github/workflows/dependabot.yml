@@ -11,3 +11,7 @@ updates:
         - "/tests"
     schedule:
       interval: "weekly"
+      day: "sunday"
+      time: "23:00"
+    commit-message:
+      prefix: "deps"  # Custom prefix for the PR titles
