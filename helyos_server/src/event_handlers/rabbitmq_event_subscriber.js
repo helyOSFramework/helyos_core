@@ -91,7 +91,7 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                     if (possibleLeaderUUID !== registeredAgent.rbmq_username) {
                         if (await isAgentLeader(possibleLeaderUUID, uuid)) { // May be is the leader account but not registered yet at the agent.
                             console.log(`Agent ${uuid} is using the leader account ${possibleLeaderUUID}`);
-                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
+                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime',  0, databaseServices.agents);
                         } else { // OK, we did our best to validate you and you will be disconnected.
                             logData.addLog('agent', {uuid}, 'error', 
                                 `helyOS disconnected the agent: An agent is trying to publish a message for another agent.` + 

@@ -89,14 +89,14 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
         // Get the agent id only once and save in in-memory table.
         if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
             const toolIds = await databaseServices.agents.getIds([uuid]);
-            inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]}, toolUpdate['last_message_time']);
+            await inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]}, toolUpdate['last_message_time']);
         }
 
         if (objMsg.body.resources){
             toolUpdate['resources'] = objMsg.body.resources;
         }
 
-        inMemDB.update('agents','uuid', toolUpdate, toolUpdate.last_message_time, 'realtime');
+        await inMemDB.update('agents','uuid', toolUpdate, toolUpdate.last_message_time, 'realtime', 0, databaseServices.agents);
         inMemDB.flush('agents', 'uuid', databaseServices.agents, 0);
         
         if (objMsg.body.assignment){

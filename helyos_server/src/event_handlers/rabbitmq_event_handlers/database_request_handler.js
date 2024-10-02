@@ -64,7 +64,7 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 .then( async (newIds) => {
                     console.log(r);
                     const newObjects = await databaseServices.map_objects.list_in(newIds);
-                    newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date(), 'realtime'); });
+                    newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date()); });
                     return newIds;
                 });
                 break;    

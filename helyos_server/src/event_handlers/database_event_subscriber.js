@@ -95,7 +95,7 @@ function handleDatabaseMessages(client) {
 
             case 'change_agent_security':
                 console.log('change_agent_security', payload);
-                inMemDB.update('agents', 'uuid', payload, new Date(), 'realtime');
+                inMemDB.update('agents', 'uuid', payload, new Date(), 'buffered', 0);
                 break;
 
             case 'agent_deletion':

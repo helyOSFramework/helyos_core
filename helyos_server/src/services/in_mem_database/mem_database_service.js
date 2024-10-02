@@ -5,10 +5,13 @@
 
 const { logData } = require("../../modules/systemlog");
 const { setDBTimeout } = require("../database/database_services");
+const redisAccessLayer = require('./redis_access_layer');
+const REDIS_HOST = redisAccessLayer.REDIS_HOST;
 
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
 const MAX_DELAY = 100;
+
 let MAX_PENDING_UPDATES = LONG_TIMEOUT / DB_BUFFER_TIME;
 MAX_PENDING_UPDATES = MAX_PENDING_UPDATES > 5 ? MAX_PENDING_UPDATES : 5;
 const SHORT_TIMEOUT = DB_BUFFER_TIME / 2;
@@ -68,7 +71,17 @@ class InMemDB {
         this.timeoutCounterStartTime = null;
         this.updateTimeout = this.longTimeout;
         this.lastFlushTime = new Date();
-        InMemDB.instance = this;       
+        InMemDB.instance = this;    
+        
+        if (REDIS_HOST) {
+            this.hSetAsync = (hash,object) => redisAccessLayer.hSet(this.client, hash, object);
+            this.hashDelAsync = (hash) => redisAccessLayer.deleteHash(this.client, hash);
+            this.getAndDeleteHashesByPattern = (pattern) => redisAccessLayer.getAndDeleteHashesByPattern(this.client, pattern);
+        }
+        
+
+
+
 
     }
 
@@ -80,8 +93,13 @@ class InMemDB {
      * @param {DatabaseService} dbService - The database service instance.
      * @returns {Promise} A promise that resolves with the inserted data.
      */
-    insert(tableName, indexName, data) {
-        return this[tableName][data[indexName]] = data;
+    async insert(tableName, indexName, data) {
+        if (REDIS_HOST) {
+            await this.hSetAsync(`${tableName}:${data[indexName]}`, data);
+        } else {
+            this[tableName][data[indexName]] = data;
+        }
+        return data;
     }
 
 
@@ -93,36 +111,59 @@ class InMemDB {
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    update(tableName,indexName, data, storeTimeStamp, statsLabel='buffered', msgTimeStamp=0) {
+    async update(tableName,indexName, data, storeTimeStamp, mode='buffered', msgTimeStamp=0,  dbService=null) {
         if (!msgTimeStamp) msgTimeStamp = storeTimeStamp;
-        const table = this[tableName];
+        const keyId = data[indexName];
+        data['last_message_time'] = storeTimeStamp;
+
+        // Instance local statistics
         const tableStats = this[`${tableName}_stats`];
-        let instance = table[data[indexName]];
-        let statsData = tableStats[data[indexName]];
-
-        // Create Instance
-        if (!instance) { 
-            table[data[indexName]] = {};
-            instance = table[data[indexName]];
-            instance['last_message_time'] = 0;
-        }
-
-        // Create Stats
-        if (!statsData ){
-            tableStats[data[indexName]] = { msgPerSecond: new UpdateStats(),
+        if (!tableStats[keyId] ){
+            tableStats[keyId] = { msgPerSecond: new UpdateStats(),
                                             updtPerSecond: new UpdateStats(), 
                                             errorPerSecond: new UpdateStats(10)
                                            };
-            statsData = tableStats[data[indexName]];
         }
 
-        // Update Instance if the message is newer
-        if ((storeTimeStamp - msgTimeStamp) < MAX_DELAY || statsLabel === 'realtime' ){ 
+
+        if (REDIS_HOST) {
+            const entityHash = `${tableName}:${keyId}`;
+    
+            if (mode === 'realtime') {
+                await Promise.all(  [this.hSetAsync(entityHash, data),
+                                     dbService.update(indexName, keyId, data) //Loop?
+                                    ]);
+            } 
+            
+            if (mode == 'buffered') {
+                await this.hSetAsync(entityHash, data);
+                await this.updateBuffer(tableName, indexName, data, timeStamp);
+            }
+
+            return true;
+        }
+
+        if (!REDIS_HOST) {
+            const table = this[tableName];
+            if (!table[keyId]) { table[keyId]={'last_message_time':0}; }
+            const instance = table[keyId];
             Object.assign(instance, data);
             data.id = instance.id;
-            instance['last_message_time'] = storeTimeStamp;
-            this.updateBuffer(tableName,indexName, data, storeTimeStamp);
-            return true;
+
+            if (mode === 'realtime') {
+                await dbService.update(indexName, keyId, data);// Loop!
+                this.updateBuffer(tableName,indexName, data, storeTimeStamp);
+                return true;
+            }
+
+            if (mode == 'buffered') {
+                if ((storeTimeStamp - msgTimeStamp) < MAX_DELAY) {
+                    this.updateBuffer(tableName,indexName, data, storeTimeStamp);
+                    return true
+                }
+                return false;
+            }
+
         }
 
         return false;
@@ -136,12 +177,22 @@ class InMemDB {
      * @param {Object} dbService - The database service object.
      * @returns {Promise} A promise that resolves with a status code.
      */
-    delete(tableName, indexName, dataId) {
-        const tableStatsName = `${tableName}_stats`;
-        const tableBufferName = `${tableName}_buffer`;
-        delete this[tableName][dataId];
-        delete this[tableStatsName][dataId];
-        delete this[tableBufferName][dataId];
+    async delete(tableName, indexName, dataId) {
+        if (REDIS_HOST) {
+            const keyId = dataId;
+            const entityHash = `${tableName}:${keyId}`;
+            const entityHashBuffer = `${tableName}_buffer:${keyId}`;
+            await this.hashDelAsync(entityHash);
+            await this.hashDelAsync(entityHashBuffer);
+        }
+
+        if (!REDIS_HOST) {
+            const tableStatsName = `${tableName}_stats`;
+            const tableBufferName = `${tableName}_buffer`;
+            delete this[tableName][dataId];
+            delete this[tableStatsName][dataId];
+            delete this[tableBufferName][dataId];
+        }
     }
 
 
@@ -153,7 +204,7 @@ class InMemDB {
      * @param {number} maxAge - The maximum age of data to be flushed (optional, defaults to 0).
      * @returns {Promise} A promise that resolves after the flush operation completes.
      */
-    flush(tableName, indexName, dbService, maxAge = 0){
+    async flush(tableName, indexName, dbService, maxAge = 0){
         const now = new Date();
         const tableBufferName = `${tableName}_buffer`;
         const tableStatsName = `${tableName}_stats`;
@@ -164,27 +215,38 @@ class InMemDB {
         this._dynamicallyChooseTimeout();
 
         this.lastFlushTime = new Date();
-        const objArray = Object.keys(this[tableBufferName])
-                            .map(key => { 
-                                const msgPerSecond = this[tableStatsName][key]['msgPerSecond'].countsPerSecond;
-                                this[tableName][key].msg_per_sec = msgPerSecond;
-                                this[tableBufferName][key].msg_per_sec = msgPerSecond;
+        let objectsToSave;
 
+        if (REDIS_HOST){
+            objectsToSave = await this.getAndDeleteHashesByPattern(`${tableBufferName}:*`);
+        } else {
+            objectsToSave = {...this[tableBufferName]}; //Get
+            this[tableBufferName] = {};   //Delete
+        }
+
+        const objArray = Object.keys(objectsToSave)
+                            .map(key => { 
+
+                                // Save statistic counts:
+                                const msgPerSecond = this[tableStatsName][key].msgPerSecond.countsPerSecond;
                                 this[tableStatsName][key].updtPerSecond.countMessage();
                                 const updtPerSecond = this[tableStatsName][key].updtPerSecond.countsPerSecond;
-                                this[tableName][key]['updt_per_sec'] = updtPerSecond;
-                                this[tableBufferName][key]['updt_per_sec'] = updtPerSecond;
+                                objectsToSave[key].msg_per_sec = msgPerSecond;
+                                objectsToSave[key].updt_per_sec = updtPerSecond;
+                                if (REDIS_HOST) { // COMMENT: WIP - check alternative
+                                    // this.hSetAsync(`${tableName}:${keyId}`, {msg_per_sec: msgPerSecond, updt_per_sec: updtPerSecond});
+                                }     
+
+                                // Delete properties that are relevant only for agents:
                                 if (tableName !== 'agents') {
                                     delete this[tableName][key]['last_message_time'];
-                                    delete this[tableBufferName][key]['updt_per_sec'];
-                                    delete this[tableBufferName][key]['msg_per_sec'];
-                                    delete this[tableBufferName][key]['_leaderAgents'];
-                                    this[tableBufferName][key]['type']= "obstacle";
+                                    delete objectsToSave[key]['updt_per_sec'];
+                                    delete objectsToSave[key]['msg_per_sec'];
+                                    delete objectsToSave[key]['_leaderAgents'];
                                 }
-                                return this[tableBufferName][key];
+                                return objectsToSave[key];
                             });
 
-        this[tableBufferName] = {};   
         
         const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
@@ -222,21 +284,30 @@ class InMemDB {
      * @param {number} timeStamp - The timestamp of the updated data.
      * @returns {Promise} A promise that resolves with a status code.
      */
-     updateBuffer(tableName,index, data, timeStamp) {
+     async updateBuffer(tableName,indexName, data, timeStamp) {
+        const keyId = data[indexName];
         const tableBufferName = `${tableName}_buffer`;
         const tableBuffer = this[tableBufferName];
-        let instance = tableBuffer[data[index]];
+        const entityHash = `${tableBuffer}:${keyId}`;
+        data['last_message_time'] = timeStamp;
 
-        // Create Instance
-        if (!instance) {
-            tableBuffer[data[index]] = {};
-            instance = tableBuffer[data[index]];
-            instance['last_message_time'] = 0;
+        if(REDIS_HOST){
+            await this.hSetAsync(entityHash, data);
         }
-        // Update Instance
-        Object.assign(instance, data);
-        instance['last_message_time'] = timeStamp;
+
+        if (!REDIS_HOST){
+            if (tableBuffer[keyId]){
+                Object.assign(tableBuffer[keyId], data);
+            } else { 
+                tableBuffer[keyId]= data; 
+            }
+        }
+
     }
+
+ 
+
+
 
    
     dispatchUpdatePromise(promiseTrigger, numberUpdates=1) {
@@ -362,7 +433,7 @@ class DataRetriever {
         return this.dbServices[this.tableName].get(indexName, index, this.requiredFields)
                 .then((r) => { 
                     if(r.length) {
-                        this.inMemDB.update(this.tableName,indexName,r[0],new Date(), 'realtime');
+                        this.inMemDB.update(this.tableName,indexName,r[0],new Date(), 'realtime',0 , this.dbServices[this.tableName] );
                         return r[0];
                     } else return null;
                 });
