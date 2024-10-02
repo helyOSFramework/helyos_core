@@ -15,11 +15,10 @@ const {SERVICE_STATUS, MISSION_STATUS} = require('../../modules/data_models');
 const { logData } = require('../../modules/systemlog.js');
 
 // Callbacks to database changes
-function processMicroserviceEvents(msg) {
-        let payload = JSON.parse(msg.payload);
+function processMicroserviceEvents(channel, payload) {
         let service_request_id, service_request_status
 
-        switch (msg.channel) {
+        switch (channel) {
 
         // EXTERNAL SERVICE TABLE TRIGGERS    
         // Status sequence: not_ready_for_service => wait_dependencies => ready_for_service  => pending => ready | failed | canceled

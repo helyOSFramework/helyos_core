@@ -6,19 +6,29 @@
 --
 
 CREATE OR REPLACE FUNCTION public.notify_service_requests_insertion()
-  RETURNS trigger AS
+RETURNS trigger AS
 $BODY$
    BEGIN
        PERFORM pg_notify('service_requests_insertion',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT  id, work_process_id, fetched, processed, canceled, status from public.service_requests  where id = NEW.id)
-            r)
+             SELECT id, work_process_id 
+             FROM public.service_requests 
+             WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('service_requests_insertion', 
+            (SELECT row_to_json(r.*)::text FROM (
+             SELECT id, work_process_id, fetched, processed, canceled, status 
+             FROM public.service_requests 
+             WHERE id = NEW.id) r)
+        );
+        
        RETURN NULL;
    END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100;
 
   
 CREATE OR REPLACE FUNCTION public.notify_service_requests_updates()
@@ -27,16 +37,26 @@ $BODY$
     BEGIN
         PERFORM pg_notify('service_requests_update', 
             (SELECT row_to_json(r.*)::varchar FROM (
-            SELECT  id, work_process_id, fetched, processed, canceled, service_type, request_uid,
-                    status, next_request_to_dispatch_uid, next_request_to_dispatch_uids, is_result_assignment, assignment_dispatched,
-                     context->'map'->>'id' as yard_id from public.service_requests  where id = NEW.id)
+            SELECT  id, work_process_id 
+            from public.service_requests  where id = NEW.id)
             r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('service_requests_update', 
+            (SELECT row_to_json(r.*)::text FROM (
+            SELECT  id, work_process_id, fetched, processed, canceled, service_type, request_uid,
+                    status, next_request_to_dispatch_uids, is_result_assignment, assignment_dispatched,
+                    context->'map'->>'id' as yard_id 
+            FROM public.service_requests 
+            WHERE id = NEW.id) r)
+        );
+        
         RETURN NULL;
     END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100;
 
 
 -- Changes status of the next service to "READY_TO_BE_SENT once the previous service is ready (result is not null)"

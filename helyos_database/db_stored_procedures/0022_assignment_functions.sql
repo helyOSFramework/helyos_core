@@ -9,14 +9,24 @@ $BODY$
    BEGIN
        PERFORM pg_notify('assignments_insertion',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT  id, yard_id,  work_process_id, agent_id, status, start_time_stamp from public.assignments  where id = NEW.id)
-            r)
+                  SELECT id, yard_id, work_process_id 
+                  FROM public.assignments 
+                  WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('assignments_insertion', 
+            (SELECT row_to_json(r.*)::text FROM (
+             SELECT id, yard_id, work_process_id, agent_id, status, start_time_stamp 
+             FROM public.assignments 
+             WHERE id = NEW.id) r)
+        );
+
        RETURN NULL;
    END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100;
 
   
 CREATE OR REPLACE FUNCTION public.notify_assignments_updates()
@@ -25,14 +35,24 @@ $BODY$
     BEGIN
         PERFORM pg_notify('assignments_status_update', 
             (SELECT row_to_json(r.*)::varchar FROM (
-            SELECT id, yard_id,  work_process_id, agent_id, status,on_assignment_failure, fallback_mission,  start_time_stamp from public.assignments  where id = NEW.id)
-            r)
+            SELECT id, yard_id, work_process_id, agent_id, status, on_assignment_failure, start_time_stamp, fallback_mission
+            FROM public.assignments 
+            WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('assignments_status_update', 
+            (SELECT row_to_json(r.*)::text FROM (
+            SELECT id, yard_id, work_process_id, agent_id, status, on_assignment_failure, start_time_stamp, fallback_mission
+            FROM public.assignments 
+            WHERE id = NEW.id) r)
+        );
+        
         RETURN NULL;
     END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100;
 
 
 

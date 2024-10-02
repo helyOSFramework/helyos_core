@@ -9,11 +9,10 @@ const {logData} = require('../../modules/systemlog.js');
 
 
 // Callbacks to database changes
-async function processInstantActionEvents(msg) {
-        let payload = JSON.parse(msg.payload);
+async function processInstantActionEvents(channel,payload) {
     
 
-        switch (msg.channel) {
+        switch (channel) {
 
             case 'instant_actions_insertion':
                 let agentId = payload['agent_id'];
