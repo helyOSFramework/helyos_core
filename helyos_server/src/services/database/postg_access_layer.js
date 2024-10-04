@@ -17,9 +17,19 @@ const parseConditions = (tableName, conditions) => {
         return this.list();
     }
 
-
 	let fromTableStatements = [];
+
+	const notNullConditions = {};
 	Object.keys(conditions).forEach((key, idx) => {
+		if (conditions[key] === null) {
+			null_conditions.push(` AND ${key} IS NULL `);
+		} else {
+			notNullConditions[key]=conditions[key];
+		}
+	});
+
+
+	Object.keys(notNullConditions).forEach((key, idx) => {
 
 		if (key.includes('.')) {
 			const [table, field] = key.split('.');
@@ -38,9 +48,7 @@ const parseConditions = (tableName, conditions) => {
             } else {
                 in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
             }
-		} else if (conditions[key] === null) {
-			null_conditions.push(`AND ${key} IS NULL `);
-		} else {
+		}  else {
 			names.push(key);
 			values.push(conditions[key]);
 			masks.push('$' + (idx + 1));
