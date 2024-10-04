@@ -53,7 +53,9 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 break;
 
             case 'allMapObjects':
-                response = await databaseServices.map_objects.select(objMsg.body['conditions'] || {});
+                let conditions = objMsg.body['conditions'] || {deleted_at: null};
+                conditions = {deleted_at: null, ...conditions};
+                response = await databaseServices.map_objects.select(conditions);
                 break;             
         }
 
