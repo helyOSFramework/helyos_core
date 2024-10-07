@@ -179,7 +179,6 @@ class InMemDB {
                                     delete this[tableBufferName][key]['updt_per_sec'];
                                     delete this[tableBufferName][key]['msg_per_sec'];
                                     delete this[tableBufferName][key]['_leaderAgents'];
-                                    this[tableBufferName][key]['type']= "obstacle";
                                 }
                                 return this[tableBufferName][key];
                             });
