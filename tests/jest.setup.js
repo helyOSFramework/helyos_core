@@ -217,11 +217,14 @@ afterAll(async () => {
   await rabbitMQClient.close();
 
   await Promise.all([
-    postgresContainer.stop(),
-    rabbitmqContainer.stop(),
     helyosCoreContainer.stop(),
     agentSimulatorContainer.stop(),
     agentSimulatorContainer2.stop(),
+  ]);
+
+  await Promise.all([
+    postgresContainer.stop(),
+    rabbitmqContainer.stop()
   ]);
 
   await network.stop();
