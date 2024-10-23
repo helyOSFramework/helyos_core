@@ -96,7 +96,6 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
             agentUpdate['resources'] = objMsg.body.resources;
         }
 
-        inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
         inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
         await databaseServices.agents.updateByConditions({uuid}, agentUpdate);
         
