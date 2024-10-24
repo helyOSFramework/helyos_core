@@ -6,6 +6,7 @@ let postgresContainer;
 let rabbitmqContainer;
 let helyosCoreContainer;
 let agentSimulatorContainer;
+let agentSimulatorContainer2;
 let network;
 // Instances running on host machine
 let helyosApplication;
@@ -59,13 +60,18 @@ const wait5seconds = () => new Promise((resolve, reject) => {
 
 
 beforeAll(async () => {
-    console.log(`setting up test ${process.env.TEST_NUMBER}`);
+    const TEST_NUMBER = process.env.TEST_NUMBER;
+
+    const postgresContainerName = `db_hostname_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
+    const rabbitmqContainerName = `rbmq_hostname_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
+    const helyosContainerName = `helyos_core_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
+    console.log(`setting up test ${TEST_NUMBER}`);
 
     network = await new Network().start();
 
     postgresContainer = await new GenericContainer('postgres:13')
       .withExposedPorts(5432)
-      .withName('local_postgres')
+      .withName(postgresContainerName)
       .withEnvironment({
             'POSTGRES_USER': 'helyos_db_admin',
             'POSTGRES_PASSWORD': 'helyos_secret'
@@ -80,7 +86,7 @@ beforeAll(async () => {
 
 
     rabbitmqContainer = await new GenericContainer('rabbitmq:3-management')
-      .withName('local_rabbitmq')
+      .withName(rabbitmqContainerName)
       .withExposedPorts(5672, 15672)
       .withWaitStrategy(Wait.forListeningPorts())
       .withNetwork(network)
@@ -92,8 +98,8 @@ beforeAll(async () => {
       .start();
 
     helyosCoreContainer = await new GenericContainer('helyosframework/helyos_core:test')
-      .withName('helyos_core')
-      .withNetworkAliases('helyos_core')
+      .withName(helyosContainerName)
+      .withNetworkAliases(helyosContainerName)
       .withExposedPorts(5000,5002)
       .withWaitStrategy(Wait.forListeningPorts())
       .withBindMounts([
@@ -101,20 +107,23 @@ beforeAll(async () => {
         { source: path.join(__dirname, './settings/db_initial_data/'), target: '/etc/helyos/db_initial_data/' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_private.key'), target: '/etc/helyos/.ssl_keys/helyos_private.key' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_public.key'), target: '/etc/helyos/.ssl_keys/helyos_public.key' },
-        { source: path.join(__dirname, `./fixtures/mock${process.env.TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/src/microservice_mocks.js'}
+        { source: path.join(__dirname, `./fixtures/mock${TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/src/microservice_mocks.js'}
       ])
       .withEnvironment({
         'PGUSER': 'helyos_db_admin',
         'PGPASSWORD': 'helyos_secret',
-        'PGHOST': 'local_postgres',
+        'PGHOST': postgresContainerName,
         'PGDATABASE': 'helyos_db',
         'PGPORT': '5432',
         'GQLPORT': '5000',
-        'RBMQ_HOST': 'local_rabbitmq',
+        'RBMQ_HOST': rabbitmqContainerName,
         'RBMQ_PORT': '5672',
         'RBMQ_API_PORT': '15672',
         'RBMQ_SSL': 'False',
         'RBMQ_API_SSL': 'False',
+        // 'REDIS_HOST':'local_redis',
+        // 'REDIS_PORT':'6379',
+        // 'REDIS_PASSWORD':'mypass',
         'CREATE_RBMQ_ACCOUNTS': 'True',
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
@@ -132,7 +141,6 @@ beforeAll(async () => {
       // })
       .start();
 
-
       await wait5seconds();
 
 
@@ -148,7 +156,7 @@ beforeAll(async () => {
         'VEHICLE_PARTS': '2',
         'YARD_UID': '1',
         'UPDATE_RATE': '10',
-        'RBMQ_HOST': 'local_rabbitmq',
+        'RBMQ_HOST': rabbitmqContainerName,
         'RBMQ_PORT': '5672',
         'REGISTRATION_TOKEN': '0001-0002-0003-0000-0004'
       })
@@ -177,7 +185,7 @@ beforeAll(async () => {
         'VEHICLE_PARTS': '2',
         'YARD_UID': '1',
         'UPDATE_RATE': '10',
-        'RBMQ_HOST': 'local_rabbitmq',
+        'RBMQ_HOST': rabbitmqContainerName,
         'RBMQ_PORT': '5672',
         'REGISTRATION_TOKEN': '0001-0002-0003-0000-0004'
       })
@@ -202,16 +210,21 @@ beforeAll(async () => {
 
 
 afterAll(async () => {
-  await helyosApplication.dumpLogsToFile(process.env.TEST_NUMBER);
+  const TEST_NUMBER = process.env.TEST_NUMBER;
+
+  await helyosApplication.dumpLogsToFile(TEST_NUMBER);
   await helyosApplication.logout();
   await rabbitMQClient.close();
 
   await Promise.all([
-    postgresContainer.stop(),
-    rabbitmqContainer.stop(),
     helyosCoreContainer.stop(),
     agentSimulatorContainer.stop(),
     agentSimulatorContainer2.stop(),
+  ]);
+
+  await Promise.all([
+    postgresContainer.stop(),
+    rabbitmqContainer.stop()
   ]);
 
   await network.stop();

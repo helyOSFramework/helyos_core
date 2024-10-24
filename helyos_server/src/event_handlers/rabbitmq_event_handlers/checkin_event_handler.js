@@ -92,6 +92,7 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                 });
                 rabbitMQServices.sendEncriptedMsg(replyTo, message);
                 rabbitMQServices.sendEncriptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                console.error('Stack trace:', err.stack);
                 throw Error(err);
             });
         })
@@ -239,7 +240,17 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     }
 
     inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
-    return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0).then(()=>agentUpdate);    
+    
+    inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
+    return databaseServices.agents.updateByConditions({uuid}, agentUpdate)
+           .then(() => databaseServices.agents.get('uuid', uuid, [ 'id', 'uuid',
+                                                                 'message_channel', 
+                                                                 'rbmq_username',
+                                                                 'rbmq_encrypted_password',
+                                                                 'yard_id',
+                                                                 'public_key'
+                                                                ]))
+            .then(agents=>agents[0])
 }
 
 

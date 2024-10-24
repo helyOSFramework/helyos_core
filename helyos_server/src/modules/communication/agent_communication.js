@@ -4,7 +4,7 @@
 var rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 var databaseServices = require('../../services/database/database_services.js');
 const { logData } = require('../systemlog.js');
-const { MISSION_STATUS } = require('../data_models.js');
+const { MISSION_STATUS, AGENT_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
 const REFRESH_ONLNE_TIME_PERIOD = 5;
@@ -150,20 +150,31 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
     const timeStep = 1000;
     let enlapsedTime = 0;
 
+    if (status.toLowerCase() == AGENT_STATUS.READY && !wpId) {
+        Promise.reject(new Error('working process id was not informed'));
+    }
+
     const checkAgentClearence = (id) => databaseServices.agents.get_byId(id)
         .then(agent => {
-            const agentCurrentResources = agent.resources? agent.resources: agent.wp_clearance
-            
+
             if (agent.status && agent.status.toUpperCase() === status.toUpperCase()) {
-                if (!wpId) {
-                    return {};
-                } else if (agentCurrentResources && (agentCurrentResources.wp_id == wpId || agentCurrentResources.work_process_id == wpId)) {
-                    return (agentCurrentResources);
+                            
+                if (status.toLowerCase() == AGENT_STATUS.READY) { // READY TO WHICH WP.ID ?
+                            const agentCurrentResources = agent.resources? agent.resources: agent.wp_clearance;
+                            const reportedWorkProcesscId = !agentCurrentResources?  null: agentCurrentResources.work_process_id || agentCurrentResources.wp_id;
+                            if (reportedWorkProcesscId == wpId) {
+                                return true;
+                            } else {
+                                console.warn("agentCurrentResources",agentCurrentResources )
+                                logData.addLog('agent', {uuid: uuids[0]}, 'warn', `agent ${agent.id} is not ready for ${wpId}, current wp: ${reportedWorkProcesscId}`); 
+                                return null;
+                            }
                 } else {
-                    return null;
+                    return true;
                 }
             }
-            console.log("Wating agent be ", status);
+
+            console.log("WaIting agent be ", status);
             console.log("===============================================")
             console.log(agent.status, status.toUpperCase())
             console.log("===============================================")
@@ -176,7 +187,7 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
 
         const watcher = setInterval(() => {
             enlapsedTime = enlapsedTime + timeStep;
-            console.log('Waiting agent status. Time:', enlapsedTime);
+            console.log(`Waiting agent status ${status}. Time:`, enlapsedTime);
             const promiseArray = agentIds.map(agentId => checkAgentClearence(parseInt(agentId)));
 
             const promises = databaseServices.work_processes.get_byId(wpId, ['status'])
