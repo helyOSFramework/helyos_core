@@ -190,7 +190,7 @@ class InMemDB {
 
         this[tableBufferName] = {};   
 
-        if ( objArray.length === 0 ) return Promise.resolve(null);
+        if ( objArray.length === 0 ) return null;
         
         const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
