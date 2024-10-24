@@ -153,15 +153,20 @@ class InMemDB {
      * @param {number} maxAge - The maximum age of data to be flushed (optional, defaults to 0).
      * @returns {Promise} A promise that resolves after the flush operation completes.
      */
-    flush(tableName, indexName, dbService, maxAge = 0){
+    async flush(tableName, indexName, dbService, maxAge = 0){
         const now = new Date();
         const tableBufferName = `${tableName}_buffer`;
         const tableStatsName = `${tableName}_stats`;
-        const useShortTimeOutClient = maxAge > 0;
+        const useShortTimeOutClient = true;
 
 
         // Damaging control: if the number of pending promisses is too big, reduce the update timeout and accept the losts.
-        this._dynamicallyChooseTimeout();
+        try {
+            await this._dynamicallyChooseTimeout();
+        } catch (error) {
+            console.error(error);
+        }
+
 
         this.lastFlushTime = new Date();
         const objArray = Object.keys(this[tableBufferName])
@@ -184,6 +189,8 @@ class InMemDB {
                             });
 
         this[tableBufferName] = {};   
+
+        if ( objArray.length === 0 ) return null;
         
         const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
@@ -287,26 +294,28 @@ class InMemDB {
                 logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. The timeout was reduced to ${this.shortTimeout} milliseconds to avoid the system blockage.`);
                 logData.addLog('helyos_core', null, 'error',
              `${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`);
+            console.warn( `${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout/1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`)
             this.lostUpdates = 0;
             this.timeoutCounterStartTime = new Date();
         }
     }
 
 
-    _dynamicallyChooseTimeout() {
+   async _dynamicallyChooseTimeout() {
         if (this.pendingPromises > this.limitWaitingFlushes){
             if (this.updateTimeout === this.longTimeout) {
                 this.updateTimeout = this.shortTimeout;
-                setDBTimeout(this.updateTimeout);
+                return setDBTimeout(this.updateTimeout);
             }
         } 
         
         if (this.pendingPromises < Math.round(this.limitWaitingFlushes/2)){
             if (this.updateTimeout === this.shortTimeout) {
                 this.updateTimeout = this.longTimeout;
-                setDBTimeout(this.updateTimeout);
+                return setDBTimeout(this.updateTimeout);
             }
         }
+        return null;
     }
 
 }

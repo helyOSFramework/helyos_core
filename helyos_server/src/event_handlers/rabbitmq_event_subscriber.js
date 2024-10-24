@@ -256,7 +256,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
         if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
             logData.addLog('agent', {uuid}, 'error',
-                            `Agent disconnected: high number of database updates per second. Please check the publish rate for the routes agent.{uuid}.update, agent.{uuid}.state, and agent.{uuid}.database_req.`);
+                            `Agent disconnected: high number of database updates per second (MESSAGE_UPDATE_LIMIT=${MESSAGE_UPDATE_LIMIT}). Please check the publish rate for the routes agent.${uuid}.update, agent.${uuid}.state, and agent.${uuid}.database_req.`);
             
             closeConnection = true;
         }
