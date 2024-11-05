@@ -152,6 +152,9 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
 
     const checkAgentClearence = (id) => databaseServices.agents.get_byId(id)
         .then(agent => {
+            if (!agent) {
+                return {error:`the agent id ${id} could not be found in the database.`}
+            }
             const agentCurrentResources = agent.resources? agent.resources: agent.wp_clearance
             
             if (agent.status && agent.status.toUpperCase() === status.toUpperCase()) {
@@ -193,6 +196,11 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
                 }
 
                 if (values.every(value => value != null)) {
+                    const checkForErrors = values.filter(v => (v!==undefined? v.error:false)).map(v=> v.error);
+                    if (checkForErrors.lenght) {
+                        const errorMsgs = checkForErrors.join('\n');
+                        reject(new Error(`${errorMsgs} | WorkProcess ${wpId}`));
+                    }
                     clearInterval(watcher);
                     resolve(values);
                 }
