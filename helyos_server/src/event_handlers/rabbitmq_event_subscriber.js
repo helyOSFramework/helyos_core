@@ -270,7 +270,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         if (closeConnection) {
             inMemDB.delete('agents', 'uuid', uuid);
             inMemDB.delete('agents', 'uuid', agentAccount);
-            deleteConnections(agentAccount).catch(e => console.log(e));
+            deleteConnections(agentAccount).catch(e => console.error(e));
             return;
         }
 

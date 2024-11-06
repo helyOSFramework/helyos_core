@@ -79,7 +79,7 @@ function broadcastNotifications(channel, payload) {
 
 // Subscribe to database changes
 function handleDatabaseMessages(client) {
-    client.on('notification', function (msg) {
+    client.on('notification', async function (msg) {
         let payload = JSON.parse(msg.payload);
 
         broadcastPriorityNotification(msg.channel, JSON.parse(msg.payload));
@@ -99,9 +99,15 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'agent_deletion':
-                inMemDB.delete('agents','uuid', payload['uuid']);
-                removeAgentRbmqAccount(payload);
                 logData.addLog('agent', payload, 'normal', `agent deleted`);
+
+                try {
+                    await removeAgentRbmqAccount(payload);
+                    inMemDB.delete('agents','uuid', payload['uuid']);
+                } catch (error) {
+                    logData.addLog('agent', payload, 'warn', `Remove RabbitMQ account: ${error.message}`);
+                }
+
                 break;
 
             case 'change_agent_status':
@@ -110,8 +116,13 @@ function handleDatabaseMessages(client) {
 
 
             case 'new_rabbitmq_account':
-                logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
-                createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
+                try {
+                    await createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
+                    logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
+                } catch (error) {
+                    logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
+                }
+
                 break;
 
             default:
