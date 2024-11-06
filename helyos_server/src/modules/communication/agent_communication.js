@@ -197,9 +197,9 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
 
                 if (values.every(value => value != null)) {
                     const checkForErrors = values.filter(v => (v!==undefined? v.error:false)).map(v=> v.error);
-                    if (checkForErrors.lenght) {
+                    if (checkForErrors.length) {
                         const errorMsgs = checkForErrors.join('\n');
-                        reject(new Error(`${errorMsgs} | WorkProcess ${wpId}`));
+                        reject(new Error(`WorkProcess ${wpId} | ${errorMsgs} `));
                     }
                     clearInterval(watcher);
                     resolve(values);
