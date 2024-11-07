@@ -254,11 +254,11 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 	}
 
 	// Append default work process settings to the request data as "_settings".
-	if (recipe._settings) {
+	if (recipe.settings) {
 		if (workProcess.data) { 
-			Object.assign(workProcess.data, { _settings: _settings });
+			Object.assign(workProcess.data, { _settings: recipe.settings });
 		} else {
-			workProcess.data =  { _settings: _settings }
+			workProcess.data =  { _settings: recipe.settings }
 		}
 		await databaseServices.work_processes.update_byId(workProcess.id, {status: MISSION_STATUS.PREPARING, 'data': workProcess.data});					
 	}
