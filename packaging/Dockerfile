@@ -12,7 +12,7 @@ RUN npm run build --prod
 
 
 # # Second stage
-FROM helyosframework/helyos_core_base:2.0.5
+FROM helyosframework/helyos_core_base:2.1.0-20241106
 
 # ------------------- BUILDING THE SERVER -----------------------------
 
