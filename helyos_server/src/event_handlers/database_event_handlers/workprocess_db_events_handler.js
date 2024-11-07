@@ -30,7 +30,14 @@ function processWorkProcessEvents(channel, payload) {
                 const yard_uid = payload['yard_uid'];
                 if (yard_uid) {
                     prepareWPData = databaseServices.yards.select({uid: yard_uid},['id'])
-                                    .then(r => databaseServices.work_processes.update_byId(workProcessId, {yard_id: r[0].id}));
+                                    .then(r => {
+                                        if (r.length) {
+                                            return databaseServices.work_processes.update_byId(workProcessId, {yard_id: r[0].id});
+                                        } else {
+                                            logData.addLog('helyos_core', {wproc_id: workProcessId},'error',  `Yard UID:${yard_uid} not found`);
+                                            return Promise.resolve(0);
+                                        }
+                                    });
                 }
 
                 let uuids = payload['agent_uuids'];

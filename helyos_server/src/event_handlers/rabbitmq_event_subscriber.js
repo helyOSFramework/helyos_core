@@ -49,8 +49,14 @@ function parseMessage(message) {
                                     
 
 const isAgentLeader = (leaderUUID, followerUUID) => { 
-        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
-        .then(leader => leader[0].follower_connections.some(t => t.uuid === followerUUID));
+    return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
+    .then(leader => {
+        if (leader.length === 0) {
+            logData.addLog('agent', {uuid: leaderUUID}, 'error', `Agent cannot be found in the database: ${leaderUUID}`);
+            return false;
+        }
+        return leader[0].follower_connections.some(t => t.uuid === followerUUID)
+    })
 }
 
 function identifyMessageSender(objMsg, routingKey) {
@@ -264,7 +270,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         if (closeConnection) {
             inMemDB.delete('agents', 'uuid', uuid);
             inMemDB.delete('agents', 'uuid', agentAccount);
-            deleteConnections(agentAccount).catch(e => console.log(e));
+            deleteConnections(agentAccount).catch(e => console.error(e));
             return;
         }
 
