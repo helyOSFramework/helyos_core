@@ -64,8 +64,8 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                             console.log(`${uuid} => ${agent.uuid}`);
                             console.log("===============================================================");
                             const public_key = agent['public_key'] || (registeredAgent && registeredAgent.public_key) ;
-                            rabbitMQServices.sendEncriptedMsg(replyTo, message, public_key);
-                            rabbitMQServices.sendEncriptedMsg(null, message, public_key, replyTo, replyExchange);    
+                            rabbitMQServices.sendEncryptedMsg(replyTo, message, public_key);
+                            rabbitMQServices.sendEncryptedMsg(null, message, public_key, replyTo, replyExchange);    
                     })
                     .catch(err => {
                         const message = JSON.stringify({
@@ -76,8 +76,8 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                                 response_code: '500'
                             }
                         });
-                        rabbitMQServices.sendEncriptedMsg(replyTo, message);
-                        rabbitMQServices.sendEncriptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                        rabbitMQServices.sendEncryptedMsg(replyTo, message);
+                        rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, replyTo, replyExchange);
                         throw Error(err);
                     });
             })
@@ -90,8 +90,8 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                         response_code: '500'
                     }
                 });
-                rabbitMQServices.sendEncriptedMsg(replyTo, message);
-                rabbitMQServices.sendEncriptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                rabbitMQServices.sendEncryptedMsg(replyTo, message);
+                rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, replyTo, replyExchange);
                 console.error('Stack trace:', err.stack);
                 throw Error(err);
             });
@@ -108,7 +108,7 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
 
                 });
                 const replyToQueue = msgProps.replyTo || uuid;
-                rabbitMQServices.sendEncriptedMsg(replyToQueue, message);
+                rabbitMQServices.sendEncryptedMsg(replyToQueue, message);
                 throw err;
 
         });
