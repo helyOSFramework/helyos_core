@@ -17,9 +17,19 @@ const parseConditions = (tableName, conditions) => {
         return this.list();
     }
 
-
 	let fromTableStatements = [];
+
+	const notNullConditions = {};
 	Object.keys(conditions).forEach((key, idx) => {
+		if (conditions[key] === null) {
+			null_conditions.push(` AND ${key} IS NULL `);
+		} else {
+			notNullConditions[key]=conditions[key];
+		}
+	});
+
+
+	Object.keys(notNullConditions).forEach((key, idx) => {
 
 		if (key.includes('.')) {
 			const [table, field] = key.split('.');
@@ -38,9 +48,7 @@ const parseConditions = (tableName, conditions) => {
             } else {
                 in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
             }
-		} else if (conditions[key] === null) {
-			null_conditions.push(`AND ${key} IS NULL `);
-		} else {
+		}  else {
 			names.push(key);
 			values.push(conditions[key]);
 			masks.push('$' + (idx + 1));
@@ -487,7 +495,7 @@ class AgentDataLayer extends DatabaseLayer {
 
 	aggregatedFollowerConnections(agent) {
 		return this.client.query(`
-		SELECT A.id, A.uuid, A.geometry, B.connection_geometry FROM public.agents as A 
+		SELECT A.id, A.uuid, A.geometry, A.yard_id, B.connection_geometry FROM public.agents as A 
 		JOIN public.agents_interconnections as B 
 		ON A.id = B.follower_id
 		WHERE A.id IN  (SELECT follower_id FROM  public.agents_interconnections WHERE leader_id = $1) 
@@ -497,7 +505,7 @@ class AgentDataLayer extends DatabaseLayer {
 
 	aggregatedLeaderConnections(agent) {
 		return this.client.query(`
-		SELECT A.id, A.uuid, A.geometry, B.connection_geometry FROM public.agents as A 
+		SELECT A.id, A.uuid, A.geometry, A.yard_id, B.connection_geometry FROM public.agents as A 
 		JOIN public.agents_interconnections as B 
 		ON A.id = B.leader_id
 		WHERE A.id IN  (SELECT leader_id FROM  public.agents_interconnections WHERE follower_id = $1) 
