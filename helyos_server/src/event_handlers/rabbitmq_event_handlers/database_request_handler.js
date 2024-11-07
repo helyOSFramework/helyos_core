@@ -93,7 +93,7 @@ async function queryDataBase(uuid, objMsg, msgProps) {
         message = JSON.stringify(response);
     }
 
-    rabbitMQServices.sendEncriptedMsg(replyTo, message, null, null, null, msgProps.correlationId);
+    rabbitMQServices.sendEncryptedMsg(replyTo, message, null, null, null, msgProps.correlationId);
     return 0;
 }
 

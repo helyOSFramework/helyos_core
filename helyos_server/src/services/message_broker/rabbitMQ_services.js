@@ -179,7 +179,7 @@ function connectAndOpenChannels(options={}) {
 }
 
 
-function sendEncriptedMsg(queue, message, publicKey='', routingKey=null, exchange=null, correlationId=null) {
+function sendEncryptedMsg(queue, message, publicKey='', routingKey=null, exchange=null, correlationId=null) {
     let encryptedMsg;
     console.log(" \n=============== helyOS core is sending a message in RabbitMQ ===================")
 
@@ -310,7 +310,7 @@ module.exports.disconnect = disconnect;
 
 module.exports.connectAndOpenChannels = connectAndOpenChannels;
 module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
-module.exports.sendEncriptedMsg = sendEncriptedMsg;
+module.exports.sendEncryptedMsg = sendEncryptedMsg;
 module.exports.create_rbmq_user = rbmqAccessLayer.createUser;
 module.exports.remove_rbmq_user = rbmqAccessLayer.removeUser;
 module.exports.add_rbmq_user_vhost = rbmqAccessLayer.add_rbmq_user_vhost;
