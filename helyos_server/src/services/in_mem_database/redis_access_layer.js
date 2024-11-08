@@ -1,10 +1,12 @@
 // Retrieve Redis connection details from environment variables
-const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
+const REDIS_HOST = process.env.REDIS_HOST || '';
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'mypass';
 
 const {serializeNonStringValues, parseObjectValues} = require('../../modules/utils')
 const { createClient } = require('redis');
+
+if (!REDIS_HOST) return;
 
 // Create Redis client
 const pubClient = createClient({
@@ -295,8 +297,8 @@ async function getAndDeleteHashesByPattern(client, pattern) {
     // Attempt to acquire the lock
     const lockAcquired = await acquireLock(client, lockKey);
     if (!lockAcquired) {
-      console.log('Could not acquire Mem db lock, operation skipped.');
-      return false;
+      console.log(`Could not acquire Mem db lock ${pattern}, operation skipped.`);
+      return {};
     } 
 
     // Start a transaction for hash retrieval
@@ -424,4 +426,5 @@ module.exports = {
   hExists,
   deleteHash,
   getAndDeleteHash,
+  REDIS_HOST
 };
