@@ -113,8 +113,8 @@ async function connectToRabbitMQ() {
 // 4) GraphQL server setup -  External App <-> Nodejs(GraphQL Lib) <-> Postgres
 // ----------------------------------------------------------------------------
 const { postgraphile } = require("postgraphile");
-const JWT_SECRET = process.env.JWT_SECRET || 'keyboard_kitten';
-const postgraphileRolePassword = process.env.PGPASSWORD || 'xyz';
+const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
+const postgraphileRolePassword = process.env.PGPASSWORD;
 
 
 const postGraphileOptions = {

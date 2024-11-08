@@ -50,6 +50,7 @@ services:
             # DATABASE
             - PGUSER=helyos_db_admin
             - PGPASSWORD=helyos_secret
+            - JWT_SECRET=keyboard_kitten
             - PGHOST=local_postgres
             - PGDATABASE=smartfarm_db
             - PGPORT=5432
