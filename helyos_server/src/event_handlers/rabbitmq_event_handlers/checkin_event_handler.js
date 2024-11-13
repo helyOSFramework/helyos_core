@@ -2,7 +2,7 @@
 
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
+const memDBService = require('../../services/in_mem_database/mem_database_service');
 
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
@@ -239,8 +239,9 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
         agentUpdate['geometry'] =  checkinData['geometry'];  
     }
 
-    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
-    
+
+    const inMemDB =  await memDBService.getInstance();
+    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time,'buffered');
     inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
     return databaseServices.agents.updateByConditions({uuid}, agentUpdate)
            .then(() => databaseServices.agents.get('uuid', uuid, [ 'id', 'uuid',

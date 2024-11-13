@@ -18,7 +18,7 @@ const {processAssignmentEvents} = require('./database_event_handlers/assignment_
 const {processMicroserviceEvents} = require('./database_event_handlers/microservice_db_events_handler.js');
 const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_event_handlers/checkin_event_handler.js');
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
-const { inMemDB } = require('../services/in_mem_database/mem_database_service.js');
+const inMemServices = require('../services/in_mem_database/mem_database_service.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
@@ -95,6 +95,7 @@ function handleDatabaseMessages(client) {
             return false;
         }
 
+        let inMemDB;
         switch (channel) {
         // AGENT TABLES TRIGGERS
 
@@ -104,11 +105,14 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'change_agent_security':
-                console.log('change_agent_security', payload);
-                inMemDB.update('agents', 'uuid', payload, new Date(), 'realtime');
+                inMemDB = await inMemServices.getInstance();
+                console.log('change_agent_security', payload['uuid']);
+                inMemDB.update('agents', 'uuid', payload, new Date(), 'buffered');
                 break;
 
             case 'agent_deletion':
+                inMemDB = await inMemServices.getInstance();
+                inMemDB.delete('agents','uuid', payload['uuid']);
                 logData.addLog('agent', payload, 'normal', `agent deleted`);
 
                 try {
@@ -128,7 +132,7 @@ function handleDatabaseMessages(client) {
             case 'new_rabbitmq_account':
                 try {
                     await createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
-                    logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
+                logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
                 } catch (error) {
                     logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
                 }

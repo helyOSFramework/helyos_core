@@ -1,7 +1,7 @@
 
 const databaseServices = require('../../services/database/database_services.js');
 const { logData} = require('../..//modules/systemlog');
-const { inMemDB } = require('../../services/in_mem_database/mem_database_service.js');
+const memDBService = require('../../services/in_mem_database/mem_database_service.js');
 const { MISSION_STATUS, ASSIGNMENT_STATUS } = require('../../modules/data_models.js');
 
 
@@ -85,6 +85,7 @@ async function updateAgentMission(assignment, uuid = null) {
 async function updateState(objMsg, uuid, bufferPeriod=0) {
     try {
         const agentUpdate = {uuid, "status": objMsg.body.status, 'last_message_time': new Date() };
+        const inMemDB = await memDBService.getInstance();
 
         // Get the agent id only once and save in in-memory table.
         if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
