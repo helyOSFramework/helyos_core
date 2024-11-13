@@ -12,6 +12,7 @@ const RBMQ_API_PORT= process.env.RBMQ_API_PORT || 15672;
 const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
 const RBMQ_ADMIN_USERNAME= process.env.RBMQ_ADMIN_USERNAME || 'guest';
 const RBMQ_ADMIN_PASSWORD= process.env.RBMQ_ADMIN_PASSWORD || 'guest';
+const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
 
 const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
 const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False") === "True";
@@ -31,7 +32,7 @@ const create_rbmq_admin = (username, password, tags) =>
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth('guest', 'guest')
         .then(() => requestXHTTP
-                    .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/%2F/${username}`)
+                    .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/${RBMQ_VHOST}/${username}`)
                     .send({"configure":".*","write":".*","read":".*"})
                     .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
                     .auth('guest', 'guest'))
@@ -64,7 +65,7 @@ const removeUser = (username) =>  !username? Promise.resolve(null) :
 
 const add_rbmq_user_vhost = (username) =>  !username? Promise.resolve(null) :
         requestXHTTP
-        .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/%2F/${username}`)
+        .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/${RBMQ_VHOST}/${username}`)
         .send({"configure":".*","write":".*","read":".*"})
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
@@ -101,7 +102,7 @@ const deleteConnections = (username) =>  {
 const guestPermissions = `(amq\.gen.*|${ANONYMOUS_EXCHANGE})`;
 const update_guest_account_permissions = (username) => !username? Promise.resolve(null) :
         requestXHTTP
-        .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/%2F/${username}`)
+        .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/${RBMQ_VHOST}/${username}`)
         .send({"configure":`^${guestPermissions}`,"write":guestPermissions,"read":guestPermissions})
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
@@ -112,7 +113,7 @@ const update_guest_account_permissions = (username) => !username? Promise.resolv
 
 const getQueueInfo = (queueName) => {
         return requestXHTTP
-        .get(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/queues/%2F/${queueName}`)
+        .get(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/queues/${RBMQ_VHOST}/${queueName}`)
         .set( {'content-type': 'application/json'  }).ca(RBMQ_CERTIFICATE)
         .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
         .then(r => r.body);
