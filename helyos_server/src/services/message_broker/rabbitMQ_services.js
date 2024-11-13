@@ -31,6 +31,7 @@ const CHECK_IN_QUEUE = process.env.CHECK_IN_QUEUE ||         'agent_checkin_queu
 const AGENT_UPDATE_QUEUE = process.env.AGENT_UPDATE_QUEUE || 'agent_update_queue';
 const AGENT_VISUALIZATION_QUEUE = process.env.AGENT_VISUALIZATION_QUEUE || 'agent_visualization_queue';
 const YARD_VISUALIZATION_QUEUE = process.env.YARD_VISUALIZATION_QUEUE || 'yard_visualization_queue';
+const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
 
 const AGENT_STATE_QUEUE = process.env.AGENT_STATE_QUEUE || 'agent_state_queue';
 const AGENT_MISSION_QUEUE = process.env.AGENT_MISSION_QUEUE || 'agent_mission_queue';
@@ -63,6 +64,15 @@ try {
     console.warn('Private and/or public key not defined');
 }
 
+const urlObj = (username=RBMQ_USERNAME, password=RBMQ_PASSWORD) => ({
+        hostname:  RBMQ_HOST,
+        port: RBMQ_PORT,
+        username: username,
+        password: password,
+        protocol: RBMQ_PROTOCOL,
+        vhost: username==='guest'? '%2F':RBMQ_VHOST
+        // vhost: `%2F${RBMQ_VHOST}`
+    });
 
 
 function verifyMessageSignature(message, publicKey, signature) {
@@ -76,13 +86,6 @@ function verifyMessageSignature(message, publicKey, signature) {
     return verifier.verify(pubkeyPadding, signature, 'hex');
 }
 
-const urlObj = (username=RBMQ_USERNAME, password=RBMQ_PASSWORD) => ({
-        hostname:  RBMQ_HOST,
-        port: RBMQ_PORT,
-        username: username,
-        password: password,
-        protocol: RBMQ_PROTOCOL
-    });
 
 const connect = (username, password) => rbmqAccessLayer.connect(urlObj(username, password), sslOptions);
 const disconnect = async () =>  {   
