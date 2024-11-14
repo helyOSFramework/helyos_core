@@ -137,7 +137,7 @@ FOR EACH ROW
 EXECUTE PROCEDURE public.notify_work_processes_update();
 
 
-DROP TRIGGER IF EXISTS trigger_work_processes_insertion ON public.work_processes;
+DROP TRIGGER IF EXISTS trigger_work_processes_before_insertion ON public.work_processes;
 CREATE TRIGGER trigger_work_processes_before_insertion
   BEFORE INSERT
   ON public.work_processes

@@ -454,10 +454,10 @@ class DataRetriever {
 
 
     getData(index, indexName='uuid', reload=false) {
-        console.log(this.startTimePerId[index])
+        // console.log(this.startTimePerId[index])
 
         if (this.startTimePerId[index] === undefined) {this.startTimePerId[index] = new Date();}
-        console.log("now", this.startTimePerId[index])
+        // console.log("now", this.startTimePerId[index])
 
         const deltaTime = (new Date() - this.startTimePerId[index])
         let _reload = null;
@@ -480,7 +480,7 @@ class DataRetriever {
         if (_reload === null) {
             const inMemLocalData = this.inMemDB.agents[index];
             if (inMemLocalData && this.requiredFields.every(field => inMemLocalData[field] !== undefined)) {
-                console.log("return local \n", (new Date() -  this.startTimePerId[index] ) )
+                // console.log("return local \n", (new Date() -  this.startTimePerId[index] ) )
                 return inMemLocalData;
             } else {
                 _reload = "IN_MEM";
@@ -490,7 +490,7 @@ class DataRetriever {
         if (_reload === "IN_MEM" ) {
             const inMemServerData =  await this.inMemDB.get(this.tableName, index) || {};
             if (inMemServerData && this.requiredFields.every(field => inMemServerData[field] !== undefined)) {
-                console.log("return server \n")
+                // console.log("return server \n")
                 return inMemServerData;
             } else {
                 _reload = "POSTGRES";

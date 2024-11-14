@@ -125,7 +125,9 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'change_agent_status':
+                inMemDB = await inMemServices.getInstance();
                 logData.addLog('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
+                inMemDB.update('agents', 'uuid', payload, new Date(), 'buffered');
                 break;
 
 
