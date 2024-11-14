@@ -9,7 +9,7 @@
     "testcontainers": "^10.13.1"
   },
   "scripts": {
-    "test": "ENV_VARIABLE=false jest --verbose",
+    "test": "TEST_REDIS=false jest --verbose",
     "test_redis_integration": "TEST_REDIS=true jest --verbose"
   }
 }

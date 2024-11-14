@@ -139,9 +139,9 @@ beforeAll(async () => {
         'RBMQ_API_PORT': '15672',
         'RBMQ_SSL': 'False',
         'RBMQ_API_SSL': 'False',
-        'REDIS_HOST':testWithRedis? redisContainerName:null,
-        'REDIS_PORT':testWithRedis? '6379':null,
-        'REDIS_PASSWORD':testWithRedis? 'mypass':null,
+        'REDIS_HOST':testWithRedis? redisContainerName:'',
+        'REDIS_PORT':testWithRedis? '6379':'',
+        'REDIS_PASSWORD':testWithRedis? 'mypass':'',
         'CREATE_RBMQ_ACCOUNTS': 'True',
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
@@ -230,6 +230,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const TEST_NUMBER = process.env.TEST_NUMBER;
+  const testWithRedis = process.env.TEST_REDIS === "true";
+
 
   await helyosApplication.dumpLogsToFile(TEST_NUMBER);
   await helyosApplication.logout();
@@ -244,8 +246,11 @@ afterAll(async () => {
   await Promise.all([
     postgresContainer.stop(),
     rabbitmqContainer.stop(),
-    redisContainer.stop()
   ]);
+
+  if (testWithRedis) {
+    await redisContainer.stop();
+  }
 
   await network.stop();
 
