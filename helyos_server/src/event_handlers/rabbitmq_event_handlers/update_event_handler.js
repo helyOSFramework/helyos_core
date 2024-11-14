@@ -19,9 +19,10 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     let agentUpdate = {uuid};
     agentUpdate['last_message_time'] = new Date();
 
-    // Get the agent id only once and save in in-memory table.
-    const agentInMem = await inMemDB.get('agents', uuid);
+    // Get the agent id only once and save in local in-memory table.
+    const agentInMem = await inMemDB.agents[uuid];
     if (!agentInMem || !agentInMem.id ){
+        console.log(`Database request of agent id for uuid ${uuid}`);
         const ids = await databaseServices.agents.getIds([uuid]);
         await inMemDB.update('agents', 'uuid', {uuid, id:ids[0]}, agentUpdate['last_message_time']);
     }
