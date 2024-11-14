@@ -270,6 +270,10 @@ class InMemDB {
                                 }     
                             }
 
+                            // State information is exclusively saved by state_event_handler module
+                            delete bufferedData[key]['status'];
+                            delete bufferedData[key]['resources'];
+
                             // Delete properties that are relevant only for agents:
                             if (tableName !== 'agents') {
                                 // delete this[tableName][key]['last_message_time'];

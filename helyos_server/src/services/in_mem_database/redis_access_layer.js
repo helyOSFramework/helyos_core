@@ -324,7 +324,7 @@ async function getAndDeleteHashesByPattern(client, pattern) {
 
     // Perform deletion in a separate transaction to ensure atomicity of deletion
     if (keysToDelete.length > 0) {
-      await client.multi().del(...keysToDelete).exec();
+      await client.multi().del(keysToDelete).exec();
     }
 
     return result;
