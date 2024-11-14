@@ -236,12 +236,12 @@ function handleBrokerMessages(channelOrQueue, message)   {
                 }
             }
             
-            logData.addLog('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
+            logData.addLog('agent', checkinData, 'normal', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then(( ) =>  logData.addLog('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
+                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'normal', `${uuid}-${agent?.name} agent checked in`))
                     .catch( err => {
-                        console.log('checkin:', err);
+                        console.error('checkin:', err);
                         logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                     });
         }

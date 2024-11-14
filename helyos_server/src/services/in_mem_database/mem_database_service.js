@@ -439,7 +439,7 @@ class DataRetriever {
     startTimePerId = {}
     static instance = null;
 
-    constructor(inMemDB, dbServices, tableName, requiredFields, reloadPeriod = 1000) {
+    constructor(inMemDB, dbServices, tableName, requiredFields, reloadPeriod = 2000) {
         this.dbServices = dbServices;
         this.inMemDB = inMemDB;
         this.requiredFields = [...requiredFields];
@@ -449,7 +449,7 @@ class DataRetriever {
         DataRetriever.instance = this;
     }
 
-    static getInstance(inMemDB, dbServices, tableName, requiredFields, reloadPeriod = 1000) {
+    static getInstance(inMemDB, dbServices, tableName, requiredFields, reloadPeriod = 2000) {
         if (!DataRetriever.instance) {
             DataRetriever.instance = new DataRetriever(inMemDB, dbServices, tableName, requiredFields, reloadPeriod);
         }
@@ -465,8 +465,11 @@ class DataRetriever {
 
         const deltaTime = (new Date() - this.startTimePerId[index])
         let _reload = null;
-        if (deltaTime > this.reloadPeriod/2 ) { _reload = "IN_MEM"};
         if (deltaTime > this.reloadPeriod ) { _reload = "POSTGRES"};
+
+        // COMMENT: When direct retrieve from external In mem database is necessary?
+        // if (deltaTime > ? ) { _reload = "IN_MEM"};
+
 
         if (_reload === "IN_MEM") {
             this.startTimePerId[index] = new Date();
@@ -481,17 +484,18 @@ class DataRetriever {
     async getDataFromSelectedSource(index, indexName='uuid', reload=null) {
         let _reload = reload;
 
-        if (_reload === null) {
-            const inMemLocalData = this.inMemDB.agents[index];
+        // If required fields is not available in external in-Mem DBm try Postgress
+        if (_reload === null) { 
+            const inMemLocalData = this.inMemDB[this.tableName][index];
             if (inMemLocalData && this.requiredFields.every(field => inMemLocalData[field] !== undefined)) {
-                // console.log("return local \n", (new Date() -  this.startTimePerId[index] ) )
                 return inMemLocalData;
             } else {
                 _reload = "IN_MEM";
             }
         }
 
-        if (_reload === "IN_MEM" ) {
+        // If required fields is not available in external in-Mem DBm try Postgress
+        if (_reload === "IN_MEM" ) { 
             const inMemServerData =  await this.inMemDB.get(this.tableName, index) || {};
             if (inMemServerData && this.requiredFields.every(field => inMemServerData[field] !== undefined)) {
                 // console.log("return server \n")
@@ -501,9 +505,8 @@ class DataRetriever {
             }
         }
 
+
         if (_reload === "POSTGRES" ) {
-            console.log("return database \n",  (new Date() -  this.startTimePerId[index] ));
-    
             return this.dbServices[this.tableName].get(indexName, index, this.requiredFields)
                     .then((r) => { 
                         if(r.length) {

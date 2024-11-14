@@ -60,9 +60,9 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                                 _version: MESSAGE_VERSION,
 
                             });
-                            console.log("=====================checkin message===========================");
+                            console.log("================== checkin response message to =======================");
                             console.log(`${uuid} => ${agent.uuid}`);
-                            console.log("===============================================================");
+                            console.log("======================================================================");
                             const public_key = agent['public_key'] || (registeredAgent && registeredAgent.public_key) ;
                             rabbitMQServices.sendEncryptedMsg(replyTo, message, public_key);
                             rabbitMQServices.sendEncryptedMsg(null, message, public_key, replyTo, replyExchange);    
