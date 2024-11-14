@@ -2,5 +2,5 @@ module.exports = {
   testEnvironment: 'node',
   setupFilesAfterEnv: ['./jest.setup.js'],
   testTimeout: 150000,
-  maxWorkers:4
+  maxWorkers: 2
 };
