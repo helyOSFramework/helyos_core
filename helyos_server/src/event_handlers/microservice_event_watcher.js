@@ -28,7 +28,7 @@ const waitForServicesResults = () => {
                         logMsg = `job not ready: elpsed time (sec) - ${(now - serviceReq.dispatched_at)/1000}` ; 
                     }
 
-                    logData.addLog('microservice', serviceReq, 'normal', logMsg);
+                    logData.addLog('microservice', serviceReq, 'info', logMsg);
                 }
 
                 
@@ -45,7 +45,7 @@ const waitForServicesResults = () => {
                 }
             } else {
                 return extServCommunication.saveServiceResponse(serviceReq.id, servResponse, SERVICE_STATUS.FAILED) // default satus is failed. if service is ok, it will be updated.
-                .then( status => logData.addLog('microservice', serviceReq, 'normal',  `job is ${status}`));
+                .then( status => logData.addLog('microservice', serviceReq, 'info',  `job is ${status}`));
             }
         })
         .catch(e => {
@@ -77,7 +77,7 @@ const sendRequestToCancelServices = () => {
             .then( accessData => webServices.cancelService(accessData.url, accessData.apiKey, serviceReq.service_queue_id))
             .then((servResponse) => {
                 servResponse = {status:'canceled',result:{}};
-                logData.addLog('microservice', serviceReq, 'normal',  `Canceling signal sent to microservice: job is ${servResponse.status}`);
+                logData.addLog('microservice', serviceReq, 'info',  `Canceling signal sent to microservice: job is ${servResponse.status}`);
                 return databaseServices.service_requests.updateByConditions({id: serviceReq.id, processed: false, status: SERVICE_STATUS.CANCELED},
                                                                             { fetched: true,
                                                                                processed: true,

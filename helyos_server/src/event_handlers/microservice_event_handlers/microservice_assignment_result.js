@@ -12,8 +12,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 
 	const agentIds = workProcess.agent_ids;
 	const serviceRequestId = serviceRequest?  serviceRequest.id:null
-    logData.addLog('helyos_core', {wproc_id: workProcess.id}, 'info', `Create assignment(s) using the response of ${serviceRequest.service_url}`);
-	console.log(`WORKPROCESS ${workProcess.id}: Create assignment(s) using the response of ${serviceRequest.service_url}`);
+    logData.addLog('helyos_core', {wproc_id: workProcess.id}, 'info', `Create WP-${ workProcess.id} assignment(s) using the response of ${serviceRequest.service_url}`);
 
 	const yardId = workProcess.yard_id;
 

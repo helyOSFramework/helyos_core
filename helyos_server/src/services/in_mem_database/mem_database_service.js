@@ -458,10 +458,8 @@ class DataRetriever {
 
 
     getData(index, indexName='uuid', reload=false) {
-        // console.log(this.startTimePerId[index])
 
         if (this.startTimePerId[index] === undefined) {this.startTimePerId[index] = new Date();}
-        // console.log("now", this.startTimePerId[index])
 
         const deltaTime = (new Date() - this.startTimePerId[index])
         let _reload = null;

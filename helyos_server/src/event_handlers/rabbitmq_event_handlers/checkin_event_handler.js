@@ -197,7 +197,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     agentUpdate['message_channel'] = replyTo || uuid;
 
     if ('public_key' in checkinData){
-        logData.addLog('agent', {uuid}, 'normal', `agent public key updated`);
+        logData.addLog('agent', {uuid}, 'info', `agent public key updated`);
         agentUpdate['public_key'] = checkinData.public_key;
     }
 

@@ -32,7 +32,7 @@ async function processInstantActionEvents(channel,payload) {
                     agentComm.sendCustomInstantActionToAgent(agentId, payload['command']);
                 }
                 const log = { agent_id: agentId, agent_uuid: agentUuid, sender: payload.sender};
-                logData.addLog('agent', log, 'normal', `send custom instant action to agent`);	
+                logData.addLog('agent', log, 'info', `send custom instant action to agent`);	
 
                 break;
 
