@@ -1,5 +1,5 @@
 const databaseServices = require('../services/database/database_services.js');
-const { inMemDB, DataRetriever } = require('../services/in_mem_database/mem_database_service.js');
+const memDBService = require('../services/in_mem_database/mem_database_service.js');
 const { AGENT_MQTT_EXCHANGE, AGENTS_DL_EXCHANGE, CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE,
         AGENT_UPDATE_QUEUE, AGENT_STATE_QUEUE, AGENT_VISUALIZATION_QUEUE, verifyMessageSignature } = require('../services/message_broker/rabbitMQ_services.js');
 const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handler');
@@ -49,7 +49,7 @@ function parseMessage(message) {
                                     
 
 const isAgentLeader = (leaderUUID, followerUUID) => { 
-    return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
+        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
     .then(leader => {
         if (leader.length === 0) {
             logData.addLog('agent', {uuid: leaderUUID}, 'error', `Agent cannot be found in the database: ${leaderUUID}`);
@@ -78,7 +78,7 @@ function identifyMessageSender(objMsg, routingKey) {
 }
 
 
-async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange) {
+async function validateMessageSender(inMemDB, registeredAgent, uuid, objMsg, msgProps, exchange) {
 
             if ( registeredAgent.protocol === 'AMQP' && exchange === AGENT_MQTT_EXCHANGE ) {
                 throw ({msg:`Wrong protocol; agent is registered as AMQP; ${uuid}`, code: 'AGENT-400'});
@@ -97,7 +97,7 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                     if (possibleLeaderUUID !== registeredAgent.rbmq_username) {
                         if (await isAgentLeader(possibleLeaderUUID, uuid)) { // May be is the leader account but not registered yet at the agent.
                             console.log(`Agent ${uuid} is using the leader account ${possibleLeaderUUID}`);
-                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
+                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime',  0, databaseServices.agents);
                         } else { // OK, we did our best to validate you and you will be disconnected.
                             logData.addLog('agent', {uuid}, 'error', 
                                 `helyOS disconnected the agent: An agent is trying to publish a message for another agent.` + 
@@ -158,7 +158,6 @@ function validateAnonymousCheckin(registeredAgent, checkinData) {
 const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
                          'allow_anonymous_checkin', 'public_key', 'verify_signature'];
 
-const agentDataRetriever = new DataRetriever(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
 
 /**
  * That is the main function of this module.
@@ -206,6 +205,9 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
     ( async () => {
 
+        const inMemDB = await memDBService.getInstance();
+        const agentDataRetriever =  memDBService.DataRetriever.getInstance(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
+
 // VALIDATE MESSAGE SENDER
         let registeredAgent = await agentDataRetriever.getData(uuid);
         
@@ -214,7 +216,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }
 
         if (registeredAgent) {
-            await validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange);
+            await validateMessageSender(inMemDB,registeredAgent, uuid, objMsg, msgProps, exchange);
         }
 
 // CHECK-IN 
@@ -234,12 +236,12 @@ function handleBrokerMessages(channelOrQueue, message)   {
                 }
             }
             
-            logData.addLog('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
+            logData.addLog('agent', checkinData, 'normal', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then(( ) =>  logData.addLog('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
+                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'normal', `${uuid}-${agent?.name} agent checked in`))
                     .catch( err => {
-                        console.log('checkin:', err);
+                        console.error('checkin:', err);
                         logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                     });
         }
@@ -335,6 +337,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }  
     })().catch(error => {
         const errorMsg = error.message?  {message:error.message} : error;
+        console.error('Stack trace', error.stack);
         logData.addLog('agent', {uuid}, 'error',  JSON.stringify(errorMsg, Object.getOwnPropertyNames(errorMsg)));
     });
 };

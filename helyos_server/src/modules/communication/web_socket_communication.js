@@ -27,35 +27,44 @@ class BufferNotifications {
         socketService.dispatchAllBufferedMessages(this.bufferPayload);
     }
 
-    _get_latest_updated_data(inMemDB) {
+
+    async _get_latest_updated_data(inMemDB) {
         if(!inMemDB) return;
-        for (const key in inMemDB.agents) { 
-            if(inMemDB.agents[key].id == null) {
+
+        const inMemAgents = await inMemDB.list('agents');
+        const inMemBufferedAgents = await inMemDB.list('agents_buffer');
+        const inMemMapObjects = await inMemDB.list('map_objects');
+        const inMemBufferedMapObject = await inMemDB.list('map_objects_buffer');
+
+        for (const key in inMemAgents) { 
+            if(inMemAgents[key].id == null) {
                 logData.addLog('agent', {uuid:key}, 'error', `MemDB error, id not registered`);
-                console.log('MemDB error, id not registered');
+                console.log( key, 'MemDB error, id not registered');
                 continue; 
             }
-            let agent = inMemDB.agents_buffer[key];
+
+            let agent = inMemBufferedAgents[key];
             if(!agent) {
-                const {id, uuid, x, y, z, orientations, sensors, last_message_time} = inMemDB.agents[key];
+                const {id, uuid, x, y, z, orientations, sensors, last_message_time} = inMemAgents[key];
                 agent = {id, uuid, x, y, z, orientations, sensors, last_message_time};                 
             } 
-            agent['msg_per_sec'] = inMemDB.agents[key]['msg_per_sec'];
-            const webSocketNotification = {'agent_id':inMemDB.agents[key].id,'tool_id':inMemDB.agents[key].id, ...agent };
+            agent['msg_per_sec'] = inMemAgents[key]['msg_per_sec'];
+            const webSocketNotification = {'agent_id':inMemAgents[key].id,'tool_id':inMemAgents[key].id, ...agent };
             this.pushNotificationToBuffer('new_agent_poses', webSocketNotification);
         }
 
         const now = new Date();
-        for (const key in inMemDB.map_objects) { 
-            if(now - inMemDB.map_objects[key]['last_message_time'] < 2*this.bufferRetainTime) {
-                    let mapObject = inMemDB.map_objects_buffer[key];
-                    if(!mapObject) {
-                        mapObject =  inMemDB.map_objects[key];                
-                    } 
-                    const webSocketNotification =  mapObject;
-                    this.pushNotificationToBuffer('map_objects_updates', webSocketNotification);
-                }
+        for (const key in inMemMapObjects) { 
+
+            if(now - inMemMapObjects[key]['last_message_time'] < 2*this.bufferRetainTime) {
+                let mapObject = inMemBufferedMapObject[key];
+                if(!mapObject) {
+                    mapObject =  inMemMapObjects[key];                
+                } 
+                const webSocketNotification =  mapObject;
+                this.pushNotificationToBuffer('map_objects_updates', webSocketNotification);
             }
+        }
 
     }
 

@@ -269,14 +269,13 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 	const logMetadata = {work_process_id: workProcess.id};
 	if(!(workProcess.wait_free_agent===false) && agentsListIds && agentsListIds.length) {
 			const missionAgents = await databaseServices.agents.list_in('id', agentsListIds );
-			const missionAgentsToAckn =  missionAgents.filter(t => t.acknowledge_reservation);
 
 			// Waiting agents to be "FREE"
 				try {
 					logData.addLog('agent', logMetadata, 'normal', `waiting agent to be free`);	
-					agentResponse = await agentComm.waitAgentStatusForWorkProcess(agentsListIds, 'FREE', null, WAIT_AGENT_STATUS_PERIOD)
-					.catch( e => {throw e});
-					agentsListIds.forEach(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: null}));
+					agentResponse = await agentComm.waitAgentStatusForWorkProcess(agentsListIds, 'FREE', null, WAIT_AGENT_STATUS_PERIOD);
+					await Promise.all(agentsListIds.map(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: null})));
+
 					logData.addLog('agent', logMetadata, 'normal', `agent is free`);	
 
 				} catch (error) {
@@ -294,15 +293,15 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				});
 
 			//  Waiting agents to acknowledge to be "READY"
+				const missionAgentsToAckn =  missionAgents.filter(t => t.acknowledge_reservation);
 				const waitReadyAcknListIds = missionAgentsToAckn.map( t => t.id);
 				try {
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
 						logData.addLog('agent', logMetadata, 'normal', `waiting agent to be ready`);	
 					});
-					agentResponse = await agentComm.waitAgentStatusForWorkProcess(waitReadyAcknListIds, 'READY', workProcess.id,WAIT_AGENT_STATUS_PERIOD)
-					.catch( e => {throw e});
-					agentsListIds.forEach(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: workProcess.id}));
+					agentResponse = await agentComm.waitAgentStatusForWorkProcess(waitReadyAcknListIds, 'READY', workProcess.id,WAIT_AGENT_STATUS_PERIOD);
+					await Promise.all(agentsListIds.map(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: workProcess.id})));
 
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
@@ -313,7 +312,6 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 					const logMetadata = {wproc_id: workProcess.id};
 					logData.addLog('agent', logMetadata, 'error', `expected status ready: ${error}`);					
 					databaseServices.work_processes.update_byId(workProcess.id, {'status': MISSION_STATUS.FAILED});
-					console.log(error);
 					return;
 				}
 

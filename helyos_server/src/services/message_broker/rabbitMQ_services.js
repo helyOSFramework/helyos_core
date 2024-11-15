@@ -97,12 +97,15 @@ const disconnect = async () =>  {
 const createAccounts = () =>  rbmqAccessLayer.createUser(RBMQ_USERNAME,RBMQ_PASSWORD,['administrator', 'management'])
                         .then(() => rbmqAccessLayer.add_rbmq_user_vhost(RBMQ_USERNAME))
                         .then(() => rbmqAccessLayer.createUser('anonymous','anonymous', [""] ))
+                        .then(rv => logData.addLog('helyos_core', null, rv.logType, rv.message ))
                         .then(() => rbmqAccessLayer.add_rbmq_user_vhost('anonymous'))
+                        .then(rv => logData.addLog('helyos_core', null, rv.logType, rv.message ))
                         .then(() => rbmqAccessLayer.update_guest_account_permissions('anonymous'))
-                        .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitmMQ helyOS account is set.' ))
+                        .then(rv => logData.addLog('helyos_core', null, rv.logType, rv.message ))
+                        .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitmMQ helyOS core accounts are set.' ))
                         .catch((error) => {
-                        logData.addLog('helyos_core', null, 'error', `RMBTMQ ERROR: ${error}` );
-                        console.log(error, "helyos_core user already created?");});
+                        logData.addLog('helyos_core', null, 'error', `RMBTMQ ERROR: ${error.message}` );
+                        console.error(error, "helyos_core user already created?");});
 
 
 const connect_as_admin_and_create_accounts = () => rbmqAccessLayer.connect(urlObj(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD), sslOptions)
@@ -116,7 +119,12 @@ const connect_as_admin_and_create_accounts = () => rbmqAccessLayer.connect(urlOb
 
 
 const connect_as_guest_and_create_admin = () => rbmqAccessLayer.connect(urlObj('guest', 'guest'), sslOptions)
-                                                .then(conn => rbmqAccessLayer.create_rbmq_admin(RBMQ_ADMIN_USERNAME,RBMQ_ADMIN_PASSWORD,['administrator', 'management']));
+                                                .then(conn => rbmqAccessLayer.guestCreate_RbmqAdmin(RBMQ_ADMIN_USERNAME,RBMQ_ADMIN_PASSWORD,['administrator', 'management']))
+                                                .then(rv => logData.addLog('helyos_core', null, rv.logType, rv.message ))
+                                                .then(conn => rbmqAccessLayer.guestAdd_RbmqAdminVhost(RBMQ_ADMIN_USERNAME))
+                                                .then(rv => logData.addLog('helyos_core', null, rv.logType, rv.message ))
+                                                .catch(e => logData.addLog('helyos_core', null, 'error', e.message ));
+
     
 
                                 

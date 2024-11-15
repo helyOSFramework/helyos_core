@@ -9,6 +9,8 @@
     "testcontainers": "^10.13.1"
   },
   "scripts": {
-    "test": "jest --verbose"
+    "test": "jest  --verbose",
+    "test_p": "TEST_REDIS=false jest  --verbose",
+    "test_redis_integration": "TEST_REDIS=true jest --verbose"
   }
 }

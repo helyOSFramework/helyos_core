@@ -1,7 +1,7 @@
 
 const InMemorySensorTable = {};
 const databaseServices = require('../../services/database/database_services');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
+const memDBService = require('../../services/in_mem_database/mem_database_service');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
 const bufferNotifications = webSocketCommunicaton.bufferNotifications;
@@ -13,16 +13,19 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     // check against the agent.rbmq_username for each received message is too expensive, unless we implement a in-memory table.
     // 02/06/2023: update, we need to poll data from the database anyway because the MQTT agents, we will need a in-memory database.
 
+    const inMemDB = await memDBService.getInstance();
+
     // AGENT UPDATE
     let agentUpdate = {uuid};
     agentUpdate['last_message_time'] = new Date();
 
-    // Get the agent id only once and save in in-memory table.
-    if (!inMemDB.agents[uuid] || !inMemDB.agents[uuid].id ){
-        const toolIds = await databaseServices.agents.getIds([uuid]);
-        inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]},agentUpdate['last_message_time']);
+    // Get the agent id only once and save in local in-memory table.
+    const agentInMem = await inMemDB.agents[uuid];
+    if (!agentInMem || !agentInMem.id ){
+        console.log(`Database request of agent id for uuid ${uuid}`);
+        const ids = await databaseServices.agents.getIds([uuid]);
+        await inMemDB.update('agents', 'uuid', {uuid, id:ids[0]}, agentUpdate['last_message_time']);
     }
-
 
     if ('status' in objMsg) { // Backwards compatibility helyos_agent_core <= 3.1.0
         agentUpdate['status'] = objMsg['status'];
@@ -103,14 +106,12 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     }
 
     let statsLabel = 'buffered';
+    let promises = [inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel)];
     if (bufferPeriod === 0) {
         statsLabel = 'realtime';
+        promises.push(databaseServices.agents.updateByConditions({uuid}, agentUpdate)); 
     }
-    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel);
-    if (bufferPeriod === 0) {
-        return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0);
-    }
-    return Promise.resolve(null);
+    return Promise.all(promises);
 }
 
 

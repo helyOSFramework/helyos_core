@@ -70,6 +70,7 @@ class LogData {
 
 
 function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
+    console.log(log_msg);
     let new_log_instance;
     let wproc_id = null;
     if (typeof log_msg !== 'string') {

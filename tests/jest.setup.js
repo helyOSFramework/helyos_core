@@ -11,6 +11,7 @@ let network;
 // Instances running on host machine
 let helyosApplication;
 let rabbitMQClient;
+let redisContainer;
 
 global.getHelyOSClientInstance= async () => {
     if(helyosApplication) {
@@ -64,7 +65,9 @@ beforeAll(async () => {
 
     const postgresContainerName = `db_hostname_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
     const rabbitmqContainerName = `rbmq_hostname_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
+    const redisContainerName = `redis_hostname${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
     const helyosContainerName = `helyos_core_${TEST_NUMBER}_${process.env.JEST_WORKER_ID}`;
+    const testWithRedis = process.env.TEST_REDIS === "true";
     console.log(`setting up test ${TEST_NUMBER}`);
 
     network = await new Network().start();
@@ -83,6 +86,21 @@ beforeAll(async () => {
       // stream.on("end", () => console.log("Stream closed"));
       // })
       .start();
+
+    if (testWithRedis) {
+        redisContainer = await new GenericContainer('redis:7.4')
+          .withExposedPorts(6379)
+          .withName(redisContainerName)
+          .withWaitStrategy(Wait.forListeningPorts())
+          .withNetwork(network)
+          .withCommand(['redis-server', '--requirepass', 'mypass'])
+          // .withLogConsumer(stream => {
+          // stream.on("data", line => console.log(line));
+          // stream.on("err", line => console.error(line));
+          // stream.on("end", () => console.log("Stream closed"));
+          // })
+          .start();
+    }
 
 
     rabbitmqContainer = await new GenericContainer('rabbitmq:3-management')
@@ -121,9 +139,9 @@ beforeAll(async () => {
         'RBMQ_API_PORT': '15672',
         'RBMQ_SSL': 'False',
         'RBMQ_API_SSL': 'False',
-        // 'REDIS_HOST':'local_redis',
-        // 'REDIS_PORT':'6379',
-        // 'REDIS_PASSWORD':'mypass',
+        'REDIS_HOST':testWithRedis? redisContainerName:'',
+        'REDIS_PORT':testWithRedis? '6379':'',
+        'REDIS_PASSWORD':testWithRedis? 'mypass':'',
         'CREATE_RBMQ_ACCOUNTS': 'True',
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
@@ -212,6 +230,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const TEST_NUMBER = process.env.TEST_NUMBER;
+  const testWithRedis = process.env.TEST_REDIS === "true";
+
 
   await helyosApplication.dumpLogsToFile(TEST_NUMBER);
   await helyosApplication.logout();
@@ -225,8 +245,12 @@ afterAll(async () => {
 
   await Promise.all([
     postgresContainer.stop(),
-    rabbitmqContainer.stop()
+    rabbitmqContainer.stop(),
   ]);
+
+  if (testWithRedis) {
+    await redisContainer.stop();
+  }
 
   await network.stop();
 
