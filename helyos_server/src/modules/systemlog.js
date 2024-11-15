@@ -33,10 +33,27 @@ class LogData {
     * @param {object} metadata - The metadata associated with the log message (e.g., request object, agent object, or assignment object).
     * @param {string} logType - The type of the log message ('info', 'warning', or 'error').
     * @param {string} log_msg - The log message.
-    * @param {string} [eventType=''] - The event type of the log message ('request', 'response', 'error', 'info', 'warning', or 'success').
     */
-    addLog(origin, metadata, logType, log_msg, eventType='') {
-        let new_log_instance = parseLogData(origin, metadata, logType, log_msg, eventType);
+    addLog(origin, metadata, logType, log_msg, stdOutOnly=false) {
+        const now = new Date();
+        const formattedDate = now.toISOString();
+        const colorLog = (type, message) => {
+            const colors = {
+                info: '\x1b[0m',  // Default
+                success: '\x1b[32m',  // Green
+                warn: '\x1b[33m',  // Yellow
+                error: '\x1b[31m', // Red
+                reset: '\x1b[0m',  // Reset to default
+            };
+        
+            const color = colors[type] || colors.reset;
+            console.log(`${color}[${type.toUpperCase()}] ${message}${colors.reset}`);
+        };
+        
+        colorLog(logType,`${formattedDate}: ${log_msg}`);
+        if (stdOutOnly) return;
+
+        let new_log_instance = parseLogData(origin, metadata, logType, log_msg);
         if (LOG_OUTPUT === 'database') {
             const lastLog = this.logs[this.logs.length - 1];
             if (lastLog && this.isLogRepeating(lastLog, new_log_instance)) {
@@ -69,8 +86,7 @@ class LogData {
 
 
 
-function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
-    console.log(log_msg);
+function parseLogData(origin, metadata, logType, log_msg ) {
     let new_log_instance;
     let wproc_id = null;
     if (typeof log_msg !== 'string') {
@@ -89,7 +105,6 @@ function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
             }
 
             new_log_instance = { 
-                                event: eventType,
                                 origin: origin,
                                 wproc_id:  wproc_id,
                                 service_type:  service_type,
@@ -102,7 +117,6 @@ function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
         case 'helyos_core':
             if(!metadata) metadata={};
             new_log_instance = { 
-                                event: eventType,
                                 origin: origin,
                                 wproc_id:  metadata.wproc_id,
                                 service_type:  '',
@@ -144,7 +158,6 @@ function parseLogData(origin, metadata, logType, log_msg, eventType='' ) {
             }
 
             new_log_instance = { 
-                                event: eventType,
                                 origin: origin,
                                 wproc_id:  wproc_id,
                                 agent_uuid: hac_data.uuid,
