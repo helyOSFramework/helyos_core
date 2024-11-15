@@ -4,7 +4,7 @@ const databaseServices = require('../../services/database/database_services');
 const memDBService = require('../../services/in_mem_database/mem_database_service');
 const webSocketCommunicaton = require('../../modules/communication/web_socket_communication');
 const { logData } = require('../../modules/systemlog.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
+// const bufferNotifications = webSocketCommunicaton.bufferNotifications; 
 
 
 
@@ -101,7 +101,7 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
         if (qryToolData.length) {
             const toolData = qryToolData[0];
             let webSocketNotification = {'id': toolData.id, 'uuid': uuid, 'geometry': JSONGeometry, 'status': toolData.status};
-            bufferNotifications.pushNotificationToBuffer('change_agent_status', webSocketNotification);
+            // bufferNotifications.pushNotificationToBuffer('change_agent_status', webSocketNotification);
         }
     }
 

@@ -19,11 +19,11 @@ const {processMicroserviceEvents} = require('./database_event_handlers/microserv
 const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_event_handlers/checkin_event_handler.js');
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
 const inMemServices = require('../services/in_mem_database/mem_database_service.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 
-function broadcastPriorityNotification(channel, payload){
+function broadcastPriorityNotification(channel, payload, bufferNotifications){
+
     switch (channel) {
 
         case 'change_agent_status': // Changes originate from agents.
@@ -44,7 +44,8 @@ function broadcastPriorityNotification(channel, payload){
     }
 }
 
-function broadcastNotifications(channel, payload) {
+function broadcastNotifications(channel, payload, bufferNotifications) {
+
     switch (channel) {
 
             case 'agent_deletion': // Changes originate from applications (e.g. dashboard).
@@ -78,24 +79,26 @@ function broadcastNotifications(channel, payload) {
 
 
 // Subscribe to database changes
-function handleDatabaseMessages(client) {
+function handleDatabaseMessages(client, websocket, bufferNotifications) {
+
     client.on('notification', async function (msg) {
         let channel = msg.channel;
         let payload = null
 
         const res = await client.query("DELETE FROM events_queue USING ( SELECT * FROM events_queue LIMIT 1 FOR UPDATE SKIP LOCKED) q WHERE q.id = events_queue.id RETURNING events_queue.*;");
         if (res.rows.length){
+            const bufferNotifications =  await webSocketCommunicaton.getInstance();
             payload = JSON.parse(res.rows[0].payload)
             channel = res.rows[0].event_name;
-            broadcastPriorityNotification(channel, payload);
-            broadcastNotifications(channel, payload);
+            broadcastPriorityNotification(channel, payload, bufferNotifications);
+            broadcastNotifications(channel, payload, bufferNotifications);
 
         } else {
-            console.log(`last event ${channel}. No events to process...`);
             return false;
         }
 
         let inMemDB;
+
         switch (channel) {
         // AGENT TABLES TRIGGERS
 

@@ -4,15 +4,21 @@ const socketService = require('../../services/socket_services.js');
 const utils = require('../../modules/utils.js');
 const memDBServices = require('../../services/in_mem_database/mem_database_service');
 const { logData } = require('../systemlog.js');
-const PERIOD = 100;
+const PERIOD = 1000;
 
 // Buffer Notifications to avoid flooding front-end with messages
 class BufferNotifications {
     bufferRetainTime = 500;
     bufferPayload = {}; 
     eventDispatchBuffer = null;
+    static instance = null;
+
 
     constructor(bufferRetainTime) {
+        if (BufferNotifications.instance) {
+            return BufferNotifications.instance;
+        }
+
 		this.bufferRetainTime = bufferRetainTime;
         this.bufferPayload = {};
         this.eventDispatchBuffer = setInterval(() => {
@@ -21,7 +27,9 @@ class BufferNotifications {
                 .then( () =>  this._dispatch());
                 },
                  bufferRetainTime);
-        }
+        BufferNotifications.instance = this;
+    }
+
 
     _dispatch() {
         socketService.dispatchAllBufferedMessages(this.bufferPayload);
@@ -90,5 +98,26 @@ class BufferNotifications {
 }
 
 
-const bufferNotifications = new BufferNotifications(PERIOD);
-module.exports.bufferNotifications = bufferNotifications;
+
+/**
+ * Retrieves the BufferNotifications singleton instance.
+ * 
+ * @returns {BufferNotifications} - The singleton instance.
+ */
+let bufferNotifications;
+async function getInstance() {
+  if (!bufferNotifications) {
+    console.log('====> Creating In WebSocket Notification Buffer instance');
+    try {
+        let socketIO = await socketService.setWebSocketServer();
+        bufferNotifications = new BufferNotifications(PERIOD);
+    } catch (error) {
+        console.error('Failed to initialize BufferNotifications:', error);
+        throw error; 
+    }
+  }
+  return bufferNotifications;
+}
+
+
+module.exports.getInstance = getInstance;
