@@ -93,7 +93,9 @@ function cancelAssignmentByAgent(partialAssignment){
  */
 async function onWorkProcessEnd(workProcessId, reason){
 
-	logData.addLog('helyos_core', {wproc_id:workProcessId},'warning', 'Work process ending: ' + reason);
+	if (reason !== 'assignments_completed') {
+		logData.addLog('helyos_core', {wproc_id:workProcessId},'warning', 'Work process ending: ' + reason);
+	}
 
 	// Release agents that received the assignments
 	const wpAssignments= await databaseServices.assignments.get('work_process_id', workProcessId, ['id','agent_id', 'work_process_id']);

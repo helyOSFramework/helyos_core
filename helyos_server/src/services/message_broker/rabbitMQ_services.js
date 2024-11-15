@@ -240,13 +240,11 @@ function sendEncryptedMsg(queue, message, publicKey='', routingKey=null, exchang
             exchange = AGENTS_DL_EXCHANGE;
         } 
         if(queue) {
-            console.log(`\n\nPUBLISHING TO QUEUE:${queue}}`);
             dataChannel.sendToQueue(queue, Buffer.from(stringified), {correlationId,
                                                                      userId: RBMQ_USERNAME, 
                                                                      timestamp: Date.now()});
         }
         if(routingKey){
-            console.log(`\n\nPUBLISHING TO EXCHANGE:${exchange} USING ROUTING KEY: ${routingKey}\n\n`);
             dataChannel.publish(exchange, routingKey, Buffer.from(stringified), {correlationId,
                                                                                  userId: RBMQ_USERNAME,
                                                                                  timestamp: Date.now()});    

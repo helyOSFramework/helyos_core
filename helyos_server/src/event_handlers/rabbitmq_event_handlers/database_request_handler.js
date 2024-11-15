@@ -64,7 +64,6 @@ async function queryDataBase(uuid, objMsg, msgProps) {
             case 'createMapObjects':       
                 response = await databaseServices.map_objects.insertMany(objMsg.body['data'])
                 .then( async (newIds) => {
-                    console.log(r);
                     const newObjects = await databaseServices.map_objects.list_in(newIds);
                     newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date()); });
                     return newIds;

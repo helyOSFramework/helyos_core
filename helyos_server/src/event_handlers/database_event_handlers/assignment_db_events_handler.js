@@ -90,7 +90,7 @@ function processAssignmentEvents(channel, payload) {
 	                        .then(() => agentComm.sendReleaseFromWorkProcessRequest(payload['agent_id'], payload['work_process_id']))
                             .then(() => {
                                 if (fallbackMission) {
-                                    logData.addLog('agent', {'agent_id': payload.agent_id}, 'normal', `fallback mission: ${fallbackMission}`)
+                                    logData.addLog('agent', {'agent_id': payload.agent_id}, 'info', `fallback mission: ${fallbackMission}`)
                                     return databaseServices.assignments.get_byId(payload['id'])
                                     .then((assignment) => {
                                         const data = {...wp.data, 
@@ -110,7 +110,7 @@ function processAssignmentEvents(channel, payload) {
                                                                                 work_process_type_name: fallbackMission,
                                                                                 status: MISSION_STATUS.DISPATCHED
                                                                                })
-                                        .then((wpId) => logData.addLog('agent', {'agent_id': assignment.agent_id}, 'normal', `fallback mission  dispatched`))
+                                        .then((wpId) => logData.addLog('agent', {'agent_id': assignment.agent_id}, 'info', `fallback mission  dispatched`))
                                     })
                                 }
                             });

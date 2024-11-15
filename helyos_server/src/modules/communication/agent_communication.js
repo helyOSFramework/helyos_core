@@ -243,7 +243,6 @@ function waitAgentStatusForWorkProcess(agentIds, status, wpId, timeout=20000) {
 
 
 function sendEncryptedMsgToAgent(agentId, message, reason='assignment') {
-    console.log(`send message to agent ${agentId} via rabbitmq:`, reason);
     return databaseServices.agents.get_byId(agentId)
            .then(agent => {
             if (!agent) {

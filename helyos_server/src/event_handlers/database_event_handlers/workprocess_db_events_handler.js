@@ -59,15 +59,13 @@ function processWorkProcessEvents(channel, payload) {
                     .then(()=> prepareWPData
                     .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload)))
                     .catch(err => {
-                        console.log(err);
-                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err.message}`);
                     });
             
                 else {
                     prepareWPData.then()
                     .catch(err => {
-                        console.log(err);
-                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err}`);
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_insertion ${err.message}`);
                     });
                 }
                                         
@@ -76,7 +74,11 @@ function processWorkProcessEvents(channel, payload) {
 
             case 'work_processes_update':
                 workProcessStatus = payload['status'];
-                console.log(`WORKPROCESS ${payload['id']} STATUS: `, workProcessStatus);
+
+                if (workProcessStatus === MISSION_STATUS.SUCCEEDED) {
+                    logData.addLog('helyos_core', {wproc_id: payload['id']},'success', `Work process ${payload['id']} status: ${workProcessStatus}`);
+                }
+
                 switch (workProcessStatus) {
 
                     case MISSION_STATUS.DISPATCHED:

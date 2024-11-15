@@ -68,8 +68,6 @@ const sendRequestToService = (service_url, service_licence_key, request, context
         .send({request, context, config})     
         .then((res) =>  parseResponseToJson(res))
         .catch((err)=> {
-                console.log(`\n*************** Error - microservice ${service_url} *************\n`);
-                console.log(err.message)
                 if(err.response) {
                     err.data = parseResponseToJson(err.response);
                 } else {
@@ -77,6 +75,8 @@ const sendRequestToService = (service_url, service_licence_key, request, context
                         err.message = 'Microservice is unreachable.';
                     } 
                 }
+
+                err.message = err.message + `: [${service_url}]`
                 throw err;
             });
 }
