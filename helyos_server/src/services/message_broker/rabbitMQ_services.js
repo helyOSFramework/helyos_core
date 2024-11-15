@@ -303,20 +303,12 @@ function removeDebugQueues(agent) {
 }
 
 
-function dispatchAllBufferedMessages(bufferPayload){
-    for(let channel in bufferPayload){
-        sendUpdatesToFrontEnd(channel,bufferPayload[channel]);
-        bufferPayload[channel]=null;
-    }
-}
-
 
 
 module.exports.connect = connect;
 module.exports.disconnect = disconnect;
 
 module.exports.connectAndOpenChannels = connectAndOpenChannels;
-module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
 module.exports.sendEncryptedMsg = sendEncryptedMsg;
 module.exports.create_rbmq_user = rbmqAccessLayer.createUser;
 module.exports.remove_rbmq_user = rbmqAccessLayer.removeUser;

@@ -170,15 +170,15 @@ const webSocketServices = require('./services/socket_services.js');
 
 async function start() {
     const postgClient = await connectToDB();
-    const websocket = await webSocketServices.setWebSocketServer();
-    websocket.listen(SOCKET_PORT);
+    const websocketService = await webSocketServices.getInstance();
+    websocketService.io.listen(SOCKET_PORT);
 
 
     let dataChannels = await connectToRabbitMQ();
     const frontEndServer = setDashboardServer();
     const graphqlServer = setGraphQLServer();
 
-    handleDatabaseMessages(postgClient, websocket);
+    handleDatabaseMessages(postgClient, websocketService);
     initialization.helyosConsumingMessages(dataChannels);
     initialization.initWatchers();
 

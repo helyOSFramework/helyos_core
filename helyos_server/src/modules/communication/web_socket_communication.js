@@ -14,11 +14,11 @@ class BufferNotifications {
     static instance = null;
 
 
-    constructor(bufferRetainTime) {
+    constructor(bufferRetainTime, webSocketService) {
         if (BufferNotifications.instance) {
             return BufferNotifications.instance;
         }
-
+        this.webSocketService = webSocketService;
 		this.bufferRetainTime = bufferRetainTime;
         this.bufferPayload = {};
         this.eventDispatchBuffer = setInterval(() => {
@@ -32,7 +32,7 @@ class BufferNotifications {
 
 
     _dispatch() {
-        socketService.dispatchAllBufferedMessages(this.bufferPayload);
+        this.webSocketService.dispatchAllBufferedMessages(this.bufferPayload);
     }
 
 
@@ -109,8 +109,8 @@ async function getInstance() {
   if (!bufferNotifications) {
     console.log('====> Creating In WebSocket Notification Buffer instance');
     try {
-        let socketIO = await socketService.setWebSocketServer();
-        bufferNotifications = new BufferNotifications(PERIOD);
+        let webSocketService = await socketService.getInstance();
+        bufferNotifications = new BufferNotifications(PERIOD, webSocketService);
     } catch (error) {
         console.error('Failed to initialize BufferNotifications:', error);
         throw error; 

@@ -31,16 +31,18 @@ const conf = {
 
 class WebSocketService {
 
+    static instance = null;
+
     constructor() {
         if (WebSocketService.instance){
             return WebSocketService.instance;
         }
 
         console.log("######## Creating socket io service...");
-        self._webSocketServer = http.createServer();
-        self.io = socket_io(self._webSocketServer, conf.socketIo);
+        this._webSocketServer = http.createServer();
+        this.io = socket_io(this._webSocketServer, conf.socketIo);
 
-        self.io.sockets.on('connection', function (socket) {
+        this.io.sockets.on('connection', function (socket) {
             let clientToken = null;
             if (socket.handshake.query && socket.handshake.query.token){
                 clientToken = socket.handshake.query.token;
@@ -71,78 +73,36 @@ class WebSocketService {
             await redisAccessLayer.ensureConnected();
             const pubClient = redisAccessLayer.pubForSocketIOServer;
             const subClient= redisAccessLayer.subForSocketIOServer;    
-            self.io.adapter(createRedisAdapter(pubClient, subClient));
+            this.io.adapter(createRedisAdapter(pubClient, subClient));
         } 
         if (SOCKET_IO_ADAPTER === 'cluster') {
-            self.io.adapter(createClusterAdapter());
+            this.io.adapter(createClusterAdapter());
         }    
     }
 
 
     dispatchAllBufferedMessages(bufferPayload){
         for(let channel in bufferPayload){
-            sendUpdatesToFrontEnd(channel,bufferPayload[channel]);
+            this.sendUpdatesToFrontEnd(channel,bufferPayload[channel]);
             bufferPayload[channel]=null;
         }
     }
 
 
-
-
-}
-
-
-let io;
-async function setWebSocketServer() {
-    if (io) { 
-        return io; 
-    }
-    console.log("######## Creating socket io service...");
-    // Create an HTTP default server
-    const _webSocketServer = http.createServer();
-    // Create the socket server
-    io = socket_io(_webSocketServer, conf.socketIo);
-
-    if (SOCKET_IO_ADAPTER === 'redis') {
-        await redisAccessLayer.ensureConnected();
-        const pubClient = redisAccessLayer.pubForSocketIOServer;
-        const subClient= redisAccessLayer.subForSocketIOServer;    
-        io.adapter(createRedisAdapter(pubClient, subClient));
-    } 
-    
-    if (SOCKET_IO_ADAPTER === 'cluster') {
-        io.adapter(createClusterAdapter());
-    }    
-
-
-    io.sockets.on('connection', function (socket) {
-        let clientToken = null;
-        if (socket.handshake.query && socket.handshake.query.token){
-            clientToken = socket.handshake.query.token;
-        }
-        if (socket.handshake.auth && socket.handshake.auth.token){
-            clientToken = socket.handshake.auth.token;
-        }
-        if(!clientToken) {
-            unauthorizeClient(socket);
+    sendUpdatesToFrontEnd(channel, msg=null){
+        if (!this.io){
+            console.warn("socket.io is not defined, start the websocket server", msg);
             return;
-        }
-        let decoded;
+        } 
+        if (!msg || msg==[]) return;
         try {
-            decoded = jwt.verify(clientToken, JWT_SECRET);
-            socket.decoded = decoded;
+            const room = 'all_users';
+            this.io.to(room).emit(channel, msg);
         } catch (e) {
-            unauthorizeClient(socket);
-            return;
+            console.error("error message from Postgress to Front-end", e)
         }
+    }
 
-        logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
-
-        // Join room
-        socket.join('all_users');
-    });
-
-    return io;
 }
 
 
@@ -155,31 +115,31 @@ const unauthorizeClient = (socket) => {
     socket.disconnect(true);
 }
 
-function dispatchAllBufferedMessages(bufferPayload){
-    for(let channel in bufferPayload){
-        sendUpdatesToFrontEnd(channel,bufferPayload[channel]);
-        bufferPayload[channel]=null;
-    }
-}
 
 
-function sendUpdatesToFrontEnd(channel, msg=null){
-    if (!io){
-        console.warn("socket.io is not defined, start the websocket server", msg);
-        return;
-    } 
-    if (!msg || msg==[]) return;
+
+/**
+ * Retrieves the BufferNotifications singleton instance.
+ * 
+ * @returns {BufferNotifications} - The singleton instance.
+ */
+let webSocketService;
+async function getInstance() {
+  if (!webSocketService) {
+    console.log('====> Creating and initiating WebSocketService Instance');
     try {
-        const room = 'all_users';
-        io.to(room).emit(channel, msg);
-    } catch (e) {
-        console.error("error message from Postgress to Front-end", e)
+        webSocketService = new WebSocketService();
+        await webSocketService.initiateWebSocket();
+
+    } catch (error) {
+        console.error('Failed to initialize WebSocketService:', error);
+        throw error; 
     }
+  }
+  return webSocketService;
 }
 
 
-module.exports.sendUpdatesToFrontEnd = sendUpdatesToFrontEnd;
-module.exports.dispatchAllBufferedMessages = dispatchAllBufferedMessages;
-module.exports.setWebSocketServer = setWebSocketServer;
+module.exports.getInstance = getInstance;
 module.exports.SOCKET_IO_ADAPTER = SOCKET_IO_ADAPTER;
-module.exports.io = io;
+module.exports.webSocketService = webSocketService;
