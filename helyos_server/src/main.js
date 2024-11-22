@@ -237,7 +237,7 @@ if (cluster.isMaster && NUM_THREADS > 1) {
         }
 
         cluster.on('exit', (worker, code, signal) => {
-            console.log(`Worker ${worker.process.pid} died !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+            console.warn(`Worker ${worker.process.pid} died !`);
             cluster.fork();
         });
 
