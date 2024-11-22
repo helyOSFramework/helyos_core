@@ -22,9 +22,9 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
     // Get the agent id only once and save in local in-memory table.
     const agentInMem = await inMemDB.agents[uuid];
     if (!agentInMem || !agentInMem.id ){
-        console.log(`Database request of agent id for uuid ${uuid}`);
         const ids = await databaseServices.agents.getIds([uuid]);
         await inMemDB.update('agents', 'uuid', {uuid, id:ids[0]}, agentUpdate['last_message_time']);
+        console.log(`Database query: agent ${uuid} has ID = ${ids[0]}`);
     }
 
     if ('status' in objMsg) { // Backwards compatibility helyos_agent_core <= 3.1.0

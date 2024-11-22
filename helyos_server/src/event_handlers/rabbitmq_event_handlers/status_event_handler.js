@@ -90,9 +90,10 @@ async function updateState(objMsg, uuid, bufferPeriod=0) {
         // Get the agent id only once and save in local in-memory table.
         const agentInMem = await inMemDB.agents[uuid];
         if (!agentInMem || !agentInMem.id ){
-           console.log(`Database request of agent id for uuid ${uuid}`);
-            const toolIds = await databaseServices.agents.getIds([uuid]);
-            inMemDB.update('agents', 'uuid', {uuid, id:toolIds[0]}, agentUpdate['last_message_time']);
+            const ids = await databaseServices.agents.getIds([uuid]);
+            inMemDB.update('agents', 'uuid', {uuid, id:ids[0]}, agentUpdate['last_message_time']);
+            console.log(`Database query: agent ${uuid} has ID = ${ids[0]}`);
+
         }
 
         if (objMsg.body.resources){
