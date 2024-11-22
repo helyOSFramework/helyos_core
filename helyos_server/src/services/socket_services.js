@@ -119,9 +119,9 @@ const unauthorizeClient = (socket) => {
 
 
 /**
- * Retrieves the BufferNotifications singleton instance.
+ * Retrieves the  WebSocketService singleton instance.
  * 
- * @returns {BufferNotifications} - The singleton instance.
+ * @returns {WebSocketService} - The singleton instance.
  */
 let webSocketService;
 async function getInstance() {

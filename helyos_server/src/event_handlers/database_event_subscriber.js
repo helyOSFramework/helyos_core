@@ -22,12 +22,13 @@ const inMemServices = require('../services/in_mem_database/mem_database_service.
 
 
 
-function broadcastPriorityNotification(channel, payload, bufferNotifications){
+function broadcastPriorityNotifications(channel, payload, bufferNotifications){
 
     switch (channel) {
 
         case 'change_agent_status': // Changes originate from agents.
             bufferNotifications.publishToFrontEnd(channel, payload);
+            logData.addLog('agent', payload, 'info', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
             break;
 
         case 'assignments_status_update':
@@ -46,54 +47,51 @@ function broadcastPriorityNotification(channel, payload, bufferNotifications){
 
 function broadcastNotifications(channel, payload, bufferNotifications) {
 
-    switch (channel) {
-
-            case 'agent_deletion': // Changes originate from applications (e.g. dashboard).
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
-            case 'assignments_insertion':
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
-            case  'mission_queue_insertion':
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
-            case 'service_requests_update':
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
-            case 'service_requests_insertion':
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
-            case 'work_processes_insertion':
-                bufferNotifications.pushNotificationToBuffer(channel, payload);
-                break;
-
+    if ([
+        'agent_deletion',
+        'assignments_insertion',
+        'mission_queue_insertion',
+        'service_requests_update',
+        'service_requests_insertion',
+        'work_processes_insertion'
+        ].includes(channel)) {
+        bufferNotifications.pushNotificationToBuffer(channel, payload);
     }
 }
 
 
 
-
 // Subscribe to database changes
-function handleDatabaseMessages(client, websocket, bufferNotifications) {
+async function handleDatabaseMessages(client, websocket) {
+    const bufferNotifications =  await webSocketCommunicaton.getInstance();
 
     client.on('notification', async function (msg) {
         let channel = msg.channel;
-        let payload = null
+        let payload = null;
 
-        const res = await client.query("DELETE FROM events_queue USING ( SELECT * FROM events_queue LIMIT 1 FOR UPDATE SKIP LOCKED) q WHERE q.id = events_queue.id RETURNING events_queue.*;");
-        if (res.rows.length){
-            const bufferNotifications =  await webSocketCommunicaton.getInstance();
+        // **Note:** `ctid` is a system column that uniquely identifies a physical row specific from PostgreSQL.
+        const res = await client.query(`
+            DELETE FROM events_queue
+            WHERE ctid = (
+              SELECT ctid
+              FROM events_queue
+              LIMIT 1
+              FOR UPDATE SKIP LOCKED
+            )
+            RETURNING *;
+          `);
+
+        
+        if (res.rows.length === 1){
             payload = JSON.parse(res.rows[0].payload)
             channel = res.rows[0].event_name;
-            broadcastPriorityNotification(channel, payload, bufferNotifications);
+            broadcastPriorityNotifications(channel, payload, bufferNotifications);
             broadcastNotifications(channel, payload, bufferNotifications);
 
         } else {
+            if (res.rows.length > 1) {
+                logData.addLog('helyos_core', null, 'error', `Event query returned ${res.rows.length} events`);
+            }
             return false;
         }
 
@@ -125,10 +123,6 @@ function handleDatabaseMessages(client, websocket, bufferNotifications) {
                     logData.addLog('agent', payload, 'warn', `Remove RabbitMQ account: ${error.message}`);
                 }
 
-                break;
-
-            case 'change_agent_status':
-                logData.addLog('agent', payload, 'info', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
                 break;
 
 

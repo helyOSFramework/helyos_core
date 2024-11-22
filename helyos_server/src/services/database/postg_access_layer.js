@@ -527,7 +527,7 @@ const updateAgentsConnectionStatus = (client, n_secs) => {
 	const sqlString2 = `UPDATE public.agents SET connection_status = $1, msg_per_sec = 0 WHERE (connection_status = $2) and (last_message_time >=  (now() - ${strSeconds}));`;
 	const onlineToOffline = client.query(sqlString1, ['offline', 'online']);
 	const offlineToOnline = client.query(sqlString2, ['online', 'offline']);
-	return Promise.allSettled([onlineToOffline, offlineToOnline]);
+	return Promise.allSettled([onlineToOffline, offlineToOnline]).catch((e) => console.error(e));
 }
 
 

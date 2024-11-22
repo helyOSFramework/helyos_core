@@ -71,7 +71,6 @@ const urlObj = (username=RBMQ_USERNAME, password=RBMQ_PASSWORD) => ({
         password: password,
         protocol: RBMQ_PROTOCOL,
         vhost: username==='guest'? '%2F':RBMQ_VHOST
-        // vhost: `%2F${RBMQ_VHOST}`
     });
 
 

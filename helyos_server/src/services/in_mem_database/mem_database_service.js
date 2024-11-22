@@ -580,6 +580,15 @@ async function getInstance() {
   return inMemDB;
 }
 
+async function disconnect() {
+    if (inMemDB && REDIS_HOST) {
+        await inMemDB.client.quit();
+        await inMemDB.subClient.quit();
+    }
+}
+
+
 module.exports.inMemDB = inMemDB;
 module.exports.DataRetriever = DataRetriever;
 module.exports.getInstance = getInstance;
+module.exports.disconnect = disconnect;

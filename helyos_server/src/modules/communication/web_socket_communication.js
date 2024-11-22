@@ -5,6 +5,7 @@ const utils = require('../../modules/utils.js');
 const memDBServices = require('../../services/in_mem_database/mem_database_service');
 const { logData } = require('../systemlog.js');
 const PERIOD = 1000;
+const roleManagerModule = require('../../role_manager.js');
 
 // Buffer Notifications to avoid flooding front-end with messages
 class BufferNotifications {
@@ -18,15 +19,18 @@ class BufferNotifications {
         if (BufferNotifications.instance) {
             return BufferNotifications.instance;
         }
+        console.log('instantiating new BufferNotifications');
         this.webSocketService = webSocketService;
 		this.bufferRetainTime = bufferRetainTime;
         this.bufferPayload = {};
-        this.eventDispatchBuffer = setInterval(() => {
-                memDBServices.getInstance()
-                .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
-                .then( () =>  this._dispatch());
-                },
-                 bufferRetainTime);
+        this.eventDispatchBuffer = setInterval(async () => {
+                                        const roleManager = await roleManagerModule.getInstance();
+                                        if(roleManager.role != 'broadcaster') return;
+                                        const inMemDB = await memDBServices.getInstance()
+                                        await this._get_latest_updated_data(inMemDB)
+                                        return this._dispatch();          
+                                     },
+                                    bufferRetainTime);
         BufferNotifications.instance = this;
     }
 
@@ -38,7 +42,6 @@ class BufferNotifications {
 
     async _get_latest_updated_data(inMemDB) {
         if(!inMemDB) return;
-
         const inMemAgents = await inMemDB.list('agents');
         const inMemBufferedAgents = await inMemDB.list('agents_buffer');
         const inMemMapObjects = await inMemDB.list('map_objects');
@@ -90,9 +93,7 @@ class BufferNotifications {
 
     publishToFrontEnd(channel, payload) {
         this.pushNotificationToBuffer(channel, payload);
-        return memDBServices.getInstance()
-        .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
-        .then( () =>  this._dispatch());
+        return this._dispatch();
     }
 
 }

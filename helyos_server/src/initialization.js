@@ -7,6 +7,7 @@ const microserviceWatcher = require('./event_handlers/microservice_event_watcher
 const inMemDBWatcher = require('./event_handlers/in_mem_db_watcher.js');
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
+const roleManagerModule = require('./role_manager.js');
 
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
@@ -17,8 +18,8 @@ const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UP
 const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
 
 // Settings for horizontal scaling
-let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'False';
-HELYOS_REPLICA = HELYOS_REPLICA === 'True';
+let USE_HELYOS_REPLICA = (process.env.USE_HELYOS_REPLICA || 'false') === 'true';
+USE_HELYOS_REPLICA = USE_HELYOS_REPLICA || (!!process.env.REDIS_HOST)
 
 
 // ----------------------------------------------------------------------------
@@ -122,24 +123,60 @@ function initializeRabbitMQAccounts() {
 
 
 
-    function helyosConsumingMessages (dataChannels) {
-        const mainChannel = dataChannels[0];
-        const secondaryChannel = dataChannels[1];
-        console.log(`\n ================================================================`+
-                    `\n ================= SUBSCRIBE TO HELYOS' QUEUES ==================`+
-                    `\n ================================================================`);
+async function helyosConsumingMessages (dataChannels) {
+    const roleManager = await roleManagerModule.getInstance();
+    const mainChannel = dataChannels[0];
+    const secondaryChannel = dataChannels[1];
+    console.log(`\n ================================================================`+
+                `\n ================= SUBSCRIBE TO HELYOS' QUEUES ==================`+
+                `\n ================================================================`);
 
-        mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(CHECK_IN_QUEUE, message), { noAck: true, priority: 5});
-        mainChannel.consume(AGENT_STATE_QUEUE, (message) => handleBrokerMessages(AGENT_STATE_QUEUE, message), { noAck: true, priority: 10});
-        mainChannel.consume(AGENT_UPDATE_QUEUE, (message) => handleBrokerMessages(AGENT_UPDATE_QUEUE, message), { noAck: true, priority: 5});
-        mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(AGENT_MISSION_QUEUE, message), { noAck: true, priority: 5});
-        secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(AGENT_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
-        secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, (message) => handleBrokerMessages(YARD_VISUALIZATION_QUEUE, message), { noAck: true, priority: 1});
+    mainChannel.consume(CHECK_IN_QUEUE, (message)   => handleBrokerMessages(mainChannel, CHECK_IN_QUEUE, message), { noAck: true, priority: 5});
+    mainChannel.consume(AGENT_MISSION_QUEUE, (message) => handleBrokerMessages(mainChannel, AGENT_MISSION_QUEUE, message), { noAck: true, priority: 5});
+    mainChannel.consume(SUMMARY_REQUESTS_QUEUE, (message) => handleBrokerMessages(mainChannel, SUMMARY_REQUESTS_QUEUE, message), { noAck: true});
+
+    const becomingLeader = async (consumerTagsToCancel) => {
+        await Promise.all(consumerTagsToCancel.map( cti => mainChannel.cancel(cti.consumerTag)));
+
+        const ct1 = await mainChannel.consume(AGENT_STATE_QUEUE,
+                    (message) => handleBrokerMessages(mainChannel,AGENT_STATE_QUEUE, message),
+                    {noAck: false, priority: 10});
+
+        const ct2 = await mainChannel.consume(AGENT_UPDATE_QUEUE,
+                    (message) => handleBrokerMessages(mainChannel,AGENT_UPDATE_QUEUE, message),
+                    { noAck: false, priority: 5});
+
+        logData.addLog('helyos_core', null, 'warn', `Node ${roleManager.NODE_ID} subscribed to state queues`);
+        return [ct1, ct2];
+    };
+
+    const becomingFollower =  async (consumerTagsToCancel) => {
+        await Promise.all(consumerTagsToCancel.map( cti => mainChannel.cancel(cti.consumerTag)));
+        
+        console.log( `====> SUBSCRIBE TO VISUALIZATION QUEUE`);
+        const ct1 = await secondaryChannel.consume(AGENT_VISUALIZATION_QUEUE, 
+                (message) => handleBrokerMessages(secondaryChannel,AGENT_VISUALIZATION_QUEUE,message),
+                { noAck: true, priority: 1});
+
+        const ct2 = await secondaryChannel.consume(YARD_VISUALIZATION_QUEUE, 
+                (message) => handleBrokerMessages(secondaryChannel,YARD_VISUALIZATION_QUEUE, message),
+                { noAck: true, priority: 1});
+        return [ct1, ct2];
+    };
 
 
-        mainChannel.consume(SUMMARY_REQUESTS_QUEUE, (message) => handleBrokerMessages(SUMMARY_REQUESTS_QUEUE, message), { noAck: true});
-        return dataChannels;    
+    if (USE_HELYOS_REPLICA) {
+        await roleManager.tryToBecomeLeader(becomingLeader, becomingFollower);
+        await roleManager.tryToBecomeBroadcaster(()=>{}, ()=>{});
+    } else {
+        roleManager.amILeader = true;
+        roleManager.role = 'broadcaster';
+        becomingLeader([]);
+        becomingFollower([]);
     }
+
+    return dataChannels;    
+}
 
 
 module.exports.initWatchers = initWatchers;

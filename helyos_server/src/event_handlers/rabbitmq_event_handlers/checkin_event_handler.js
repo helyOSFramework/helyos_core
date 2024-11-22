@@ -65,7 +65,8 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                             console.log("======================================================================");
                             const public_key = agent['public_key'] || (registeredAgent && registeredAgent.public_key) ;
                             rabbitMQServices.sendEncryptedMsg(replyTo, message, public_key);
-                            rabbitMQServices.sendEncryptedMsg(null, message, public_key, replyTo, replyExchange);    
+                            rabbitMQServices.sendEncryptedMsg(null, message, public_key, replyTo, replyExchange);
+                            return agent;   
                     })
                     .catch(err => {
                         const message = JSON.stringify({
