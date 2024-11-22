@@ -16,11 +16,19 @@ const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,AGENT_VISUALIZATION_QUEUE,  AGENT_UPDATE_QUEUE,
         AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE } =  require('./services/message_broker/rabbitMQ_services.js');
 const {handleBrokerMessages} = require('./event_handlers/rabbitmq_event_subscriber.js');
+const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
 
 // Settings for horizontal scaling
 let USE_HELYOS_REPLICA = (process.env.USE_HELYOS_REPLICA || 'false') === 'true';
-USE_HELYOS_REPLICA = USE_HELYOS_REPLICA || (!!process.env.REDIS_HOST)
+USE_HELYOS_REPLICA = USE_HELYOS_REPLICA || (NUM_THREADS > 1)
 
+if (USE_HELYOS_REPLICA && !process.env.REDIS_HOST) {
+    const errorMessage = 'REDIS host not defined. Please define the REDIS host in your environment variables or set NUM_THREADS=1 and USE_HELYOS_REPLICA=false.';
+    
+    logData.addLog('helyos_core', null, 'error', errorMessage);
+    console.error(errorMessage);
+    process.exit(1);
+}
 
 // ----------------------------------------------------------------------------
 // Initialization of the back-end
@@ -146,7 +154,7 @@ async function helyosConsumingMessages (dataChannels) {
                     (message) => handleBrokerMessages(mainChannel,AGENT_UPDATE_QUEUE, message),
                     { noAck: false, priority: 5});
 
-        logData.addLog('helyos_core', null, 'warn', `Node ${roleManager.NODE_ID} subscribed to state queues`);
+        logData.addLog('helyos_core', null, 'warn', `Leader Node ${roleManager.NODE_ID} subscribed to state queues`);
         return [ct1, ct2];
     };
 
