@@ -243,7 +243,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
 
     const inMemDB =  await memDBService.getInstance();
     inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time,'buffered');
-    inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
+    inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
     return databaseServices.agents.updateByConditions({uuid}, agentUpdate)
            .then(() => databaseServices.agents.get('uuid', uuid, [ 'id', 'uuid',
                                                                  'message_channel', 

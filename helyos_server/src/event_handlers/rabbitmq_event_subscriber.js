@@ -246,11 +246,11 @@ function handleBrokerMessages(channel, queueName, message)   {
 
 
 
-    // SENDER IS INDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
+    // SENDER IS IDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
 
-        // If in-memory datatabase is set, track the number of postgres hits.
+    
         if (inMemDB.agents_stats[uuid]) {
-            inMemDB.agents_stats[uuid]['msgPerSecond'].countMessage();
+            inMemDB.countMessages(`agents_stats`, uuid, 'msgPerSecond');
         }
         const avgRates = inMemDB.getHistoricalCountRateAverage('agents', uuid, 20);
         let closeConnection = false;
@@ -260,6 +260,7 @@ function handleBrokerMessages(channel, queueName, message)   {
             closeConnection = true;
         }
 
+        // If in-memory datatabase is set, track the number of postgres hits.
         if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
             logData.addLog('agent', {uuid}, 'error',
                             `Agent disconnected: high number of database updates per second (MESSAGE_UPDATE_LIMIT=${MESSAGE_UPDATE_LIMIT}). Please check the publish rate for the routes agent.${uuid}.update, agent.${uuid}.state, and agent.${uuid}.database_req.`);
