@@ -6,7 +6,11 @@ const rabbitMQServices = require('../../services/message_broker/rabbitMQ_service
 
 async function queryDataBase(uuid, objMsg, msgProps) {
     const inMemDB = await memDBService.getInstance();
-    inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
+
+    // If in-memory datatabase is set, track the number of postgres hits.
+    if (inMemDB.agents_stats[uuid]) {
+        inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
+    }
     
     let replyTo = msgProps.replyTo?  msgProps.replyTo : uuid;
     let response, message;

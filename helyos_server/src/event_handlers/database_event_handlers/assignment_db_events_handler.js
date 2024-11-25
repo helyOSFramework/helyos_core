@@ -13,7 +13,6 @@ const agentComm = require('../../modules/communication/agent_communication.js');
 
 const { logData } = require('../../modules/systemlog.js');
 const {ASSIGNMENT_STATUS, MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS} = require('../../modules/data_models.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
 
 
 

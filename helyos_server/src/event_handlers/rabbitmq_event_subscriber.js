@@ -161,7 +161,7 @@ const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
 /**
  * That is the main function of this module.
  * it handles the messages received from the message broker.
- * @param {string} channelOrQueue - The name of the channel or queue.
+ * @param {string} queueName - The name of the channel or queue.
  * @param {Object} message - The message object.
  * @returns {Promise} A promise that resolves after the message is processed.
  * 
@@ -178,14 +178,13 @@ const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
  * And, if required, verifies the signature of the message.
  * 
  **/
-function handleBrokerMessages(channelOrQueue, message)   {
+function handleBrokerMessages(channel, queueName, message)   {
     let objMsg;
     const content = message.content;
     if (!content) return;
     let msgProps = message.properties;
     const exchange = message.fields.exchange;
     const routingKey  = message.fields.routingKey;
-
     try {
         objMsg = parseMessage(content);
     } catch (error) {
@@ -210,7 +209,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
 // VALIDATE MESSAGE SENDER
         let registeredAgent = await agentDataRetriever.getData(uuid);
         
-        if (!registeredAgent && channelOrQueue !== CHECK_IN_QUEUE) {
+        if (!registeredAgent && queueName !== CHECK_IN_QUEUE) {
             throw ({msg:`Agent is not registered; ${uuid}`, code: 'AGENT-404'});
         }
 
@@ -219,7 +218,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }
 
 // CHECK-IN 
-        if (channelOrQueue == CHECK_IN_QUEUE) {
+        if (queueName == CHECK_IN_QUEUE) {
             let checkinData = objMsg.obj.body? objMsg.obj.body : objMsg.obj; // compatibility for agent versions < 2.0
 
             if (!registeredAgent){
@@ -238,7 +237,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
             logData.addLog('agent', checkinData, 'info', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid}-${agent?.name} agent checked in`))
+                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked in`))
                     .catch( err => {
                         console.error('checkin:', err);
                         logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
@@ -249,7 +248,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
     // SENDER IS INDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
 
-        // Check if the agent is sending too many messages per second.
+        // If in-memory datatabase is set, track the number of postgres hits.
         if (inMemDB.agents_stats[uuid]) {
             inMemDB.agents_stats[uuid]['msgPerSecond'].countMessage();
         }
@@ -276,7 +275,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
         }
 
         try {
-            switch (channelOrQueue) {
+            switch (queueName) {
                 
                     case SUMMARY_REQUESTS_QUEUE:
                         if (objMsg.obj.body){
@@ -300,6 +299,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
                     case AGENT_STATE_QUEUE:
                         if (objMsg.obj.body.status) {
                             updateState(objMsg.obj, uuid, 0)
+                            .then( () => channel.ack(message))
                             .catch(e => {
                                 const msg = e.message? e.message : e;
                                 logData.addLog('agent', objMsg.obj, 'error', `agent state update: ${msg}`);
@@ -311,7 +311,8 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
                     case AGENT_UPDATE_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 0);
+                            agentAutoUpdate(objMsg.obj, uuid, 0)
+                            .then( () => channel.ack(message));
                         }
                         break;
 

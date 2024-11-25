@@ -33,7 +33,9 @@ const express = require('express');
 const path = require('path');
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
 const DASHBOARD_PORT = 8080;
+const SOCKET_PORT = process.env.SOCKET_PORT || 5002;
 const API_DOC_DIR = 'docs/';
+const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
 
 // Settings for horizontal scaling
 let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
@@ -161,15 +163,26 @@ const setDashboardServer = () => {
 }
 
 
+// ----------------------------------------------------------------------------
+// 6) START
+// ---------------------------------------------------------------------------
+const webSocketServices = require('./services/socket_services.js');
+const inMemmoryServices = require('./services/in_mem_database/mem_database_service.js');
 
 async function start() {
     const postgClient = await connectToDB();
-    dataChannels = await connectToRabbitMQ();
-    initialization.helyosConsumingMessages(dataChannels);
-    initialization.initWatchers();
-    handleDatabaseMessages(postgClient);
+    const websocketService = await webSocketServices.getInstance();
+    websocketService.io.listen(SOCKET_PORT);
+
+
+    let dataChannels = await connectToRabbitMQ();
     const frontEndServer = setDashboardServer();
     const graphqlServer = setGraphQLServer();
+
+    await initialization.helyosConsumingMessages(dataChannels);
+    initialization.initWatchers();
+    await handleDatabaseMessages(postgClient, websocketService);
+
 
     frontEndServer.listen(DASHBOARD_PORT);
     graphqlServer.listen(process.env.GQLPORT);
@@ -195,6 +208,8 @@ async function end() {
     try {
         await rabbitMQServices.disconnect();
         console.log('Disconnected from RabbitMQ.');
+        await inMemmoryServices.disconnect();
+        console.log('Disconnected from REDIS.');
         await databaseServices.disconnectFromDB([ databaseServices.client,
                                                 databaseServices.shortTimeClient,
                                                 databaseServices.pgNotifications ]);
@@ -205,7 +220,32 @@ async function end() {
     }    
 }
 
-start();
+
+
+const cluster = require('cluster');
+const { setupPrimary } = require("@socket.io/cluster-adapter");
+
+if (cluster.isMaster && NUM_THREADS > 1) {
+
+    console.log(`Master ${process.pid} is running`);
+        if (webSocketServices.SOCKET_IO_ADAPTER === 'cluster'){
+            setupPrimary(); // Set up the socket_io connections between workers
+        }
+
+        for (let i = 0; i < NUM_THREADS; i++) {
+            cluster.fork();
+        }
+
+        cluster.on('exit', (worker, code, signal) => {
+            console.warn(`Worker ${worker.process.pid} died !`);
+            cluster.fork();
+        });
+
+} else {
+    // Workers will run in parallel
+    console.log(`Worker ${process.pid} started`);
+    start();
+}
 
 
 // Microservice API Documentation ----------------------------------------------

@@ -48,6 +48,7 @@ class InMemDB {
  * @returns {InMemDB} An instance of the InMemDB class.
  * 
  */
+    static instance = null;
     constructor(connectedRedisClients,longTimeout=3000, shortTimeout=500, limitWaitingFlushes=10) {
         if (InMemDB.instance) {
             return InMemDB.instance;
@@ -579,6 +580,15 @@ async function getInstance() {
   return inMemDB;
 }
 
+async function disconnect() {
+    if (inMemDB && REDIS_HOST) {
+        await inMemDB.client.quit();
+        await inMemDB.subClient.quit();
+    }
+}
+
+
 module.exports.inMemDB = inMemDB;
 module.exports.DataRetriever = DataRetriever;
 module.exports.getInstance = getInstance;
+module.exports.disconnect = disconnect;

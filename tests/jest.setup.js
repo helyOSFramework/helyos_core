@@ -142,6 +142,7 @@ beforeAll(async () => {
         'REDIS_HOST':testWithRedis? redisContainerName:'',
         'REDIS_PORT':testWithRedis? '6379':'',
         'REDIS_PASSWORD':testWithRedis? 'mypass':'',
+        'NUM_THREADS':testWithRedis? 4 : 1,
         'CREATE_RBMQ_ACCOUNTS': 'True',
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
@@ -166,7 +167,7 @@ beforeAll(async () => {
       .withEnvironment({
         'UUID': 'Ab34069fc5-fdgs-434b-b87e-f19c5435113',
         'ASSIGNMENT_FORMAT': 'trajectory',
-        'NAME': 'MY_TRACTOR',
+        'NAME': 'MY_TRACTOR_A',
         'X0': '-28000',
         'Y0': '29000',
         'ORIENTATION': '0.329',
@@ -196,7 +197,7 @@ beforeAll(async () => {
       .withEnvironment({
         'UUID': 'Bb34069fc5-fdgs-434b-b87e-f19c5435113',
         'ASSIGNMENT_FORMAT': 'trajectory',
-        'NAME': 'MY_TRACTOR',
+        'NAME': 'MY_TRACTOR_B',
         'X0': '-28000',
         'Y0': '29000',
         'ORIENTATION': '0.329',

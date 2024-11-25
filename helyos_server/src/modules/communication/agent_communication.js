@@ -3,6 +3,7 @@
 
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
+const roleManagerModule = require('../../role_manager.js');
 const { logData } = require('../systemlog.js');
 const { MISSION_STATUS, AGENT_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
@@ -17,8 +18,15 @@ else
 
 
 
-function watchWhoIsOnline(maxTimeWithoutUpdate) {
-    setInterval(() => databaseServices.updateAgentsConnectionStatus(maxTimeWithoutUpdate), REFRESH_ONLINE_TIME_PERIOD * 1000);
+async function watchWhoIsOnline(maxTimeWithoutUpdate) {
+    const roleManager = await roleManagerModule.getInstance();
+    
+    setInterval(() => {
+        if (roleManager.amILeader) {
+            databaseServices.updateAgentsConnectionStatus(maxTimeWithoutUpdate);
+        }
+    }, REFRESH_ONLINE_TIME_PERIOD * 1000);
+    
 }
 
 

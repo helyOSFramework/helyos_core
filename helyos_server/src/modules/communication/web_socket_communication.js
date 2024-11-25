@@ -4,33 +4,44 @@ const socketService = require('../../services/socket_services.js');
 const utils = require('../../modules/utils.js');
 const memDBServices = require('../../services/in_mem_database/mem_database_service');
 const { logData } = require('../systemlog.js');
-const PERIOD = 100;
+const PERIOD = 1000;
+const roleManagerModule = require('../../role_manager.js');
 
 // Buffer Notifications to avoid flooding front-end with messages
 class BufferNotifications {
     bufferRetainTime = 500;
     bufferPayload = {}; 
     eventDispatchBuffer = null;
+    static instance = null;
 
-    constructor(bufferRetainTime) {
+
+    constructor(bufferRetainTime, webSocketService) {
+        if (BufferNotifications.instance) {
+            return BufferNotifications.instance;
+        }
+        console.log('instantiating new BufferNotifications');
+        this.webSocketService = webSocketService;
 		this.bufferRetainTime = bufferRetainTime;
         this.bufferPayload = {};
-        this.eventDispatchBuffer = setInterval(() => {
-                memDBServices.getInstance()
-                .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
-                .then( () =>  this._dispatch());
-                },
-                 bufferRetainTime);
-        }
+        this.eventDispatchBuffer = setInterval(async () => {
+                                        const roleManager = await roleManagerModule.getInstance();
+                                        if(roleManager.role != 'broadcaster') return;
+                                        const inMemDB = await memDBServices.getInstance()
+                                        await this._get_latest_updated_data(inMemDB)
+                                        return this._dispatch();          
+                                     },
+                                    bufferRetainTime);
+        BufferNotifications.instance = this;
+    }
+
 
     _dispatch() {
-        socketService.dispatchAllBufferedMessages(this.bufferPayload);
+        this.webSocketService.dispatchAllBufferedMessages(this.bufferPayload);
     }
 
 
     async _get_latest_updated_data(inMemDB) {
         if(!inMemDB) return;
-
         const inMemAgents = await inMemDB.list('agents');
         const inMemBufferedAgents = await inMemDB.list('agents_buffer');
         const inMemMapObjects = await inMemDB.list('map_objects');
@@ -82,13 +93,32 @@ class BufferNotifications {
 
     publishToFrontEnd(channel, payload) {
         this.pushNotificationToBuffer(channel, payload);
-        return memDBServices.getInstance()
-        .then( (inMemDB) => this._get_latest_updated_data(inMemDB))
-        .then( () =>  this._dispatch());
+        return this._dispatch();
     }
 
 }
 
 
-const bufferNotifications = new BufferNotifications(PERIOD);
-module.exports.bufferNotifications = bufferNotifications;
+
+/**
+ * Retrieves the BufferNotifications singleton instance.
+ * 
+ * @returns {BufferNotifications} - The singleton instance.
+ */
+let bufferNotifications;
+async function getInstance() {
+  if (!bufferNotifications) {
+    console.log('====> Creating In WebSocket Notification Buffer instance');
+    try {
+        let webSocketService = await socketService.getInstance();
+        bufferNotifications = new BufferNotifications(PERIOD, webSocketService);
+    } catch (error) {
+        console.error('Failed to initialize BufferNotifications:', error);
+        throw error; 
+    }
+  }
+  return bufferNotifications;
+}
+
+
+module.exports.getInstance = getInstance;

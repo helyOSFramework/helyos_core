@@ -15,6 +15,8 @@
     "jest": "^27.3.1"
   },
   "dependencies": {
+    "@socket.io/cluster-adapter": "^0.2.2",
+    "@socket.io/redis-adapter": "^8.3.0",
     "amqplib": "^0.10.3",
     "events": "^3.3.0",
     "express": "4.21.0",
