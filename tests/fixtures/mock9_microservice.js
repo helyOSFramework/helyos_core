@@ -24,10 +24,10 @@ const pathPlannerResponse = {
 
 overridePathPlannerCalls = () => {
         const post_new_calculation = nock('http://my_path_planner:9002/api/')
-        .post('/plan_job/')
+        .post('/plan_job/', (body)=> body.request?.nockSelector === 1) 
         .reply(201, { request_id: JOBID_1 },  {'Content-Type': 'application/json'})
 
-        .post('/plan_job/')
+        .post('/plan_job/', (body)=> body.request?.nockSelector === 2) 
         .reply(201, { request_id: JOBID_2 },  {'Content-Type': 'application/json'})
 
         const get_calculation_result = nock('http://my_path_planner:9002/api/')
