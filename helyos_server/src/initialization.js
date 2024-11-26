@@ -4,10 +4,13 @@ const rbmqServices = require('./services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('./services/database/database_services.js');
 const agentComm = require('./modules/communication/agent_communication.js');
 const microserviceWatcher = require('./event_handlers/microservice_event_watcher.js');
-const inMemDBWatcher = require('./event_handlers/in_mem_db_watcher.js');
+const inMemDBFlusher = require('./event_handlers/in_mem_db_flusher.js');
 const fs = require('fs');
 const readYML = require('./modules/read_config_yml.js');
 const roleManagerModule = require('./role_manager.js');
+
+const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
+const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || 20);
 
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
@@ -37,8 +40,9 @@ if (USE_HELYOS_REPLICA && !process.env.REDIS_HOST) {
 
 const initWatchers = () => {
     agentComm.watchWhoIsOnline(AGENT_IDLE_TIME_OFFLINE);
+    agentComm.watchMessageRates(MESSAGE_RATE_LIMIT, MESSAGE_UPDATE_LIMIT);
     microserviceWatcher.initWatcher();
-    inMemDBWatcher.initWatcher(DB_BUFFER_TIME);
+    inMemDBFlusher.initWatcher(DB_BUFFER_TIME);
 };
 
 

@@ -284,7 +284,7 @@ class InMemDB {
                             // Parse the stats local key and remote hash
                             const bufferKeys = key.split(':');
                             const keyId = bufferKeys.length > 1 ? bufferKeys[1] : bufferKeys;
-                            const statHash = `${tableStatsName}:${statKey}`;
+                            const statHash = `${tableStatsName}:${keyId}`;
                             await this.countMessages(tableStatsName, keyId, 'updtPerSecond');
 
                             if (REDIS_HOST && statData[statHash]) { 

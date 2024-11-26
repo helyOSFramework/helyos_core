@@ -12,8 +12,6 @@ const { deleteConnections } = require('../services/message_broker/rabbitMQ_acces
 
 const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
 const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
-const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
-const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || 20);
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const {MISSION_STATUS } = require('../modules/data_models.js');
 
@@ -251,28 +249,6 @@ function handleBrokerMessages(channel, queueName, message)   {
     
         if (inMemDB.agents_stats[uuid]) {
             inMemDB.countMessages(`agents_stats`, uuid, 'msgPerSecond');
-        }
-        const avgRates = inMemDB.getHistoricalCountRateAverage('agents', uuid, 20);
-        let closeConnection = false;
-        
-        if (avgRates.avgMsgPerSecond > MESSAGE_RATE_LIMIT ) {
-            logData.addLog('agent', {uuid}, 'error', `Agent disconnected: high number of messages per second: ${avgRates.avgMsgPerSecond}. LIMIT: ${MESSAGE_RATE_LIMIT}.`);
-            closeConnection = true;
-        }
-
-        // If in-memory datatabase is set, track the number of postgres hits.
-        if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
-            logData.addLog('agent', {uuid}, 'error',
-                            `Agent disconnected: high number of database updates per second (MESSAGE_UPDATE_LIMIT=${MESSAGE_UPDATE_LIMIT}). Please check the publish rate for the routes agent.${uuid}.update, agent.${uuid}.state, and agent.${uuid}.database_req.`);
-            
-            closeConnection = true;
-        }
-
-        if (closeConnection) {
-            inMemDB.delete('agents', 'uuid', uuid);
-            inMemDB.delete('agents', 'uuid', agentAccount);
-            deleteConnections(agentAccount).catch(e => console.error(e));
-            return;
         }
 
         try {
