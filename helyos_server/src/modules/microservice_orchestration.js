@@ -273,11 +273,11 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 			// Waiting agents to be "FREE"
 				try {
-					logData.addLog('agent', logMetadata, 'normal', `waiting agent to be free`);	
+					logData.addLog('agent', logMetadata, 'info', `waiting agent to be free`);	
 					agentResponse = await agentComm.waitAgentStatusForWorkProcess(agentsListIds, 'FREE', null, WAIT_AGENT_STATUS_PERIOD)
 					.catch( e => {throw e});
 					agentsListIds.forEach(agentId => databaseServices.agents.update_byId(agentId, {work_process_id: null}));
-					logData.addLog('agent', logMetadata, 'normal', `agent is free`);	
+					logData.addLog('agent', logMetadata, 'info', `agent is free`);	
 
 				} catch (error) {
 					logData.addLog('agent', logMetadata, 'error', `expected free=${error}`);
@@ -290,7 +290,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				await agentComm.sendGetReadyForWorkProcessRequest(agentsListIds, workProcess.id, workProcess.operation_types_required);
 				missionAgents.forEach( agent => {
 					logMetadata['uuid'] = agent.uuid;
-					logData.addLog('agent', logMetadata, 'normal', `requesting agent to be ready`);	
+					logData.addLog('agent', logMetadata, 'info', `requesting agent to be ready`);	
 				});
 
 			//  Waiting agents to acknowledge to be "READY"
@@ -298,7 +298,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 				try {
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
-						logData.addLog('agent', logMetadata, 'normal', `waiting agent to be ready`);	
+						logData.addLog('agent', logMetadata, 'info', `waiting agent to be ready`);	
 					});
 					agentResponse = await agentComm.waitAgentStatusForWorkProcess(waitReadyAcknListIds, 'READY', workProcess.id,WAIT_AGENT_STATUS_PERIOD)
 					.catch( e => {throw e});
@@ -306,7 +306,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess) {
 
 					missionAgentsToAckn.forEach( agent => {
 						logMetadata['uuid'] = agent.uuid;
-						logData.addLog('agent', logMetadata, 'normal', `agent is ready`);	
+						logData.addLog('agent', logMetadata, 'info', `agent is ready`);	
 					});
 
 				} catch (error) {
@@ -472,7 +472,7 @@ async function activateNextServicesInPipeline(partialServiceRequest) {
 		return Promise.resolve(0);
 	}
 
-	logData.addLog('helyos_core', null, 'normal', `activate Next Services In Pipeline, workprocess status is ${workProcessStatus.status}`);
+	logData.addLog('helyos_core', null, 'info', `activate Next Services In Pipeline, workprocess status is ${workProcessStatus.status}`);
 
 	const serviceRequest = await databaseServices.service_requests.get_byId(partialServiceRequest.id);
 	const nextRequests = await databaseServices.service_requests.list_in('request_uid', serviceRequest.next_request_to_dispatch_uids);

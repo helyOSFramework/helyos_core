@@ -99,7 +99,7 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'agent_deletion':
-                logData.addLog('agent', payload, 'normal', `agent deleted`);
+                logData.addLog('agent', payload, 'info', `agent deleted`);
 
                 try {
                     await removeAgentRbmqAccount(payload);
@@ -111,14 +111,14 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'change_agent_status':
-                logData.addLog('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
+                logData.addLog('agent', payload, 'info', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
                 break;
 
 
             case 'new_rabbitmq_account':
                 try {
                     await createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
-                    logData.addLog('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
+                    logData.addLog('agent', {id: payload.agent_id}, 'info', `create/update rabbitmq account`);
                 } catch (error) {
                     logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
                 }

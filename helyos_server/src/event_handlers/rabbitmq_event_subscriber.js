@@ -234,10 +234,10 @@ function handleBrokerMessages(channelOrQueue, message)   {
                 }
             }
             
-            logData.addLog('agent', checkinData, 'normal', `agent trying to check in ${message.content.toString()}`);
+            logData.addLog('agent', checkinData, 'info', `agent trying to check in ${message.content.toString()}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then(( ) =>  logData.addLog('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
+                    .then(( ) =>  logData.addLog('agent', objMsg.obj, 'info', `agent checked in ${message.content.toString()}`))
                     .catch( err => {
                         console.log('checkin:', err);
                         logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
@@ -291,7 +291,7 @@ function handleBrokerMessages(channelOrQueue, message)   {
                         if (objMsg.obj.body){
                             const newWProc = {status: MISSION_STATUS.DISPATCHED};
                             databaseServices.work_processes.insert({...objMsg.obj.body, ...newWProc})
-                            .then((wpId) => logData.addLog('agent', {...objMsg.obj.body, work_process_id: wpId}, 'normal', `agent created a mission: ${wpId}`))
+                            .then((wpId) => logData.addLog('agent', {...objMsg.obj.body, work_process_id: wpId}, 'info', `agent created a mission: ${wpId}`))
                             .catch(e => logData.addLog('agent', objMsg.obj, 'error', `agent create mission=${e}`));
                         } else {
                             logData.addLog('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
