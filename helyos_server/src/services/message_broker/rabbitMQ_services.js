@@ -224,7 +224,7 @@ function sendEncryptedMsg(queue, message, publicKey='', routingKey=null, exchang
     }
 
 
-    getMainChannel()
+    return getMainChannel()
     .then( dataChannel => {
         const sign = crypto.createSign('SHA256');
         sign.update(encryptedMsg);
@@ -312,6 +312,8 @@ module.exports.sendEncryptedMsg = sendEncryptedMsg;
 module.exports.create_rbmq_user = rbmqAccessLayer.createUser;
 module.exports.remove_rbmq_user = rbmqAccessLayer.removeUser;
 module.exports.add_rbmq_user_vhost = rbmqAccessLayer.add_rbmq_user_vhost;
+module.exports.deleteConnections = rbmqAccessLayer.deleteConnections;
+
 module.exports.connect_as_admin_and_create_accounts = connect_as_admin_and_create_accounts;
 module.exports.connect_as_guest_and_create_admin = connect_as_guest_and_create_admin;
 module.exports.createDebugQueues = createDebugQueues;

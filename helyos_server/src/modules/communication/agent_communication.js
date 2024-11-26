@@ -4,10 +4,11 @@
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
 const roleManagerModule = require('../../role_manager.js');
+const memDBService = require('../../services/in_mem_database/mem_database_service.js');
+
 const { logData } = require('../systemlog.js');
 const { MISSION_STATUS, AGENT_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
-const BACKWARD_COMPATIBILITY = (process.env.BACKWARD_COMPATIBILITY || 'false') === 'true';
 const REFRESH_ONLINE_TIME_PERIOD = 5;
 
 let POSITION_MARGIN;
@@ -28,6 +29,58 @@ async function watchWhoIsOnline(maxTimeWithoutUpdate) {
     }, REFRESH_ONLINE_TIME_PERIOD * 1000);
     
 }
+
+
+async function watchMessageRates(msgRateLimit, updtRateLimit) {
+    const roleManager = await roleManagerModule.getInstance();
+    const inMemDB = await memDBService.getInstance();
+    
+    setInterval(async () => {
+        if (roleManager.amILeader) {
+            const infractors = await databaseServices.getHighMsgRateAgents(msgRateLimit, updtRateLimit);
+            const updtInfractors = infractors? infractors[1]:[];
+            const msgInfractors =  infractors? infractors[0]:[];
+
+            const kickOutInfractorAgent = (agent, commandStr) => {
+                return sendReduceMsgRateInstantAction(agent, commandStr)
+                .then(() => rabbitMQServices.deleteConnections(agent.uuid))
+                .then(() => databaseServices.agents.update('uuid', agent.uuid, {connection_status: 'offline',
+                                                                                msg_per_sec: 0, 
+                                                                                updt_per_sec: 0}))
+                .then(()=> inMemDB.delete('agents', 'uuid', agent.uuid))
+                .catch(e => console.error(e));
+            }
+
+
+            updtInfractors.forEach( agent => {
+                const commandStr = JSON.stringify({
+                    action: 'REDUCE_UPDATE_RATE', parameters: {rate: agent.updt_per_sec, limit: updtRateLimit}
+                });
+                logData.addLog('agent', {uuid: agent.uuid}, 'error',
+                    `Agent disconnected: high number of database updates per second. MESSAGE_UPDATE_LIMIT=${updtRateLimit} Hz. `+
+                    `Please check the publish rate for the routes agent.${uuid}.update, agent.${uuid}.state, and agent.${uuid}.database_req.`
+                );
+                kickOutInfractorAgent(agent, commandStr);
+
+            });
+
+
+            msgInfractors.forEach( agent => {
+                const commandStr = JSON.stringify({
+                    action: 'REDUCE_MSG_RATE', parameters: {rate: agent.msg_per_sec, limit: msgRateLimit}
+                });
+                logData.addLog('agent', {uuid: agent.uuid}, 'error',
+                     `Agent disconnected: high number of messages per second: ${agent.msg_per_sec}. MESSAGE_RATE_LIMIT=${msgRateLimit} Hz.`
+                );
+                kickOutInfractorAgent(agent, commandStr);
+
+            });
+
+        }
+    }, REFRESH_ONLINE_TIME_PERIOD * 1000);
+    
+}
+
 
 
 async function sendAssignmentToExecuteInAgent(assignment) {
@@ -95,6 +148,22 @@ async function sendCustomInstantActionToAgent(agentId, commandStr) {
 
 
     sendEncryptedMsgToAgent(agentId, JSON.stringify(assignment_obj), 'instantActions');
+
+}
+
+
+async function sendReduceMsgRateInstantAction(agent, commandStr) {
+
+    const assignment_obj = {type: 'data_control',
+                            uuid: agent.uuid,
+                            metadata: {},
+                            body: commandStr,
+                            _version: MESSAGE_VERSION
+
+                           };
+
+
+    return sendEncryptedMsgToAgent(agent.id, JSON.stringify(assignment_obj), 'instantActions');
 
 }
 
@@ -259,41 +328,41 @@ function sendEncryptedMsgToAgent(agentId, message, reason='assignment') {
             }
             let exchange = rabbitMQServices.AGENTS_DL_EXCHANGE; 
 
-            if (BACKWARD_COMPATIBILITY)
-                rabbitMQServices.sendEncryptedMsg(agent.message_channel, message, agent.public_key);
 
             if (agent.protocol === 'MQTT'){
                 exchange = rabbitMQServices.AGENT_MQTT_EXCHANGE;
             }
-
+            let sendPromise;
             switch (reason) {
                 case 'assignment':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.assignment`, exchange);
+                    sendPromise = rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.assignment`, exchange);
                     break;
 
                 case 'order':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.order`, exchange);  // VDA-5050 Compatible
+                    sendPromise = rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.order`, exchange);  // VDA-5050 Compatible
                     break;
 
                 case 'instantActions':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  // helyOS & VDA-5050 Compatible
+                    sendPromise = rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  // helyOS & VDA-5050 Compatible
                     break;
 
                 case 'reserve':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
+                    sendPromise = rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
                     break;
                 
                 case 'release':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
+                    sendPromise = rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
                     break;    
 
                 case 'cancel':
-                    rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
+                    sendPromise =rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, `agent.${agent.uuid}.instantActions`,exchange);  
                     break;   
             
                 default:
                     break;
             }
+
+            return sendPromise;
 
         })
 }
@@ -302,6 +371,8 @@ function sendEncryptedMsgToAgent(agentId, message, reason='assignment') {
 
 
 module.exports.watchWhoIsOnline = watchWhoIsOnline;
+module.exports.watchMessageRates = watchMessageRates;
+
 module.exports.sendEncryptedMsgToAgent = sendEncryptedMsgToAgent;
 module.exports.POSITION_MARGIN = POSITION_MARGIN;
 module.exports.sendGetReadyForWorkProcessRequest = sendGetReadyForWorkProcessRequest;

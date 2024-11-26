@@ -190,21 +190,6 @@ async function getHashesByPattern(client, pattern) {
       }
     }
 
-    // let cursor = '0';
-    // do {
-    //   const scanResult = await client.scan(cursor, 'MATCH',pattern);
-    //   cursor = scanResult.cursor;
-    //   const keys = scanResult.keys;
-    //   for (const key of keys) {
-    //     const type = await client.type(key);
-    //     if (type === 'hash') {
-    //       const hashData = await client.hGetAll(key);
-    //       if (Object.keys(hashData).length > 0) {
-    //         result[key] = hashData;
-    //       }
-    //     }
-    //   }
-    // } while (cursor !== '0' && cursor !== 0);
 
     return result;
 
@@ -339,57 +324,6 @@ async function getAndDeleteHashesByPattern(client, pattern) {
     await releaseLock(client, lockKey);
   }
 }
-
-
-// async function getAndDeleteHashesByPattern(client, pattern) {
-//   try {
-//     let cursor = '0';
-//     const keys = [];
-
-//     // Use SCAN to find all keys matching the pattern
-//     do {
-//       const [newCursor, foundKeys] = await client.scan(cursor, 'MATCH', pattern);
-//       cursor = newCursor;
-//       keys.push(...foundKeys);
-//       console.log('cursor', cursor)
-//     } while (cursor !== '0' && cursor !== 0);
-
-
-//     console.log(keys)
-//     // Initialize the results object and a multi transaction
-//     const results = {};
-//     const multi = client.multi();
-
-//     console.log('check type')
-//     // Iterate through the keys to retrieve and delete hashes
-//     for (const key of keys) {
-//       const type = await client.type(key);
-//       if (type === 'hash') {
-//         multi.hGetAll(key);  // Queue the retrieval of the hash data
-//         multi.del(key);  // Queue the deletion of the hash
-//       }
-//     }
-
-
-
-//     // Execute the multi transaction
-//     const execResults = await multi.exec();
-
-//     // Parse the results from the transaction
-//     for (let i = 0; i < execResults.length; i += 2) {
-//       const hashData = execResults[i];
-//       const key = keys[i / 2]; // Calculate the corresponding key
-//       if (Object.keys(hashData).length > 0) {
-//         results[key] = hashData;
-//       }
-//     }
-
-//     return results;
-//   } catch (error) {
-//     console.error('Error getting and deleting hashes:', error);
-//     throw error;
-//   }
-// }
 
 
 

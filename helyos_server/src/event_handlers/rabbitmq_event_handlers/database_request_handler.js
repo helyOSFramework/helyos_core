@@ -9,7 +9,7 @@ async function queryDataBase(uuid, objMsg, msgProps) {
 
     // If in-memory datatabase is set, track the number of postgres hits.
     if (inMemDB.agents_stats[uuid]) {
-        inMemDB.agents_stats[uuid]['updtPerSecond'].countMessage();
+        inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
     }
     
     let replyTo = msgProps.replyTo?  msgProps.replyTo : uuid;

@@ -527,7 +527,15 @@ const updateAgentsConnectionStatus = (client, n_secs) => {
 	const sqlString2 = `UPDATE public.agents SET connection_status = $1, msg_per_sec = 0 WHERE (connection_status = $2) and (last_message_time >=  (now() - ${strSeconds}));`;
 	const onlineToOffline = client.query(sqlString1, ['offline', 'online']);
 	const offlineToOnline = client.query(sqlString2, ['online', 'offline']);
-	return Promise.allSettled([onlineToOffline, offlineToOnline]).catch((e) => console.error(e));
+	return Promise.allSettled([onlineToOffline, offlineToOnline]);
+}
+
+const getHighMsgRateAgents = (client, msgRateLimit, updtRateLimit) => {
+	const sqlStringUpdtRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (updt_per_sec >  $1);`;
+	const sqlStringMsgRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (msg_per_sec >  $1);`;
+	const updtInfractors = client.query(sqlStringUpdtRate, [updtRateLimit]).then(rv=>rv.rows);
+	const msgInfractors = client.query(sqlStringMsgRate, [msgRateLimit]).then(rv=>rv.rows);
+	return Promise.all([msgInfractors, updtInfractors ]).catch((e) => console.error(e));
 }
 
 
@@ -607,5 +615,7 @@ module.exports.wait_database_query = wait_database_query;
 module.exports.setDBTimeout = setDBTimeout;
 
 module.exports.updateAgentsConnectionStatus = updateAgentsConnectionStatus;
+module.exports.getHighMsgRateAgents = getHighMsgRateAgents;
+
 module.exports.getUncompletedAssignments_byWPId = getUncompletedAssignments_byWPId;
 module.exports.searchAllRelatedUncompletedAssignments = searchAllRelatedUncompletedAssignments;

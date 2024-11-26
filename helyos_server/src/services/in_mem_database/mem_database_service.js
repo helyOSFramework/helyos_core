@@ -11,6 +11,7 @@ const REDIS_HOST = redisAccessLayer.REDIS_HOST;
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
 const MAX_DELAY = 100;
+const STAT_ACCUM_PERIOD = 10000; // Set accummlation time to calculate msg rates.
 
 let MAX_PENDING_UPDATES = LONG_TIMEOUT / DB_BUFFER_TIME;
 MAX_PENDING_UPDATES = MAX_PENDING_UPDATES > 5 ? MAX_PENDING_UPDATES : 5;
@@ -56,6 +57,7 @@ class InMemDB {
         
         this.client =  connectedRedisClients['publisher'];
         this.subClient =  connectedRedisClients['subscriber'];
+        this.startTime = new Date();
 
         this.agents = {};
         this.agents_buffer = {};
@@ -81,6 +83,7 @@ class InMemDB {
             this.getHashesByPattern = (pattern) => redisAccessLayer.getHashesByPattern(this.client, pattern);
             this.getAndDeleteHashesByPattern = (pattern) => redisAccessLayer.getAndDeleteHashesByPattern(this.client, pattern);
             this.hGetAsync = (hash, field) => redisAccessLayer.hGetAll(this.subClient, hash);      
+            this.hIncrBy = (hash, field, increment) => redisAccessLayer.hIncrBy(this.subClient, hash, field, increment);      
         }
 
     }
@@ -121,6 +124,18 @@ class InMemDB {
     }
 
 
+    async countMessages(tableStatsName, keyId, counter){
+        if (REDIS_HOST) {
+            const statHash = `${tableStatsName}:${keyId}`;
+            await this.hIncrBy(statHash, `accum_${counter}`, 1 );
+
+        } else {
+            if (this[tableStatsName][keyId]) {
+                this[tableStatsName][keyId][counter].countMessage();
+            }
+        }
+    }
+
     /**
      * Updates data in the specified table based on the provided timestamp.
      * @param {string} tableName - The name of the table.
@@ -136,6 +151,7 @@ class InMemDB {
         const tableStats = this[`${tableName}_stats`];
 
         // Initialize local inMem register
+        if (!data.last_message_time) Object.assign( data, {'last_message_time':storeTimeStamp});
         table[keyId] = table[keyId]?  table[keyId]:{'last_message_time':storeTimeStamp};
         Object.assign(table[keyId], data);
 
@@ -152,7 +168,7 @@ class InMemDB {
         if (REDIS_HOST) {
             const entityHash = `${tableName}:${keyId}`;
             if (mode === 'realtime') {
-                tableStats[keyId].updtPerSecond.countMessage();
+                this.countMessages(`${tableName}_stats`, keyId, 'updtPerSecond');
                 await Promise.all(  [this.hSetAsync(entityHash, data),
                                      dbService.update(indexName, keyId, data) //Loop?
                                     ]);
@@ -169,7 +185,7 @@ class InMemDB {
             data.id = table[keyId].id;
 
             if (mode === 'realtime') {
-                tableStats[keyId].updtPerSecond.countMessage();
+                this.countMessages(`${tableName}_stats`, keyId, 'updtPerSecond');
                 this.updateBuffer(tableName,indexName, data, storeTimeStamp);
                 await dbService.update(indexName, keyId, data); // Loop?
                 return true;
@@ -228,10 +244,12 @@ class InMemDB {
      */
     async flush(tableName, indexName, dbService, maxAge = 0){
         const now = new Date();
+        this.lastFlushTime = now;
+        const elapsed_time = now - this.startTime;
+
         const tableBufferName = `${tableName}_buffer`;
         const tableStatsName = `${tableName}_stats`;
         const useShortTimeOutClient = true;
-
 
         // Damaging control: if there are too many pending update promisses, reduce the timeout and accept the losses.
         try {
@@ -242,33 +260,44 @@ class InMemDB {
 
         // Get buffered data
         let bufferedData = {};
+        let statData = {};
         if (REDIS_HOST){
             bufferedData = await this.getAndDeleteHashesByPattern(`${tableBufferName}:*`);
+            if (elapsed_time > STAT_ACCUM_PERIOD){
+                statData = await this.getAndDeleteHashesByPattern(`${tableStatsName}:*`);
+                this.startTime = now;
+            }
         } else {
             bufferedData = {...this[tableBufferName]}; //Get &
             this[tableBufferName] = {};                //Delete
+            statData = this[tableStatsName];
         }
         // Nothing to do if buffer is empty
         if (Object.keys(bufferedData).length === 0) { return null };
 
 
-        this.lastFlushTime = new Date();
+
+        const promiseArray = Object.keys(bufferedData) // Objects to be updated in the postgres database
+                        .map( async key => { 
   
-        const objArray = Object.keys(bufferedData) // Objects to be updated in the postgres database
-                        .map(key => { 
-                            // Save statistic counts:
-                            let statKey = key.split(':');
-                            statKey = statKey.length > 1 ? statKey[1] : key;
-                            if (this[tableStatsName][statKey]){
-                                this[tableStatsName][statKey].updtPerSecond.countMessage();
-                                const msgPerSecond = this[tableStatsName][statKey].msgPerSecond.countsPerSecond;
-                                const updtPerSecond = this[tableStatsName][statKey].updtPerSecond.countsPerSecond;
-                                // this[tableName][key].msg_per_sec = msgPerSecond;
+                            let msgPerSecond, updtPerSecond;
+                            // Parse the stats local key and remote hash
+                            const bufferKeys = key.split(':');
+                            const keyId = bufferKeys.length > 1 ? bufferKeys[1] : bufferKeys;
+                            const statHash = `${tableStatsName}:${keyId}`;
+                            await this.countMessages(tableStatsName, keyId, 'updtPerSecond');
+
+                            if (REDIS_HOST && statData[statHash]) { 
+                                msgPerSecond = statData[statHash].accum_msgPerSecond / (elapsed_time / 1000);
+                                updtPerSecond = statData[statHash].accum_updtPerSecond / (elapsed_time / 1000);
                                 bufferedData[key].msg_per_sec = msgPerSecond;
                                 bufferedData[key].updt_per_sec = updtPerSecond;
-                                if (REDIS_HOST) { // COMMENT: WIP - check alternative
-                                    // this.hSetAsync(`${tableName}:${keyId}`, {msg_per_sec: msgPerSecond, updt_per_sec: updtPerSecond});
-                                }     
+                            }  
+                            if (!REDIS_HOST && statData[keyId]) { 
+                                msgPerSecond = statData[keyId].msgPerSecond.countsPerSecond;
+                                updtPerSecond = statData[keyId].updtPerSecond.countsPerSecond;
+                                bufferedData[key].msg_per_sec = msgPerSecond;
+                                bufferedData[key].updt_per_sec = updtPerSecond;
                             }
 
                             // State information is exclusively saved by state_event_handler module
@@ -282,10 +311,11 @@ class InMemDB {
                                 delete bufferedData[key]['msg_per_sec'];
                                 delete bufferedData[key]['_leaderAgents'];
                             }
-                            return bufferedData[key];
-                            });
 
-        
+                            return bufferedData[key];
+                        });
+
+        const objArray = await Promise.all(promiseArray);
         const promiseTrigger = () =>    dbService.updateMany(objArray, indexName, useShortTimeOutClient)
                                         .then((r) => {
                                             if (r && r.length) {     
@@ -528,7 +558,7 @@ class UpdateStats {
     counts = 0;
     startCountingTime = new Date();
     countsPerSecond = 0;
-    enlapsed_time = 0;
+    elapsed_time = 0;
     minSample = 100;
     historyLength = 50;
     countsPerSecondHistory = [];
@@ -545,8 +575,8 @@ class UpdateStats {
         }
         if (this.counts === this.minSample){
             const now = new Date();
-            this.enlapsed_time = (now - this.startCountingTime)/1000;
-            this.countsPerSecond = this.counts/this.enlapsed_time;
+            this.elapsed_time = (now - this.startCountingTime)/1000;
+            this.countsPerSecond = this.counts/this.elapsed_time;
             this.countsPerSecondHistory.push(this.countsPerSecond);
             this.countsPerSecondMovingAcumm = this.countsPerSecondMovingAcumm + this.countsPerSecond;
             if (this.countsPerSecondHistory.length > this.historyLength){
