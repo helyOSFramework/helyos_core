@@ -85,9 +85,7 @@ class WebSocketService {
 
 
     dispatchAllBufferedMessages(bufferPayload){
-        console.log(bufferPayload)
         for(let room in bufferPayload) {
-            console.log('that is the room', room)
             const roomChannels = bufferPayload[room];
             for(let channel in roomChannels){
                     this.sendUpdatesToFrontEnd(channel, roomChannels[channel], room);
