@@ -56,12 +56,16 @@ class BufferNotifications {
 
             let agent = inMemBufferedAgents[key];
             if(!agent) {
-                const {id, uuid, x, y, z, orientations, sensors, last_message_time} = inMemAgents[key];
-                agent = {id, uuid, x, y, z, orientations, sensors, last_message_time};                 
+                const {id, uuid, x, y, z, orientations, sensors, last_message_time, yard_id} = inMemAgents[key];
+                agent = {id, uuid, x, y, z, orientations, sensors, last_message_time,  yard_id};                 
             } 
+            if(!agent.yard_id) {
+                agent.yard_id = inMemAgents[key].yard_id;
+            }
+
             agent['msg_per_sec'] = inMemAgents[key]['msg_per_sec'];
             const webSocketNotification = {'agent_id':inMemAgents[key].id,'tool_id':inMemAgents[key].id, ...agent };
-            this.pushNotificationToBuffer('new_agent_poses', webSocketNotification);
+            this.pushNotificationToBuffer('new_agent_poses', webSocketNotification, `${agent['yard_id']}`);
         }
 
         const now = new Date();
@@ -72,27 +76,35 @@ class BufferNotifications {
                 if(!mapObject) {
                     mapObject =  inMemMapObjects[key];                
                 } 
+                if(!mapObject.yard_id) {
+                    mapObject.yard_id = inMemMapObjects[key].yard_id;
+                }
                 const webSocketNotification =  mapObject;
-                this.pushNotificationToBuffer('map_objects_updates', webSocketNotification);
+                this.pushNotificationToBuffer('map_objects_updates', webSocketNotification, `${mapObject['yard_id']}`);
             }
         }
 
     }
 
-    pushNotificationToBuffer(channel, payload) {
+    pushNotificationToBuffer(channel, payload, room='all_users') {
         let _payload = utils.camelizeAttributes(payload);
         if (!this.bufferPayload) {
             this.bufferPayload = {};
         }
-        if (this.bufferPayload[channel]) {
-            this.bufferPayload[channel].push(_payload);
+        if (!this.bufferPayload[room]) {
+            this.bufferPayload[room] = {};
+            this.bufferPayload[room][channel] = null;
+        }
+
+        if (this.bufferPayload[room][channel]) {
+            this.bufferPayload[room][channel].push(_payload);
         } else {
-            this.bufferPayload[channel] = [_payload];
+            this.bufferPayload[room][channel] = [_payload];
         }
     }
 
-    publishToFrontEnd(channel, payload) {
-        this.pushNotificationToBuffer(channel, payload);
+    publishToFrontEnd(channel, payload, room) {
+        this.pushNotificationToBuffer(channel, payload, room);
         return this._dispatch();
     }
 
