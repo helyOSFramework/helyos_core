@@ -178,6 +178,19 @@
 
               <div class="row">
                 <fieldset class="form-group col-xl-12">
+                  <label for="description"> Description </label>
+                  <input
+                    id="description"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.description"
+                    name="description"
+                    maxlength="255"
+                    placeholder="Add here a short description..." />
+                </fieldset>
+              </div>
+
+              <div class="row">
+                <fieldset class="form-group col-xl-12">
                   <label for="publicKey"> Public key (PEM) </label>
                   <textarea
                     id="publicKey"
