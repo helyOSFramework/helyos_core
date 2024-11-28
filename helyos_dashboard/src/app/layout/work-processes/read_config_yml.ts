@@ -51,24 +51,25 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   const workprocessPlans: H_WorkProcessServicePlan[] = await wpServPlanMethods.list({});
   const jsonIndent = 2
 
+  const missions = {};
   const dataJSON = {
     'version': '2.0',
-    'missions': {},
+    'missions': missions,
   };
   workprocessTypes.forEach((wpType) => {
 
     // parse properites of work_process_type into missions
-    dataJSON['missions'][wpType.name] = {};
+    missions[wpType.name] = {};
     for (const key in wpType) {
       if (Object.prototype.hasOwnProperty.call(WorkProcessTypeTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpType, key)) {
         if (key === "settings" || key === "dispatchOrder") {
           // JSON.stringify() is used to preserve list brackets
           if (wpType[key] !== null) {
-            dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key], null, jsonIndent);
+            missions[wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key], null, jsonIndent);
           }
 
         } else {
-          dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = wpType[key];
+          missions[wpType.name][WorkProcessTypeTableToYmlMap[key]] = wpType[key];
         }
       }
     }
@@ -98,7 +99,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
     });
 
     if (formatedSteps.length > 0) {
-      dataJSON.missions[wpType.name]['recipe'] = {
+      missions[wpType.name]['recipe'] = {
         'steps': formatedSteps,
       };
     }
