@@ -105,7 +105,9 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   });
 
   // convert JSON to yml
-  const ymlData = yaml.dump(dataJSON);
+  let ymlData = yaml.dump(dataJSON)
+  ymlData = ymlData
+    .replace(/(\n\s{2}\w+:)/g, '\n\n$1') // 2 line spaces before mission name at 2 spaces indentation
   return Promise.resolve(ymlData);
 
 };
