@@ -50,6 +50,9 @@ class WebSocketService {
             if (socket.handshake.auth && socket.handshake.auth.token){
                 clientToken = socket.handshake.auth.token;
             }
+
+            const room = socket.handshake.auth?.room || 'all';
+
             if(!clientToken) {
                 unauthorizeClient(socket);
                 return;
@@ -60,9 +63,9 @@ class WebSocketService {
                 unauthorizeClient(socket);
                 return;
             }
-            logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id}`);
+            logData.addLog('helyos_core', null, 'warn', `Client application connected to websocket ${socket.id} joined to room:${room}`);
             // Join room
-            socket.join('all_users');
+            socket.join(room);
         });
     }
 
@@ -82,22 +85,25 @@ class WebSocketService {
 
 
     dispatchAllBufferedMessages(bufferPayload){
-        for(let channel in bufferPayload){
-            this.sendUpdatesToFrontEnd(channel,bufferPayload[channel]);
-            bufferPayload[channel]=null;
+        for(let room in bufferPayload) {
+            const roomChannels = bufferPayload[room];
+            for(let channel in roomChannels){
+                    this.sendUpdatesToFrontEnd(channel, roomChannels[channel], room);
+                    roomChannels[channel]=null;
+            }
         }
     }
 
 
-    sendUpdatesToFrontEnd(channel, msg=null){
+    sendUpdatesToFrontEnd(channel, msg=null, room) {
         if (!this.io){
             console.warn("socket.io is not defined, start the websocket server", msg);
             return;
         } 
         if (!msg || msg==[]) return;
         try {
-            const room = 'all_users';
-            this.io.to(room).emit(channel, msg);
+            if (room !== 'all') this.io.to(room).emit(channel, msg);
+            this.io.to('all').emit(channel, msg);
         } catch (e) {
             console.error("error message from Postgress to Front-end", e)
         }

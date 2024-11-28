@@ -27,20 +27,20 @@ function broadcastPriorityNotifications(channel, payload, bufferNotifications){
     switch (channel) {
 
         case 'change_agent_status': // Changes originate from agents.
-            bufferNotifications.publishToFrontEnd(channel, payload);
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
             logData.addLog('agent', payload, 'info', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
             break;
 
         case 'assignments_status_update':
-            bufferNotifications.publishToFrontEnd(channel, payload);
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
             break;
 
         case 'mission_queue_update':
-            bufferNotifications.publishToFrontEnd(channel, payload);
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
             break;
 
         case 'work_processes_update':
-            bufferNotifications.publishToFrontEnd(channel, payload);
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
             break;
     }
 }
@@ -55,7 +55,18 @@ function broadcastNotifications(channel, payload, bufferNotifications) {
         'service_requests_insertion',
         'work_processes_insertion'
         ].includes(channel)) {
-        bufferNotifications.pushNotificationToBuffer(channel, payload);
+
+        let room = 'all';
+        if(payload['yard_id']){
+            room = `${payload['yard_id']}`;
+        } else {
+            console.error(channel, "does not have yard id")
+        }
+
+
+
+
+        bufferNotifications.pushNotificationToBuffer(channel, payload, room);
     }
 }
 
