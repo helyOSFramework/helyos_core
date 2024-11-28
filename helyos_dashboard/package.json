@@ -1,6 +1,6 @@
 {
   "name": "helyos-admin-dashboard",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "helyos Admin Dashboard",
   "license": "Modified Apache-2.0",
   "scripts": {
@@ -37,7 +37,7 @@
     "bootstrap": "^5.3.2",
     "cheap-ruler": "^3.0.2",
     "core-js": "^3.38.0",
-    "helyosjs-sdk": "2.1.2",
+    "helyosjs-sdk": "2.2.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "rxjs": "^7.4.1",
