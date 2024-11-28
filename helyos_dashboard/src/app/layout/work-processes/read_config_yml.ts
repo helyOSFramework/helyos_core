@@ -49,6 +49,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   // Template JSON to populate data from tables
   const workprocessTypes: H_WorkProcessType[] = await wpTypeMethods.list({});
   const workprocessPlans: H_WorkProcessServicePlan[] = await wpServPlanMethods.list({});
+  const jsonIndent = 2
 
   const dataJSON = {
     'version': '2.0',
@@ -63,7 +64,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
         if (key === "settings" || key === "dispatchOrder") {
           // JSON.stringify() is used to preserve list brackets
           if (wpType[key] !== null) {
-            dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key]);
+            dataJSON['missions'][wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key], null, jsonIndent);
           }
 
         } else {
@@ -80,7 +81,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
         if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
           if (key === "dependsOnSteps") {  // JSON.stringify() is used to preserve list brackets
             if (wpStep[key] != null) {
-              formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key]);
+              formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key], null, jsonIndent);
             }
           } else {
             formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = wpStep[key];
