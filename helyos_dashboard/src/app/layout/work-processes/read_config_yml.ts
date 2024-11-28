@@ -25,10 +25,9 @@ const WorkProcessServicePlanTableToYmlMap = {
   requestOrder: 'request_order',
   agent: 'agent',
   serviceType: 'service_type',
-  // serviceConfig: 'service_config',
+  serviceConfig: 'service_config',
   dependsOnSteps: 'dependencies',
   isResultAssignment: 'apply_result',
-  overrideConfig: 'override_config',
   waitDependenciesAssignments: 'wait_assignments',
 
 };
@@ -78,7 +77,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
       const formatedStep = {};
       for (const key in wpStep) {
         if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
-          if (key === "dependsOnSteps") {  // JSON.stringify() is used to preserve list brackets
+          if (key === "dependsOnSteps" || key === "serviceConfig") {  // JSON.stringify() is used to preserve list brackets
             if (wpStep[key] != null) {
               formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key]);
             }
@@ -88,9 +87,9 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
         }
       }
 
-      // add dummy override_config if not present
-      if (!Object.prototype.hasOwnProperty.call(formatedStep, 'override_config')) {
-        formatedStep['override_config'] = "{}";
+      // add dummy service_config if not present
+      if (!Object.prototype.hasOwnProperty.call(formatedStep, 'service_config')) {
+        formatedStep['service_config'] = "{}";
       }
 
       return formatedStep;
