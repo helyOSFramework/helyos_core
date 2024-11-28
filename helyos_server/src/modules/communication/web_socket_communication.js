@@ -86,7 +86,7 @@ class BufferNotifications {
 
     }
 
-    pushNotificationToBuffer(channel, payload, room='all_users') {
+    pushNotificationToBuffer(channel, payload, room='all') {
         let _payload = utils.camelizeAttributes(payload);
         if (!this.bufferPayload) {
             this.bufferPayload = {};

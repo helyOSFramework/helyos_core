@@ -51,7 +51,7 @@ class WebSocketService {
                 clientToken = socket.handshake.auth.token;
             }
 
-            const room = socket.handshake.auth?.room || 'all_users';
+            const room = socket.handshake.auth?.room || 'all';
 
             if(!clientToken) {
                 unauthorizeClient(socket);
@@ -102,8 +102,8 @@ class WebSocketService {
         } 
         if (!msg || msg==[]) return;
         try {
-            if (room !== 'all_users') this.io.to(room).emit(channel, msg);
-            this.io.to('all_users').emit(channel, msg);
+            if (room !== 'all') this.io.to(room).emit(channel, msg);
+            this.io.to('all').emit(channel, msg);
         } catch (e) {
             console.error("error message from Postgress to Front-end", e)
         }

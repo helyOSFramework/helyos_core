@@ -56,7 +56,7 @@ function broadcastNotifications(channel, payload, bufferNotifications) {
         'work_processes_insertion'
         ].includes(channel)) {
 
-        let room = 'all_users';
+        let room = 'all';
         if(payload['yard_id']){
             room = `${payload['yard_id']}`;
         } else {
