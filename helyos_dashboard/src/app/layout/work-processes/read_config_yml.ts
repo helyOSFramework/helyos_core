@@ -108,6 +108,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   let ymlData = yaml.dump(dataJSON)
   ymlData = ymlData
     .replace(/(\n\s{2}\w+:)/g, '\n\n$1') // 2 line spaces before mission name at 2 spaces indentation
+    .replace(/(\n\s+- step:)/g, '\n$1'); // 1 line space before each step
   return Promise.resolve(ymlData);
 
 };
