@@ -16,17 +16,17 @@ describe('16 Test Failed Assignment - Continue mission - Overridden Fallback mis
         await helyosApplication.createNewMission('driving_continue', ['Ab34069fc5-fdgs-434b-b87e-f19c5435113',
                                                   'Bb34069fc5-fdgs-434b-b87e-f19c5435113']);
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Assignment 1 is sent with wrong format, it should fail at the agent', async () => {
         const result = await helyosApplication.waitAssignmentStatus(1, 'failed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('failed');
     });
 
     it('Check failed agent was immediately released ', async () => {
@@ -38,37 +38,37 @@ describe('16 Test Failed Assignment - Continue mission - Overridden Fallback mis
 
     it('Fallback Microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
 
     it('Assignment 2 is completed', async () => {
         const result = await helyosApplication.waitAssignmentStatus(2, 'completed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('completed');
     });
 
 
     it('Fallback Assignment for failed agent is completed', async () => {
         const result = await helyosApplication.waitAssignmentStatus(3, 'completed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('completed');
     });
 
 
     it('Assignment was failed -> Mission goes on => Mission is marked as succeeded', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
-        expect(result).toEqual(true);
+        expect(result).toEqual('succeeded');
     });
 
     it('Fallback Mission is marked as succeeded', async () => {
         const result = await helyosApplication.waitMissionStatus(2, 'succeeded');
-        expect(result).toEqual(true);
+        expect(result).toEqual('succeeded');
     });
 
     it('Agents are free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
         const result2 = await helyosApplication.waitAgentStatus(2, 'free');
-        expect(result).toEqual(true);
-        expect(result2).toEqual(true);
+        expect(result).toEqual('free');
+        expect(result2).toEqual('free');
     });
 
     it('Check 2 x Reserve/ 3 x Release sent to the agent 1', async () => {

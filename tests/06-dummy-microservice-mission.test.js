@@ -15,13 +15,13 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
         helyosApplication = await getHelyOSClientInstance();
         await helyosApplication.createMissionWithAssignmentData();
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
 
     it('Dummy Microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
 
@@ -38,7 +38,7 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
 
     it('Agent is busy', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'busy');
-        expect(result).toEqual(true);
+        expect(result).toEqual('busy');
     });
 
     it('Mission produced one assignment', async () => {
@@ -48,12 +48,12 @@ describe('06 Test Mission Calculated By Ext. App',   () =>  {
 
     it('Mission is marked as finished', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
-        expect(result).toEqual(true);
+        expect(result).toEqual('succeeded');
     });
 
     it('Agent is free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
-        expect(result).toEqual(true);
+        expect(result).toEqual('free');
     });
 
     
