@@ -21,7 +21,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 		workProcess.sched_start_at = new Date();
 	}
 	const start_stamp = workProcess.sched_start_at.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-	let assigmentInputs = [], instantActionsInput = [];
+	let assigmentInputs = [], instantActionsInput = []; assignmentPlan = [];
 	let dispatch_order = servResponse.dispatch_order;  
 
 	if (servResponse.results) {
@@ -68,11 +68,15 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 					work_process_id: workProcess.id,
 					agent_id: agent_id, 
 					service_request_id: serviceRequestId,
-					status: 'not_ready_to_dispatch',
+					status: ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH,
 					start_time_stamp: start_stamp,
 					on_assignment_failure: result.on_assignment_failure  || result.onAssignmentFailure, 
 					fallback_mission: result.fallback_mission || result.fallbackMission,
 					data: JSON.stringify(result.result || result.assignment)});
+			}
+
+			if (result.dispatch_order || result.assignment_order) {
+				assignmentPlan.push(result.dispatch_order || result.assignment_order);
 
 			}
 
@@ -90,7 +94,7 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 										work_process_id: workProcess.id,
 										agent_id: agentId,
 										service_request_id: serviceRequestId,
-										status: 'not_ready_to_dispatch',
+										status: ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH,
 										start_time_stamp: start_stamp,
 										data: data}
 		));
@@ -102,42 +106,90 @@ async function createAssignment(workProcess, servResponse, serviceRequest){
 
 	// create assignments
 	const insertPromises = assigmentInputs.map( input => databaseServices.assignments.insert(input).then( newId => newId));
+
+	// update assginments; sorting them.
 	let updatePromises = [];
+	let assignment_orchestration = '';
+	if (dispatch_order && dispatch_order.length) assignment_orchestration = 'dispatch_order_array';
+	else if (assignmentPlan && assignmentPlan.length) assignment_orchestration = 'assignment_order_array';
+	else assignment_orchestration = 'dispatch_all_at_once';
+
+	// validating assigment plans
+	
+
 
 	return Promise.all(insertPromises)
 	.then((insertedPromiseIds)=>{
-		// ordering assignment dispatches
-			if (dispatch_order && dispatch_order.length) {
-				if (dispatch_order.length === 1 ) dispatch_order.push([]); // special case: there is no dependent assignments.
-				for (let order = dispatch_order.length-1; order > 0; order--) {
-					const assgmtArrayIdxs = dispatch_order[order];
-					const previousArrayIdxs = dispatch_order[order-1];
-					const assgmtDBIdxs = assgmtArrayIdxs.map(i => parseInt(insertedPromiseIds[i]) );
-					const previousDBIdxs = previousArrayIdxs.map(i => parseInt(insertedPromiseIds[i]));
-					const statusPrecedent = (order-1) === 0 ?  ASSIGNMENT_STATUS.TO_DISPATCH : 'not_ready_to_dispatch';
-					const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'next_assignments': assgmtDBIdxs,
-																															 'status': statusPrecedent }
-																														));
-					const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'depend_on_assignments':previousDBIdxs}));
-					updatePromises = updatePromises.concat([...updateDependentAssignments, ...updatePrecedentAssignments]);
-				}
-			} else {
-				updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: ASSIGNMENT_STATUS.TO_DISPATCH}));
-			}
 
-			return Promise.all(updatePromises)
-			.then(()=>{
-				const statusUpdatePromises = assigmentInputs.map( input => 
-					databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})
-					.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY}))
-					.then(() =>  databaseServices.work_processes.updateByConditions(
-						{'id': workProcess.id, 'status__in': [ MISSION_STATUS.DISPATCHED,
-															   MISSION_STATUS.CALCULATING,
-															   MISSION_STATUS.PREPARING]},
-						{status: MISSION_STATUS.EXECUTING}))
-				);
-				return Promise.all(statusUpdatePromises);
-			})
+		if (assignment_orchestration ===  'dispatch_all_at_once') {
+			updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: ASSIGNMENT_STATUS.TO_DISPATCH}));
+		}
+
+		if (assignment_orchestration ===  'dispatch_order_array') {
+			updatePromises = insertedPromiseIds.map(id => databaseServices.assignments.update_byId(id,{status: ASSIGNMENT_STATUS.TO_DISPATCH}));
+			if (dispatch_order.length === 1 ) dispatch_order.push([]); // special case: there is no dependent assignments.
+			for (let order = dispatch_order.length-1; order > 0; order--) {
+				const assgmtArrayIdxs = dispatch_order[order];
+				const previousArrayIdxs = dispatch_order[order-1];
+				const assgmtDBIdxs = assgmtArrayIdxs.map(i => parseInt(insertedPromiseIds[i]) );
+				const previousDBIdxs = previousArrayIdxs.map(i => parseInt(insertedPromiseIds[i]));
+				const statusPrecedent = (order-1) === 0 ?  ASSIGNMENT_STATUS.TO_DISPATCH : ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH;
+				const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'next_assignments': assgmtDBIdxs,
+																														 'status': statusPrecedent }
+																													));
+				const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id,{'depend_on_assignments':previousDBIdxs}));
+				updatePromises = updatePromises.concat([...updateDependentAssignments, ...updatePrecedentAssignments]);
+			}
+		}
+		
+		if (assignment_orchestration ===  'assignment_order_array') {
+			const dispatchGroup = {};
+			// Group assignments
+			assignmentPlan.forEach((order, index) => { 
+				if (!dispatchGroup[order]) dispatchGroup[order] = [insertedPromiseIds[index]];
+				else dispatchGroup[order].push(insertedPromiseIds[index]);
+			});
+
+			assignmentPlan.forEach(order => {
+				const ids = dispatchGroup[order];
+				const nextIds = dispatchGroup[order + 1];
+				const prevIds = dispatchGroup[order - 1];
+		
+				const nextAssignments = nextIds ? nextIds : [];
+				const dependOnAssignments = prevIds ? prevIds : [];
+		
+				const updateDependencies = ids.map( id => databaseServices.assignments.update_byId(id, {
+													'next_assignments': nextAssignments,
+													'depend_on_assignments': dependOnAssignments
+												}));
+				updatePromises = updatePromises.concat([...updateDependencies]);
+			});
+
+			let dispatchTriggerPromises = [];
+			if (dispatchGroup[1]) {
+					dispatchTriggerPromises = dispatchGroup[1].map(id =>
+						databaseServices.assignments.update_byId(id, { 'status': ASSIGNMENT_STATUS.TO_DISPATCH })
+					);		
+			}
+			updatePromises = [Promise.all(updatePromises).then(()=> Promise.all(dispatchTriggerPromises))];
+
+		}
+
+
+
+		return Promise.all(updatePromises)
+		.then(()=>{
+			const statusUpdatePromises = assigmentInputs.map( input => 
+				databaseServices.service_requests.update_byId(serviceRequest.id, {assignment_dispatched: true})
+				.then(() =>  databaseServices.agents.update('id', input.agentId, {status:AGENT_STATUS.BUSY})) // COMMENT: This should not be necessary here.
+				.then(() =>  databaseServices.work_processes.updateByConditions(
+					{'id': workProcess.id, 'status__in': [ MISSION_STATUS.DISPATCHED,
+															MISSION_STATUS.CALCULATING,
+															MISSION_STATUS.PREPARING]},
+					{status: MISSION_STATUS.EXECUTING}))
+			);
+			return Promise.all(statusUpdatePromises);
+		})
 
 	})
 	.catch(err => logData.addLog('helyos_core', null, 'error', `createAssignment ${err.message}`));
