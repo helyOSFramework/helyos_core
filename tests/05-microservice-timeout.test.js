@@ -16,29 +16,29 @@ describe('05 Test Microservice Timeout',   () =>  {
         helyosApplication = await getHelyOSClientInstance();
         await helyosApplication.createNewMission();
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Microservice is calculating', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'pending');
-        expect(result).toEqual(true);
+        expect(result).toEqual('pending');
     });
 
     it('Calculation is canceled by timeout', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'canceled');
-        expect(result).toEqual(true);
+        expect(result).toEqual('canceled');
     });
 
 
     it('Agent is released free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
-        expect(result).toEqual(true);
+        expect(result).toEqual('free');
     });
 
 
     it('Mission is marked as failed', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'failed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('failed');
     });
 
     it('Check Reserve/Release sent to the agent', async () => {

@@ -21,17 +21,17 @@ describe('04 Test Mission composed of map update and driving',   () =>  {
     it('Mission is dispatched -> Agent is reserved', async () => {
         await helyosApplication.createNewMission('map_driving');
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Map microservice is calculating', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'pending');
-        expect(result).toEqual(true);
+        expect(result).toEqual('pending');
     });
 
     it('Map microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Yard has many map objects', async () => {
@@ -41,28 +41,28 @@ describe('04 Test Mission composed of map update and driving',   () =>  {
 
     it('Assignment microservice is calculating', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(2, 'pending');
-        expect(result).toEqual(true);
+        expect(result).toEqual('pending');
     });
 
     it('Assignment microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(2, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Agent is busy', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'busy');
-        expect(result).toEqual(true);
+        expect(result).toEqual('busy');
     });
 
 
     it('Agent is free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
-        expect(result).toEqual(true);
+        expect(result).toEqual('free');
     });
 
     it('Mission is marked as finished', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
-        expect(result).toEqual(true);
+        expect(result).toEqual('succeeded');
     });
     
 

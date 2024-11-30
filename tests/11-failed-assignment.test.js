@@ -16,29 +16,29 @@ describe('11 Test Failed Assignment - Fail mission',   () =>  {
         await helyosApplication.createNewMission('driving', ['Ab34069fc5-fdgs-434b-b87e-f19c5435113',
                                                   'Bb34069fc5-fdgs-434b-b87e-f19c5435113']);
         const result = await helyosApplication.waitAgentStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Microservice is ready', async () => {
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Assignment is sent with wrong format, it should fail at the agent', async () => {
         const result = await helyosApplication.waitAssignmentStatus(1, 'failed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('failed');
     });
 
     it('Assignment is failed -> Mission is marked as failed', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'failed');
-        expect(result).toEqual(true);
+        expect(result).toEqual('failed');
     });
 
     it('Agent is free', async () => {
         const result = await helyosApplication.waitAgentStatus(1, 'free');
         const result2 = await helyosApplication.waitAgentStatus(2, 'free');
-        expect(result).toEqual(true);
-        expect(result2).toEqual(true);
+        expect(result).toEqual('free');
+        expect(result2).toEqual('free');
     });
 
     it('Check Reserve/Release sent to the agent 1', async () => {

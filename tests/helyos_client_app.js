@@ -36,7 +36,7 @@ class HelyOSClientApplication {
 
                 if (result['check']){
                     clearInterval(watcher);
-                    resolve(true);
+                    resolve(result['value']);
                 } 
        
                 tries += 1;
@@ -63,6 +63,17 @@ class HelyOSClientApplication {
     }
 
 
+    waitAgentStatuses(agentId, statuses) {
+        const checkValue = (agentId) => {
+            return this.helyosService.agents.get(agentId)
+                  .then(serv => ({check: statuses.includes(serv.status), value: serv.status}))
+                  .catch(err => ({check: false, value: null}));
+
+        }
+  
+        return this._waitStatus(checkValue, agentId, statuses);
+    }
+
 
     waitMicroserviceStatus(id, status) {
         const checkValue = (id) => {
@@ -84,6 +95,18 @@ class HelyOSClientApplication {
         }
   
         return this._waitStatus(checkValue, id, status);
+    }
+
+
+    waitAssignmentStatuses(agentId, statuses) {
+        const checkValue = (agentId) => {
+            return this.helyosService.assignments.get(agentId)
+                  .then(serv => ({check: statuses.includes(serv.status), value: serv.status}))
+                  .catch(err => ({check: false, value: null}));
+
+        }
+  
+        return this._waitStatus(checkValue, agentId, statuses);
     }
 
 
