@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { H_Agent } from 'helyosjs-sdk';
 import { ModalDismissReasons, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { HelyosService } from '../../services/helyos.service';
+import { isObjectProperty } from 'src/app/shared/utilities';
 
 interface ISensor { }
 
@@ -67,7 +68,7 @@ export class AgentsComponent implements OnInit, OnDestroy {
 
       if (item) {
         for (const key in patch) {
-          if (Object.prototype.hasOwnProperty.call(patch, key)) {
+          if (isObjectProperty(patch, key)) {
             if (key !== "id" && key !== "toolId") {
               item[key] = patch[key];
             }

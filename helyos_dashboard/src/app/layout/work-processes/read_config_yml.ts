@@ -1,7 +1,9 @@
 import { H_WorkProcessServicePlan, H_WorkProcessType } from 'helyosjs-sdk';
 import { WORKPROCESS_SERVICE_PLAN } from 'helyosjs-sdk/dist/cruds/wprocess_service_matrix';
 import { WORKPROCESS_TYPE } from 'helyosjs-sdk/dist/cruds/wprocess_types';
-import * as yaml from 'js-yaml';
+import { isObjectProperty, yamlDump, yamlLoad } from 'src/app/shared/utilities';
+
+const ymlJsonIndent = 2;
 
 const WorkProcessTypeTableToYmlMap = {
   description: 'description',
@@ -48,70 +50,88 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
   // Template JSON to populate data from tables
   const workprocessTypes: H_WorkProcessType[] = await wpTypeMethods.list({});
   const workprocessPlans: H_WorkProcessServicePlan[] = await wpServPlanMethods.list({});
-  const jsonIndent = 2
 
+  const missions = parseWorkProcess(workprocessTypes, workprocessPlans);
+  const ymlData = missionstoYML(missions);
+
+  return Promise.resolve(ymlData);
+};
+
+const parseWorkProcess = (workprocessTypes: H_WorkProcessType[], workprocessPlans: H_WorkProcessServicePlan[]) => {
   const missions = {};
+
+  workprocessTypes.forEach((wpType) => {
+    const wpTypeName = wpType.name;
+
+    // parse properites of work_process_type into missions
+    const mission = {};
+    for (const [key, wpTypeValue] of Object.entries(wpType)) {
+      if (isObjectProperty(WorkProcessTypeTableToYmlMap, key)) {
+        const mappedKey = WorkProcessTypeTableToYmlMap[key];
+        if (["settings", "dispatchOrder"].includes(key)) {
+          // JSON.stringify() is used to preserve list brackets
+          if (wpTypeValue !== null) {
+            mission[mappedKey] = JSON.stringify(wpTypeValue, null, ymlJsonIndent);
+          }
+        } else {
+          mission[mappedKey] = wpTypeValue;
+        }
+      }
+    }
+    missions[wpTypeName] = mission;
+
+    // parse wp_plans into mission steps
+    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId === wpType.id);
+    const formatedSteps = parseWorkProcessRecipeSteps(wpTypeRecipeSteps);
+
+    if (formatedSteps.length > 0) {
+      missions[wpTypeName]['recipe'] = {
+        'steps': formatedSteps,
+      };
+    }
+  });
+
+  return missions;
+};
+
+const parseWorkProcessRecipeSteps = (wpTypeRecipeSteps: H_WorkProcessServicePlan[]) => {
+  const formattedSteps = wpTypeRecipeSteps.map((wpStep) => {
+    const formattedStep = {};
+    for (const [key, wpStepValue] of Object.entries(wpStep)) {
+      if (isObjectProperty(WorkProcessServicePlanTableToYmlMap, key)) {
+        const mappedKey = WorkProcessServicePlanTableToYmlMap[key];
+        if (["dependsOnSteps", "serviceConfig"].includes(key)) { // JSON.stringify() is used to preserve list brackets
+          if (wpStepValue != null) {
+            formattedStep[mappedKey] = JSON.stringify(wpStepValue, null, ymlJsonIndent);
+          }
+        } else {
+          formattedStep[mappedKey] = wpStepValue;
+        }
+      }
+    }
+
+    // add dummy service_config if not present
+    if (!isObjectProperty(formattedStep, 'service_config')) {
+      formattedStep['service_config'] = null;
+    }
+    return formattedStep;
+
+  });
+  return formattedSteps;
+};
+
+const missionstoYML = (missions: object) => {
   const dataJSON = {
     'version': '2.0',
     'missions': missions,
   };
-  workprocessTypes.forEach((wpType) => {
-
-    // parse properites of work_process_type into missions
-    missions[wpType.name] = {};
-    for (const key in wpType) {
-      if (Object.prototype.hasOwnProperty.call(WorkProcessTypeTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpType, key)) {
-        if (key === "settings" || key === "dispatchOrder") {
-          // JSON.stringify() is used to preserve list brackets
-          if (wpType[key] !== null) {
-            missions[wpType.name][WorkProcessTypeTableToYmlMap[key]] = JSON.stringify(wpType[key], null, jsonIndent);
-          }
-
-        } else {
-          missions[wpType.name][WorkProcessTypeTableToYmlMap[key]] = wpType[key];
-        }
-      }
-    }
-
-    // parse wp_plans into mission steps
-    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId === wpType.id);
-    const formatedSteps = wpTypeRecipeSteps.map((wpStep) => {
-      const formatedStep = {};
-      for (const key in wpStep) {
-        if (Object.prototype.hasOwnProperty.call(WorkProcessServicePlanTableToYmlMap, key) && Object.prototype.hasOwnProperty.call(wpStep, key)) {
-          if (key === "dependsOnSteps" || key === "serviceConfig") {  // JSON.stringify() is used to preserve list brackets
-            if (wpStep[key] != null) {
-              formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = JSON.stringify(wpStep[key], null, jsonIndent);
-            }
-          } else {
-            formatedStep[WorkProcessServicePlanTableToYmlMap[key]] = wpStep[key];
-          }
-        }
-      }
-
-      // add dummy service_config if not present
-      if (!Object.prototype.hasOwnProperty.call(formatedStep, 'service_config')) {
-        formatedStep['service_config'] = null;
-      }
-
-      return formatedStep;
-    });
-
-    if (formatedSteps.length > 0) {
-      missions[wpType.name]['recipe'] = {
-        'steps': formatedSteps,
-      };
-    }
-
-  });
-
   // convert JSON to yml
-  let ymlData = yaml.dump(dataJSON)
+  let ymlData = yamlDump(dataJSON);
   ymlData = ymlData
     .replace(/(\n\s{2}\w+:)/g, '\n\n$1') // 2 line spaces before mission name at 2 spaces indentation
     .replace(/(\n\s+- step:)/g, '\n$1'); // 1 line space before each step
-  return Promise.resolve(ymlData);
 
+  return ymlData;
 };
 
 /**
@@ -124,8 +144,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
 export const importFromYML = (rawdata: string, wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMethods: WORKPROCESS_SERVICE_PLAN) => {
   try {
 
-    const missions = yaml.load(rawdata);
-    console.log(flattenMissionsData(missions));
+    const missions = yamlLoad(rawdata) as object;
     const promises = flattenMissionsData(missions).map(
       async (wprocess) => {
         const workProcessTypeName = wprocess['name'];
@@ -201,7 +220,7 @@ const saveWorkProcessServicePlans = (
     // loop through the key-value pairs of each step object
     for (const [key2, value2] of Object.entries(step)) {
       // check if the key is in the mapping object
-      if (Object.keys(ymlToWorkProcessServicePlanTableMap).indexOf(key2) > -1) {
+      if (isObjectProperty(ymlToWorkProcessServicePlanTableMap, key2)) {
         // push the corresponding column name and value to the arrays
         colNames2.push(ymlToWorkProcessServicePlanTableMap[key2]);
         colValues2.push(value2);
@@ -238,7 +257,7 @@ const saveWorkProcessServicePlans = (
 flattenMissionsData()
 function which returns list of flat jsons with missions data.
 */
-const flattenMissionsData = (jsonObj) => {
+const flattenMissionsData = (jsonObj: object) => {
   try {
 
     // use lookup to find the missions object in the input json
@@ -255,21 +274,19 @@ const flattenMissionsData = (jsonObj) => {
       // loop through the key-value pairs of each mission object
       for (const [key2, value2] of Object.entries(value)) {
         // check if the key is in the mapping object
-        if (Object.keys(ymlToWorkProcessTypeTableMap).indexOf(key2) > -1) {
+        if (isObjectProperty(ymlToWorkProcessTypeTableMap, key2)) {
           // push the corresponding column name and value to the arrays
           colNames.push(ymlToWorkProcessTypeTableMap[key2]);
 
-          if (key2 === "settings" || key2 === "extraParams" || key2 === "dependencies" || key2 === "serviceConfig") {
+          if (["settings", "extraParams", "dependencies", "serviceConfig"].includes(key2)) {
             if (value2 != null) {
               colValues.push(JSON.parse(value2));
             } else {
               colValues.push(null);
             }
-
           } else {
             colValues.push(value2);
           }
-
         }
       }
 
@@ -277,8 +294,8 @@ const flattenMissionsData = (jsonObj) => {
       const patchFlat = {};
 
       // loop through the column names and assign them to the flattened mission object with their values
-      for (const [index, val] of colNames.entries()) {
-        patchFlat[val] = colValues[index];
+      for (const [key, value] of colNames.entries()) {
+        patchFlat[value] = colValues[key];
       }
 
       // push the flattened mission object to the mission list array
@@ -298,21 +315,21 @@ const flattenMissionsData = (jsonObj) => {
 lookup()
 function to search for nested objects by their keys.
 */
-const lookup = (obj, k) => {
+const lookup = (object: object, key: string) => {
   try {
     // check if the input is an object
-    if (typeof obj !== 'object') {
+    if (typeof object !== 'object') {
       return null;
     }
     let result = null;
     // check if the object has the key as a direct property
-    if (Object.prototype.hasOwnProperty.call(obj, k)) {
-      return obj[k];
+    if (isObjectProperty(object, key)) {
+      return object[key];
     } else {
       // otherwise, loop through the values of the object
-      for (const o of Object.values(obj)) {
+      for (const value of Object.values(object)) {
         // recursively call lookup on each value
-        result = lookup(o, k);
+        result = lookup(value, key);
         // if the result is not null, break the loop
         if (result == null) {
           continue;
