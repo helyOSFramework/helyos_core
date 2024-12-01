@@ -4,7 +4,7 @@
 const extServCommunication = require('../modules/communication/microservice_communication');
 const databaseServices = require('../services/database/database_services.js');
 const { logData} = require('../modules/systemlog');
-const { SERVICE_STATUS } = require('../modules/data_models');
+const { SERVICE_STATUS, ASSIGNMENT_STATUS } = require('../modules/data_models');
 const { determineServiceRequestStatus } = require('../modules/microservice_orchestration');
 
 
@@ -128,7 +128,7 @@ const waitForAssigmentsDependencies =() => {
     // when first assighment get ready it changes the status of dependents to "wait_dependencies"
     // here we just wait to switch wait_dependencies => to_dispatch
     
-    return databaseServices.assignments.select({status:'wait_dependencies'})
+    return databaseServices.assignments.select({status: ASSIGNMENT_STATUS.WAIT_DEPENDENCIES})
     .then((allAwaitingAssignments) => { 
         const promises = allAwaitingAssignments.map(
         async (assignment) => {
