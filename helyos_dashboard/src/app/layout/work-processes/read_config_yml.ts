@@ -91,7 +91,7 @@ export const exportToYML = async (wpTypeMethods: WORKPROCESS_TYPE, wpServPlanMet
 
       // add dummy service_config if not present
       if (!Object.prototype.hasOwnProperty.call(formatedStep, 'service_config')) {
-        formatedStep['service_config'] = "{}";
+        formatedStep['service_config'] = null;
       }
 
       return formatedStep;
