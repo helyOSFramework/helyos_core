@@ -82,7 +82,9 @@ function processWorkProcessEvents(channel, payload) {
                 switch (workProcessStatus) {
 
                     case MISSION_STATUS.DISPATCHED:
-                        databaseServices.work_processes.update_byId(payload['id'], {status: MISSION_STATUS.PREPARING})
+                        databaseServices.work_processes.updateByConditions({id:payload['id'], status:MISSION_STATUS.DISPATCHED},
+                                                                           {status: MISSION_STATUS.DISPATCHED}
+                        )
                         .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload))
                         .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `p ${err.message}`)});
                         break;
@@ -97,7 +99,9 @@ function processWorkProcessEvents(channel, payload) {
                         break;
 
                     case MISSION_STATUS.CANCELING:
-                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.CANCELED})
+                        databaseServices.work_processes.updateByConditions({id:payload['id'], status:MISSION_STATUS.CANCELING},
+                                                                           {status:MISSION_STATUS.CANCELED}
+                        )
                         .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
                         .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
                         .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
@@ -106,7 +110,9 @@ function processWorkProcessEvents(channel, payload) {
                         break;
 
                     case MISSION_STATUS.ASSIGNMENT_FAILED:
-                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
+                        databaseServices.work_processes.updateByConditions({id:payload['id'], status:MISSION_STATUS.ASSIGNMENT_FAILED},
+                                                                           {status:MISSION_STATUS.FAILED}
+                        )
                         .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
                         .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
                         .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
@@ -115,15 +121,19 @@ function processWorkProcessEvents(channel, payload) {
                         break;
 
                     case MISSION_STATUS.PLANNING_FAILED:
-                        databaseServices.work_processes.update_byId(payload['id'], {status:MISSION_STATUS.FAILED})
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'success', `Work process ${payload['id']}: ${workProcessStatus}`);
+                        databaseServices.work_processes.updateByConditions({id:payload['id'], status:MISSION_STATUS.PLANNING_FAILED},
+                                                                   {status:MISSION_STATUS.FAILED}
+                        )
                         .then(() => blAssignm.cancelRequestsToMicroservicesByWPId(payload['id']))
                         .then(() => blAssignm.cancelWorkProcessAssignments(payload['id']))
                         .then(() => blAssignm.onWorkProcessEnd(payload['id'], workProcessStatus))
-                        .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error',  `work_processes_update ${err.message}`)});
+                        .catch(err => {logData.addLog('helyos_core', {wproc_id: payload['id']},'error', `work_processes_update ${err.message}`)});
 
                         break;
 
                     case MISSION_STATUS.ASSIGNMENTS_COMPLETED:
+                        logData.addLog('helyos_core', {wproc_id: payload['id']},'success', `Work process ${payload['id']}: ${workProcessStatus}`);
                         databaseServices.assignments.select({work_process_id:payload['id'], status: ASSIGNMENT_STATUS.CANCELED})
                         .then( r => {
                             let w_process_status = r.length? MISSION_STATUS.CANCELED : MISSION_STATUS.SUCCEEDED;

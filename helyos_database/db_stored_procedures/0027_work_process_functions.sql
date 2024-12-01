@@ -42,22 +42,24 @@ CREATE OR REPLACE FUNCTION public.notify_work_processes_update()
 RETURNS trigger AS
 $BODY$
     BEGIN
-        PERFORM pg_notify('work_processes_update',            
-            (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT id, yard_id, work_process_type_id 
-             FROM public.work_processes 
-             WHERE id = NEW.id) r)
-        );
-        
-        INSERT INTO public.events_queue (event_name, payload)
-        VALUES ('work_processes_update', 
-            (SELECT row_to_json(r.*)::text FROM (
-             SELECT id, yard_id, work_process_type_id, status, work_process_type_name,
-                    agent_ids, on_assignment_failure, tools_uuids, agent_uuids, sched_start_at, fallback_mission
-             FROM public.work_processes 
-             WHERE id = NEW.id) r)
-        );
-        
+        IF NEW.status IS DISTINCT FROM OLD.status THEN
+            PERFORM pg_notify('work_processes_update',            
+                (SELECT row_to_json(r.*)::varchar FROM (
+                SELECT id, yard_id, work_process_type_id 
+                FROM public.work_processes 
+                WHERE id = NEW.id) r)
+            );
+            
+            INSERT INTO public.events_queue (event_name, payload)
+            VALUES ('work_processes_update', 
+                (SELECT row_to_json(r.*)::text FROM (
+                SELECT id, yard_id, work_process_type_id, status, work_process_type_name,
+                        agent_ids, on_assignment_failure, tools_uuids, agent_uuids, sched_start_at, fallback_mission
+                FROM public.work_processes 
+                WHERE id = NEW.id) r)
+            );
+        END IF;
+            
         RETURN NULL;
     END; 
 $BODY$

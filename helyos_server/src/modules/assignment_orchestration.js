@@ -137,7 +137,8 @@ async function assignmentUpdatesMissionStatus(id, wprocId) {
 			await databaseServices.work_processes.get_byId(wprocId, ['status'])
 			.then( wproc => {
 				if (UNCOMPLETE_MISSION_STATUS.includes(wproc.status)) {
-					return databaseServices.work_processes.update_byId(wprocId, { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
+					return databaseServices.work_processes.updateByConditions({id:wprocId, status__in: UNCOMPLETE_MISSION_STATUS},
+																			  { status: MISSION_STATUS.ASSIGNMENTS_COMPLETED});
 				}
 			});
 		}
