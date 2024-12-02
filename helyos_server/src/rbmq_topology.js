@@ -65,7 +65,7 @@ async function configureRabbitMQSchema(dataChannels) {
             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.database_req");
             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary_req");
             await mainChannel.bindQueue(SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE, "*.*.summary");  // MAGPIE COMPATIBLE
-            console.log("===> RabbitMQ Schema Completed");
+            console.log("====> RabbitMQ Schema Completed");
 
             return dataChannels;
 }

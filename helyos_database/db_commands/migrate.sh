@@ -14,7 +14,6 @@ if [ -f "/usr/local/helyos_core/helyos_database/migrations/pre_migrations.sql" ]
     echo "Running pre_migrations.sql: changes before adapting to new schema in '$PGDATABASE'"
     psql -q --dbname=$PGDATABASE  -v PGDATABASE="$PGDATABASE" -f "/usr/local/helyos_core/helyos_database/migrations/pre_migrations.sql"   
     echo "End pre-migration data updates '$PGDATABASE'"
-    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
 fi
 
 
