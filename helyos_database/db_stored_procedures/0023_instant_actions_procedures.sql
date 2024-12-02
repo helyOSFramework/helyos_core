@@ -1,4 +1,5 @@
  
+SET client_min_messages TO WARNING;
 
 
 CREATE OR REPLACE FUNCTION public.notify_instant_actions_insertion()
@@ -24,7 +25,9 @@ $BODY$
     END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_instant_actions_insertion() OWNER TO role_admin;
 
 
 

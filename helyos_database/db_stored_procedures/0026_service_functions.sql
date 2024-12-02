@@ -1,5 +1,6 @@
  
 
+SET client_min_messages TO WARNING;
 
 --
 --  Function used by the Triggers:  notifications on updates and automatic procedures
@@ -28,7 +29,9 @@ $BODY$
    END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_service_requests_insertion() OWNER TO role_admin;
 
   
 CREATE OR REPLACE FUNCTION public.notify_service_requests_updates()
@@ -56,7 +59,9 @@ $BODY$
     END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_service_requests_updates() OWNER TO role_admin;
 
 
 -- Changes status of the next service to "READY_TO_BE_SENT once the previous service is ready (result is not null)"

@@ -1,4 +1,5 @@
  
+SET client_min_messages TO WARNING;
 
 --
 --  Function used for query and mutations
@@ -64,7 +65,9 @@ $BODY$
     END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_work_processes_update() OWNER TO role_admin;
 
 
 CREATE OR REPLACE FUNCTION public.update_work_process_list_order()
@@ -102,7 +105,9 @@ $BODY$
    END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_work_processes_insertion() OWNER TO role_admin;
 
 
 
@@ -157,3 +162,4 @@ CREATE TRIGGER trigger_work_processes_insertion
 
 
 grant execute on function public.getWorkProcessActionData(work_process_id bigint)to role_admin, role_application, role_postgraphile;
+
