@@ -1,3 +1,4 @@
+SET client_min_messages TO WARNING;
  
 --
 --  Function used for query and mutations
@@ -12,11 +13,9 @@ CREATE OR REPLACE FUNCTION public.selectToolPoseHistory(
     COST 100
     STABLE 
     ROWS 1000
-AS $BODY$
-
- SELECT *  FROM public.agent_poses WHERE created_at < to_timestamp(end_time) AND  created_at > to_timestamp(start_time);
- 
-$BODY$;
+    AS $BODY$
+        SELECT *  FROM public.agent_poses WHERE created_at < to_timestamp(end_time) AND  created_at > to_timestamp(start_time);
+    $BODY$;
 
 
 
@@ -87,21 +86,27 @@ $BODY$
     END; 
 $BODY$
   LANGUAGE plpgsql VOLATILE
-  COST 100;
+  COST 100
+  SECURITY DEFINER;
+ALTER FUNCTION public.notify_change_tool() OWNER TO role_admin;
 
 
-CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
+CREATE OR REPLACE FUNCTION public.notify_new_rabbitmq_account(
   agent_id int,
   username text,
   password text
-) AS
+) RETURNS void AS
 $BODY$
     BEGIN
        PERFORM pg_notify('new_rabbitmq_account', (json_build_object('agent_id', agent_id))::text);
        
        INSERT INTO public.events_queue (event_name, payload)
        VALUES ('new_rabbitmq_account', json_build_object('username', username, 'password', password, 'agent_id', agent_id)::text);
+      
+       RETURN;
+
     END; 
+
 $BODY$
 LANGUAGE plpgsql;
 
@@ -133,7 +138,10 @@ $BODY$
         RETURN NULL;
     END; 
 $BODY$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_deleted_tool() OWNER TO role_admin;
 
 
 ---------------------
@@ -158,15 +166,12 @@ BEGIN
   END IF;
 
   
-  CALL public.notify_new_rabbitmq_account(agent_id, username, password);
+  PERFORM public.notify_new_rabbitmq_account(agent_id, username, password);
 
   return 0;
 
 END
 $$  language plpgsql strict security definer;
-
-
-comment on function public.admin_change_password(text,text) is 'Admin changes regular user passwords.';
 
 
 
@@ -219,9 +224,9 @@ EXECUTE PROCEDURE public.notify_deleted_tool();
 
 
 
-
-
-
 grant execute on function public.create_row_tool_sensors_history() to role_admin, role_application, role_postgraphile;
-grant execute on function public.register_rabbitmq_account() to role_admin, role_postgraphile;
+grant execute on function public.register_rabbitmq_account(agent_id int,
+                                                            username text,
+                                                            password text
+                                                          )  to role_admin, role_postgraphile;
 

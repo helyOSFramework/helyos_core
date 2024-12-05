@@ -1,4 +1,5 @@
  
+SET client_min_messages TO WARNING;
 
 
 --
@@ -29,7 +30,9 @@ $BODY$
     END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_mission_queue_update() OWNER TO role_admin;
 
 
 
@@ -57,7 +60,9 @@ $BODY$
    END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_mission_queue_insertion() OWNER TO role_admin;
 
 
 

@@ -110,7 +110,7 @@ const createAccounts = () =>  rbmqAccessLayer.createUser(RBMQ_USERNAME,RBMQ_PASS
 const connect_as_admin_and_create_accounts = () => rbmqAccessLayer.connect(urlObj(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD), sslOptions)
                             .then(conn => {
                                 console.log("=========================");
-                                console.log("Creating  user helyos_core in AMQP server\n", urlObj().hostname );
+                                console.log("Creating account for helyos_core in the AMQP server\n", urlObj().hostname );
                                 console.log("=========================");
                                 logData.addLog('helyos_core', null, 'warn', 'Connected to AMQP, creating accounts...' );
                                 return createAccounts();
@@ -281,7 +281,7 @@ async function assertOrSubstituteQueue(channel, queueName, exclusive, durable, a
         }
 
         await channel.assertQueue(queueName, {exclusive: exclusive, durable: durable, arguments: arguments});
-        console.log(`Queue ${queueName} asserted.`);
+        logData.addLog('helyos_core', null, 'info', `Queue ${queueName} was asserted.`);
         return true;
 
     } catch (error) {

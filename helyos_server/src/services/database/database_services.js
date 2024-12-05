@@ -16,11 +16,10 @@ const pgNotifications = new Client();
 
 const connectToDB = async (_client, statementTimeout = 0) => {
 	await _client.connect();
-	console.log("CREATE DATABASE CLIENT CONNECTION");
 	if (statementTimeout > 0) {
 		await _client.query(`SET statement_timeout = ${statementTimeout}`);
-		console.log(`Statement timeout set to ${statementTimeout} milliseconds`);
 	}
+	console.log(`CREATE DATABASE CLIENT CONNECTION. STATEMENT_TIMEOUT=${statementTimeout} milliseconds`);
 }
 
 const disconnectFromDB = async (clients) => {

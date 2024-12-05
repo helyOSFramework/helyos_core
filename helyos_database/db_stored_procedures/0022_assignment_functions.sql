@@ -1,4 +1,5 @@
- 
+SET client_min_messages TO WARNING;
+
 
 --  Function used by the Triggers:  notifications on updates and automatic procedures
 --
@@ -26,7 +27,9 @@ $BODY$
    END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_assignments_insertion() OWNER TO role_admin;
 
   
 CREATE OR REPLACE FUNCTION public.notify_assignments_updates()
@@ -52,7 +55,9 @@ $BODY$
     END; 
 $BODY$
 LANGUAGE plpgsql VOLATILE
-COST 100;
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_assignments_updates() OWNER TO role_admin;
 
 
 

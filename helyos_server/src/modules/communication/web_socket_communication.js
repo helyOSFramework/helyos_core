@@ -4,7 +4,7 @@ const socketService = require('../../services/socket_services.js');
 const utils = require('../../modules/utils.js');
 const memDBServices = require('../../services/in_mem_database/mem_database_service');
 const { logData } = require('../systemlog.js');
-const PERIOD = 1000;
+const PERIOD = 100;
 const roleManagerModule = require('../../role_manager.js');
 
 // Buffer Notifications to avoid flooding front-end with messages
