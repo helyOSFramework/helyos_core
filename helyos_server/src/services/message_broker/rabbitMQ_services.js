@@ -281,7 +281,7 @@ async function assertOrSubstituteQueue(channel, queueName, exclusive, durable, a
         }
 
         await channel.assertQueue(queueName, {exclusive: exclusive, durable: durable, arguments: arguments});
-        console.log(`Queue ${queueName} asserted.`);
+        logData.addLog('helyos_core', null, 'info', `Queue ${queueName} was asserted.`);
         return true;
 
     } catch (error) {
