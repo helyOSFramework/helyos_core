@@ -25,7 +25,7 @@ describe('10 Test Mission composed of map update and driving',   () =>  {
     });
 
     it('Mission is canceled by app -> Microservice is canceled, agent has not yet an assignment', async () => {
-        await helyosApplication.waitMicroserviceStatus(1, 'executing');
+        await helyosApplication.waitMicroserviceStatus(1, 'pending');
         await helyosApplication.cancelMission(1);
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'canceled');
         expect(result).toEqual('canceled');
