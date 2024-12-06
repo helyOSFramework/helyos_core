@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HelyosService } from '../../services/helyos.service';
 import { H_Assignment } from 'helyosjs-sdk';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { downloadObject } from 'src/app/shared/utilities';
 
 @Component({
   selector: 'app-agent-assignments',
@@ -126,18 +127,8 @@ export class AgentAssignmentsComponent implements OnInit {
   }
 
   downloadData() {
-    this.downloadObject(this.selectedItem.data,
-      `assignment_data_${this.selectedItem.id}.json`,
-      'application/json');
-  }
-
-  downloadObject(content, fileName, contentType) {
-    const a = document.createElement("a");
-    const file = new Blob([content], {
-      type: contentType,
-    });
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
+    const content = this.selectedItem.data;
+    const fileName = `assignment_data_${this.selectedItem.id}.json`;
+    downloadObject(content, fileName, 'application/json');
   }
 }

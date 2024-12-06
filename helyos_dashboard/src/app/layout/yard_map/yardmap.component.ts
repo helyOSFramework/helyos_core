@@ -2,6 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/co
 import { H_Yard } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { H_MapObject } from 'helyosjs-sdk/dist/helyos.models';
+import { downloadObject } from 'src/app/shared/utilities';
 
 @Component({
   selector: 'app-yardmap',
@@ -198,23 +199,16 @@ export class YardmapComponent implements OnInit, AfterViewInit {
     const dataFormat = this.selectedItem.dataFormat;
     const id = this.selectedItem.id;
     alert(`${mapObjects.length} objects to download`);
-    this.downloadObject(JSON.stringify({
+    const object = {
       id,
       mapObjects,
       origin,
       dataFormat,
-    }, undefined, 4), `${this.selectedItem.name}.json`, 'application/json');
+    };
+    const content = JSON.stringify(object, undefined, 4);
+    const fileName = `${this.selectedItem.name}.json`;
+    downloadObject(content, fileName, 'application/json');
 
-  }
-
-  downloadObject(content, fileName, contentType) {
-    const a = document.createElement("a");
-    const file = new Blob([content], {
-      type: contentType,
-    });
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
   }
 
   browserYardShapes() {

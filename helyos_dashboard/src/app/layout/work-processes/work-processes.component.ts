@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { H_WorkProcessType } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
 import { exportToYML, importFromYML } from './read_config_yml';
+import { downloadObject } from 'src/app/shared/utilities';
 
 @Component({
   selector: 'app-work-processes',
@@ -108,18 +109,8 @@ export class WorkProcessesComponent implements OnInit {
     // convert DB data to yml
     exportToYML(this.helyosService.methods.workProcessType, this.helyosService.methods.workProcessServicePlan)
       .then(ymlData => {
-        this.downloadObject(ymlData, 'missions.yml', 'application/x-yaml');
+        downloadObject(ymlData, 'missions.yml', 'application/x-yaml');
       });
-  }
-
-  downloadObject(content, fileName, contentType) {
-    const a = document.createElement("a");
-    const file = new Blob([content], {
-      type: contentType,
-    });
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
   }
 
 }
