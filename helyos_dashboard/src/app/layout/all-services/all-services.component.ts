@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { H_Service } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
+import { downloadObject, yamlDump } from 'src/app/shared/utilities';
 
 @Component({
   selector: 'app-all-services',
@@ -101,5 +102,84 @@ export class AllServicesComponent implements OnInit {
         item.enabled = !item.enabled;
         this.list();
       });
+  }
+
+  exportYML() {
+    if (!this.services) {
+      alert('No Microservices Found');
+      return;
+    }
+    this.parseServices()
+      .then((services) => {
+        const dataJSON = {
+          'version': '2.0',
+          'services': services,
+        };
+        let ymlData = yamlDump(dataJSON);
+        ymlData = ymlData
+          .replace(/(\n\s{2}\w+:)/g, '\n\n$1'); // 2 line spaces before service name at 2 spaces indentation
+
+        downloadObject(ymlData, 'microservices.yml', 'application/x-yaml');
+      });
+  }
+
+  private async parseServices() {
+    const ymlJsonIndent = 2;
+    const servicesToYmlMap = {
+      serviceType: 'type',
+      serviceUrl: 'url',
+      licenceKey: 'apikey',
+      class: 'domain',
+      isDummy: 'is_dummy',
+      enabled: 'enable',
+      resultTimeout: 'timeout',
+      config: 'config',
+      requireMapData: 'context.map_data',
+      requireMissionAgentsData: 'context.mission_agents_data',
+      requireAgentsData: 'context.all_agents_data',
+      requireMapObjects: 'context.require_map_objects',
+      description: 'description',
+    };
+
+    const services = {};
+    const servicesDetails = await this.fetchServicesInParallel();
+
+    servicesDetails.forEach((service) => {
+      const mappedItem = {};
+      const serviceName = service["name"];
+
+      for (const [jsonKey, yamlKey] of Object.entries(servicesToYmlMap)) {
+        const value = service[jsonKey];
+        if (yamlKey.includes('.')) {
+          // Handle nested context mappings
+          const [mainKey, subKey] = yamlKey.split('.');
+          mappedItem[mainKey] = mappedItem[mainKey] || {}; // if mainKey not present, initialize it
+          mappedItem[mainKey][subKey] = value;
+        } else {
+          mappedItem[yamlKey] = value;
+        }
+      }
+
+      const config = JSON.parse(mappedItem["config"]);
+      mappedItem["config"] = JSON.stringify(config, null, ymlJsonIndent);
+
+      services[serviceName] = mappedItem;
+    });
+    return services;
+  }
+
+  private async fetchServicesInParallel() {
+    try {
+      // Create an array of promises for each service request
+      const servicePromises = this.services.map((service) =>
+        this.helyosService.methods.extServices.get(service.id)
+      );
+      const results = await Promise.all(servicePromises);
+
+      return results;
+    } catch (error) {
+      console.error('Error fetching services details:', error);
+      return [];
+    }
   }
 }
