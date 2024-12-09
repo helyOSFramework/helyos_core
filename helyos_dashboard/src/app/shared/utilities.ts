@@ -8,7 +8,9 @@ function isObjectProperty(object: object, propertyName: string): boolean {
 // download an object as a file
 function downloadObject(content: any, fileName: string, contentType: string): void {
   const a = document.createElement("a");
-  const file = new Blob([content], { type: contentType });
+  const file = new Blob([content], {
+    type: contentType,
+  });
   a.href = URL.createObjectURL(file);
   a.download = fileName;
   a.click();
@@ -28,5 +30,5 @@ export {
   isObjectProperty,
   downloadObject,
   yamlDump,
-  yamlLoad
+  yamlLoad,
 };
