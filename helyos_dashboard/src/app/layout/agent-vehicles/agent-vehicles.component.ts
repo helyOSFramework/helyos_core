@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { H_Agent, H_AgentInterconnection, H_InstantAction } from 'helyosjs-sdk';
 import { HelyosService } from '../../services/helyos.service';
-import { AgentClass } from 'helyosjs-sdk/dist/helyos.models';
+import { AgentClass, H_Yard } from 'helyosjs-sdk/dist/helyos.models';
 
 @Component({
   selector: 'app-agent-vehicles',
@@ -19,6 +19,7 @@ export class AgentVehiclesComponent implements OnInit {
   public showOthers = false;
   private agentClass: AgentClass = AgentClass.Vehicle;
   public saveStateMsg: string = '';
+  public agentYard: H_Yard = null;
 
   constructor(private helyosService: HelyosService) {
 
@@ -108,13 +109,24 @@ export class AgentVehiclesComponent implements OnInit {
         this.saveStateMsg = '';
         const id = r.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
+
         this.helyosService.methods.toolsInterconnections.list({
           leaderId: leaderId,
         })
-          .then(r => {
+        .then(r => {
             this.interconnections = r;
             return this.interconnections;
-          });
+        })
+        .then(() => {
+          this.helyosService.methods.yard.get(this.selectedItem.yardId as any)
+          .then( yard => {
+            if (yard) {
+              this.agentYard = yard;
+            } else {
+              this.agentYard = null;
+            }
+          })
+        });
       });
   }
 
