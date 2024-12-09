@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS public.yards (
     rbmq_vhost character varying(255) DEFAULT NULL,
     alt double precision,
     data_format character varying default 'trucktrix-map',
-    coordinate_unit character varying default 'mm_xy_east_north'
+    unit character varying default 'mm - mrad',
+    coordinate_frame character varying default 'cart_x_east_y_north'
 
     );
 
@@ -30,5 +31,6 @@ comment on column yards.map_data is '@ map data object. Example: { "origin": { "
 comment on column yards.lat is '@ latitude of the yard reference point';
 comment on column yards.lon is '@ longitude of the yard reference point';
 comment on column yards.description is '@ field for the arbitrary description of the yard';
-comment on column yards.rbmq_vhost is '@ rabbitmq virtual host'; 
-
+comment on column yards.rbmq_vhost is '@ RabbitMQ virtual host associated with the yard.';
+comment on column yards.coordinate_frame is '@ Coordinate frame used for the yard. Default is "cart_x_east_y_north".';
+comment on column yards.unit is '@ Unit of measurement for the yard.';

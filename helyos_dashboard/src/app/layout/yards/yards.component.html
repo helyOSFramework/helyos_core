@@ -125,15 +125,27 @@
       </fieldset>
 
       <fieldset class="form-group col-xl-4">
-        <label for="dataFormat">Coordinate Unit</label>
+        <label for="dataFormat">Coordinate Frame</label>
         <input
-          id="dataFormat"
+          id="coordinateFrame"
           type="text"
           class="form-control"
-          [(ngModel)]="selectedItem.coordinateUnit"
-          name="dataFormat"
-          placeholder="e.g. lat-long" />
+          [(ngModel)]="selectedItem.coordinateFrame"
+          name="coordinateFrame"
+          placeholder="e.g. LAT-LON, UTM, etc." />
       </fieldset>
+
+      <fieldset class="form-group col-xl-3">
+        <label for="unit">Units</label>
+        <input
+          id="unit"
+          type="text"
+          class="form-control"
+          [(ngModel)]="selectedItem.unit"
+          name="unit"
+          placeholder="e.g. mm" />
+      </fieldset>
+
 
     </div>
 

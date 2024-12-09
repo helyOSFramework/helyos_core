@@ -137,7 +137,7 @@
                 </fieldset>
 
                 <fieldset class="form-group col-xl-2">
-                  <label for="yardId">yard id</label>
+                  <label for="yardId">Yard id</label>
                   <input
                     id="yardId"
                     type="number"
@@ -257,16 +257,6 @@
                     name="z"
                     placeholder="13000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
-                  <label for="unit">unit</label>
-                  <input
-                    id="unit"
-                    type="text"
-                    class="form-control"
-                    [(ngModel)]="unit"
-                    name="unit"
-                    placeholder="e.g. mm" />
-                </fieldset>
               </div>
 
               <div class="row">
@@ -290,6 +280,38 @@
                     name="orientations"
                     placeholder="1.57, 3.14,..." />
                 </fieldset>
+              </div>
+
+
+              <div class="row">
+
+                <fieldset class="form-group col-xl-4">
+                  <label for="dataFormat">Coordinate Frame</label>
+                  <input
+                    id="coordinateFrame"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.coordinateFrame"
+                    name="coordinateFrame"
+                    placeholder="e.g. LAT-LON, UTM, etc." />
+                </fieldset>
+
+                <fieldset class="form-group col-xl-4">
+                  <label for="unit">Units for (x,y,z) and orientations</label>
+                  <input
+                    id="unit"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.unit"
+                    name="unit"
+                    placeholder="e.g. mm" />
+                </fieldset>
+
+                <div *ngIf="agentYard && (agentYard?.coordinateFrame != selectedItem.coordinateFrame || agentYard?.unit != selectedItem.unit)" 
+                    class="col-xl-3" style="font-size: small; color: red; margin: auto ">
+                  The coordinate frame or position units reported by this agent may be incompatible with the current yard!
+                </div>
+
               </div>
 
               <br />
