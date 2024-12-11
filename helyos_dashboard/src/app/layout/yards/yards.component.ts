@@ -77,12 +77,17 @@ export class YardsComponent implements OnInit {
     };
     delete patch.createdAt;
     delete patch.modifiedAt;
+    delete patch._customCoordinateFrame;
 
     try {
       patch.mapData = JSON.parse(patch.mapData);
     } catch (error) {
       alert('Map Info is no a valid JSON');
       return;
+    }
+
+    if (item._customCoordinateFrame){
+      patch.coordinateFrame = item._customCoordinateFrame;
     }
 
     this.helyosService.methods.yard.patch(patch)

@@ -231,6 +231,17 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
         agentUpdate['data_format'] = checkinData['data_format'];
     }
 
+    if ('unit' in checkinData) {
+        agentUpdate['unit'] = checkinData['unit'];
+    }
+
+    if ('coordinate_frame' in checkinData) {
+        agentUpdate['coordinate_frame'] = checkinData['coordinate_frame'];
+    }
+
+    if ('reference_point' in checkinData) {
+        agentUpdate['reference_point'] = checkinData['reference_point'];
+    }
 
     if ('factsheet' in checkinData){
         agentUpdate['factsheet'] =  checkinData['factsheet'];

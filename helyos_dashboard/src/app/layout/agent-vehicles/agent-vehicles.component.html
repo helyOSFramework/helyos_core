@@ -135,7 +135,7 @@
                 </fieldset>
 
                 <fieldset class="form-group col-xl-2">
-                  <label for="yardId">yard id</label>
+                  <label for="yardId">Yard id</label>
                   <input
                     id="yardId"
                     type="number"
@@ -226,7 +226,7 @@
               <p>The position parameters should be set according to the chosen reference in your application.</p>
 
               <div class="row">
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="x">x (unit)</label>
                   <input
                     id="x"
@@ -236,7 +236,7 @@
                     name="x"
                     placeholder="5000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="y">y (unit)</label>
                   <input
                     id="y"
@@ -246,7 +246,7 @@
                     name="y"
                     placeholder="13000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="z">z (unit)</label>
                   <input
                     id="z"
@@ -256,16 +256,20 @@
                     name="z"
                     placeholder="13000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
-                  <label for="unit">unit</label>
+                <fieldset class="form-group col-xl-4">
+                  <label for="referencePoint">ref. point</label>
                   <input
-                    id="unit"
+                    id="referencePoint"
                     type="text"
                     class="form-control"
-                    [(ngModel)]="unit"
-                    name="unit"
-                    placeholder="e.g. mm" />
+                    [(ngModel)]="selectedItem.referencePoint"
+                    name="z"
+                    placeholder="e.g. body center" />
+                    <small class="form-text text-muted">
+                      Specify the point on the agent's body that corresponds to the given x, y, z coordinates.
+                    </small>
                 </fieldset>
+
               </div>
 
               <div class="row">
@@ -291,11 +295,54 @@
                 </fieldset>
               </div>
 
+              <div class="row">
+
+                <fieldset class="form-group col-xl-4">
+                  <label for="dataFormat">Coordinate Frame</label>
+                  <select
+                      id="coordinateFrame"
+                      class="form-control"
+                      [(ngModel)]="selectedItem.coordinateFrame"
+                      name="coordinateFrame">
+                      <option value="WGS84">WGS84</option>
+                      <option value="UTM">UTM</option>
+                      <option value="local-UTM">local-UTM</option>
+                      <option value="Other...">Other...</option>
+                      <option *ngIf="!['local-UTM', 'UTM', 'WGS84', 'Other...'].includes(selectedItem.coordinateFrame)" 
+                      [value]="selectedItem.coordinateFrame">{{ selectedItem.coordinateFrame }}</option>
+                  </select>
+                  <input
+                      *ngIf="selectedItem.coordinateFrame === 'Other...'"
+                      type="text"
+                      class="form-control mt-2"
+                      [(ngModel)]="selectedItem._customCoordinateFrame"
+                      name="_customCoordinateFrame"
+                      placeholder="Enter custom value" />
+                </fieldset>
+
+                <fieldset class="form-group col-xl-4">
+                  <label for="unit">Units for (x,y,z) and orientations</label>
+                  <input
+                    id="unit"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.unit"
+                    name="unit"
+                    placeholder="e.g. mm" />
+                </fieldset>
+
+                <div *ngIf="agentYard && (agentYard?.coordinateFrame != selectedItem.coordinateFrame || agentYard?.unit != selectedItem.unit)" 
+                    class="col-xl-3" style="font-size: small; color: red; margin: auto ">
+                  The coordinate frame or position units reported by this agent may be incompatible with the current yard!
+                </div>
+
+              </div>
+
               <br />
 
               <div class="row">
                 <fieldset class="form-group col-xl-12">
-                  <label for="geometry"> geometry (JSON)</label>
+                  <label for="geometry"> Geometry (JSON)</label>
                   <textarea
                     id="geometry"
                     class="form-control"

@@ -69,6 +69,14 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
         agentUpdate['unit'] = msgBody['unit'];
     }
 
+    if ('coordinate_frame' in msgBody) {
+        agentUpdate['coordinate_frame'] = msgBody['coordinate_frame'];
+    }
+
+    if ('reference_point' in msgBody) {
+        agentUpdate['reference_point'] = msgBody['reference_point'];
+    }
+
     if ('sensors' in msgBody) {
         agentUpdate['sensors'] = msgBody['sensors'];
     }
