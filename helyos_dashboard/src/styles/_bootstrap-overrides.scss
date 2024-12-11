@@ -1,0 +1,28 @@
+// Include any default variable overrides here (though functions won't be available)
+
+// border
+$border-color: #ced4da;
+
+// card
+$card-cap-padding-y: 0.75rem;
+$card-cap-padding-x: 1.25rem;
+
+// table
+$table-cell-padding-y: 0.75rem;
+$table-cell-padding-x: 0.75rem;
+
+// list
+$list-group-item-padding-y: 0.7rem;
+$list-group-item-padding-x: 1.25rem;
+
+@import 'bootstrap/scss/bootstrap';
+
+// add additional custom code here
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  margin-bottom: 0.5rem;
+}

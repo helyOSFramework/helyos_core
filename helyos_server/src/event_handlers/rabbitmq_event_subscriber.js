@@ -1,19 +1,18 @@
 const databaseServices = require('../services/database/database_services.js');
-const { inMemDB, DataRetriever } = require('../services/in_mem_database/mem_database_service.js');
+const memDBService = require('../services/in_mem_database/mem_database_service.js');
 const { AGENT_MQTT_EXCHANGE, AGENTS_DL_EXCHANGE, CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE,
         AGENT_UPDATE_QUEUE, AGENT_STATE_QUEUE, AGENT_VISUALIZATION_QUEUE, verifyMessageSignature } = require('../services/message_broker/rabbitMQ_services.js');
 const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handler');
 const {yardAutoUpdate} = require('./rabbitmq_event_handlers/yard_update_event_handler');
 const {agentCheckIn} = require('./rabbitmq_event_handlers/checkin_event_handler');
 const {updateState} = require('./rabbitmq_event_handlers/status_event_handler');
-const {saveLogData} = require('../modules/systemlog.js');
+const { logData} = require('../modules/systemlog.js');
 const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_handler');
 const { deleteConnections } = require('../services/message_broker/rabbitMQ_access_layer.js');
 
-const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || '0000-0000-0000-0000-0000';
-const AGENT_REGISTRATION_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
-const MESSAGE_RATE_LIMIT = process.env.MESSAGE_RATE_LIMIT || 150;
-const MESSAGE_UPDATE_LIMIT = process.env.MESSAGE_UPDATE_LIMIT || 20;
+const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
+const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
+const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const {MISSION_STATUS } = require('../modules/data_models.js');
 
 /**
@@ -48,21 +47,27 @@ function parseMessage(message) {
                                     
 
 const isAgentLeader = (leaderUUID, followerUUID) => { 
-        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['interconnections'] )
-        .then(leader => leader[0].interconnections.some(t => t.uuid === followerUUID));
+        return databaseServices.agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections'] )
+    .then(leader => {
+        if (leader.length === 0) {
+            logData.addLog('agent', {uuid: leaderUUID}, 'error', `Agent cannot be found in the database: ${leaderUUID}`);
+            return false;
+        }
+        return leader[0].follower_connections.some(t => t.uuid === followerUUID)
+    })
 }
 
 function identifyMessageSender(objMsg, routingKey) {
     // 1st option: search uuid in message. 2nd option: search uuid in the routing key
     let uuid = objMsg && objMsg.obj['uuid'];
-    if (!uuid && routingKey.startsWith('agent')) {
+    if (!uuid && (routingKey.startsWith('agent.') || routingKey.startsWith('yard.')) ) {
         try {
             uuid = routingKey.split('.').reverse()[1];
             if (!uuid){
                 throw Error(`UUID code is not present in the routing-key, topic or message`);
             }
         } catch (error) {
-            saveLogData('agent', objMsg, 'warn', `error in parsing the UUID from routing-key: ${routingKey}`);
+            logData.addLog('agent', objMsg, 'warn', `error in parsing the UUID from routing-key: ${routingKey}`);
             throw ({msg:`UUID code is not present in the routing-key, topic or message`, code: 'AGENT-400'});
         }
     }
@@ -71,7 +76,7 @@ function identifyMessageSender(objMsg, routingKey) {
 }
 
 
-async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange) {
+async function validateMessageSender(inMemDB, registeredAgent, uuid, objMsg, msgProps, exchange) {
 
             if ( registeredAgent.protocol === 'AMQP' && exchange === AGENT_MQTT_EXCHANGE ) {
                 throw ({msg:`Wrong protocol; agent is registered as AMQP; ${uuid}`, code: 'AGENT-400'});
@@ -89,14 +94,15 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                     const possibleLeaderUUID = agentAccount; // The account is possibly from the leader.
                     if (possibleLeaderUUID !== registeredAgent.rbmq_username) {
                         if (await isAgentLeader(possibleLeaderUUID, uuid)) { // May be is the leader account but not registered yet at the agent.
-                            console.log(`Agent ${uuid} is using the leader account ${possibleLeaderUUID}`);
-                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime');
+                            inMemDB.update('agents', 'uuid', {uuid, rbmq_username:possibleLeaderUUID}, new Date(), 'realtime',  0, databaseServices.agents);
                         } else { // OK, we did our best to validate you and you will be disconnected.
-                            saveLogData('agent', {uuid}, 'error', `Agent disconnected: RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`)
-                            deleteConnections(agentAccount);
+                            logData.addLog('agent', {uuid}, 'error', 
+                                `helyOS disconnected the agent: An agent is trying to publish a message for another agent.` + 
+                                `For interconnected agents, the RabbitMQ username ${agentAccount} should match the leader's UUID.`)
                             inMemDB.delete('agents', 'uuid', uuid);
                             inMemDB.delete('agents', 'uuid', agentAccount);
-                            throw Error(`RabbitMQ username ${agentAccount} does not match agent uuid or agent leader!`);
+                            deleteConnections(agentAccount);
+                            throw Error(`RabbitMQ username ${agentAccount} does not match either the agent's UUID or its leader's UUID.`);
                         }
                     }
                 }
@@ -111,9 +117,37 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
                     }
                 } else {    
                     deleteConnections(uuid);
-                    throw ({msg:`signature or public key-absent; ${uuid}`, code: 'AGENT-403'});
+                    throw ({msg:`Signature or public key-absent; ${uuid}`, code: 'AGENT-403'});
                 }
             }
+}
+
+
+function validateAnonymousCheckin(registeredAgent, checkinData) {
+
+    const errorMsg = registeredAgent? `Agent registered, logged as anonymous` : `Agent not registered, logged as anonymous`;
+    const errorCode = registeredAgent? 'AGENT-403' : 'AGENT-404';
+
+    if (!checkinData['registration_token'] ) {
+        throw ({
+            msg: `${errorMsg}, No "registration_token" provided by agent during check-in.`,
+            code: errorCode
+        });
+    }
+
+    if (!AGENT_REGISTRATION_TOKEN) {
+        throw ({
+            msg:`${errorMsg}, AGENT_REGISTRATION_TOKEN was not set in this helyOS server.`, 
+            code: errorCode
+        });
+    }
+
+    if (checkinData['registration_token'] !== AGENT_REGISTRATION_TOKEN) {
+        throw ({
+            msg:`${errorMsg}, Agent's registration_token is invalid`, 
+            code: errorCode
+        });
+    }   
 }
 
 
@@ -121,12 +155,11 @@ async function validateMessageSender(registeredAgent, uuid, objMsg, msgProps, ex
 const SECURITY_FIELDS = ['id', 'uuid', 'protocol', 'rbmq_username',
                          'allow_anonymous_checkin', 'public_key', 'verify_signature'];
 
-const agentDataRetriever = new DataRetriever(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
 
 /**
  * That is the main function of this module.
  * it handles the messages received from the message broker.
- * @param {string} channelOrQueue - The name of the channel or queue.
+ * @param {string} queueName - The name of the channel or queue.
  * @param {Object} message - The message object.
  * @returns {Promise} A promise that resolves after the message is processed.
  * 
@@ -143,18 +176,17 @@ const agentDataRetriever = new DataRetriever(inMemDB, databaseServices, 'agents'
  * And, if required, verifies the signature of the message.
  * 
  **/
-function handleBrokerMessages(channelOrQueue, message)   {
+function handleBrokerMessages(channel, queueName, message)   {
     let objMsg;
     const content = message.content;
     if (!content) return;
     let msgProps = message.properties;
     const exchange = message.fields.exchange;
     const routingKey  = message.fields.routingKey;
-
     try {
         objMsg = parseMessage(content);
     } catch (error) {
-        saveLogData('agent', {}, 'error', `agent message to ${routingKey} is not a valid JSON`);
+        logData.addLog('agent', {}, 'error', `agent message to ${routingKey} is not a valid JSON`);
         return;
     }
 
@@ -169,79 +201,64 @@ function handleBrokerMessages(channelOrQueue, message)   {
 
     ( async () => {
 
+        const inMemDB = await memDBService.getInstance();
+        const agentDataRetriever =  memDBService.DataRetriever.getInstance(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
+
 // VALIDATE MESSAGE SENDER
         let registeredAgent = await agentDataRetriever.getData(uuid);
         
-        if (!registeredAgent && channelOrQueue !== CHECK_IN_QUEUE) {
+        if (!registeredAgent && queueName !== CHECK_IN_QUEUE) {
             throw ({msg:`Agent is not registered; ${uuid}`, code: 'AGENT-404'});
         }
 
         if (registeredAgent) {
-            await validateMessageSender(registeredAgent, uuid, objMsg, msgProps, exchange);
+            await validateMessageSender(inMemDB,registeredAgent, uuid, objMsg, msgProps, exchange);
         }
 
 // CHECK-IN 
-        if (channelOrQueue == CHECK_IN_QUEUE) {
+        if (queueName == CHECK_IN_QUEUE) {
             let checkinData = objMsg.obj.body? objMsg.obj.body : objMsg.obj; // compatibility for agent versions < 2.0
 
-            // SPECIAL CASE: CHECK-IN IS USED FOR CREATING REGISTRATION OR CHANGING REGISTRATION
-            if ( !registeredAgent && checkinData['registration_token'] !== AGENT_REGISTRATION_TOKEN) {
-                throw ({msg:`Agent is not registered; ${uuid} and registration token is invalid`, code: 'AGENT-404'});
-            }   
-            if (registeredAgent &&  isAnonymousConnection ) {
-                registeredAgent = await agentDataRetriever.getData(uuid, 'uuid', true);
-                if(!registeredAgent['allow_anonymous_checkin']){
-                    throw ({msg:`Anonymous check-in is not enabled for this agent.; ${uuid}`, code: 'AGENT-403'});
+            if (!registeredAgent){
+                validateAnonymousCheckin(registeredAgent, checkinData);
+
+            } else {
+                if (isAnonymousConnection) {
+                        registeredAgent = await agentDataRetriever.getData(uuid, 'uuid', true);
+                        if(!registeredAgent['allow_anonymous_checkin']){
+                            throw ({msg:`Anonymous check-in is not enabled for this agent.; ${uuid}`, code: 'AGENT-403'});
+                        }
+                        validateAnonymousCheckin(registeredAgent, checkinData);
                 }
             }
             
-            saveLogData('agent', objMsg.obj, 'normal', `agent trying to check in ${message.content.toString()}`);
+            logData.addLog('agent', checkinData, 'info', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
             const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then(( ) =>  saveLogData('agent', objMsg.obj, 'normal', `agent checked in ${message.content.toString()}`))
+                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked in`))
                     .catch( err => {
-                        console.log('checkin:', err);
-                        saveLogData('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
+                        console.error('checkin:', err);
+                        logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                     });
         }
 
 
 
-    // SENDER IS INDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
+    // SENDER IS IDENTIFIED, CHECKED-IN, REGISTERED AND VALIDATED, LET'S NOW PROCESS THE MESSAGE...
 
-        // Check if the agent is sending too many messages per second.
-        inMemDB.agents_stats[uuid]['msgPerSecond'].countMessage();
-        const avgRates = inMemDB.getHistoricalCountRateAverage('agents', uuid, 20);
-        let closeConnection = false;
-        
-        if (avgRates.avgMsgPerSecond > MESSAGE_RATE_LIMIT ) {
-            saveLogData('agent', {uuid}, 'error', `Agent disconnected: high number of messages per second: ${avgRates.avgMsgPerSecond}. LIMIT: ${MESSAGE_RATE_LIMIT}.`);
-            closeConnection = true;
-        }
-
-        if (avgRates.avgUpdtPerSecond > MESSAGE_UPDATE_LIMIT) {
-            saveLogData('agent', {uuid}, 'error', `Agent disconnected: high db updates per second. Check the publish
-                                                 rate for agent.{uuid}.update, agent.{uuid}.state, agent.{uuid}.database_req routes`);
-            closeConnection = true;
-        }
-
-        if (closeConnection) {
-            deleteConnections(agentAccount);
-            inMemDB.delete('agents', 'uuid', uuid);
-            inMemDB.delete('agents', 'uuid', agentAccount);
-            return;
+    
+        if (inMemDB.agents_stats[uuid]) {
+            inMemDB.countMessages(`agents_stats`, uuid, 'msgPerSecond');
         }
 
         try {
-            switch (channelOrQueue) {
+            switch (queueName) {
                 
                     case SUMMARY_REQUESTS_QUEUE:
-                        console.log('SUMMARY_REQUESTS_QUEUE')
-
                         if (objMsg.obj.body){
                             return queryDataBase(uuid, objMsg.obj, msgProps);
                         } else {
-                            saveLogData('agent', objMsg.obj, 'error', `agent data rquest: input body not found`);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent data request: input body not found`);
                         }
                     break;
                     
@@ -249,40 +266,42 @@ function handleBrokerMessages(channelOrQueue, message)   {
                         if (objMsg.obj.body){
                             const newWProc = {status: MISSION_STATUS.DISPATCHED};
                             databaseServices.work_processes.insert({...objMsg.obj.body, ...newWProc})
-                            .then((wpId) => saveLogData('agent', {...objMsg.obj.body, work_process_id: wpId}, 'normal', `agent created a mission: ${wpId}`))
-                            .catch(e => saveLogData('agent', objMsg.obj, 'error', `agent create mission=${e}`));
+                            .then((wpId) => logData.addLog('agent', {...objMsg.obj.body, work_process_id: wpId}, 'info', `agent created a mission: ${wpId}`))
+                            .catch(e => logData.addLog('agent', objMsg.obj, 'error', `agent create mission=${e}`));
                         } else {
-                            saveLogData('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
                         }
                     break;
 
                     case AGENT_STATE_QUEUE:
                         if (objMsg.obj.body.status) {
                             updateState(objMsg.obj, uuid, 0)
+                            .then( () => channel.ack(message))
                             .catch(e => {
-                                const msg = e.msg? e.msg : e;
-                                saveLogData('agent', objMsg.obj, 'error', `agent state update=${msg}`);
+                                const msg = e.message? e.message : e;
+                                logData.addLog('agent', objMsg.obj, 'error', `agent state update: ${msg}`);
                             });
                         } else {
-                            saveLogData('agent', {}, 'error', "state update message does not contain agent status.");
+                            logData.addLog('agent', {}, 'error', "state update message does not contain agent status.");
                         }
                     break;
 
                     case AGENT_UPDATE_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 0);
+                            agentAutoUpdate(objMsg.obj, uuid, 0)
+                            .then( () => channel.ack(message));
                         }
                         break;
 
                     case AGENT_VISUALIZATION_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 1000);
+                            agentAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
                         }
                         break;
 
 
                     case YARD_VISUALIZATION_QUEUE:
-                            yardAutoUpdate(objMsg.obj, uuid, 1000);
+                            yardAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
                         break;    
 
                     default:
@@ -294,7 +313,9 @@ function handleBrokerMessages(channelOrQueue, message)   {
             console.log(error);
         }  
     })().catch(error => {
-        saveLogData('agent', {uuid}, 'error',  JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        const errorMsg = error.message?  {message:error.message} : error;
+        console.error('Stack trace', error.stack);
+        logData.addLog('agent', {uuid}, 'error',  JSON.stringify(errorMsg, Object.getOwnPropertyNames(errorMsg)));
     });
 };
 

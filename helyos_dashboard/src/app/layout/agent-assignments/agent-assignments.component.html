@@ -1,150 +1,164 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>Agent Assignments </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
-        <button  class="btn btn-lg btn-outline-dark" >
-                  Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">Agent Assignments</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark">Documentation</button>
+  </div>
+</div>
+
+<div class="row" style="align-items: flex-end">
+  <fieldset class="form-group col-xl-3">
+    <label for="filterWprocId">Work process id</label>
+    <input
+      id="filterWprocId"
+      type="number"
+      class="form-control"
+      [(ngModel)]="filterWprocId"
+      name="filterWprocId"
+      (keydown.enter)="filterList(0)" />
+  </fieldset>
+
+  <button
+    style="margin-bottom: 16px; height: fit-content"
+    class="btn btn-primary w-auto"
+    (click)="filterList(0)"
+    type="submit">
+    APPLY
+  </button>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header" style="display: flex; justify-content: space-between;">
-        <div class="clickable" (click)="filterList(0)">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
-        <div>
-            <span  class="clickable" (click)="filterList(-1)" > &#8810; previous </span>
-             | {{page}} |
-            <span class="clickable" (click)="filterList(1)" >next &#8811;</span>
-        </div>
+  <div class="card-header" style="display: flex; justify-content: space-between">
+    <div class="clickable" (click)="filterList(0)">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-
-    <div class="tableFixHeadHideScrolled" ></div>
-    <div class="tableFixHead  card-body table-responsive">
-        <table class=" table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>WorkProc ID</th>
-                    <th>Yard ID</th>
-                    <th>Agent ID</th>
-                    <th>started</th>
-                    <th>status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of assignments" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <th scope="row">{{item.id}}</th>
-                    <td>{{item.workProcessId}}</td>
-                    <td>{{item.yardId}}</td>
-                    <td>{{item.agentId}}</td>
-                    <td>{{item.startTimeStamp}}</td>
-                    <td>{{item.status}}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div>
+      <span class="clickable" (click)="filterList(-1)"> &#8810; previous </span>
+      | {{ page }} |
+      <span class="clickable" (click)="filterList(1)">next &#8811;</span>
     </div>
+  </div>
 
+  <div class="table-fix-head-hide-scrolled"></div>
+  <div class="table-fix-head card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>WorkProc ID</th>
+          <th>Yard ID</th>
+          <th>Agent ID</th>
+          <th>started</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of assignments"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <th scope="row">{{ item.id }}</th>
+          <td>{{ item.workProcessId }}</td>
+          <td>{{ item.yardId }}</td>
+          <td>{{ item.agentId }}</td>
+          <td>{{ item.startTimeStamp }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <!-- <button class="btn btn-primary" (click)="create()" type="submit">Add</button>-->
-    <button class="btn btn-danger" (click)="sendCancelSignal(selectedItem)" type="submit">Send Cancel Signal</button> 
+<div style="text-align: right; margin-bottom: 10px">
+  <!-- <button class="btn btn-primary" (click)="create()" type="submit">Add</button>-->
+  <button class="btn btn-danger" (click)="sendCancelSignal(selectedItem)" type="submit">Send Cancel Signal</button>
 </div>
 
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>ID: {{ selectedItem.id }}</h4>
 
- 
-<section class="detail-container " *ngIf="selectedItem" >
+  <form role="form" style="margin: 0 auto; max-width: 1000px">
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="workProcessId">Work Proc ID </label>
+        <input id="workProcessId" class="form-control" [(ngModel)]="selectedItem.workProcessId" name="workProcessId" />
+      </fieldset>
 
-        <h4> ID: {{selectedItem.id}}</h4>
+      <fieldset class="form-group col-xl-4">
+        <label for="yardId">Yard ID </label>
+        <input id="yardId" class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId" />
+      </fieldset>
 
-        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
-            <div class="row">
-                <fieldset class="form-group col-xl-4">
-                    <label>Work Proc ID </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.workProcessId" name="workProcessId" />
-                </fieldset>
+      <fieldset class="form-group col-xl-4">
+        <label for="agentId">Agent ID</label>
+        <input
+          id="agentId"
+          class="form-control"
+          [(ngModel)]="selectedItem.agentId"
+          name="agentId"
+          placeholder="e.g. 2" />
+      </fieldset>
+    </div>
 
-                <fieldset class="form-group col-xl-4">
-                    <label>Yard ID </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.yardId" name="yardId" />
-                </fieldset>
+    <div class="row">
+      <div class="form-group col-xl-4">
+        <label for="startedAt">Started at </label>
 
-                <fieldset class="form-group col-xl-4">
-                    <label>Agent ID</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.agentId"  name="agentId"
-                    placeholder="e.g. 2" />
-                </fieldset>
+        <div class="input-group datepicker-input">
+          <input
+            [hidden]="!showInput"
+            #d="ngbDatepicker"
+            [(ngModel)]="selectedItem.startTimeStamp"
+            class="form-control"
+            name="dp"
+            ngbDatepicker
+            placeholder="yyyy-mm-dd" />
+          <input *ngIf="!showInput" type="text" [value]="selectedItem.startTimeStamp" readonly />
+          <button (click)="d.toggle(); showInput = true" class="input-group-addon" type="button">
+            <span class="fa-solid fa-calendar"></span>
+          </button>
+        </div>
+      </div>
 
-            </div>
+      <ngb-timepicker [hidden]="!showInput" [(ngModel)]="selectedItem.startTimeStamp"></ngb-timepicker>
+    </div>
 
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="result"> Assignment resulting data </label>
+        <textarea id="result" rows="4" class="form-control" [(ngModel)]="selectedItem.result" name="result"></textarea>
+      </fieldset>
+    </div>
 
-            <div class="row" >
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="context"> Assignment context (results from precedent assignments) </label>
+        <textarea
+          id="context"
+          rows="4"
+          class="form-control"
+          [(ngModel)]="selectedItem.context"
+          name="context"></textarea>
+      </fieldset>
+    </div>
 
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="data"> Assignment data </label>
+        <textarea id="data" rows="4" class="form-control" [(ngModel)]="selectedItem.data" name="data"></textarea>
+      </fieldset>
+    </div>
 
-                <div class="form-group col-xl-4">
-                    <label>Started at </label>
-
-                    <div class="input-group datepicker-input">
-                        <input [hidden]="!showInput"
-                            #d="ngbDatepicker"
-                            [(ngModel)]="selectedItem.startTimeStamp"
-                            class="form-control"
-                            name="dp"
-                            ngbDatepicker
-                            placeholder="yyyy-mm-dd"
-                        />
-                        <input *ngIf="!showInput" type="text" [value]="selectedItem.startTimeStamp" readonly>
-                        <button (click)="d.toggle(); showInput=true" class="input-group-addon" type="button">
-                            <span class="fa fa-calendar"></span>
-                        </button>
-                    </div>
-                </div>
-
-
-                <ngb-timepicker [hidden]="!showInput" [(ngModel)]="selectedItem.startTimeStamp"></ngb-timepicker>
-
-            </div>
-
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label>  Assignment resulting data </label>
-                    <textarea rows="4" class="form-control" [(ngModel)]="selectedItem.result" name="result"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label>  Assignment context (results from precedent assignments) </label>
-                    <textarea rows="4" class="form-control" [(ngModel)]="selectedItem.context" name="context"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label>  Assignment order </label>
-                    <textarea rows="4" class="form-control" [(ngModel)]="selectedItem.data" name="data"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-            <div class="row" style="justify-content:space-between;">
-                <div>
-                    <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem, 'draft')">Save</button>
-                    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-                </div>
-                <div>
-                    <button  class="btn btn-danger" type="submit"  (click)="downloadData()">Download order</button>
-                </div>
-            </div>
-        </form>
-
+    <div class="row" style="justify-content: space-between">
+      <div class="w-auto">
+        <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem, 'draft')">Save</button>
+        <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
+      </div>
+      <div class="w-auto">
+        <button class="btn btn-danger" type="submit" (click)="downloadData()">Download order</button>
+      </div>
+    </div>
+  </form>
 </section>

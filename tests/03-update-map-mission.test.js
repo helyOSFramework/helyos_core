@@ -18,7 +18,7 @@ describe('03 Map Update Mission',   () =>  {
     it('Update request -> Map microservice is ready', async () => {
         await helyosApplication.createMapUpdate();
         const result =  await helyosApplication.waitMicroserviceStatus(1, 'ready');
-        expect(result).toEqual(true);
+        expect(result).toEqual('ready');
     });
 
     it('Yard has many map objects', async () => {
@@ -29,7 +29,7 @@ describe('03 Map Update Mission',   () =>  {
 
     it('Mission is marked as finished', async () => {
         const result = await helyosApplication.waitMissionStatus(1, 'succeeded');
-        expect(result).toEqual(true);
+        expect(result).toEqual('succeeded');
     });
 
   });

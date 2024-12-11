@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.agents (
     connection_status character varying DEFAULT 'offline',
     code character varying,
     name character varying,
+    description character varying,
     message_channel character varying,
     public_key character varying,
     public_key_format character varying(255) DEFAULT 'PEM',
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.agents (
 
     -- RABBITMQ CONNECTION
     rbmq_username character varying(255) DEFAULT NULL,
+    rbmq_vhost character varying(255) DEFAULT NULL,
     rbmq_encrypted_password text DEFAULT '',
     has_rbmq_account boolean DEFAULT false,
     protocol text DEFAULT 'AMQP',
@@ -45,9 +47,11 @@ CREATE TABLE IF NOT EXISTS public.agents (
     x float DEFAULT 0,
     y float DEFAULT 0,
     z float DEFAULT 0,
-    unit character varying,
+    unit character varying DEFAULT 'mm - mrad',
     orientation float,
     orientations float[],
+    coordinate_frame character varying DEFAULT 'local-UTM',
+    reference_point character varying DEFAULT 'front-axle-center',
     status character varying,
     state character varying,
     sensors jsonb,
@@ -58,7 +62,19 @@ CREATE TABLE IF NOT EXISTS public.agents (
     sensors_data_format character varying default 'helyos-native',
     geometry_data_format character varying default 'trucktrix-vehicle',
     data_format character varying default 'trucktrix-vehicle',
-    UNIQUE(uuid)
+    
+    UNIQUE(uuid),
+    CONSTRAINT status_check CHECK (
+    status IS NULL OR 
+    status IN (
+        'not_automatable', 
+        'free',
+        'ready',
+        'busy'
+    )
+)
+
+
 );
 
 
@@ -68,6 +84,7 @@ comment on column agents.geometry is '@ agent geometry object';
 comment on column agents.status is '@ agent status: Depracated. It will be converted to state.';
 comment on column agents.state is '@ agent state: "free", "busy", "ready"';
 comment on column agents.connection_status is '@ agent connection status: "online", "offline" (more than 30 seconds without any agent update)'; 
+comment on column agents.rbmq_vhost is '@ rabbitmq virtual host'; 
 comment on column agents.rbmq_encrypted_password is '@ rabbitmq password for the agent: random password hashed using the agent public key'; 
 
 comment on column agents.x is '@ agent x pose - horizontal (unit)';

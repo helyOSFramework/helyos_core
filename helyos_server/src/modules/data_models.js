@@ -1,5 +1,21 @@
 
 /**
+ * Actions to take on assignment failure.
+ * @enum {string}
+ * 
+ * - FAIL: The system stops the current process and reports an error.
+ * - CONTINUE: The system continues with the next steps despite the failure.
+ * - RELEASE_FAILED: The system continue but releases the current agent and marks its assignment as failed.
+ */
+const ON_ASSIGNMENT_FAILURE_ACTIONS = {
+    FAIL: 'FAIL_MISSION',
+    CONTINUE: 'CONTINUE_MISSION',
+    RELEASE: 'RELEASE_FAILED',
+    DEFAULT: 'DEFAULT'
+}
+
+
+/**
  * Defines agent statuses.
  * @enum {string}
  * 
@@ -11,7 +27,7 @@
  *
  */
 const AGENT_STATUS = {
-    NOT_AUTOMAT: 'not_automatable', 
+    NOT_AUTOMAT: 'not_automatable',
     FREE: 'free',
     READY: 'ready',
     BUSY: 'busy'
@@ -28,21 +44,22 @@ const AGENT_STATUS = {
  * @enum {string}
  * 
  * Usual cycle:
- * NOT_READY => WAIT_DEPENDENICIES => READY_FOR_SERVICE => PENDING => READY
+ * NOT_READY => WAIT_DEPENDENCIES => READY_FOR_SERVICE => PENDING => READY
  * 
  * helyOS core is responsible for the transitions:
  * PENDING => TIMEOUT
  *
  */
 const SERVICE_STATUS = {
-    NOT_READY: 'not_ready_for_service', 
+    NOT_READY: 'not_ready_for_service',
     READY_FOR_SERVICE: 'ready_for_service',
     PENDING: 'pending',
     FAILED: 'failed',
     TIMEOUT: 'time-out',
     CANCELED: 'canceled',
+    SKIPPED: 'skipped',
     READY: 'ready',
-    WAIT_DEPENDENICIES:'wait_dependencies',
+    WAIT_DEPENDENCIES: 'wait_dependencies',
     DISPATCHING_SERVICE: 'dispatching_service',
 }
 
@@ -58,9 +75,9 @@ const SERVICE_STATUS = {
  *
  */
 const MISSION_STATUS = {
-    DRAFT: 'draft', 
+    DRAFT: 'draft',
     DISPATCHED: 'dispatched',
-    PREPARING: 'preparing resources', 
+    PREPARING: 'preparing resources',
     CALCULATING: 'calculating',
     EXECUTING: 'executing',
     ASSIGNMENTS_COMPLETED: 'assignments_completed',
@@ -87,7 +104,7 @@ const MISSION_STATUS = {
  *
  */
 const ASSIGNMENT_STATUS = {
-    TO_DISPATCH: 'to_dispatch', 
+    TO_DISPATCH: 'to_dispatch',
     EXECUTING: 'executing',
     SUCCEEDED: 'succeeded',
     COMPLETED: 'completed',
@@ -96,8 +113,9 @@ const ASSIGNMENT_STATUS = {
     ABORTED: 'aborted',
     CANCELING: 'canceling',
     CANCELED: 'canceled',
-    WAIT_DEPENDENICIES:'wait_dependencies'
-
+    WAIT_DEPENDENCIES: 'wait_dependencies',
+    NOT_READY_TO_DISPATCH: 'not_ready_to_dispatch',
+    ACTIVE: 'active'
 }
 
 
@@ -116,9 +134,15 @@ const MISSION_QUEUE_STATUS = {
     CANCEL: 'cancel'
 }
 
-const UNCOMPLETE_ASSIGNM_STATUSES = ['to_dispatch', 'not_ready_to_dispatch', 'wait_dependencies',  'executing', 'active'];
+const UNCOMPLETE_ASSIGNM_STATUSES = ['to_dispatch', 'not_ready_to_dispatch', 'wait_dependencies', 'executing', 'active'];
 const UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH = ['to_dispatch', 'not_ready_to_dispatch', 'wait_dependencies'];
 const UNCOMPLETE_ASSIGNM_AFTER_DISPATCH = ['executing', 'active'];
+const UNCOMPLETE_MISSION_STATUS = [MISSION_STATUS.DRAFT, MISSION_STATUS.DISPATCHED,
+MISSION_STATUS.PREPARING, MISSION_STATUS.CANCELING,
+MISSION_STATUS.CALCULATING, MISSION_STATUS.EXECUTING];
+
+const UNCOMPLETED_SERVICE_STATUS = [SERVICE_STATUS.DISPATCHING_SERVICE, SERVICE_STATUS.PENDING,
+SERVICE_STATUS.READY, SERVICE_STATUS.WAIT_DEPENDENCIES];
 
 
 module.exports.AGENT_STATUS = AGENT_STATUS;
@@ -128,4 +152,7 @@ module.exports.ASSIGNMENT_STATUS = ASSIGNMENT_STATUS;
 module.exports.UNCOMPLETE_ASSIGNM_STATUSES = UNCOMPLETE_ASSIGNM_STATUSES;
 module.exports.UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH = UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH;
 module.exports.UNCOMPLETE_ASSIGNM_AFTER_DISPATCH = UNCOMPLETE_ASSIGNM_AFTER_DISPATCH;
+module.exports.UNCOMPLETE_MISSION_STATUS = UNCOMPLETE_MISSION_STATUS;
+module.exports.UNCOMPLETED_SERVICE_STATUS = UNCOMPLETED_SERVICE_STATUS;
 module.exports.MISSION_QUEUE_STATUS = MISSION_QUEUE_STATUS;
+module.exports.ON_ASSIGNMENT_FAILURE_ACTIONS = ON_ASSIGNMENT_FAILURE_ACTIONS;

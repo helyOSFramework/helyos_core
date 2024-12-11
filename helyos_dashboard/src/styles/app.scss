@@ -1,53 +1,62 @@
 /* You can add global styles to this file, and also import other style files */
-@import 'bootstrap/bootstrap';
+@import 'bootstrap-overrides';
 @import 'spinner';
 @import 'utils';
 @import 'rtl';
 @import 'responsive';
+@import 'icons';
 
 @media print {
-    .breadcrumb {
-        display: none !important;
-    }
+  .breadcrumb {
+    display: none !important;
+  }
+}
+
+@mixin nav-divider($color: #e5e5e5) {
+  height: 0;
+  margin: calc($spacer / 2) 0;
+  overflow: hidden;
+  border-top: 1px solid $color;
 }
 
 .nav-divider {
-    @include nav-divider;
+  @include nav-divider;
 }
-
-
 
 tr {
-    max-width: 100px;
+  max-width: 100px;
 }
-
 
 .td {
-    max-width: 100px;
+  max-width: 100px;
 }
 
-.selectedHighlight {
-    background-color: #ced4da;
+.selected-highlight {
+  --bs-table-bg: #ced4da;
+  border-left: solid 1px;
 }
 
-.detail-container{
-    border-radius: 10px;
-    border: solid 0.5px lightgray;
-    padding: 20px;
-    margin: 10px 5%;
+.detail-container {
+  border-radius: 10px;
+  border: solid 0.5px lightgray;
+  padding: 20px;
 }
 
 .map {
-    height: 100%;
-    padding: 0;
-  }
+  height: 100%;
+  padding: 0;
+}
 
-  .click-show{
-    cursor: pointer;
-    color:blue;
+.click-show {
+  cursor: pointer;
+  color: blue;
 }
 
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
+}
+
+.table .disabled {
+  color: grey;
 }

@@ -36,5 +36,10 @@ CREATE TABLE IF NOT EXISTS public.ar_internal_metadata (
 );
 
 
-
+CREATE TABLE public.events_queue(
+    id bigserial,
+    created_at	timestamp without time zone default now(),
+    event_name character varying,
+    payload	text
+);
 

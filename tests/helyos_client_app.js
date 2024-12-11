@@ -36,12 +36,12 @@ class HelyOSClientApplication {
 
                 if (result['check']){
                     clearInterval(watcher);
-                    resolve(true);
+                    resolve(result['value']);
                 } 
        
                 tries += 1;
                 if (tries > maxTries){
-                    console.log(`Max tries reached for ${id} with status ${result['value']}`);
+                    console.log(`Max tries reached for ${id} with status ${result['value']} instead ${status}`);
                     clearInterval(watcher);
                     resolve(false);
                 }
@@ -62,6 +62,17 @@ class HelyOSClientApplication {
         return this._waitStatus(checkValue, agentId, status);
     }
 
+
+    waitAgentStatuses(agentId, statuses) {
+        const checkValue = (agentId) => {
+            return this.helyosService.agents.get(agentId)
+                  .then(serv => ({check: statuses.includes(serv.status), value: serv.status}))
+                  .catch(err => ({check: false, value: null}));
+
+        }
+  
+        return this._waitStatus(checkValue, agentId, statuses);
+    }
 
 
     waitMicroserviceStatus(id, status) {
@@ -87,6 +98,18 @@ class HelyOSClientApplication {
     }
 
 
+    waitAssignmentStatuses(agentId, statuses) {
+        const checkValue = (agentId) => {
+            return this.helyosService.assignments.get(agentId)
+                  .then(serv => ({check: statuses.includes(serv.status), value: serv.status}))
+                  .catch(err => ({check: false, value: null}));
+
+        }
+  
+        return this._waitStatus(checkValue, agentId, statuses);
+    }
+
+
     waitMissionStatus(id, status) {
         const checkValue = (id) => {
             return this.helyosService.workProcess.get(id)
@@ -107,9 +130,9 @@ class HelyOSClientApplication {
         return this._waitStatus(checkValue, id, status);
     }
 
-    createNewMission(missionType = 'driving') {
+    createNewMission(missionType = 'driving', agentUuids=["Ab34069fc5-fdgs-434b-b87e-f19c5435113"]) {
         return this.helyosService.workProcess.create({
-            agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 
+            agentUuids: agentUuids,   //  is the agent uuid. 
             yardId: 1,       // the yard where the agent has checked in.
             workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
             data: { "foo:": "bar", agent_id:1  },        // this data format depends on the microservice.
@@ -117,12 +140,23 @@ class HelyOSClientApplication {
         });
     }
 
-    createMissionForQueue(missionType = 'driving', queueId = null, runOrder = 1) {
+
+    createNewMissionForInstantAction(missionType = 'instantActionMission', agentUuids=[]) {
+        return this.helyosService.workProcess.create({
+            agentUuids: agentUuids,   //  is the agent uuid. 
+            yardId: 1,       // the yard where the agent has checked in.
+            workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
+            data: { },        // this data format depends on the microservice.
+            status: 'dispatched',            // status = 'draft' will save the mission but no dispatch it.
+        });
+    }
+
+    createMissionForQueue(missionType = 'driving', queueId = null, runOrder = 1,) {
         return this.helyosService.workProcess.create({
             agentUuids: ["Ab34069fc5-fdgs-434b-b87e-f19c5435113"],   //  is the agent uuid. 
             yardId: 1,       // the yard where the agent has checked in.
             workProcessTypeName: missionType,  // name of the mission recipe as defined in helyOS dashboard
-            data: { "foo:": "bar", agent_id:1  },        // this data format depends on the microservice.
+            data: { "foo:": "bar", agent_id:1, nockSelector: runOrder },        // this data format depends on the microservice.
             status: 'draft',            // status = 'draft' will save the mission but no dispatch it.
             runOrder: runOrder,
             missionQueueId: queueId
@@ -142,8 +176,6 @@ class HelyOSClientApplication {
     startQueue(queueId) {
         return this.helyosService.missionQueue.patch({id: queueId, status: 'run'});
     }
-
-
 
 
     createMapUpdate() {
@@ -212,7 +244,9 @@ class HelyOSClientApplication {
         return this.helyosService.serviceRequests.list({});
     }
 
-
+    getAgentRelatedLogs(uuid){
+        return this.helyosService.systemLogs.list({agentUuid: uuid});
+    }
 
     dumpLogsToFile(testNunber=1){
         return this.helyosService.systemLogs.list({})

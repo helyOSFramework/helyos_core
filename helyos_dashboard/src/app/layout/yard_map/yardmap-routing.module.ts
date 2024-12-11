@@ -4,14 +4,17 @@ import { RouterModule, Routes } from '@angular/router';
 import { YardmapComponent } from './yardmap.component';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: YardmapComponent
-    }
+  {
+    path: '',
+    component: YardmapComponent,
+  },
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule, FormsModule]
+  imports: [RouterModule.forChild(routes)],
+  exports: [
+    RouterModule,
+    FormsModule,
+  ],
 })
-export class YardmapRoutingModule {}
+export class YardmapRoutingModule { }

@@ -6,16 +6,19 @@ services:
       is_dummy: false
       domain: "Assignment planner"  # Assignment planner | Map Server | Storage server
       type: "drive"
-      url: https://my_path_planner:9002/api/
+      url: https://my_path_planner:9002/api/plan_job/
       enable: true
       apikey: "CN783V9SygdG0deHgfesdfsaeNuCqwbm"
       timeout: 300
+      description: ""
       
       context:
         map_data: true
         all_agents_data: false
         mission_agents_data: true
-        
+        require_map_objects:
+          - obstacle
+          - drivable
       config: >
             {"plan-directions": "all_directions",
               "output_format" :"trajectory"}
@@ -25,10 +28,11 @@ services:
     maploader:
       domain: "Map server"  # Assignment planner | Map server | Storage server
       type: "map"
-      url: https://my_map_server:9002/api/
+      url: https://my_map_server:9002/api/map/
       enable: true
       apikey: "ABy40lwSsdfafasdBiCbvU2hVEeY7t"
       timeout: 180
+      description: ""
       
       context:
         map_data: true

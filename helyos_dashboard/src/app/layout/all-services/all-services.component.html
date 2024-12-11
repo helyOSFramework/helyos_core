@@ -1,197 +1,258 @@
-<div class="row" style="padding: 0px 24px; justify-content:space-between">
-    <h1>Microservices</h1>
-    <div class="row">
-
-        <div style="text-align: right; margin-right: 6px;">
-            <button  class="btn btn-lg btn-outline-dark" style="background-color: rgb(154, 195, 246);" (click)="openPPAPIDoc()">
-                    Assignment planner API
-            </button>
-        </div>
-
-        <div style="text-align: right; margin-bottom: 6px;">
-            <button  class="btn btn-lg btn-outline-dark" style="background-color: rgb(197, 224, 180);" (click)="openMapAPIDoc()">
-                    Map server API
-            </button>
-        </div>
-
-        <div style="text-align: right; margin-left: 6px;">
-            <button  class="storage-row btn btn-lg btn-outline-dark" (click)="openPPAPIDoc()">
-                    Storage server API
-            </button>
-        </div>
+<div class="row g-0" style="justify-content: space-between">
+  <h1 class="w-auto">Microservices</h1>
+  <div class="row w-auto">
+    <div class="p-0 w-auto" style="text-align: right; margin-right: 6px">
+      <button class="btn btn-lg btn-outline-dark" style="background-color: rgb(154, 195, 246)" (click)="openPPAPIDoc()">
+        Assignment planner API
+      </button>
     </div>
+
+    <div class="p-0 w-auto" style="text-align: right; margin-bottom: 6px">
+      <button
+        class="btn btn-lg btn-outline-dark"
+        style="background-color: rgb(197, 224, 180)"
+        (click)="openMapAPIDoc()">
+        Map server API
+      </button>
+    </div>
+
+    <div class="p-0 w-auto" style="text-align: right; margin-left: 6px">
+      <button class="storage-row btn btn-lg btn-outline-dark" (click)="openPPAPIDoc()">Storage server API</button>
+    </div>
+  </div>
 </div>
 
-<div style="width: 80%;">
+<div style="width: 80%">
+  <p>
+    Microservices are the building blocks used to create missions. These services can be employed to create paths,
+    convert and update maps, and facilitate communication with cloud systems.
+  </p>
+  <ng-container *ngIf="showDescription">
+    <p>
+      The request data to these services contains primarily the user input, helyOS automatically appends a snapshot of
+      the yard state as
+      <strong>context</strong>. This context includes infomation of map objects, guidelines and agent positions.
+    </p>
 
-            <p> Microservices are the building blocks used to create missions. 
-                These services can be employed to create paths, convert and update maps, and facilitate communication with cloud systems. 
-            </p>
-            <ng-container *ngIf="showDescription" >
-            <p> The request data to these services contains primarily the user input, helyOS automatically appends a snapshot of the yard state as 
-                <strong>context</strong>. This context includes infomation of map objects, guidelines and agent positions.</p>
+    <li>Service responses can include agent assignments or map information (see API Documentation).</li>
+    <br />
+    <li>
+      <b>helyOS is agnostic regarding the map data format</b>. The Map servers are responsible to provide map objects
+      compatible with your path planner and user interface.
+    </li>
+    <br />
 
-            <li> Service responses can include agent assignments or map information (see API Documentation).</li> <br>
-            <li> <b>helyOS is agnostic regarding the map data format</b>. The Map servers are 
-                responsible to provide  map objects compatible with your path planner and user interface.</li> <br>
+    <li>
+      <b>helyOS is agnostic regarding the assignment data format</b>. The Assignment planners are responsible to provide
+      assignment data compatible with the agent.
+    </li>
+    <br />
 
-            <li> <b>helyOS is agnostic regarding the assignment data format</b>. The Assignment planners are 
-                responsible to provide assignment data compatible with the agent.</li> <br>
+    <li>
+      helyOS orchestrates the delivery of assignments. You can use the "results" field inside the service response to
+      route data from microservices to agents.
+    </li>
+    <br />
+  </ng-container>
 
-            <li> helyOS orchestrates the delivery of assignments. You can use the "results" field inside the service response to route data from microservices to agents.</li>  <br>
-
-            </ng-container>  
-
-            <p class="click-show" (click)="showDescription=!showDescription"> show
-                    {{showDescription? 'less' : 'more ...'}}
-                    
-        </p>
-            
+  <p class="click-show" (click)="showDescription = !showDescription">
+    show
+    {{ showDescription ? 'less' : 'more ...' }}
+  </p>
 </div>
 
-
-
+<button (click)="exportYML()">Export YML...</button>
 <div class="card mb-3">
-    <div class="card-header">
-        Microservices
-    </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Service Type</th>
-                    <th>Domain</th>
-                    <th>Name</th>
-                    <th>URL</th>
-                    <th>API key</th>
-                    <th>Enabled</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of services" (click)="getItem(item.id)" [title]="item.enabled ? '' : 'Service is disabled'"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id, 'disable-row': !item.enabled,
-                               'assignment-row': item.class === 'Assignment planner',
-                               'mapserver-row': item.class === 'Map server',
-                               'storage-row': item.class === 'Storage server'
-                            }">
-                    <th scope="row">{{item.serviceType}}</th>
-                    <td>{{item.class}}</td>
-                    <td>{{item.name}}</td>
-                    <td>{{item.serviceUrl}}</td>
-                    <td>{{item.licenceKey}}</td>
-                    <td>{{item.enabled}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
+  <div class="card-header">Microservices</div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Service Type</th>
+          <th>Domain</th>
+          <th>Name</th>
+          <th>URL</th>
+          <th>API key</th>
+          <th>Enabled</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of services"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+            'disable-row': !item.enabled,
+            'assignment-row': item.class === 'Assignment planner',
+            'mapserver-row': item.class === 'Map server',
+            'storage-row': item.class === 'Storage server',
+          }">
+          <th scope="row">{{ item.serviceType }}</th>
+          <td>{{ item.class }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.serviceUrl }}</td>
+          <td>{{ item.licenceKey }}</td>
+          <td>{{ item.enabled }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-    <button class="btn btn-danger" (click)="delete(selectedItem.id)"  type="submit">Delete</button>
-    <button class="btn btn-secondary" (click)="toggleEnable(selectedItem)"  type="submit">Enable/Disable</button>
+<div style="text-align: right; margin-bottom: 10px">
+  <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+  <button class="btn btn-danger" (click)="delete(selectedItem.id)" type="submit">Delete</button>
+  <button class="btn btn-secondary" (click)="toggleEnable(selectedItem)" type="submit">Enable/Disable</button>
 </div>
 
+<section class="service-detail-container" *ngIf="selectedItem">
+  <h4>{{ selectedItem.name }}</h4>
 
+  <div class="row">
+    <div class="checkbox">
+      <label for="isDummy">
+        <input id="isDummy" type="checkbox" [(ngModel)]="selectedItem.isDummy" name="isDummy" />
+        Dummy service
+      </label>
+    </div>
+  </div>
 
-<section class="service-detail-container" *ngIf="selectedItem" >
-        <h4>{{selectedItem.name}}</h4>
+  <form role="form" style="margin: 10px auto; max-width: 1000px">
+    <div class="row">
+      <fieldset class="form-group col-xl-6">
+        <label for="name">Name</label>
+        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+      </fieldset>
 
-        <div class="row" style="margin-left:3px">
-            <div class="checkbox">
-                <label> <input type="checkbox" [(ngModel)]="selectedItem.isDummy"  name="isDummy" /> Dummy service </label>
-            </div>
+      <fieldset class="form-group col-xl-6" *ngIf="!selectedItem?.isDummy">
+        <label for="serviceUrl"> URL</label>
+        <input
+          id="serviceUrl"
+          class="form-control"
+          [(ngModel)]="selectedItem.serviceUrl"
+          name="serviceUrl"
+          placeholder="https://..." />
+      </fieldset>
+
+      <fieldset class="form-group col-xl-6" *ngIf="selectedItem?.isDummy">
+        <label for="serviceUrl"> URL is not used: response data = request data</label>
+        <input id="serviceUrl" class="form-control" name="serviceUrl" [disabled]="true" placeholder="-- not used --" />
+      </fieldset>
+    </div>
+
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="class">Domain</label>
+        <select id="class" class="form-control form-select" [(ngModel)]="selectedItem.class" name="class">
+          <option value="Assignment planner">Assignment planner</option>
+          <option value="Map server">Map server</option>
+          <option value="Storage server">Storage server</option>
+        </select>
+      </fieldset>
+
+      <fieldset class="form-group col-xl-4">
+        <label for="serviceType">Type</label>
+        <input
+          id="serviceType"
+          class="form-control"
+          [(ngModel)]="selectedItem.serviceType"
+          name="serviceType"
+          placeholder="drive, crop..." />
+      </fieldset>
+
+      <fieldset class="form-group col-xl-4">
+        <label for="resultTimeout">Process time limit (sec)</label>
+        <input
+          id="resultTimeout"
+          type="number"
+          class="form-control"
+          [(ngModel)]="selectedItem.resultTimeout"
+          name="resultTimeout" />
+      </fieldset>
+    </div>
+
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="licenceKey"> API Key</label>
+        <input
+          id="licenceKey"
+          class="form-control"
+          [(ngModel)]="selectedItem.licenceKey"
+          name="licenceKey"
+          [disabled]="selectedItem?.isDummy" />
+      </fieldset>
+    </div>
+
+    <div class="row">
+      <div class="w-auto">Context data:</div>
+      <fieldset class="form-group col-xl-8">
+        <div class="checkbox">
+          <label for="requireMissionAgentsData">
+            <input
+              id="requireMissionAgentsData"
+              type="checkbox"
+              [(ngModel)]="selectedItem.requireMissionAgentsData"
+              name="requireMissionAgentsData" />
+            Include data of the agents involved in the mission
+          </label>
         </div>
 
+        <div class="checkbox">
+          <label for="requireAgentsData">
+            <input
+              id="requireAgentsData"
+              type="checkbox"
+              [(ngModel)]="selectedItem.requireAgentsData"
+              name="requireAgentsData" />
+            Include data of all agents in the yard
+          </label>
+        </div>
 
-        <form role="form"  style="margin: 10px auto; max-width: 1000px;">
-            <div class="row">
-                <fieldset class="form-group col-xl-6">
-                    <label>Name</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
-                </fieldset>
+        <div class="checkbox">
+          <label for="requireMapData">
+            <input
+              id="requireMapData"
+              type="checkbox"
+              [(ngModel)]="selectedItem.requireMapData"
+              name="requireMapData" />
+            Include yard and map objects data
+          </label>
+        </div>
 
-                <fieldset class="form-group col-xl-6" *ngIf="!selectedItem?.isDummy">
-                    <label> URL</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.serviceUrl" name="serviceUrl"
-                    placeholder="https://..." />
-                </fieldset>
+        <div class="checkbox" style="margin-left: 18px" *ngIf="selectedItem.requireMapData">
+          <label for="requireMapObjectsInput"> Specify the types of map objects to include: </label>
+          <input
+            id="requireMapObjectsInput"
+            class="form-control"
+            type="text"
+            [(ngModel)]="requireMapObjectsInput"
+            name="requireMapObjectsInput" />
+          <small class="form-text text-muted">
+            separate each type with a comma (,). E.g: building, road, parking_lot
+          </small>
+        </div>
+      </fieldset>
+    </div>
 
-                <fieldset class="form-group col-xl-6" *ngIf="selectedItem?.isDummy">
-                    <label> URL is not used: response data = request data</label>
-                    <input class="form-control" name="serviceUrl" [disabled]="true"
-                    placeholder="-- not used --" />
-                </fieldset>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="config"> Config </label>
+        <textarea id="config" class="form-control" [(ngModel)]="selectedItem.config" name="config"></textarea>
+      </fieldset>
+    </div>
 
-            
-            </div>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="description"> Description </label>
+        <textarea
+          id="description"
+          class="form-control"
+          [(ngModel)]="selectedItem.description"
+          name="description"></textarea>
+      </fieldset>
+    </div>
 
-
-            <div class="row" >
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Domain</label>
-                    <select class="form-control" [(ngModel)]="selectedItem.class" name="class">
-                        <option value="Assignment planner">Assignment planner</option>
-                        <option value="Map server">Map server</option>
-                        <option value="Storage server">Storage server</option>
-                    </select>
-                </fieldset>
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Type</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.serviceType"  name="serviceType"
-                    placeholder="drive, crop..." />
-                </fieldset>
-
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Process time limit (sec)</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.resultTimeout"  name="resultTimeout"
-                    />
-                </fieldset>
-
-            </div>
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> API Key</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.licenceKey" name="licenceKey" [disabled]="selectedItem?.isDummy"
-                    />
-                </fieldset>
-            </div>
-
-            <div class="row" >
-                <div style="margin-left: 14px;"> Context data: </div>
-                <fieldset class="form-group col-xl-8">
-                    <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMapData"  name="requireMapData" /> Include map data  </label>
-                    </div>
-
-                    <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireMissionAgentsData"  name="requireMissionAgentsData" /> Include data of the agents involved in the mission </label>
-                    </div>
-
-                    <div class="checkbox">
-                        <label> <input type="checkbox" [(ngModel)]="selectedItem.requireAgentsData"  name="requireAgentsData" /> Include data of all agents in the yard </label>
-                    </div>
-
-                </fieldset>
-            </div>
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> Config </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.config" name="config"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-            <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
-            <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-
-        </form>
-
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
+  </form>
 </section>

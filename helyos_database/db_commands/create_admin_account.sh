@@ -13,14 +13,23 @@ BEGIN
       username, email, user_role,password_hash ) 
     VALUES (
       (SELECT id FROM public.users WHERE name = 'admin' ORDER BY id DESC LIMIT 1),
-      'admin', 'admin', 0, crypt('admin', gen_salt('bf')) );
+      'admin', 'admin@example.com', 0, crypt('admin', gen_salt('bf')) );
 
     PERFORM pg_catalog.setval('public.users_id_seq', 10, true);
     PERFORM pg_catalog.setval('public.user_account_id_seq', 10, true);
   END IF;
-END \$\$;
+END 
+\$\$;
 
 EOF
 
 
-psql -U "$PGUSER" --dbname="$PGDATABASE" -c "CREATE ROLE role_postgraphile WITH LOGIN PASSWORD'$PGPASSWORD';" || true;
+
+psql -U "$PGUSER" --dbname="$PGDATABASE" -c "
+DO \$\$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'role_postgraphile') THEN
+      CREATE ROLE role_postgraphile WITH LOGIN PASSWORD '$PGPASSWORD';
+   END IF;
+END
+\$\$;" || true;

@@ -14,7 +14,7 @@ missions:
             service_type: "drive"
             request_order: 1
             apply_result: true
-            override_config: "{}"
+            service_config: "{}"
 
 
     mapping:
@@ -29,5 +29,5 @@ missions:
             service_type: "map"
             request_order: 1
             apply_result: true
-            override_config: "{}"
+            service_config: "{}"
           

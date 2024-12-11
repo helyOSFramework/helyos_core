@@ -1,3 +1,4 @@
+SET client_min_messages TO WARNING;
  
 --
 --  Function used for query and mutations
@@ -12,11 +13,9 @@ CREATE OR REPLACE FUNCTION public.selectToolPoseHistory(
     COST 100
     STABLE 
     ROWS 1000
-AS $BODY$
-
- SELECT *  FROM public.agent_poses WHERE created_at < to_timestamp(end_time) AND  created_at > to_timestamp(start_time);
- 
-$BODY$;
+    AS $BODY$
+        SELECT *  FROM public.agent_poses WHERE created_at < to_timestamp(end_time) AND  created_at > to_timestamp(start_time);
+    $BODY$;
 
 
 
@@ -53,8 +52,15 @@ $BODY$
     BEGIN
 
     IF (OLD.status IS DISTINCT FROM NEW.status OR OLD.connection_status IS DISTINCT FROM NEW.connection_status) THEN
-      PERFORM pg_notify('change_agent_status', 
+        PERFORM pg_notify('change_agent_status', 
             (SELECT row_to_json(r.*)::varchar FROM (
+            SELECT  id, uuid, yard_id from public.agents where id = NEW.id)
+            r)
+        );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('change_agent_status', 
+            (SELECT row_to_json(r.*)::text FROM (
             SELECT  id, status, uuid, name, connection_status, yard_id, modified_at from public.agents where id = NEW.id)
             r)
         );
@@ -62,8 +68,15 @@ $BODY$
 
     IF (OLD.public_key IS DISTINCT FROM NEW.public_key OR OLD.verify_signature IS DISTINCT FROM NEW.verify_signature OR
         OLD.rbmq_username IS DISTINCT FROM NEW.rbmq_username OR OLD.allow_anonymous_checkin IS DISTINCT FROM NEW.allow_anonymous_checkin) THEN
-      PERFORM pg_notify('change_agent_security', 
+        PERFORM pg_notify('change_agent_security', 
             (SELECT row_to_json(r.*)::varchar FROM (
+            SELECT  id, uuid, yard_id, modified_at from public.agents where id = NEW.id)
+            r)
+        );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('change_agent_security', 
+            (SELECT row_to_json(r.*)::text FROM (
             SELECT  id, public_key, uuid, verify_signature, rbmq_username, allow_anonymous_checkin, yard_id, modified_at from public.agents where id = NEW.id)
             r)
         );
@@ -73,19 +86,27 @@ $BODY$
     END; 
 $BODY$
   LANGUAGE plpgsql VOLATILE
-  COST 100;
+  COST 100
+  SECURITY DEFINER;
+ALTER FUNCTION public.notify_change_tool() OWNER TO role_admin;
 
 
-
-CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
+CREATE OR REPLACE FUNCTION public.notify_new_rabbitmq_account(
   agent_id int,
   username text,
   password text
-) AS
+) RETURNS void AS
 $BODY$
     BEGIN
-       PERFORM pg_notify('new_rabbitmq_account', (json_build_object('username', username, 'password', password, 'agent_id', agent_id))::text);
+       PERFORM pg_notify('new_rabbitmq_account', (json_build_object('agent_id', agent_id))::text);
+       
+       INSERT INTO public.events_queue (event_name, payload)
+       VALUES ('new_rabbitmq_account', json_build_object('username', username, 'password', password, 'agent_id', agent_id)::text);
+      
+       RETURN;
+
     END; 
+
 $BODY$
 LANGUAGE plpgsql;
 
@@ -95,11 +116,32 @@ CREATE OR REPLACE FUNCTION public.notify_deleted_tool()
 RETURNS trigger AS
 $BODY$
     BEGIN
-      PERFORM pg_notify('agent_deletion', row_to_json(OLD)::text);
+
+          PERFORM pg_notify(
+          'agent_deletion', 
+          json_build_object(
+              'id', OLD.id, 
+              'uuid', OLD.uuid, 
+              'rbmq_username', OLD.rbmq_username,
+              'yard_id', OLD.yard_id
+          )::text
+      );
+      
+      INSERT INTO public.events_queue (event_name, payload)
+      VALUES ('agent_deletion', json_build_object(
+              'id', OLD.id, 
+              'uuid', OLD.uuid, 
+              'rbmq_username', OLD.rbmq_username,
+              'yard_id', OLD.yard_id
+          )::text);
+      
         RETURN NULL;
     END; 
 $BODY$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_deleted_tool() OWNER TO role_admin;
 
 
 ---------------------
@@ -124,15 +166,12 @@ BEGIN
   END IF;
 
   
-  CALL public.notify_new_rabbitmq_account(agent_id, username, password);
+  PERFORM public.notify_new_rabbitmq_account(agent_id, username, password);
 
   return 0;
 
 END
 $$  language plpgsql strict security definer;
-
-
-comment on function public.admin_change_password(text,text) is 'Admin changes regular user passwords.';
 
 
 
@@ -185,9 +224,9 @@ EXECUTE PROCEDURE public.notify_deleted_tool();
 
 
 
-
-
-
 grant execute on function public.create_row_tool_sensors_history() to role_admin, role_application, role_postgraphile;
-grant execute on function public.register_rabbitmq_account() to role_admin, role_postgraphile;
+grant execute on function public.register_rabbitmq_account(agent_id int,
+                                                            username text,
+                                                            password text
+                                                          )  to role_admin, role_postgraphile;
 

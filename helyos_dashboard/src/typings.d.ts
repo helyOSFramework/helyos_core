@@ -1,5 +1,8 @@
 /* SystemJS module definition */
-declare var module: NodeModule;
+/* eslint-disable @typescript-eslint/naming-convention */
+declare const module: NodeModule;
 interface NodeModule {
-    id: string;
+  id: string;
 }
+
+declare const bootstrap: any;

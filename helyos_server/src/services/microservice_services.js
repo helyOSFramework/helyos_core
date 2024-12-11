@@ -7,106 +7,85 @@ const requestXHTTP = require('superagent');
 const getExtServiceEndpoint = (serviceUrl, serviceClass) => {
     let url = serviceUrl;
     if (!url) return " ";
-    url = url.replace(/\/$/, '');
-
-    switch (serviceClass) {
-        case 'Map server':
-            url = url + '/map/';
-            break;
-        case 'Path planner':
-            url = url + '/plan_job/';
-            break;
-        case 'Assignment planner':
-            url = url + '/plan_job/';
-            break;
-        case 'Storage':
-            url = url + '/storage/';
-            break;    
-        default:
-            url = url + '/';
-            break;
-    }
-
     return url;
 }
 
 
 const parseResponseToJson = (res) => {
     let data = null;
-    if (Object.keys(res.body).length === 0){
+    if (Object.keys(res.body).length === 0) {
         try {
             data = JSON.parse(res.text)
         } catch (error) {
-            data = {'text': res.text}
+            data = { 'text': res.text }
         }
     } else {
         data = res.body;
     }
-    if(!data) {data = {}}
+    if (!data) { data = {} }
     return data
 }
 
 
 const sendRequestToService = (service_url, service_licence_key, request, context, config) => {
 
-    console.log('=============================')
-    console.log('dispatch request to service:')
-    console.log(service_url)
-    console.log('=============================')
+    console.log('=============================\nDispatch request to service:');
+    console.log(service_url);
+    console.log('=============================');
 
-    url_string = service_url ;
+    url_string = service_url;
     // const request_string = JSON.stringify({request, context, config});
     return requestXHTTP.post(url_string)
-	    .set('x-api-key', service_licence_key)
-        .set('Accept', 'application/json')	    
+        .set('x-api-key', service_licence_key)
+        .set('Accept', 'application/json')
         .set('Content-Type', 'application/json')
-        .send({request, context, config})     
-        .then((res) =>  parseResponseToJson(res))
-        .catch((err)=> {
-                console.log("\n*************** Error - send request to external microservice *************\n");
-                console.log(err)
-                if(err.response) {
-                    err.data = parseResponseToJson(err.response);
-                } else {
-                    if (err.code === 'ENOTFOUND') {
-                        err.message = 'microservice is unreachable.';
-                    } 
+        .send({ request, context, config })
+        .then((res) => parseResponseToJson(res))
+        .catch((err) => {
+            if (err.response) {
+                err.data = parseResponseToJson(err.response);
+            } else {
+                if (err.code === 'ENOTFOUND') {
+                    err.message = 'Microservice is unreachable.';
                 }
-                throw err;
-            });
+            }
+
+            err.message = err.message + `: [${service_url}]`;
+            throw err;
+        });
 }
 
 
-const getServiceResponse =  (service_url, service_licence_key, jobId) => { 
+const getServiceResponse = (service_url, service_licence_key, jobId) => {
 
-    url_string = service_url  + jobId;  
+    url_string = service_url + jobId;
 
-    	return requestXHTTP.get(url_string)
-		.set('x-api-key', service_licence_key)
-		.then((res) => {
+    return requestXHTTP.get(url_string)
+        .set('x-api-key', service_licence_key)
+        .then((res) => {
             let data;
-            if (Object.keys(res.body).length === 0){
-                data = JSON.parse(res.text)
+            if (Object.keys(res.body).length === 0) {
+                data = JSON.parse(res.text);
             } else {
                 data = res.body;
             }
-			return data;
-		})
-		.catch((err)=> console.log('\n==== error in getResultPathPlanner===', err));
+            return data;
+        })
+        .catch((err) => console.log('\n==== Error in getting microservice response ===', err.message));
 }
 
 
 
-const cancelService =  (service_url, service_licence_key, jobId) => { 
-    
+const cancelService = (service_url, service_licence_key, jobId) => {
+
     url_string = service_url + jobId;
 
     return requestXHTTP.delete(url_string)
-	.set('x-api-key', service_licence_key)
-    .set('Accept', 'application/json')
-    .set('Content-Type', 'application/json')
+        .set('x-api-key', service_licence_key)
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
         .then((res) => res.body.toString())
-        .catch((err)=> console.log('error in cancelPathPlanner', err));
+        .catch((err) => console.log('Error in canceling microservice', err.message));
 
 }
 

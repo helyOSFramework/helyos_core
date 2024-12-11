@@ -1,115 +1,157 @@
-<h1>Missions</h1>
+<h1>Available Missions</h1>
 
 <p>Each registered mission type translates to a new feature available in the client applications.</p>
-<p>The mission type represents a template for a task or group of tasks. </p> 
 
-<ng-container *ngIf="showDescription" >
-    <p>A mission can involve the calculation of a path,  data transfers to the cloud, handling of map information, or a combination 
-        of many tasks. </p>
 
-    <p>A mission can be requested by the client application or by the agent (vehicle).</p> 
 
-    <p>A dispatched mission triggers one or several <a [routerLink]="['/all-services']">microservices </a>,
-        which operate in a sequential order based on the <a > <strong> Mission Recipes' </strong> </a> orchestration scheme.
-     </p>
+<ng-container *ngIf="showDescription">
+  <p style="margin-right:10%">A mission type represents a recipe of how helyos core orchestrate a task or group of tasks. 
+    It can involve path calculation, data transfers to the cloud, map information handling, agent operations
+     or a mix of tasks. Missions can be requested by external applications or the agents. 
+  </p>
+
+
+  <p style="margin-right:10%">
+    When dispatched, missions trigger one or more
+    <a [routerLink]="['/all-services']">microservices </a>, which operate in a sequential order based on the
+    <a> <strong> Mission Recipes' </strong> </a> orchestration scheme.
+  </p>
 </ng-container>
 
-<p class="click-show" (click)="showDescription=!showDescription"> show
-    {{showDescription? 'less' : 'more ...'}}
-    
+<p class="click-show" (click)="showDescription = !showDescription">
+  show
+  {{ showDescription ? 'less' : 'more ...' }}
 </p>
 
-
-<button (click)="importYMLElementInput.click()"> Import YML... </button>
-<button (click)="exportYML()"> Export YML... </button>
+<button (click)="importYMLElementInput.click()">Import YML...</button>
+<button (click)="exportYML()">Export YML...</button>
 <div class="card mb-3">
-    <div class="card-header">
-        Registered Mission Types
-    </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Max. Agents</th>
-                    <!-- <th>Execution Order</th> -->
-                    <!-- <th>Params</th> -->
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of wpTypes" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <th scope="row">{{item.id}}</th>
-                    <td>{{item.name}}</td>
-                    <td>{{item.numMaxAgents}}</td>
-                    <!-- <td>{{item.dispatchOrder}}</td> -->
-                    <!-- <td>{{item.extraParams}}</td> -->
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
+  <div class="card-header"> Recipes</div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Max. Agents</th>
+          <!-- <th>Execution Order</th> -->
+          <!-- <th>Params</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of wpTypes"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <th scope="row">{{ item.id }}</th>
+          <td>{{ item.name }}</td>
+          <td>{{ item.numMaxAgents }}</td>
+          <!-- <td>{{item.dispatchOrder}}</td> -->
+          <!-- <td>{{item.extraParams}}</td> -->
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-    <button class="btn btn-danger" (click)="deleteItem()" type="submit">Delete</button>
+<div style="text-align: right; margin-bottom: 10px">
+  <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+  <button class="btn btn-danger" (click)="deleteItem()" type="submit">Delete</button>
 </div>
 
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>{{ selectedItem.name }}</h4>
 
+  <form role="form" style="margin: 0 auto; max-width: 1000px">
+    <h5 style="margin-top: 16px">Definition</h5>
 
-<section class="detail-container" *ngIf="selectedItem" >
+    <div class="row">
+      <fieldset class="form-group col-xl-6">
+        <label for="name">Name</label>
+        <input id="name" class="form-control" [(ngModel)]="selectedItem.name" name="name" />
+      </fieldset>
 
-        <h4>{{selectedItem.name}}</h4>
+      <fieldset class="form-group col-xl-4">
+        <label for="numMaxAgents">Maximum of agents employed </label>
+        <input
+          id="numMaxAgents"
+          class="form-control"
+          type="number"
+          min="0"
+          [(ngModel)]="selectedItem.numMaxAgents"
+          name="numMaxAgents"
+          placeholder="1" />
+      </fieldset>
 
-        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
-            <div class="row">
-                <fieldset class="form-group col-xl-6">
-                    <label>Name</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.name" name="name" />
-                </fieldset>
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Maximum of agents employed </label>
-                    <input class="form-control" type="number" min="0" [(ngModel)]="selectedItem.numMaxAgents"  name="numMaxAgents"
-                    placeholder="1" />
-                </fieldset>
-
-                <!-- <fieldset class="form-group col-xl-6">
-                    <label>Execution order (use step tag) </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.dispatchOrder"  name="dispatchOrder"
+      <!-- <fieldset class="form-group col-xl-6">
+                    <label for="dispatchOrder">Execution order (use step tag) </label>
+                    <input id="dispatchOrder" class="form-control" [(ngModel)]="selectedItem.dispatchOrder" name="dispatchOrder"
                     placeholder="[['A'], ['B'],...]" />
                 </fieldset> -->
+    </div>
 
-            </div>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="description"> Description </label>
+        <textarea
+          id="description"
+          class="form-control"
+          [(ngModel)]="selectedItem.description"
+          name="description"></textarea>
+      </fieldset>
+    </div>
 
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.description" name="description"
-                    ></textarea>
-                </fieldset>
-            </div>
+    <h5 style="margin-top: 16px">Failure Policy</h5>
+    <div class="row">
+      <fieldset class="form-group col-xl-6">
+        <label for="onAssignmentFailure">Default action on assignment failure</label>
 
-            <h5 style="margin-top:16px">Default Settings </h5>
-            <label>{{"To be automatically inserted in the mission requests as  \"_settings\" : requestData['_settings'] = workProcess.settings"}}</label>
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <textarea class="form-control" [(ngModel)]="selectedItem.settings" name="settings" rows="10"
-                    ></textarea>
-                </fieldset>
-            </div>
+        <select
+          id="onAssignmentFailure"
+          class="form-control"
+          [(ngModel)]="selectedItem.onAssignmentFailure"
+          name="onAssignmentFailure">
+          <option value="FAIL_MISSION" title="FAIL">fail the mission</option>
+          <option value="CONTINUE_MISSION" title="CONTINUE">continue the mission</option>
+          <option value="RELEASE_FAILED" title="RELEASE_FAILED">immediately release the failed agent</option>
+        </select>
+      </fieldset>
 
+      <fieldset class="form-group col-xl-6" title="Run mission when assignment fails.">
+        <label for="fallbackMission">Fallback mission </label>
+        <select
+          id="fallbackMission"
+          class="form-control form-select"
+          [(ngModel)]="selectedItem.fallbackMission"
+          name="fallbackMission">
+          <option [value]="''">---- ----</option>
+          <ng-container *ngIf="selectedItem.onAssignmentFailure === 'RELEASE_FAILED'">
+            <option *ngFor="let missionName of availableMissions" [value]="missionName">
+              {{ missionName }}
+            </option>
+          </ng-container>
+        </select>
+      </fieldset>
+    </div>
 
-            <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
-            <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
+    <h5 style="margin-top: 16px">Default Settings</h5>
+    <label for="settings">Automatically included in mission request data under the key "_settings".</label>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <textarea
+          id="settings"
+          class="form-control"
+          [(ngModel)]="selectedItem.settings"
+          name="settings"
+          rows="10"></textarea>
+      </fieldset>
+    </div>
 
-        </form>
-
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
+  </form>
 </section>
 
-<input
-  style="display: none" extensions=".json"
-  type="file" (change)="importYML($event)"
-  #importYMLElementInput>
+<input style="display: none" extensions=".json" type="file" (change)="importYML($event)" #importYMLElementInput />

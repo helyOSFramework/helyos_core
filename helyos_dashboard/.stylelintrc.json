@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "stylelint-config-standard-scss"
+  ],
+  "rules": {
+    "no-empty-source": null,
+    "declaration-empty-line-before": "never",
+    "scss/dollar-variable-empty-line-before": "never",
+    "scss/no-global-function-names": null,
+    "media-feature-range-notation": "prefix",
+    "property-no-vendor-prefix": null,
+    "selector-no-vendor-prefix": null,
+    "at-rule-no-vendor-prefix": null,
+    "color-function-notation": "legacy",
+    "alpha-value-notation": "number",
+    "no-descending-specificity": null,
+    "color-hex-length": "long",
+    "import-notation": "string"
+  }
+}

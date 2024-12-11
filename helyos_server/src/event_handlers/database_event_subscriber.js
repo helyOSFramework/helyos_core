@@ -11,23 +11,104 @@
 
 
 const webSocketCommunicaton = require('../modules/communication/web_socket_communication.js');
-const { saveLogData } = require('../modules/systemlog');
+const { logData } = require('../modules/systemlog');
 const { processInstantActionEvents } = require('./database_event_handlers/instant_actions_db_events_handler.js');
 const {processWorkProcessEvents} = require('./database_event_handlers/workprocess_db_events_handler.js');
 const {processAssignmentEvents} = require('./database_event_handlers/assignment_db_events_handler.js');
 const {processMicroserviceEvents} = require('./database_event_handlers/microservice_db_events_handler.js');
 const {createAgentRbmqAccount, removeAgentRbmqAccount} = require('./rabbitmq_event_handlers/checkin_event_handler.js');
 const {processRunListEvents} = require('./database_event_handlers/missionqueue_db_events_handler.js');
-const { inMemDB } = require('../services/in_mem_database/mem_database_service.js');
-const bufferNotifications = webSocketCommunicaton.bufferNotifications;
+const inMemServices = require('../services/in_mem_database/mem_database_service.js');
+
+
+
+function broadcastPriorityNotifications(channel, payload, bufferNotifications){
+
+    switch (channel) {
+
+        case 'change_agent_status': // Changes originate from agents.
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
+            logData.addLog('agent', payload, 'info', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
+            break;
+
+        case 'assignments_status_update':
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
+            break;
+
+        case 'mission_queue_update':
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
+            break;
+
+        case 'work_processes_update':
+            bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
+            break;
+    }
+}
+
+function broadcastNotifications(channel, payload, bufferNotifications) {
+
+    if ([
+        'agent_deletion',
+        'assignments_insertion',
+        'mission_queue_insertion',
+        'service_requests_update',
+        'service_requests_insertion',
+        'work_processes_insertion'
+        ].includes(channel)) {
+
+        let room = 'all';
+        if(payload['yard_id']){
+            room = `${payload['yard_id']}`;
+        } else {
+            console.error(channel, "does not have yard id")
+        }
+
+
+
+
+        bufferNotifications.pushNotificationToBuffer(channel, payload, room);
+    }
+}
+
 
 
 // Subscribe to database changes
-function handleDatabaseMessages(client) {
-    client.on('notification', function (msg) {
-        let payload = JSON.parse(msg.payload);
+async function handleDatabaseMessages(client, websocket) {
+    const bufferNotifications =  await webSocketCommunicaton.getInstance();
 
-        switch (msg.channel) {
+    client.on('notification', async function (msg) {
+        let channel = msg.channel;
+        let payload = null;
+
+        // **Note:** `ctid` is a system column that uniquely identifies a physical row specific from PostgreSQL.
+        const res = await client.query(`
+            DELETE FROM events_queue
+            WHERE ctid = (
+              SELECT ctid
+              FROM events_queue
+              LIMIT 1
+              FOR UPDATE SKIP LOCKED
+            )
+            RETURNING *;
+          `);
+
+        
+        if (res.rows.length === 1){
+            payload = JSON.parse(res.rows[0].payload)
+            channel = res.rows[0].event_name;
+            broadcastPriorityNotifications(channel, payload, bufferNotifications);
+            broadcastNotifications(channel, payload, bufferNotifications);
+
+        } else {
+            if (res.rows.length > 1) {
+                logData.addLog('helyos_core', null, 'error', `Event query returned ${res.rows.length} events`);
+            }
+            return false;
+        }
+
+        let inMemDB;
+
+        switch (channel) {
         // AGENT TABLES TRIGGERS
 
             case 'new_agent_poses':
@@ -36,53 +117,61 @@ function handleDatabaseMessages(client) {
                 break;
 
             case 'change_agent_security':
-                console.log('change_agent_security', payload);
-                inMemDB.update('agents', 'uuid', payload, new Date(), 'realtime');
+                inMemDB = await inMemServices.getInstance();
+                console.log('change_agent_security', payload['uuid']);
+                inMemDB.update('agents', 'uuid', payload, new Date(), 'buffered');
                 break;
 
             case 'agent_deletion':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
+                inMemDB = await inMemServices.getInstance();
                 inMemDB.delete('agents','uuid', payload['uuid']);
-                removeAgentRbmqAccount(payload);
-                saveLogData('agent', payload, 'normal', `agent deleted`);
-                break;
+                logData.addLog('agent', payload, 'info', `agent deleted`);
 
-            case 'change_agent_status':
-                bufferNotifications.pushNotificationToFrontEnd(msg.channel, payload);
-                saveLogData('agent', payload, 'normal', `agent changed: "${payload.connection_status}"-"${payload.status}"`);
+                try {
+                    await removeAgentRbmqAccount(payload);
+                    inMemDB.delete('agents','uuid', payload['uuid']);
+                } catch (error) {
+                    logData.addLog('agent', payload, 'warn', `Remove RabbitMQ account: ${error.message}`);
+                }
+
                 break;
 
 
             case 'new_rabbitmq_account':
-                saveLogData('agent', {id: payload.agent_id}, 'normal', `create/update rabbitmq account`);
-                createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
+                try {
+                    await createAgentRbmqAccount({id: payload.agent_id}, payload['username'], payload['password']);
+                logData.addLog('agent', {id: payload.agent_id}, 'info', `create/update rabbitmq account`);
+                } catch (error) {
+                    logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
+                }
+
                 break;
 
             default:
 
-                if (msg.channel.includes('service_request')) {
-                    processMicroserviceEvents(msg);
+                if (channel.includes('service_request')) {
+                    processMicroserviceEvents(channel, payload);
                     break;
                 }
 
 
-                if (msg.channel.includes('work_process')) {
-                    processWorkProcessEvents(msg);
+                if (channel.includes('work_process')) {
+                    processWorkProcessEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('assignments')) {
-                    processAssignmentEvents(msg);
+                if (channel.includes('assignments')) {
+                    processAssignmentEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('instant_action')) {
-                    processInstantActionEvents(msg);
+                if (channel.includes('instant_action')) {
+                    processInstantActionEvents(channel, payload);
                     break;
                 }
 
-                if (msg.channel.includes('mission_queue')) {
-                    processRunListEvents(msg);
+                if (channel.includes('mission_queue')) {
+                    processRunListEvents(channel, payload);
                     break;
                 }
 

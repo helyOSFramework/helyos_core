@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS map_objects (
     created_at timestamp(6) without time zone NOT NULL DEFAULT NOW(),
     modified_at timestamp(6) without time zone NOT NULL DEFAULT NOW(),
     deleted_at timestamp(6) without time zone,
-    name character varying default NULL
+    name character varying default NULL,
+    last_message_time timestamp(6) without time zone NOT NULL DEFAULT NOW()
     );
 
 

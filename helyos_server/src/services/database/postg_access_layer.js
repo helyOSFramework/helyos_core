@@ -10,16 +10,44 @@ const { Client } = require('pg');
  * @param {Object} conditions - key-value pairs
  * @returns 
  */
-const parseConditions = (conditions) => {
+const parseConditions = (tableName, conditions) => {
 	let names = [], values = [], masks = [];
-	let null_conditions = [];
+	let null_conditions = [], in_conditions = [];
 	if (!conditions || Object.keys(conditions).length == 0) {
 		return this.list();
 	}
 
+	let fromTableStatements = [];
+
+	const notNullConditions = {};
 	Object.keys(conditions).forEach((key, idx) => {
 		if (conditions[key] === null) {
-			null_conditions.push(`AND ${key} IS NULL `);
+			null_conditions.push(` AND ${key} IS NULL `);
+		} else {
+			notNullConditions[key] = conditions[key];
+		}
+	});
+
+
+	Object.keys(notNullConditions).forEach((key, idx) => {
+
+		if (key.includes('.')) {
+			const [table, field] = key.split('.');
+			if (!tableName.includes(table) && !fromTableStatements.includes(table)) {
+				fromTableStatements.push(table);
+			}
+		}
+
+		if (key.endsWith('__in')) {
+			if (!Array.isArray(conditions[key])) {
+				throw new Error(`Invalid value for ${key}. Expected an array.`);
+			}
+			// Check if the array contains only numbers
+			if (conditions[key].every(Number.isFinite)) {
+				in_conditions.push(`AND ${key.slice(0, -4)} IN (${conditions[key].join(",")}) `);
+			} else {
+				in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
+			}
 		} else {
 			names.push(key);
 			values.push(conditions[key]);
@@ -29,31 +57,37 @@ const parseConditions = (conditions) => {
 
 	names = names.join(',');
 	masks = masks.join(',');
+	fromTableStatements = fromTableStatements.length > 0 ? ' FROM ' + fromTableStatements.join(', ') : '';
 	null_conditions = null_conditions.join(' ');
+	in_conditions = in_conditions.join(' ');
 
-	return { names, values, masks, null_conditions };
-
+	return { names, values, masks, null_conditions, in_conditions, fromTableStatements };
 }
-
 
 class DatabaseLayer {
 
-	constructor(client, table) {
+	constructor(client, table, shortTimeClient = null, jsonFields = []) {
 		this.client = client;
 		this.table = table;
+		this.shortTimeClient = shortTimeClient;
+		this.jsonFields = jsonFields;
 	}
 
 	_isEmptyObject(obj) {
 		return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 	}
 
-	insert(patch) {
+	insert(patch, useShortTimeClient = false) {
 		let colNames = [], colValues = [], valueMasks = [];
 		delete patch['id'];
 
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
 			valueMasks.push('$' + (idx + 1));
 		});
 
@@ -62,26 +96,33 @@ class DatabaseLayer {
 
 		let queryText = 'INSERT INTO ' + this.table + '(' + colNames + ') VALUES (' + valueMasks + ') RETURNING id';
 
-		return this.client.query(queryText, colValues)
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(queryText, colValues)
 			.then((res) => { return res['rows'][0]['id'] });
 
 	}
 
-	list() {
-		return this.client.query('SELECT * FROM ' + this.table + ' ')
+	list(useShortTimeClient = false) {
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query('SELECT * FROM ' + this.table + ' ')
 			.then((res) => { return res['rows'] });
 	}
 
-	list_in(key, listArgs, orderBy = null) {
+	list_in(key, listArgs, orderBy = null, useShortTimeClient = false) {
 		if (!listArgs || listArgs.length === 0) { return Promise.resolve([]); }
 		let orderByStr = orderBy ? `ORDER BY ${orderBy}` : '';
 		let values = listArgs.map(e => `'${e}'`);
 		values.join(', ');
-		return this.client.query("SELECT * FROM " + this.table + " WHERE " + key + " IN  (" + values + ")" + orderByStr)
+
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query("SELECT * FROM " + this.table + " WHERE " + key + " IN  (" + values + ")" + orderByStr)
 			.then((res) => { return res['rows'] });
 	}
 
-	get(key, value, items = [], orderBy = null) {
+	get(key, value, items = [], orderBy = null, useShortTimeClient = false) {
 		let colNames;
 		let orderByStr;
 
@@ -95,21 +136,23 @@ class DatabaseLayer {
 		else
 			orderByStr = '';
 
-		return this.client.query('SELECT ' + colNames + ' FROM ' + this.table + ' WHERE ' + key + '= $1' + orderByStr, [value])
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query('SELECT ' + colNames + ' FROM ' + this.table + ' WHERE ' + key + '= $1' + orderByStr, [value])
 			.then((res) => { return res['rows'] });
 	}
 
-	get_byId(id, items) {
-		return this.get('id', id, items)
+	get_byId(id, items, useShortTimeClient = false) {
+		return this.get('id', id, items, null, useShortTimeClient)
 			.then((res) => { return res[0] });
 	}
 
 
-	select(conditions, items = [], orderBy = '') {
+	select(conditions, items = [], orderBy = '', useShortTimeClient = false) {
 		let selColNames = [];
 		let orderByStr;
 		if (!conditions || Object.keys(conditions).length == 0) {
-			return this.list();
+			return this.list(useShortTimeClient);
 		}
 
 		if (items === undefined || items.length == 0)
@@ -117,7 +160,7 @@ class DatabaseLayer {
 		else
 			selColNames = items.join(',');
 
-		const {names, values, masks, null_conditions} = parseConditions(conditions);
+		const { names, values, masks, null_conditions, in_conditions, fromTableStatements } = parseConditions(this.table, conditions);
 		const colNames = names, colValues = values, valueMasks = masks;
 
 		if (orderBy)
@@ -128,21 +171,21 @@ class DatabaseLayer {
 		let queryText;
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions + orderByStr;
+			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions + in_conditions + orderByStr;
 		} else {
-			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions + orderByStr;
+			queryText = 'SELECT ' + selColNames + ' FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions + in_conditions + orderByStr;
 		}
-		return this.client.query(queryText, colValues)
-			.then((res) => res['rows'])
-			.catch(e => {
-				console.log(e);
-				throw Error(e);
-			});
+
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(queryText, colValues)
+			.then((res) => res['rows']);
 	}
 
 
 
-	update(name, value, patch) {
+	update(name, value, patch, useShortTimeClient = false) {
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
 		if (this._isEmptyObject(patch)) {
 			return Promise.resolve({})
 		}
@@ -151,7 +194,12 @@ class DatabaseLayer {
 
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
+
 			valueMasks.push('$' + (idx + 1));
 		});
 
@@ -168,37 +216,38 @@ class DatabaseLayer {
 		} else {
 			queryText = 'UPDATE ' + this.table + ' SET ' + colNames + ' = ' + valueMasks + '  WHERE ' + name + ' = ' + filterMask + ' ';
 		}
-		return this.client.query(queryText, colValues)
-			.then((res) => patch)
-			.catch(e => {
-				console.log(e);
-			})
+
+		return _client.query(queryText, colValues)
+			.then((res) => patch);
 	}
 
 
-	updateByConditions(conditions, patch) {
+	updateByConditions(conditions, patch, useShortTimeClient = false) {
 		if (this._isEmptyObject(patch) || this._isEmptyObject(conditions)) {
 			return Promise.resolve({})
 		}
 
-		const {names, values, masks, null_conditions} = parseConditions(conditions);
-		const condColNames = names, condColValues = values, condValueMasks = masks;	
+		const { names, values, masks, null_conditions, in_conditions, fromTableStatements } = parseConditions(this.table, conditions);
+		const condColNames = names, condColValues = values, condValueMasks = masks;
 
-		let colNames = [], colValues = condColValues, valueMasks = [];
+		let colNames = [], colValues = [...condColValues], valueMasks = [];
 		delete patch['id'];
 
-		console.log('colValues', colValues);
 		Object.keys(patch).forEach((key, idx) => {
 			colNames.push(key);
-			colValues.push(patch[key]);
-			valueMasks.push('$' + (idx + values.length ));
+			if (this.jsonFields.includes(key)) {
+				colValues.push(JSON.stringify(patch[key]));
+			} else {
+				colValues.push(patch[key]);
+			}
+			valueMasks.push('$' + (idx + 1 + condColValues.length));
 		});
 
 		colNames = colNames.join(',');
 		valueMasks = valueMasks.join(',');
 
-		let queryText, patchString ;
-		if (Object.keys(patch).length === 1)  {
+		let queryText, patchString;
+		if (Object.keys(patch).length === 1) {
 			patchString = colNames + ' = ' + valueMasks;
 		} else {
 			patchString = '(' + colNames + ') = (' + valueMasks + ')';
@@ -206,29 +255,31 @@ class DatabaseLayer {
 
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'UPDATE ' +  this.table + ' SET ' + patchString + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions ;
+			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + fromTableStatements + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions + in_conditions;
 		} else {
-			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + '  WHERE ' + condColNames + ' = ' + condValueMasks + null_conditions;
+			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + fromTableStatements + '  WHERE ' + condColNames + ' = ' + condValueMasks + null_conditions + in_conditions;
 		}
 
-		return this.client.query(queryText, colValues)
-			.then((res) => patch)
-			.catch(e => {
-				console.log(e);
-			});
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(queryText, colValues)
+			.then((res) => res.rowCount);
 	}
 
 
-	
-	updateMany(patchArray, index) {
-	//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
-		const queriePromises = patchArray.map(patch => {
+
+	updateMany(patchArray, index, useShortTimeClient = false) {
+		//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
+		const promisseList = patchArray.map(patch => {
 			delete patch.time_stamp;
 			if (Object.keys(patch).length < 2) return Promise.resolve({});
-			else return this.update(index, patch[index], patch).catch(r => ({ error: r, failedIndex: patch[index] }));
+			else return this.update(index, patch[index], patch, useShortTimeClient)
+				.catch(e => {
+					return { error: e, failedIndex: patch[index] }
+				});
 		});
 
-		return Promise.all(queriePromises);
+		return Promise.all(promisseList);
 
 		// return this.client.query('BEGIN').then(()=>Promise.all(queriePromises))
 		// 		   .then((r)=>this.client.query('COMMIT').then(()=>r))
@@ -237,10 +288,10 @@ class DatabaseLayer {
 
 
 	//updateMany function delayed by X seconds to test system resilience
-	updateManyDelayed(patchArray, index) {
+	updateManyDelayed(patchArray, index, useShortTimeClient = false) {
 		return new Promise((resolve, reject) => {
 			setTimeout(() => {
-				this.updateMany(patchArray, index)
+				this.updateMany(patchArray, index, useShortTimeClient)
 					.then((r) => resolve(r))
 					.catch((e) => reject(e));
 			}, 1000);
@@ -249,8 +300,7 @@ class DatabaseLayer {
 
 
 
-	createMany(dataArray) {
-
+	insertMany(dataArray, useShortTimeClient = false) {
 		if (dataArray.length === 0) { return Promise.resolve([]) };
 
 		// Collect all unique column names across all objects
@@ -262,13 +312,13 @@ class DatabaseLayer {
 		});
 
 		const insertValues = [];
-		dataArray.forEach((data, i) => {
-				const values = Array.from(columnNames).map((col) => {
-					if (data[col]===undefined) return 'default';
-					if (Array.isArray(data[col])) return JSON.stringify(data[col]);
-					return data[col];
-				});	
-				insertValues.push(...values);
+		dataArray.forEach((data) => {
+			const values = Array.from(columnNames).map((col) => {
+				if (data[col] === undefined) return null;
+				if (Array.isArray(data[col])) return JSON.stringify(data[col]);
+				return data[col];
+			});
+			insertValues.push(values);
 		});
 
 		// Construct the SQL query
@@ -282,26 +332,28 @@ class DatabaseLayer {
 		RETURNING id
 		`;
 
-		const queryValues = valuesArray.flat();
+		const queryValues = insertValues.flat();
 
-		return this.client.query(queryText, queryValues);
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(queryText, queryValues);
 
 	}
 
 
 
 
-	update_byId(id, patch) {
-		return this.update('id', id, patch)
+	update_byId(id, patch, useShortTimeClient = false) {
+		return this.update('id', id, patch, useShortTimeClient)
 			.then((res) => { return res });
 	}
 
 
-	delete(conditions) {
+	delete(conditions, useShortTimeClient = false) {
 		let colNames = [], colValues = [], valueMasks = [];
 		let null_conditions = [];
 		if (!conditions || Object.keys(conditions).length == 0) {
-			return this.list();
+			return this.list(useShortTimeClient);
 		}
 
 		Object.keys(conditions).forEach((key, idx) => {
@@ -321,11 +373,14 @@ class DatabaseLayer {
 		let queryText;
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'DELETE  FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions ;
+			queryText = 'DELETE  FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions;
 		} else {
 			queryText = 'DELETE  FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions;
 		}
-		return this.client.query(queryText, colValues)
+
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(queryText, colValues)
 			.then((res) => res['rows'])
 			.catch(e => {
 				console.log(e);
@@ -335,12 +390,15 @@ class DatabaseLayer {
 
 
 
-	deleteByIds(ids) {
+	deleteByIds(ids, useShortTimeClient = false) {
 		if (ids.length === 0) { return Promise.resolve([]) }
 		let valueMasks = [];
 		ids.forEach((id, idx) => valueMasks.push('$' + (idx + 1)));
 		valueMasks = valueMasks.join(',');
-		return this.client.query(`DELETE FROM ${this.table} WHERE id in  (${valueMasks} )`, ids)
+
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query(`DELETE FROM ${this.table} WHERE id in  (${valueMasks} )`, ids)
 			.then((res) => res['rows'])
 			.catch(e => {
 				console.log(e);
@@ -348,8 +406,10 @@ class DatabaseLayer {
 			});
 	}
 
-	remove(key, value) {
-		return this.client.query('DELETE FROM ' + this.table + ' WHERE ' + key + '=' + value + ' ')
+	remove(key, value, useShortTimeClient = false) {
+		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
+
+		return _client.query('DELETE FROM ' + this.table + ' WHERE ' + key + '=' + value + ' ')
 			.then((res) => res)
 			.catch(e => {
 				console.log(e);
@@ -357,8 +417,8 @@ class DatabaseLayer {
 	}
 
 
-	remove_byId(id) {
-		return this.remove('id', id)
+	remove_byId(id, useShortTimeClient = false) {
+		return this.remove('id', id, useShortTimeClient)
 			.then((res) => { return res });
 	}
 
@@ -366,8 +426,8 @@ class DatabaseLayer {
 
 
 class AgentDataLayer extends DatabaseLayer {
-	constructor(client) {
-		super(client, 'public.agents');
+	constructor(client, shortTimeClient = null, jsonFields = []) {
+		super(client, 'public.agents', shortTimeClient, jsonFields);
 	}
 
 
@@ -393,15 +453,13 @@ class AgentDataLayer extends DatabaseLayer {
 	get(key, value, items, orderBy = null, nestedFields = null) {
 		let colNames;
 		let orderByStr;
-		let aggregateInterconnections = nestedFields && nestedFields.includes('interconnections');
-
-		if (aggregateInterconnections) {
-			items = items.filter(i => i !== 'interconnections');
-		}
+		let followerInterconnectionsFlag = nestedFields && nestedFields.includes('follower_connections');
+		let leaderInterconnectionsFlag = nestedFields && nestedFields.includes('leader_connections');
 
 		if (items === undefined || items.length == 0)
 			colNames = '*';
 		else {
+			items = items.filter(i => (!('leader_interconnections', 'follower_connections').includes(i)));
 			colNames = items.join(',');
 		}
 
@@ -412,27 +470,55 @@ class AgentDataLayer extends DatabaseLayer {
 
 		return this.client.query('SELECT ' + colNames + ' FROM ' + this.table + ' WHERE ' + key + '= $1' + orderByStr, [value])
 			.then((res) => {
-				if (!aggregateInterconnections) { return res['rows'] }
+				let aggregatePromises;
+				if (!followerInterconnectionsFlag && !leaderInterconnectionsFlag) { return res['rows'] };
+
+				if (followerInterconnectionsFlag && !leaderInterconnectionsFlag) { aggregatePromises = this.aggregatedFollowerConnections.bind(this) };
+
+				if (!followerInterconnectionsFlag && leaderInterconnectionsFlag) { aggregatePromises = this.aggregatedLeaderConnections.bind(this) };
+
+				if (followerInterconnectionsFlag && leaderInterconnectionsFlag) {
+					{
+						aggregatePromises = (a) => this.aggregatedFollowerConnections(a).bind(this)
+							.then(a => this.aggregatedLeaderConnections(a).bind(this))
+					};
+				}
+
 				const agents = res['rows'];
-				const promiseArray = agents.map(t => this.aggregatedInterconnections(t));
+				const promiseArray = agents.map(t => aggregatePromises(t));
 				return Promise.all(promiseArray);
 			});
 
 	}
 
 
-	aggregatedInterconnections(agent) {
+	aggregatedFollowerConnections(agent) {
 		return this.client.query(`
-		SELECT A.id, A.uuid, A.geometry, B.connection_geometry FROM public.agents as A 
+		SELECT A.id, A.uuid, A.geometry, A.yard_id, B.connection_geometry FROM public.agents as A 
 		JOIN public.agents_interconnections as B 
 		ON A.id = B.follower_id
 		WHERE A.id IN  (SELECT follower_id FROM  public.agents_interconnections WHERE leader_id = $1) 
 		`, [agent.id])
-			.then(res => ({ ...agent, interconnections: res['rows'] }));
+			.then(res => ({ ...agent, follower_connections: res['rows'] }));
 	}
+
+	aggregatedLeaderConnections(agent) {
+		return this.client.query(`
+		SELECT A.id, A.uuid, A.geometry, A.yard_id, B.connection_geometry FROM public.agents as A 
+		JOIN public.agents_interconnections as B 
+		ON A.id = B.leader_id
+		WHERE A.id IN  (SELECT leader_id FROM  public.agents_interconnections WHERE follower_id = $1) 
+		`, [agent.id])
+			.then(res => ({ ...agent, leader_connections: res['rows'] }));
+	}
+
 
 }
 
+const setDBTimeout = (client, mlSeconds) => {
+	const queryText = `SET statement_timeout = '${mlSeconds}'`;
+	return client.query(queryText);
+}
 
 const updateAgentsConnectionStatus = (client, n_secs) => {
 	const strSeconds = ` INTERVAL '${n_secs} seconds'`;
@@ -440,7 +526,15 @@ const updateAgentsConnectionStatus = (client, n_secs) => {
 	const sqlString2 = `UPDATE public.agents SET connection_status = $1, msg_per_sec = 0 WHERE (connection_status = $2) and (last_message_time >=  (now() - ${strSeconds}));`;
 	const onlineToOffline = client.query(sqlString1, ['offline', 'online']);
 	const offlineToOnline = client.query(sqlString2, ['online', 'offline']);
-	return Promise.all([onlineToOffline, offlineToOnline]);
+	return Promise.allSettled([onlineToOffline, offlineToOnline]);
+}
+
+const getHighMsgRateAgents = (client, msgRateLimit, updtRateLimit) => {
+	const sqlStringUpdtRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (updt_per_sec >  $1);`;
+	const sqlStringMsgRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (msg_per_sec >  $1);`;
+	const updtInfractors = client.query(sqlStringUpdtRate, [updtRateLimit]).then(rv => rv.rows);
+	const msgInfractors = client.query(sqlStringMsgRate, [msgRateLimit]).then(rv => rv.rows);
+	return Promise.all([msgInfractors, updtInfractors]).catch((e) => console.error(e));
 }
 
 
@@ -452,23 +546,8 @@ const getUncompletedAssignments_byWPId = (client, wpId, uncompletedAssgmStatus) 
 
 const searchAllRelatedUncompletedAssignments = (client, assId, uncompletedAssgmStatus) => {
 	return client.query('SELECT id FROM public.assignments WHERE work_process_id in (SELECT work_process_id FROM public.assignments WHERE id = $1) AND status IN ($2, $3, $4, $5, $6)',
-						 [assId, ...uncompletedAssgmStatus]).then((res) => res['rows']);
+		[assId, ...uncompletedAssgmStatus]).then((res) => res['rows']);
 }
-
-
-const cancelAllAssignments_byWPId = (client, wpId, statusBeforeDispatch, statusAfterDispatch) => {
-	const cancelBeforeDispatch = client.query('UPDATE public.assignments SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4, $5)', ['canceled', wpId, ...statusBeforeDispatch]);
-	const setToBeCanceledAfterDispatch = client.query('UPDATE public.assignments SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4)', ['canceling', wpId, ...statusAfterDispatch]);
-	return Promise.all([cancelBeforeDispatch, setToBeCanceledAfterDispatch]);
-}
-
-
-const cancelAllRequestToMicroservices_byWPId = (client, wpId) => {
-	const cancelBeforeDispatch = client.query('UPDATE public.service_requests SET status = $1 WHERE work_process_id = $2 AND status IN ($3, $4)', ['canceled', wpId, 'ready_for_service', 'wait_dependencies']);
-	const cancelAfterDispatch = client.query('UPDATE public.service_requests SET status = $1, canceled = TRUE WHERE work_process_id = $2 AND status = $3', ['canceled', wpId, 'pending']);
-	return Promise.all([cancelBeforeDispatch, cancelAfterDispatch]);
-}
-
 
 
 
@@ -532,11 +611,10 @@ module.exports.AgentDataLayer = AgentDataLayer;
 module.exports.Client = Client;
 module.exports.wait_database_value = wait_database_value;
 module.exports.wait_database_query = wait_database_query;
-
-
+module.exports.setDBTimeout = setDBTimeout;
 
 module.exports.updateAgentsConnectionStatus = updateAgentsConnectionStatus;
+module.exports.getHighMsgRateAgents = getHighMsgRateAgents;
+
 module.exports.getUncompletedAssignments_byWPId = getUncompletedAssignments_byWPId;
 module.exports.searchAllRelatedUncompletedAssignments = searchAllRelatedUncompletedAssignments;
-module.exports.cancelAllAssignments_byWPId = cancelAllAssignments_byWPId;
-module.exports.cancelAllRequestToMicroservices_byWPId = cancelAllRequestToMicroservices_byWPId;

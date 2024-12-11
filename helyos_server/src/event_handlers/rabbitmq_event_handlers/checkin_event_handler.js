@@ -2,11 +2,11 @@
 
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
-const {inMemDB} = require('../../services/in_mem_database/mem_database_service');
+const memDBService = require('../../services/in_mem_database/mem_database_service');
 
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 const { AGENT_STATUS } = require('../../modules/data_models.js');
 const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
 const RBMQ_CERTIFICATE = RBMQ_SSL? fs.readFileSync('/etc/helyos/.ssl_keys/ca_certificate.pem', 'utf-8'):null;
@@ -30,7 +30,7 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
 
             return databaseServices.yards.get_byId(agent.yard_id, ['id', 'lat', 'lon', 'alt', 'map_data'])
             .then(yard => {
-                    return  databaseServices.map.get('yard_id', yard.id)
+                    return  databaseServices.map_objects.get('yard_id', yard.id)
                     .then(map_objects => {
                             const _map_objects = map_objects.map(s => ({
                                 type: s.type,
@@ -60,12 +60,13 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                                 _version: MESSAGE_VERSION,
 
                             });
-                            console.log("=====================checkin message===========================");
+                            console.log("================== checkin response message to =======================");
                             console.log(`${uuid} => ${agent.uuid}`);
-                            console.log("===============================================================");
+                            console.log("======================================================================");
                             const public_key = agent['public_key'] || (registeredAgent && registeredAgent.public_key) ;
-                            rabbitMQServices.sendEncriptedMsg(replyTo, message, public_key);
-                            rabbitMQServices.sendEncriptedMsg(null, message, public_key, replyTo, replyExchange);    
+                            rabbitMQServices.sendEncryptedMsg(replyTo, message, public_key);
+                            rabbitMQServices.sendEncryptedMsg(null, message, public_key, replyTo, replyExchange);
+                            return agent;   
                     })
                     .catch(err => {
                         const message = JSON.stringify({
@@ -76,8 +77,8 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                                 response_code: '500'
                             }
                         });
-                        rabbitMQServices.sendEncriptedMsg(replyTo, message);
-                        rabbitMQServices.sendEncriptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                        rabbitMQServices.sendEncryptedMsg(replyTo, message);
+                        rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, replyTo, replyExchange);
                         throw Error(err);
                     });
             })
@@ -90,8 +91,9 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                         response_code: '500'
                     }
                 });
-                rabbitMQServices.sendEncriptedMsg(replyTo, message);
-                rabbitMQServices.sendEncriptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                rabbitMQServices.sendEncryptedMsg(replyTo, message);
+                rabbitMQServices.sendEncryptedMsg(null, message, agent.public_key, replyTo, replyExchange);
+                console.error('Stack trace:', err.stack);
                 throw Error(err);
             });
         })
@@ -100,14 +102,14 @@ function agentCheckIn(uuid, data, msgProps, registeredAgent, replyExchange) {
                 const message = JSON.stringify({
                     type: 'checkin',
                     body: {
-                        message: err.msg,
+                        message: err.message,
                         response_code: err.code
                     },
                     _version: MESSAGE_VERSION
 
                 });
                 const replyToQueue = msgProps.replyTo || uuid;
-                rabbitMQServices.sendEncriptedMsg(replyToQueue, message);
+                rabbitMQServices.sendEncryptedMsg(replyToQueue, message);
                 throw err;
 
         });
@@ -167,7 +169,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     }
 
     if (!checkingYard){
-        saveLogData('agent', {uuid}, 'error', `agent failed to check in; yard uid is missing`);
+        logData.addLog('agent', {uuid}, 'error', `agent failed to check in; yard uid is missing`);
         throw ({msg:`agent failed to check in; yard uid is missing;']}`, code: 'YARD-400'});
     }
     const yardId = await isYardUIdRegistered(checkingYard.toString());
@@ -196,7 +198,7 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
     agentUpdate['message_channel'] = replyTo || uuid;
 
     if ('public_key' in checkinData){
-        saveLogData('agent', {uuid}, 'normal', `agent public key updated`);
+        logData.addLog('agent', {uuid}, 'info', `agent public key updated`);
         agentUpdate['public_key'] = checkinData.public_key;
     }
 
@@ -229,37 +231,39 @@ async function processAgentCheckIn(uuid, data, msgProps, registeredAgent) {
         agentUpdate['data_format'] = checkinData['data_format'];
     }
 
+    if ('unit' in checkinData) {
+        agentUpdate['unit'] = checkinData['unit'];
+    }
+
+    if ('coordinate_frame' in checkinData) {
+        agentUpdate['coordinate_frame'] = checkinData['coordinate_frame'];
+    }
+
+    if ('reference_point' in checkinData) {
+        agentUpdate['reference_point'] = checkinData['reference_point'];
+    }
 
     if ('factsheet' in checkinData){
-        factSheet =  checkinData['factsheet']; // VDA5050
+        agentUpdate['factsheet'] =  checkinData['factsheet'];
     } 
     
     if ('geometry' in checkinData) {
-        vehicleGeometry =  checkinData['geometry'];  
+        agentUpdate['geometry'] =  checkinData['geometry'];  
     }
 
-    if (vehicleGeometry){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(vehicleGeometry)) {
-            agentUpdate['geometry'] =  JSON.stringify(vehicleGeometry); // Backward compatibility: 
-        } else {
-            agentUpdate['geometry'] = vehicleGeometry; // Backward compatibility: 
-        }
-        //
-    }
 
-    if (factSheet){
-        // JSON conversion postgres bug-workaround https://github.com/brianc/node-postgres/pull/1432
-        if (Array.isArray(factSheet)) {
-            agentUpdate['factsheet'] =  JSON.stringify(factSheet);
-        } else {
-            agentUpdate['factsheet'] = factSheet;
-        }
-        //
-    }
-
-    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, 'realtime');
-    return inMemDB.flush('agents', 'uuid', databaseServices.agents, 0).then(()=>agentUpdate);    
+    const inMemDB =  await memDBService.getInstance();
+    inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time,'buffered');
+    inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
+    return databaseServices.agents.updateByConditions({uuid}, agentUpdate)
+           .then(() => databaseServices.agents.get('uuid', uuid, [ 'id', 'uuid',
+                                                                 'message_channel', 
+                                                                 'rbmq_username',
+                                                                 'rbmq_encrypted_password',
+                                                                 'yard_id',
+                                                                 'public_key'
+                                                                ]))
+            .then(agents=>agents[0])
 }
 
 

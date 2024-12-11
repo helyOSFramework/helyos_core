@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS public.system_logs (
     created_at timestamp(6) without time zone DEFAULT NOW(),
     yard_id bigint,
     wproc_id bigint,
-    tool_uuid character varying,
     agent_uuid character varying,
     service_type  character varying,
     event  character varying,

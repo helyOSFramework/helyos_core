@@ -1,47 +1,55 @@
-$topnav-background-color: #222;
+$topnav-background-color: #222222;
+
 :host {
-    .navbar {
-        background-color: $topnav-background-color;
+  .navbar {
+    background-color: $topnav-background-color;
 
-        .navbar-brand {
-            color: #fff;
-        }
+    --bs-navbar-padding-x: 1rem;
 
-        .nav-item > a {
-            color: #999;
-
-            &:hover {
-                color: #fff;
-            }
-        }
+    .navbar-brand {
+      color: #ffffff;
+      width: 235px;
     }
 
-    .messages {
-        width: 300px;
+    .nav-item > a {
+      color: #999999;
 
-        .media {
-            border-bottom: 1px solid #ddd;
-            padding: 5px 10px;
-
-            &:last-child {
-                border-bottom: none;
-            }
-        }
-
-        .media-body {
-            h5 {
-                font-size: 13px;
-                font-weight: 600;
-            }
-
-            .small {
-                margin: 0;
-            }
-
-            .last {
-                font-size: 12px;
-                margin: 0;
-            }
-        }
+      &:hover {
+        color: #ffffff;
+      }
     }
+
+    .ml-auto {
+      margin-left: auto;
+    }
+  }
+
+  .messages {
+    width: 300px;
+
+    .media {
+      border-bottom: 1px solid #dddddd;
+      padding: 5px 10px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .media-body {
+      h5 {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .small {
+        margin: 0;
+      }
+
+      .last {
+        font-size: 12px;
+        margin: 0;
+      }
+    }
+  }
 }

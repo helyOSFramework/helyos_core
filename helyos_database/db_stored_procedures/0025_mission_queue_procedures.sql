@@ -1,4 +1,5 @@
  
+SET client_min_messages TO WARNING;
 
 
 --
@@ -9,34 +10,59 @@ CREATE OR REPLACE FUNCTION public.notify_mission_queue_update()
 RETURNS trigger AS
 $BODY$
     BEGIN
-        --PERFORM pg_notify('mission_queue_update',  row_to_json(NEW)::text);
         PERFORM pg_notify('mission_queue_update',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT id, status,  sched_start_at from public.mission_queue  where id = NEW.id)
-            r)
+             SELECT id, sched_start_at 
+             FROM public.mission_queue 
+             WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('mission_queue_update', 
+            (SELECT row_to_json(r.*)::text FROM (
+                      SELECT id, status, sched_start_at 
+                      FROM public.mission_queue 
+                      WHERE id = NEW.id) r
+            )
+        );
+        
         RETURN NULL;
     END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_mission_queue_update() OWNER TO role_admin;
 
 
 
 CREATE OR REPLACE FUNCTION public.notify_mission_queue_insertion()
-  RETURNS trigger AS
+RETURNS trigger AS
 $BODY$
    BEGIN
        PERFORM pg_notify('mission_queue_insertion',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT  id, status,  sched_start_at from public.mission_queue  where id = NEW.id)
-            r)
+             SELECT id, status, sched_start_at 
+             FROM public.mission_queue 
+             WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('mission_queue_insertion', 
+            (SELECT row_to_json(r.*)::text FROM (
+                      SELECT id, status, sched_start_at 
+                      FROM public.mission_queue 
+                      WHERE id = NEW.id) r
+             )
+        );
+        
        RETURN NULL;
    END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_mission_queue_insertion() OWNER TO role_admin;
 
 
 

@@ -1,7 +1,7 @@
 // Services imports
 const databaseServices = require('../../services/database/database_services.js')
 var utils = require('../../modules/utils');
-const { saveLogData } = require('../../modules/systemlog.js');
+const { logData } = require('../../modules/systemlog.js');
 
 // ----------------------------------------------------------------------------
 // Work Process => Work Process Type Definitions => Service Request(s) => Map Update(s)
@@ -11,7 +11,7 @@ const insertManyMapObjectsAsync = (yardId, mapObjects) => {
 	const responsePromise = mapObjects.map(mapObj => {
 		// Filter only valid properties
 		const _mapObj = (({data_format, type, metadata, data, name}) => ({data_format, type, metadata, data, name}))(mapObj);
-		return databaseServices.map.insert({..._mapObj, yard_id: yardId});
+		return databaseServices.map_objects.insert({..._mapObj, yard_id: yardId});
 	}); 
 
 	return Promise.all(responsePromise);
@@ -32,18 +32,18 @@ function updateMap(yardId, yardData){
 
 	const responsePromise = [];
 	if (mapObjects.length > 0) {
-		responsePromise.push(databaseServices.map.update('yard_id', yardId,  {'deleted_at': new Date()})
+		responsePromise.push(databaseServices.map_objects.update('yard_id', yardId,  {'deleted_at': new Date()})
 							.then( () => insertManyMapObjectsAsync(yardId, mapObjects))
-							.catch((e)=> saveLogData('microservice', {yardId}, 'error', `updating map objects: ${JSON.stringify(e)}` ))); 
+							.catch((e)=> logData.addLog('microservice', {yardId}, 'error', `updating map objects: ${JSON.stringify(e)}` ))); 
 	}
 
 	if (mapOrigin){
 		responsePromise.push(databaseServices.yards.update_byId(yardId, {lat: mapOrigin.lat, lon: mapOrigin.lon || mapOrigin.long, alt: mapOrigin.alt, source: 'microservice'})
-							.catch((e)=> saveLogData('microservice', {yardId}, 'error', `updating map origin: ${JSON.stringify(e)}` ))); 
+							.catch((e)=> logData.addLog('microservice', {yardId}, 'error', `updating map origin: ${JSON.stringify(e)}` ))); 
 	}
 	if (mapData){
 		responsePromise.push(databaseServices.yards.update_byId(yardId, {map_data: mapData, source: 'microservice'})
-							.catch((e)=> saveLogData('microservice', {yardId}, 'error', `updating map_data: ${JSON.stringify(e)}` ))); 
+							.catch((e)=> logData.addLog('microservice', {yardId}, 'error', `updating map_data: ${JSON.stringify(e)}` ))); 
 
 	}
 

@@ -1,156 +1,169 @@
 <ng-template #content let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Authorization Token</h4>
-      <button type="button"  aria-label="Close" (click)="modal.close('Cross click')">x</button>
-    </div>
-    <div class="modal-body">
-      <form>
-        <div class="mb-3">
-          <div style="width: calc(100% - 20px); margin:10px; padding: 6px; white-space: nowrap; overflow-x: scroll; overflow-y: hidden;">
-            {{accountToken}}
-          </div>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Authorization Token</h4>
+    <button type="button" aria-label="Close" (click)="modal.close('Cross click')">x</button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="mb-3">
+        <div
+          style="
+            width: calc(100% - 20px);
+            margin: 10px;
+            padding: 6px;
+            white-space: nowrap;
+            overflow-x: scroll;
+            overflow-y: hidden;
+          ">
+          {{ accountToken }}
         </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" (click)="copyText()">{{copyLabel}}</button>
-    </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="copyText()">
+      {{ copyLabel }}
+    </button>
+  </div>
 </ng-template>
 
-
 <div class="row-pannel">
-    <h1>Application Accounts </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
-        <button  class="btn btn-lg btn-outline-dark" (click)="openDocs()" >
-                  Documentation
-        </button>
-    </div>
+  <h1>Application Accounts</h1>
+  <div style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
+  </div>
 </div>
 
 <div class="card mb-3">
-    <div class="card-header">
-        Accounts
-    </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#ID</th>
-                    <th>username</th>
-                    <th>role</th>
-                    <th>description</th>
-                    <th>created</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of items" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <td>{{item.id}}</td>
-                    <td>{{item.username}}</td>
-                    <td>{{USER_ROLE[item.userRole]}}</td>
-                    <td>{{item.description}}</td>
-                    <td>{{item.createdAt}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
+  <div class="card-header">Accounts</div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>username</th>
+          <th>role</th>
+          <th>description</th>
+          <th>created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of items"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <td>{{ item.id }}</td>
+          <td>{{ item.username }}</td>
+          <td>{{ USER_ROLE[item.userRole] }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.createdAt }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="row-pannel">
+  <div>
+    <button class="btn btn-primary" (click)="getToken(content)" type="submit">Get Token</button>
+    <button class="btn btn-danger" type="submit">Remove Token</button>
+  </div>
 
-    <div>
-        <button class="btn btn-primary" (click)="getToken(content)" type="submit">Get Token</button>
-        <button class="btn btn-danger"  type="submit">Remove Token</button>
-    </div>
-
-    <div>
-        <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
-        <button class="btn btn-danger" [disabled]="!selectedItem || selectedItem?.username=='admin'" (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
-    </div>
-
+  <div>
+    <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
+    <button
+      class="btn btn-danger"
+      [disabled]="!selectedItem || selectedItem?.username === 'admin'"
+      (click)="deleteItem(selectedItem.id)"
+      type="submit">
+      Delete
+    </button>
+  </div>
 </div>
 
+<section class="detail-container" *ngIf="selectedItem">
+  <h4>{{ selectedItem.username }}</h4>
 
- 
-<section class="detail-container" *ngIf="selectedItem" >
+  <form role="form" style="margin: 0 auto; max-width: 1000px">
+    <div class="row">
+      <fieldset class="form-group col-xl-3">
+        <label for="username">Username</label>
+        <input id="username" class="form-control" [(ngModel)]="selectedItem.username" name="username" />
+      </fieldset>
 
-        <h4>{{selectedItem.username}}</h4>
+      <fieldset *ngIf="!setPassFlag" class="form-group col-xl-3">
+        <label for="btn"> &nbsp; </label>
+        <button style="height: 36px; width: 100%" class="btn btn-primary" type="submit" (click)="setPassFlag = true">
+          Change Password
+        </button>
+      </fieldset>
 
-        <form role="form"  style="margin: 0 auto; max-width: 1000px;">
-            <div class="row">
+      <ng-container *ngIf="setPassFlag">
+        <fieldset class="form-group col-xl-3">
+          <label for="password"> Password</label>
+          <input
+            id="password"
+            class="form-control"
+            [(ngModel)]="password"
+            name="password"
+            type="password"
+            placeholder="password" />
+        </fieldset>
 
-                <fieldset class="form-group col-xl-3">
-                    <label>Username</label>
-                    <input class="form-control" [(ngModel)]="selectedItem.username" name="username" />
-                </fieldset>
+        <fieldset class="form-group col-xl-3">
+          <label for="confirm_password"> &nbsp;</label>
+          <input
+            id="confirm_password"
+            class="form-control"
+            [(ngModel)]="confirmedPassword"
+            name="confirmedPassword"
+            type="password"
+            placeholder="confirm password" />
+        </fieldset>
 
-                <fieldset *ngIf="!setPassFlag" class="form-group  col-xl-3">
-                    <label> &nbsp;</label>
-                    <button style="height: 36px; width: 100%;" class="btn btn-primary" type="submit" (click)="setPassFlag=true">Change Password</button>
-                </fieldset>
+        <fieldset class="form-group col-xl-3">
+          <label for="btn"> &nbsp; </label>
+          <button style="height: 36px; width: 100%" class="btn btn-primary" type="submit" (click)="setPassword()">
+            Set Password
+          </button>
+        </fieldset>
+      </ng-container>
+    </div>
 
-                <ng-container *ngIf="setPassFlag">
-                    <fieldset class="form-group col-xl-3">
-                        <label> Password</label>
-                        <input class="form-control" [(ngModel)]="password" name="password" type="password"
-                        placeholder="password" />
-                    </fieldset>
-    
-                    <fieldset class="form-group  col-xl-3">
-                        <label> &nbsp;</label>
-                        <input class="form-control" [(ngModel)]="confirmedPassword" name="confirmedPassword" type="password"
-                        placeholder="confirm password" />
-                    </fieldset>
+    <div class="row">
+      <fieldset class="form-group col-xl-4">
+        <label for="role">Role</label>
+        <select id="role" class="form-control form-select" [(ngModel)]="selectedItem.userRole" name="class">
+          <option [value]="0">{{ USER_ROLE[0] }}</option>
+          <option [value]="1">{{ USER_ROLE[1] }}</option>
+          <option [value]="2">{{ USER_ROLE[2] }}</option>
+        </select>
+      </fieldset>
+    </div>
 
-                    <fieldset class="form-group  col-xl-3">
-                        <label> &nbsp;</label>
-                        <button style="height: 36px; width: 100%;" class="btn btn-primary" type="submit"  (click)="setPassword()">Set Password</button>
-                    </fieldset>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="description"> Description </label>
+        <input
+          id="description"
+          class="form-control"
+          [(ngModel)]="selectedItem.description"
+          name="description"
+          maxlength="255"
+          placeholder="Add here a short description..." />
+      </fieldset>
+    </div>
 
-                </ng-container>
+    <div class="row">
+      <fieldset class="form-group col-xl-12">
+        <label for="metadata"> Metadata </label>
+        <textarea id="metadata" class="form-control" [(ngModel)]="selectedItem.metadata" name="metadata"></textarea>
+      </fieldset>
+    </div>
 
-
-
-            </div>
-
-
-            <div class="row" >
-
-                <fieldset class="form-group col-xl-4">
-                    <label>Role</label>
-                    <select class="form-control" [(ngModel)]="selectedItem.userRole" name="class">
-                        <option [value]="0">{{USER_ROLE[0]}}</option>
-                        <option [value]="1">{{USER_ROLE[1]}}</option>
-                        <option [value]="2">{{USER_ROLE[2]}}</option>
-                    </select>
-                </fieldset>
-
-            </div>
-
-
-            <div class="row" >
-
-                <fieldset class="form-group col-xl-12">
-                    <label> Description </label>
-                    <input class="form-control" [(ngModel)]="selectedItem.description" name="description" maxlength="255"
-                    placeholder="Add here a short description..." />
-                </fieldset>
-            </div>
-
-
-            <div class="row" >
-                <fieldset class="form-group col-xl-12">
-                    <label> Metadata </label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.metadata" name="metadata"
-                    ></textarea>
-                </fieldset>
-            </div>
-
-
-            <button class="btn btn-primary" type="submit"  (click)="editItem(selectedItem)">Save</button>
-            <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel </button>
-
-        </form>
-
+    <button class="btn btn-primary" type="submit" (click)="editItem(selectedItem)">Save</button>
+    <button class="btn btn-secondary" type="reset" (click)="getItem(selectedItem.id)">Cancel</button>
+  </form>
 </section>

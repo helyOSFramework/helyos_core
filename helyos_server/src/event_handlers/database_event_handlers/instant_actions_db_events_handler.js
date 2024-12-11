@@ -4,43 +4,41 @@
 
 const databaseServices = require('../../services/database/database_services.js');
 const agentComm = require('../../modules/communication/agent_communication.js');
-const systemlog = require('../../modules/systemlog.js');
-const saveLogData = systemlog.saveLogData;
+const { logData } = require('../../modules/systemlog.js');
 
 
 
 // Callbacks to database changes
-async function processInstantActionEvents(msg) {
-        let payload = JSON.parse(msg.payload);
-    
+async function processInstantActionEvents(channel, payload) {
 
-        switch (msg.channel) {
 
-            case 'instant_actions_insertion':
-                let agentId = payload['agent_id'];
-                let agentUuid = payload['agent_uuid'];
+    switch (channel) {
 
-                if  (agentId && !agentUuid) {
-                    const uuids = await databaseServices.agents.getIds([payload['uuid']]);
-                    agentUuid = uuids[0];
-                 };
+        case 'instant_actions_insertion':
+            let agentId = payload['agent_id'];
+            let agentUuid = payload['agent_uuid'];
 
-                if  (!agentId && payload.uuid) {
-                   const agentIds = await databaseServices.agents.getIds([payload['uuid']]);
-                   agentId = agentIds[0];
-                };
+            if (agentId && !agentUuid) {
+                const uuids = await databaseServices.agents.getUuids([agentId]);
+                agentUuid = uuids[0];
+            };
 
-                if (agentId) {
-                    agentComm.sendCustomInstantActionToAgent(agentId, payload['command']);
-                }
-                const logData = {...payload, agentId: agentId, agentUuid: agentUuid};
-                saveLogData('agent', logData, 'normal', `send custom instant action to agent`);	
+            if (!agentId && agentUuid) {
+                const agentIds = await databaseServices.agents.getIds([agentUuid]);
+                agentId = agentIds[0];
+            };
 
-                break;
+            if (agentId) {
+                agentComm.sendCustomInstantActionToAgent(agentId, payload['command']);
+            }
+            const log = { agent_id: agentId, agent_uuid: agentUuid, sender: payload.sender };
+            logData.addLog('agent', log, 'info', `send custom instant action to agent`);
 
-            default:
-                break;
-        }
+            break;
+
+        default:
+            break;
+    }
 
 }
 

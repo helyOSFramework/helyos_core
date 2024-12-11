@@ -1,81 +1,108 @@
-<div class="row" style="padding: 0 14px; justify-content:space-between">
-    <h1>All Agents </h1>
-    <div style="text-align: right; margin-bottom: 6px;">
-        <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">
-            Documentation
-        </button>
-    </div>
+<div class="row" style="justify-content: space-between">
+  <h1 class="w-auto">All Agents</h1>
+  <div class="w-auto" style="text-align: right; margin-bottom: 6px">
+    <button class="btn btn-lg btn-outline-dark" (click)="openDocs()">Documentation</button>
+  </div>
 </div>
 
 <p>
-    In helyOS framework, any instance that communicates with helyOS core via RabbitMQ is categorized as an agent.<br>
-    There are three main classes of agents: 'vehicle', 'tool' and 'assistants'.
+  In helyOS framework, any instance that communicates with helyOS core via RabbitMQ is categorized as an agent.<br />
+  There are three main classes of agents: 'vehicle', 'tool' and 'assistants'.
 </p>
 
 <div class="card mb-3">
-    <div class="card-header" style="display:flex; justify-content:space-between">
-        <div>Agents</div>
-        <div class="clickable" (click)="list()">
-            <span class="reload">&#x21bb;</span>
-            <span> RELOAD  </span>
-        </div>
+  <div class="card-header" style="display: flex; justify-content: space-between">
+    <div>Agents</div>
+    <div class="clickable" (click)="list()">
+      <span class="reload">&#x21bb;</span>
+      <span> RELOAD </span>
     </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>#ID</th>
-                    <th>Class</th>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>UUID</th>
-                    <th>Protocol</th>
-                    <th>msg/sec  <br> <span style="font-size: smaller;"> 1 to 30 Hz </span> </th>
-                    <th>db updts/sec  <br> <span style="font-size: smaller;"> 1 to 5 Hz </span> </th>
-                    <th>yardId</th>
-                    <th>status</th>
-                    <th>connection</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of tools" (click)="getItem(item.id)"
-                    [ngClass]="{selectedHighlight: item.id==selectedItem?.id}">
-                    <td>{{item.id}}</td>
-                    <th scope="row">{{item.agentClass}}</th>
-                    <th>{{item.agentType}}</th>
-                    <td>{{item.name}}</td>
-                    <td>{{item.uuid}}</td>
-                    <td>{{item.protocol}}</td>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Class</th>
+          <th>Type</th>
+          <th>Name</th>
+          <th>UUID</th>
+          <th>Protocol</th>
+          <th>
+            msg/sec <br />
+            <span style="font-size: smaller"> 1 to 30 Hz </span>
+          </th>
+          <th>
+            db updts/sec <br />
+            <span style="font-size: smaller"> 1 to 5 Hz </span>
+          </th>
+          <th>yardId</th>
+          <th>status</th>
+          <th>connection</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of tools"
+          (click)="getItem(item.id)"
+          [ngClass]="{
+            'selected-highlight': item.id === selectedItem?.id,
+          }">
+          <td>{{ item.id }}</td>
+          <th scope="row">{{ item.agentClass }}</th>
+          <th>{{ item.agentType }}</th>
+          <td>{{ item.name }}</td>
+          <td>{{ item.uuid }}</td>
+          <td>{{ item.protocol }}</td>
 
-                    <td [ngClass]="{'bg-danger': item.msgPerSec > 30}" title="Optimal: 10Hz." >
-                        {{item.msgPerSec | number:'1.2-2' }}
-                    </td> 
-                    <td [ngClass]="{'bg-danger': item.updtPerSec > 5}"  title="Optimal: < 2 Hz" >
-                        {{item.updtPerSec | number:'1.2-2' }}
-                    </td> 
-                    <td>{{item.yardId}}</td>
-                    <td>{{item.status}}</td>
-                    <td>{{item.connectionStatus}}</td>
-                </tr>
-            </tbody>
-        </table>
+          <td
+            [ngClass]="{
+              'bg-danger': item.msgPerSec > 30 && item.connectionStatus === 'online',
+              disabled: item.connectionStatus === 'offline',
+            }"
+            title="Optimal: 10Hz.">
+            {{ item.msgPerSec | number: '1.2-2' }}
+          </td>
+          <td
+            [ngClass]="{
+              'bg-danger': item.updtPerSec > 5 && item.connectionStatus === 'online',
+              disabled: item.connectionStatus === 'offline',
+            }"
+            title="Optimal: < 2 Hz">
+            {{ item.updtPerSec | number: '1.2-2' }}
+          </td>
+          <td>{{ item.yardId }}</td>
+          <td
+            [ngClass]="{
+              disabled: item.connectionStatus === 'offline',
+            }">
+            {{ item.status }}
+          </td>
+          <td>{{ item.connectionStatus }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-footer" style="display: flex; justify-content: space-between">
+    <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center">
+      <div class="w-auto">Instant Action Command</div>
+      <div class="col-xl-6">
+        <input
+          class="form-control"
+          style="margin: 0 6px; width: 100%"
+          placeholder="type your command"
+          [(ngModel)]="instantActionCommand"
+          name="instantAction" />
+      </div>
+      <button class="btn btn-light w-auto" (click)="sendInstantAction()">SEND</button>
     </div>
 
-    <div class="card-footer" style="display:flex;justify-content:space-between">
-        <div *ngIf="selectedItem" class="col-xl-9 row" style="align-items: center;">
-            <div>Instant Action Command</div>
-            <div class="col-xl-6" ><input class="form-control" style="margin:0 6px; width: 100%;" placeholder="type your command" [(ngModel)]="instantActionCommand" name="instantAction" /></div>
-            <button class="btn"  (click)="sendInstantAction()"> SEND </button>
-        </div>
-    
-        <div *ngIf="!selectedItem" class="form-group row col-xl-6">
-        </div>
-    
-        <!-- <div style="text-align: right; margin-bottom: 10px;">
+    <div *ngIf="!selectedItem" class="form-group row col-xl-6"></div>
+
+    <!-- <div style="text-align: right; margin-bottom: 10px;">
             <button class="btn btn-primary" (click)="create()" type="submit">Add</button>
             <button class="btn btn-danger"  (click)="deleteItem(selectedItem.id)" type="submit">Delete</button>
         </div> -->
-    </div>
-
-
+  </div>
 </div>

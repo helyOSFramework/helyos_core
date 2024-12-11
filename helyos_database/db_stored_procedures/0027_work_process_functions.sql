@@ -1,4 +1,5 @@
  
+SET client_min_messages TO WARNING;
 
 --
 --  Function used for query and mutations
@@ -42,17 +43,31 @@ CREATE OR REPLACE FUNCTION public.notify_work_processes_update()
 RETURNS trigger AS
 $BODY$
     BEGIN
-        --PERFORM pg_notify('work_processes_update',  row_to_json(NEW)::text);
-        PERFORM pg_notify('work_processes_update',            
-            (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT id, yard_id, work_process_type_id, status, work_process_type_name, agent_ids,  tools_uuids, agent_uuids, sched_start_at from public.work_processes  where id = NEW.id)
-            r)
-        );
+        IF NEW.status IS DISTINCT FROM OLD.status THEN
+            PERFORM pg_notify('work_processes_update',            
+                (SELECT row_to_json(r.*)::varchar FROM (
+                SELECT id, yard_id, work_process_type_id 
+                FROM public.work_processes 
+                WHERE id = NEW.id) r)
+            );
+            
+            INSERT INTO public.events_queue (event_name, payload)
+            VALUES ('work_processes_update', 
+                (SELECT row_to_json(r.*)::text FROM (
+                SELECT id, yard_id, work_process_type_id, status, work_process_type_name,
+                        agent_ids, on_assignment_failure, tools_uuids, agent_uuids, sched_start_at, fallback_mission
+                FROM public.work_processes 
+                WHERE id = NEW.id) r)
+            );
+        END IF;
+            
         RETURN NULL;
     END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_work_processes_update() OWNER TO role_admin;
 
 
 CREATE OR REPLACE FUNCTION public.update_work_process_list_order()
@@ -68,19 +83,31 @@ $BODY$
 
 
 CREATE OR REPLACE FUNCTION public.notify_work_processes_insertion()
-  RETURNS trigger AS
+RETURNS trigger AS
 $BODY$
    BEGIN
        PERFORM pg_notify('work_processes_insertion',            
             (SELECT row_to_json(r.*)::varchar FROM (
-             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, tools_uuids, agent_ids, agent_uuids, sched_start_at from public.work_processes  where id = NEW.id)
-            r)
+             SELECT id, yard_id 
+             FROM public.work_processes 
+             WHERE id = NEW.id) r)
         );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('work_processes_insertion', 
+            (SELECT row_to_json(r.*)::text FROM (
+             SELECT id, yard_id, yard_uid, work_process_type_id, status, work_process_type_name, tools_uuids, agent_ids, agent_uuids, sched_start_at 
+             FROM public.work_processes 
+             WHERE id = NEW.id) r)
+        );
+        
        RETURN NULL;
    END; 
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+LANGUAGE plpgsql VOLATILE
+COST 100
+SECURITY DEFINER;
+ALTER FUNCTION public.notify_work_processes_insertion() OWNER TO role_admin;
 
 
 
@@ -117,11 +144,12 @@ FOR EACH ROW
 EXECUTE PROCEDURE public.notify_work_processes_update();
 
 
-DROP TRIGGER IF EXISTS trigger_work_processes_insertion ON public.work_processes;
+DROP TRIGGER IF EXISTS trigger_work_processes_before_insertion ON public.work_processes;
 CREATE TRIGGER trigger_work_processes_before_insertion
   BEFORE INSERT
   ON public.work_processes
   FOR EACH ROW
+  WHEN (NEW.run_order IS NULL)
   EXECUTE PROCEDURE public.update_work_process_list_order();
 
 
@@ -134,3 +162,4 @@ CREATE TRIGGER trigger_work_processes_insertion
 
 
 grant execute on function public.getWorkProcessActionData(work_process_id bigint)to role_admin, role_application, role_postgraphile;
+

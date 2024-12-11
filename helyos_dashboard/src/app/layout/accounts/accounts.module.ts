@@ -5,7 +5,10 @@ import { AccountsRoutingModule } from './accounts-routing.module';
 import { AccountsComponent } from './accounts.component';
 
 @NgModule({
-    imports: [CommonModule, AccountsRoutingModule],
-    declarations: [AccountsComponent]
+  imports: [
+    CommonModule,
+    AccountsRoutingModule,
+  ],
+  declarations: [AccountsComponent],
 })
-export class AccountsModule {}
+export class AccountsModule { }

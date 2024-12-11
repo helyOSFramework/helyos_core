@@ -1,26 +1,31 @@
 .file-upload {
-    display: none;
-  }
+  display: none;
+}
 
-
-.thumbnailContainer {
-
+.thumbnail-container {
   align-items: flex-start;
   height: inherit;
-  margin-left: 14px;
   display: flex;
   flex-direction: column;
+
+  .btn {
+    margin-left: calc(var(--bs-gutter-x) * 0.5);
+  }
+
   img {
-      margin: 3px;
-      height: 100%;
+    margin: 3px;
+    height: 100%;
   }
 }
 
 .clickable {
-    cursor: pointer;
-    width: 300px;
+  cursor: pointer;
+  width: 300px;
 }
 
 .field-group {
-  border: solid 0.5px rgba(0, 0, 0, 0.125); border-radius: 10px; padding: 18px; margin-bottom: 30px;
+  border: solid 0.5px rgba(0, 0, 0, 0.125);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 30px;
 }
