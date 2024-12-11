@@ -28,7 +28,7 @@ function generateFullYardContext(yardId){
 	})
 	.then((map_objects) => {
 			context.map.map_objects = map_objects;
-			agentFields = ['id', 'uuid', 'agent_class', 'agent_type', 'connection_status',
+			agentFields = ['id', 'uuid', 'agent_class', 'agent_type', 'connection_status', 'reference_point', 'coordinate_frame',
 							 'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
 							'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z','unit',
 							 'orientations', 'sensors', 'resources']

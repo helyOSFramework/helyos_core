@@ -126,14 +126,26 @@
 
       <fieldset class="form-group col-xl-4">
         <label for="dataFormat">Coordinate Frame</label>
+        <select
+            id="coordinateFrame"
+            class="form-control"
+            [(ngModel)]="selectedItem.coordinateFrame"
+            name="coordinateFrame">
+            <option value="WGS84">WGS84</option>
+            <option value="UTM">UTM</option>
+            <option value="local-UTM">local-UTM</option>
+            <option value="Other...">Other...</option>
+            <option *ngIf="!['local-UTM', 'UTM', 'WGS84', 'Other...'].includes(selectedItem.coordinateFrame)" 
+            [value]="selectedItem.coordinateFrame">{{ selectedItem.coordinateFrame }}</option>
+        </select>
         <input
-          id="coordinateFrame"
-          type="text"
-          class="form-control"
-          [(ngModel)]="selectedItem.coordinateFrame"
-          name="coordinateFrame"
-          placeholder="e.g. LAT-LON, UTM, etc." />
-      </fieldset>
+            *ngIf="selectedItem.coordinateFrame === 'Other...'"
+            type="text"
+            class="form-control mt-2"
+            [(ngModel)]="selectedItem._customCoordinateFrame"
+            name="_customCoordinateFrame"
+            placeholder="Enter custom value" />
+    </fieldset>
 
       <fieldset class="form-group col-xl-3">
         <label for="unit">Units</label>

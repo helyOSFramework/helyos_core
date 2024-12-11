@@ -227,7 +227,7 @@
               <p>The position parameters should be set according to the chosen reference in your application.</p>
 
               <div class="row">
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="x">x (unit)</label>
                   <input
                     id="x"
@@ -237,7 +237,7 @@
                     name="x"
                     placeholder="5000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="y">y (unit)</label>
                   <input
                     id="y"
@@ -247,7 +247,7 @@
                     name="y"
                     placeholder="13000" />
                 </fieldset>
-                <fieldset class="form-group col-xl-3">
+                <fieldset class="form-group col-xl-2">
                   <label for="z">z (unit)</label>
                   <input
                     id="z"
@@ -256,6 +256,19 @@
                     [(ngModel)]="selectedItem.z"
                     name="z"
                     placeholder="13000" />
+                </fieldset>
+                <fieldset class="form-group col-xl-4">
+                  <label for="referencePoint">ref. point</label>
+                  <input
+                    id="referencePoint"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="selectedItem.referencePoint"
+                    name="z"
+                    placeholder="e.g. body center" />
+                    <small class="form-text text-muted">
+                      Specify the point on the agent's body that corresponds to the given x, y, z coordinates.
+                    </small>
                 </fieldset>
               </div>
 
@@ -318,7 +331,7 @@
 
               <div class="row">
                 <fieldset class="form-group col-xl-12">
-                  <label for="geometry"> geometry (JSON)</label>
+                  <label for="geometry"> Geometry (JSON)</label>
                   <textarea
                     id="geometry"
                     class="form-control"

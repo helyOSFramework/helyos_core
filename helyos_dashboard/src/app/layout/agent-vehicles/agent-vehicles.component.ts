@@ -170,8 +170,14 @@ export class AgentVehiclesComponent implements OnInit {
     delete patch.sensors;
     delete patch.agent_poses;
     delete patch.rbmqUsername;
+    delete patch._customCoordinateFrame;
+
     if (patch.uuid) {
       patch.uuid = patch.uuid.trim();
+    }
+
+    if (item._customCoordinateFrame){
+      patch.coordinateFrame = item._customCoordinateFrame;
     }
 
     try {
