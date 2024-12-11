@@ -6,16 +6,16 @@ const { createAdapter: createClusterAdapter } = require('@socket.io/cluster-adap
 const { createAdapter: createRedisAdapter } = require('@socket.io/redis-adapter');
 const redisAccessLayer = require('./in_mem_database/redis_access_layer.js');
 const http = require('http');
-const { logData} = require('../modules/systemlog.js');
+const { logData } = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002
 
 // MULTI-INSTANCES ENVIRONMENT
 let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || 'cluster'
-const NUM_THREADS  =  parseInt(process.env.NUM_THREADS || '1');
+const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
 if (SOCKET_IO_ADAPTER !== 'redis') {
-    SOCKET_IO_ADAPTER = NUM_THREADS > 1 ? 'cluster':'none';
+    SOCKET_IO_ADAPTER = NUM_THREADS > 1 ? 'cluster' : 'none';
     console.warn(`====> socket socket io adtaper set to ${SOCKET_IO_ADAPTER}. Threads: ${NUM_THREADS}`)
 }
 
@@ -34,7 +34,7 @@ class WebSocketService {
     static instance = null;
 
     constructor() {
-        if (WebSocketService.instance){
+        if (WebSocketService.instance) {
             return WebSocketService.instance;
         }
 
@@ -44,16 +44,16 @@ class WebSocketService {
 
         this.io.sockets.on('connection', function (socket) {
             let clientToken = null;
-            if (socket.handshake.query && socket.handshake.query.token){
+            if (socket.handshake.query && socket.handshake.query.token) {
                 clientToken = socket.handshake.query.token;
             }
-            if (socket.handshake.auth && socket.handshake.auth.token){
+            if (socket.handshake.auth && socket.handshake.auth.token) {
                 clientToken = socket.handshake.auth.token;
             }
 
             const room = socket.handshake.auth?.room || 'all';
 
-            if(!clientToken) {
+            if (!clientToken) {
                 unauthorizeClient(socket);
                 return;
             }
@@ -71,36 +71,36 @@ class WebSocketService {
 
 
 
-    async initiateWebSocket() { 
+    async initiateWebSocket() {
         if (SOCKET_IO_ADAPTER === 'redis') {
             await redisAccessLayer.ensureConnected();
             const pubClient = redisAccessLayer.pubForSocketIOServer;
-            const subClient= redisAccessLayer.subForSocketIOServer;    
+            const subClient = redisAccessLayer.subForSocketIOServer;
             this.io.adapter(createRedisAdapter(pubClient, subClient));
-        } 
+        }
         if (SOCKET_IO_ADAPTER === 'cluster') {
             this.io.adapter(createClusterAdapter());
-        }    
+        }
     }
 
 
-    dispatchAllBufferedMessages(bufferPayload){
-        for(let room in bufferPayload) {
+    dispatchAllBufferedMessages(bufferPayload) {
+        for (let room in bufferPayload) {
             const roomChannels = bufferPayload[room];
-            for(let channel in roomChannels){
-                    this.sendUpdatesToFrontEnd(channel, roomChannels[channel], room);
-                    roomChannels[channel]=null;
+            for (let channel in roomChannels) {
+                this.sendUpdatesToFrontEnd(channel, roomChannels[channel], room);
+                roomChannels[channel] = null;
             }
         }
     }
 
 
-    sendUpdatesToFrontEnd(channel, msg=null, room) {
-        if (!this.io){
+    sendUpdatesToFrontEnd(channel, msg = null, room) {
+        if (!this.io) {
             console.warn("socket.io is not defined, start the websocket server", msg);
             return;
-        } 
-        if (!msg || msg==[]) return;
+        }
+        if (!msg || msg == []) return;
         try {
             if (room !== 'all') this.io.to(room).emit(channel, msg);
             this.io.to('all').emit(channel, msg);
@@ -116,7 +116,7 @@ class WebSocketService {
 const unauthorizeClient = (socket) => {
     console.log('Client disconnected id', socket.id);
     logData.addLog('helyos_core', null, 'warn',
-    `Client application tried to connect to websocket ${socket.id} with invalid token`);
+        `Client application tried to connect to websocket ${socket.id} with invalid token`);
     socket.emit('unauthorized', 'Invalid token');
     socket.disconnect(true);
 }
@@ -131,18 +131,18 @@ const unauthorizeClient = (socket) => {
  */
 let webSocketService;
 async function getInstance() {
-  if (!webSocketService) {
-    console.log('====> Creating and initiating WebSocketService Instance');
-    try {
-        webSocketService = new WebSocketService();
-        await webSocketService.initiateWebSocket();
+    if (!webSocketService) {
+        console.log('====> Creating and initiating WebSocketService Instance');
+        try {
+            webSocketService = new WebSocketService();
+            await webSocketService.initiateWebSocket();
 
-    } catch (error) {
-        console.error('Failed to initialize WebSocketService:', error);
-        throw error; 
+        } catch (error) {
+            console.error('Failed to initialize WebSocketService:', error);
+            throw error;
+        }
     }
-  }
-  return webSocketService;
+    return webSocketService;
 }
 
 

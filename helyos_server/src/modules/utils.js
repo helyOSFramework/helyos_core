@@ -5,9 +5,9 @@
  * @returns {string} - The camelized string.
  */
 const camelize = function (text) {
-    return text.replace(/^([A-Z])|[\s-_]+(\w)/g, function(match, p1, p2, offset) {
+    return text.replace(/^([A-Z])|[\s-_]+(\w)/g, function (match, p1, p2, offset) {
         if (p2) return p2.toUpperCase();
-        return p1.toLowerCase();        
+        return p1.toLowerCase();
     });
 }
 
@@ -31,16 +31,16 @@ const isISODate = (value) => {
 const serializeNonStringValues = (obj) => {
     const serializedObj = {};
     Object.keys(obj).forEach(key => {
-      const value = obj[key];
-      if (typeof value === 'string') {
-        serializedObj[key] = value;
-      } else {
-        if (typeof value === 'undefined') {
-            serializedObj[key] = '';
+        const value = obj[key];
+        if (typeof value === 'string') {
+            serializedObj[key] = value;
         } else {
-            serializedObj[key] = JSON.stringify(value);
+            if (typeof value === 'undefined') {
+                serializedObj[key] = '';
+            } else {
+                serializedObj[key] = JSON.stringify(value);
+            }
         }
-      }
     });
     return serializedObj;
 }
@@ -53,28 +53,28 @@ const serializeNonStringValues = (obj) => {
  */
 function parseObjectValues(object) {
     const parsedObject = {};
-  
+
     for (const [key, value] of Object.entries(object)) {
-      let parsedValue;
-  
-      try {
-        parsedValue = JSON.parse(value);
-      } catch (e) {
-        // If JSON.parse fails, it's not a JSON string, so handle other cases
-        if (value === 'true' || value === 'false') {
-          parsedValue = value === 'true';
-        } else if (!isNaN(value)) {
-          parsedValue = Number(value);
-        } else if (isISODate(value)) {
-          parsedValue = new Date(value); // Handle datetime strings
-        } else {
-          parsedValue = value; // Keep it as a string
+        let parsedValue;
+
+        try {
+            parsedValue = JSON.parse(value);
+        } catch (e) {
+            // If JSON.parse fails, it's not a JSON string, so handle other cases
+            if (value === 'true' || value === 'false') {
+                parsedValue = value === 'true';
+            } else if (!isNaN(value)) {
+                parsedValue = Number(value);
+            } else if (isISODate(value)) {
+                parsedValue = new Date(value); // Handle datetime strings
+            } else {
+                parsedValue = value; // Keep it as a string
+            }
         }
-      }
-  
-      parsedObject[key] = parsedValue;
+
+        parsedObject[key] = parsedValue;
     }
-  
+
     return parsedObject;
 }
 
@@ -88,7 +88,7 @@ const camelizeAttributes = function (obj) {
     var newObject = {};
     for (var property in obj) {
         newObject[camelize(property)] = obj[property];
-    } 
+    }
     return newObject;
 }
 
@@ -100,8 +100,8 @@ const camelizeAttributes = function (obj) {
  */
 const snakecasize = function (text) {
     return text && text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-                   .map(x => x.toLowerCase())
-                   .join('_')
+        .map(x => x.toLowerCase())
+        .join('_')
 }
 
 /**
@@ -122,7 +122,7 @@ const snakeCaseAttributes = function (obj) {
     var newObject = {};
     for (var property in obj) {
         newObject[camelToSnakeCase(property)] = obj[property];
-    } 
+    }
     return newObject;
 }
 
@@ -137,21 +137,21 @@ const lookup = (obj, k) => {
     try {
         // check if the input is an object
         if (typeof obj != "object") {
-        return null;
+            return null;
         }
         let result = null;
         // check if the object has the key as a direct property
         if (obj.hasOwnProperty(k)) {
-        return obj[k];
+            return obj[k];
         } else {
-        // otherwise, loop through the values of the object
-        for (const o of Object.values(obj)) {
-            // recursively call lookup on each value
-            result = lookup(o, k);
-            // if the result is not null, break the loop
-            if (result == null) continue;
-            else break;
-        }
+            // otherwise, loop through the values of the object
+            for (const o of Object.values(obj)) {
+                // recursively call lookup on each value
+                result = lookup(o, k);
+                // if the result is not null, break the loop
+                if (result == null) continue;
+                else break;
+            }
         }
         // return the result
         return result;
@@ -219,7 +219,7 @@ function topologicalIndexing(requestList = []) {
 //     { step: 'I', depends_on: [] },
 //     { step: 'J', depends_on: [] },
 //   ];
-  
+
 //   const result = topologicalIndexing(complexInput);
 // console.log(result);
 

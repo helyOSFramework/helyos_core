@@ -3,13 +3,13 @@
 // ----------------------------------------------------------------------------
 
 const { UNCOMPLETE_ASSIGNM_STATUSES, UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH, UNCOMPLETE_ASSIGNM_AFTER_DISPATCH } = require('../../modules/data_models');
-const { DatabaseLayer, AgentDataLayer, Client, 
-	searchAllRelatedUncompletedAssignments, 
+const { DatabaseLayer, AgentDataLayer, Client,
+	searchAllRelatedUncompletedAssignments,
 	getUncompletedAssignments_byWPId, getHighMsgRateAgents,
-	updateAgentsConnectionStatus, setDBTimeout} = require('./postg_access_layer');
+	updateAgentsConnectionStatus, setDBTimeout } = require('./postg_access_layer');
 
 // Singleton database clients
-const mainClient =  new Client();
+const mainClient = new Client();
 const shortTimeClient = new Client();
 const pgNotifications = new Client();
 
@@ -23,7 +23,7 @@ const connectToDB = async (_client, statementTimeout = 0) => {
 }
 
 const disconnectFromDB = async (clients) => {
-	return Promise.all(clients.map( client => client.end()))
+	return Promise.all(clients.map(client => client.end()))
 }
 
 
@@ -53,31 +53,31 @@ and inserts new connections for desired followers.
 @param {Object[]} [connection_geometries=[]] - The connection geometries for the connections.
 @returns {Promise} A promise that resolves when all connection creations are completed.
 */
-async function connectAgents(leaderUUID, followerUUIDs, allowStatuses, connection_geometries = [])  {
+async function connectAgents(leaderUUID, followerUUIDs, allowStatuses, connection_geometries = []) {
 
 	const leader = await agents.get('uuid', leaderUUID, ['id', 'uuid'], null, ['follower_connections']);
 	const currentFollowersIds = leader[0].follower_connections.map(e => parseInt(e.id));
 	const desiredFollowersIds = await agents.getIds(followerUUIDs);
 
-	const difference = (array1, array2) => array1.length? array1.filter(e=>!array2.includes(e)):[];
+	const difference = (array1, array2) => array1.length ? array1.filter(e => !array2.includes(e)) : [];
 	const disconnectIds = difference(currentFollowersIds, desiredFollowersIds);
-	const newConnectedIds = difference(desiredFollowersIds, currentFollowersIds );
+	const newConnectedIds = difference(desiredFollowersIds, currentFollowersIds);
 
 	let promises = [];
 	disconnectIds.forEach(id => {
-						promises.push(agents_interconnections.remove('follower_id', id));
-						promises.push(agents.update_byId(id, {'rbmq_username':''}));
-					});
-	promises = promises.concat(newConnectedIds.map((id) => 
-									agents_interconnections.insert({'leader_id':leader[0].id, 'follower_id':id }).then(()=>id)));
-	
+		promises.push(agents_interconnections.remove('follower_id', id));
+		promises.push(agents.update_byId(id, { 'rbmq_username': '' }));
+	});
+	promises = promises.concat(newConnectedIds.map((id) =>
+		agents_interconnections.insert({ 'leader_id': leader[0].id, 'follower_id': id }).then(() => id)));
+
 	return Promise.all(promises).then(() => desiredFollowersIds);
 }
 
 
-subscribeToDatabaseEvents = async (client, channelNames=[]) => {
+subscribeToDatabaseEvents = async (client, channelNames = []) => {
 
-    for (const channelName of channelNames) {
+	for (const channelName of channelNames) {
 		const queryText = `LISTEN ${channelName}`;
 		await client.query(queryText);
 		console.log(`Subscribed to channel: ${channelName}`);
@@ -89,7 +89,7 @@ subscribeToDatabaseEvents = async (client, channelNames=[]) => {
 const services = new DatabaseLayer(mainClient, 'public.services');
 const service_requests = new DatabaseLayer(mainClient, 'public.service_requests');
 const instant_actions = new DatabaseLayer(mainClient, 'public.instant_actions');
-const assignments = new DatabaseLayer(mainClient,'public.assignments');
+const assignments = new DatabaseLayer(mainClient, 'public.assignments');
 const work_processes = new DatabaseLayer(mainClient, 'public.work_processes');
 const mission_queue = new DatabaseLayer(mainClient, 'public.mission_queue');
 const map_objects = new DatabaseLayer(mainClient, 'public.map_objects');
@@ -131,11 +131,11 @@ module.exports.updateAgentsConnectionStatus = (n_secs) => updateAgentsConnection
 
 module.exports.getHighMsgRateAgents = (msgRateLimit, updtRateLimit) => getHighMsgRateAgents(mainClient, msgRateLimit, updtRateLimit);
 
-module.exports.getUncompletedAssignments_byWPId = (wpId) => getUncompletedAssignments_byWPId(mainClient, 
-																							 wpId,
-																							 UNCOMPLETE_ASSIGNM_STATUSES);
-module.exports.setDBTimeout = (n_secs) => setDBTimeout(shortTimeClient, n_secs);																					
-module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(shortTimeClient, 
-																											assId, 
-																											UNCOMPLETE_ASSIGNM_STATUSES);
+module.exports.getUncompletedAssignments_byWPId = (wpId) => getUncompletedAssignments_byWPId(mainClient,
+	wpId,
+	UNCOMPLETE_ASSIGNM_STATUSES);
+module.exports.setDBTimeout = (n_secs) => setDBTimeout(shortTimeClient, n_secs);
+module.exports.searchAllRelatedUncompletedAssignments = (assId) => searchAllRelatedUncompletedAssignments(shortTimeClient,
+	assId,
+	UNCOMPLETE_ASSIGNM_STATUSES);
 

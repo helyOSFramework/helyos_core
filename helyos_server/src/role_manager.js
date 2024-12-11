@@ -22,7 +22,7 @@ class RoleAssigner {
      * The current role of the node. Can be 'worker', 'leader', or 'broadcaster'.
      * @type {string}
      */
-    role = ROLES.WORKER; 
+    role = ROLES.WORKER;
 
     constructor(redisClient) {
         if (RoleAssigner.instance) {
@@ -52,10 +52,10 @@ class RoleAssigner {
     async tryToBecomeLeader(becomingLeader, becomingFollower) {
         try {
 
-            const result = this.role === ROLES.WORKER ?  await this.redisClient.set(this.LEADER_KEY, this.NODE_ID, {
-                                                                NX: true,
-                                                                PX: this.KEY_TTL
-                                                            }) : null;
+            const result = this.role === ROLES.WORKER ? await this.redisClient.set(this.LEADER_KEY, this.NODE_ID, {
+                NX: true,
+                PX: this.KEY_TTL
+            }) : null;
 
             if (result) {
                 console.log(`Node ${this.NODE_ID} is the leader ${result}`);
@@ -104,20 +104,20 @@ class RoleAssigner {
     }
 
 
-     /**
-     * Renews the broadcaster role of the current node by refreshing the broadcaster key in Redis.
-     * Continues to renew as long as the node remains the broadcaster.
-     * 
-     * @param {object} redisClient - The Redis client instance.
-     * @param {Function} becomingBroadcaster - Callback when maintaining broadcastership.
-     * @param {Function} becomingFollower - Callback when losing broadcastership.
-     */
+    /**
+    * Renews the broadcaster role of the current node by refreshing the broadcaster key in Redis.
+    * Continues to renew as long as the node remains the broadcaster.
+    * 
+    * @param {object} redisClient - The Redis client instance.
+    * @param {Function} becomingBroadcaster - Callback when maintaining broadcastership.
+    * @param {Function} becomingFollower - Callback when losing broadcastership.
+    */
     async tryToBecomeBroadcaster(becomingBroadcaster, losingBroadcastership) {
         try {
-            const result = this.role === ROLES.WORKER ?  await this.redisClient.set(this.BROADCASTER_KEY, this.NODE_ID, {
-                                                            NX: true,
-                                                            PX: this.KEY_TTL
-                                                      }) : null;
+            const result = this.role === ROLES.WORKER ? await this.redisClient.set(this.BROADCASTER_KEY, this.NODE_ID, {
+                NX: true,
+                PX: this.KEY_TTL
+            }) : null;
             if (result) {
                 console.log(`Node ${this.NODE_ID} is the broadcaster ${result}`);
                 if (this.amILeader !== true) {
@@ -176,17 +176,17 @@ class RoleAssigner {
  */
 let roleAssigner;
 async function getInstance() {
-  if (!roleAssigner) {
-    console.log('====> Creating and initiating RolerAssigner Instance');
-    try {
-        const inMemDB = await InMemDBService.getInstance(); 
-        roleAssigner = new RoleAssigner(inMemDB.client);
-    } catch (error) {
-        console.error('Failed to initialize RolerAssigner:', error);
-        throw error; 
+    if (!roleAssigner) {
+        console.log('====> Creating and initiating RolerAssigner Instance');
+        try {
+            const inMemDB = await InMemDBService.getInstance();
+            roleAssigner = new RoleAssigner(inMemDB.client);
+        } catch (error) {
+            console.error('Failed to initialize RolerAssigner:', error);
+            throw error;
+        }
     }
-  }
-  return roleAssigner;
+    return roleAssigner;
 }
 
 module.exports.getInstance = getInstance;

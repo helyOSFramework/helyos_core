@@ -11,11 +11,11 @@ const { Client } = require('pg');
  * @returns 
  */
 const parseConditions = (tableName, conditions) => {
-    let names = [], values = [], masks = [];
-    let null_conditions = [], in_conditions = [];
-    if (!conditions || Object.keys(conditions).length == 0) {
-        return this.list();
-    }
+	let names = [], values = [], masks = [];
+	let null_conditions = [], in_conditions = [];
+	if (!conditions || Object.keys(conditions).length == 0) {
+		return this.list();
+	}
 
 	let fromTableStatements = [];
 
@@ -24,7 +24,7 @@ const parseConditions = (tableName, conditions) => {
 		if (conditions[key] === null) {
 			null_conditions.push(` AND ${key} IS NULL `);
 		} else {
-			notNullConditions[key]=conditions[key];
+			notNullConditions[key] = conditions[key];
 		}
 	});
 
@@ -33,40 +33,40 @@ const parseConditions = (tableName, conditions) => {
 
 		if (key.includes('.')) {
 			const [table, field] = key.split('.');
-			if (  !tableName.includes(table) && !fromTableStatements.includes(table)) {
-					fromTableStatements.push(table);
+			if (!tableName.includes(table) && !fromTableStatements.includes(table)) {
+				fromTableStatements.push(table);
 			}
 		}
-		
+
 		if (key.endsWith('__in')) {
 			if (!Array.isArray(conditions[key])) {
 				throw new Error(`Invalid value for ${key}. Expected an array.`);
 			}
-            // Check if the array contains only numbers
-            if (conditions[key].every(Number.isFinite)) {
-                in_conditions.push(`AND ${key.slice(0, -4)} IN (${conditions[key].join(",")}) `);
-            } else {
-                in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
-            }
-		}  else {
+			// Check if the array contains only numbers
+			if (conditions[key].every(Number.isFinite)) {
+				in_conditions.push(`AND ${key.slice(0, -4)} IN (${conditions[key].join(",")}) `);
+			} else {
+				in_conditions.push(`AND ${key.slice(0, -4)} IN ('${conditions[key].join("','")}') `);
+			}
+		} else {
 			names.push(key);
 			values.push(conditions[key]);
 			masks.push('$' + (idx + 1));
 		}
 	});
 
-    names = names.join(',');
-    masks = masks.join(',');
-	fromTableStatements = fromTableStatements.length > 0 ? ' FROM ' + fromTableStatements.join(', ') : '';	
-    null_conditions = null_conditions.join(' ');
-    in_conditions = in_conditions.join(' ');
+	names = names.join(',');
+	masks = masks.join(',');
+	fromTableStatements = fromTableStatements.length > 0 ? ' FROM ' + fromTableStatements.join(', ') : '';
+	null_conditions = null_conditions.join(' ');
+	in_conditions = in_conditions.join(' ');
 
-    return { names, values, masks, null_conditions, in_conditions, fromTableStatements };
+	return { names, values, masks, null_conditions, in_conditions, fromTableStatements };
 }
 
 class DatabaseLayer {
 
-	constructor(client, table, shortTimeClient = null, jsonFields=[]) {
+	constructor(client, table, shortTimeClient = null, jsonFields = []) {
 		this.client = client;
 		this.table = table;
 		this.shortTimeClient = shortTimeClient;
@@ -160,7 +160,7 @@ class DatabaseLayer {
 		else
 			selColNames = items.join(',');
 
-		const {names, values, masks, null_conditions, in_conditions, fromTableStatements} = parseConditions(this.table, conditions);
+		const { names, values, masks, null_conditions, in_conditions, fromTableStatements } = parseConditions(this.table, conditions);
 		const colNames = names, colValues = values, valueMasks = masks;
 
 		if (orderBy)
@@ -199,7 +199,7 @@ class DatabaseLayer {
 			} else {
 				colValues.push(patch[key]);
 			}
-			
+
 			valueMasks.push('$' + (idx + 1));
 		});
 
@@ -227,8 +227,8 @@ class DatabaseLayer {
 			return Promise.resolve({})
 		}
 
-		const {names, values, masks, null_conditions, in_conditions, fromTableStatements} = parseConditions(this.table, conditions);
-		const condColNames = names, condColValues = values, condValueMasks = masks;	
+		const { names, values, masks, null_conditions, in_conditions, fromTableStatements } = parseConditions(this.table, conditions);
+		const condColNames = names, condColValues = values, condValueMasks = masks;
 
 		let colNames = [], colValues = [...condColValues], valueMasks = [];
 		delete patch['id'];
@@ -246,8 +246,8 @@ class DatabaseLayer {
 		colNames = colNames.join(',');
 		valueMasks = valueMasks.join(',');
 
-		let queryText, patchString ;
-		if (Object.keys(patch).length === 1)  {
+		let queryText, patchString;
+		if (Object.keys(patch).length === 1) {
 			patchString = colNames + ' = ' + valueMasks;
 		} else {
 			patchString = '(' + colNames + ') = (' + valueMasks + ')';
@@ -255,7 +255,7 @@ class DatabaseLayer {
 
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'UPDATE ' +  this.table + ' SET ' + patchString + fromTableStatements + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions + in_conditions ;
+			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + fromTableStatements + ' WHERE (' + condColNames + ') = (' + condValueMasks + ')' + null_conditions + in_conditions;
 		} else {
 			queryText = 'UPDATE ' + this.table + ' SET ' + patchString + fromTableStatements + '  WHERE ' + condColNames + ' = ' + condValueMasks + null_conditions + in_conditions;
 		}
@@ -263,20 +263,20 @@ class DatabaseLayer {
 		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
 
 		return _client.query(queryText, colValues)
-			   .then((res) => res.rowCount);
+			.then((res) => res.rowCount);
 	}
 
 
-	
+
 	updateMany(patchArray, index, useShortTimeClient = false) {
-	//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
+		//  POSTGRES LIMITATION: cannot insert multiple updates into a single query statement
 		const promisseList = patchArray.map(patch => {
 			delete patch.time_stamp;
 			if (Object.keys(patch).length < 2) return Promise.resolve({});
 			else return this.update(index, patch[index], patch, useShortTimeClient)
-						.catch(e => {
-							return { error: e, failedIndex: patch[index] } 
-						});
+				.catch(e => {
+					return { error: e, failedIndex: patch[index] }
+				});
 		});
 
 		return Promise.all(promisseList);
@@ -331,11 +331,11 @@ class DatabaseLayer {
 		}).join(',\n')}
 		RETURNING id
 		`;
-	
+
 		const queryValues = insertValues.flat();
 
 		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
-	
+
 		return _client.query(queryText, queryValues);
 
 	}
@@ -373,7 +373,7 @@ class DatabaseLayer {
 		let queryText;
 
 		if (Object.keys(conditions).length > 1) {
-			queryText = 'DELETE  FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions ;
+			queryText = 'DELETE  FROM ' + this.table + ' WHERE (' + colNames + ') = (' + valueMasks + ')' + null_conditions;
 		} else {
 			queryText = 'DELETE  FROM ' + this.table + ' WHERE ' + colNames + ' = ' + valueMasks + null_conditions;
 		}
@@ -426,7 +426,7 @@ class DatabaseLayer {
 
 
 class AgentDataLayer extends DatabaseLayer {
-	constructor(client, shortTimeClient = null, jsonFields=[]) {
+	constructor(client, shortTimeClient = null, jsonFields = []) {
 		super(client, 'public.agents', shortTimeClient, jsonFields);
 	}
 
@@ -453,13 +453,13 @@ class AgentDataLayer extends DatabaseLayer {
 	get(key, value, items, orderBy = null, nestedFields = null) {
 		let colNames;
 		let orderByStr;
-		let followerInterconnectionsFlag = nestedFields &&  nestedFields.includes('follower_connections');
+		let followerInterconnectionsFlag = nestedFields && nestedFields.includes('follower_connections');
 		let leaderInterconnectionsFlag = nestedFields && nestedFields.includes('leader_connections');
 
 		if (items === undefined || items.length == 0)
 			colNames = '*';
 		else {
-			items = items.filter(i => (!('leader_interconnections','follower_connections').includes(i)  ));
+			items = items.filter(i => (!('leader_interconnections', 'follower_connections').includes(i)));
 			colNames = items.join(',');
 		}
 
@@ -471,18 +471,17 @@ class AgentDataLayer extends DatabaseLayer {
 		return this.client.query('SELECT ' + colNames + ' FROM ' + this.table + ' WHERE ' + key + '= $1' + orderByStr, [value])
 			.then((res) => {
 				let aggregatePromises;
-				if (!followerInterconnectionsFlag && !leaderInterconnectionsFlag) 
-					{ return res['rows'] };
+				if (!followerInterconnectionsFlag && !leaderInterconnectionsFlag) { return res['rows'] };
 
-				if (followerInterconnectionsFlag && !leaderInterconnectionsFlag) 
-					{aggregatePromises = this.aggregatedFollowerConnections.bind(this)};
+				if (followerInterconnectionsFlag && !leaderInterconnectionsFlag) { aggregatePromises = this.aggregatedFollowerConnections.bind(this) };
 
-				if (!followerInterconnectionsFlag && leaderInterconnectionsFlag) 
-					{aggregatePromises = this.aggregatedLeaderConnections.bind(this)};
+				if (!followerInterconnectionsFlag && leaderInterconnectionsFlag) { aggregatePromises = this.aggregatedLeaderConnections.bind(this) };
 
-				if (followerInterconnectionsFlag && leaderInterconnectionsFlag ){
-					{aggregatePromises = (a) => this.aggregatedFollowerConnections(a).bind(this)
-												.then( a => this.aggregatedLeaderConnections(a).bind(this))};
+				if (followerInterconnectionsFlag && leaderInterconnectionsFlag) {
+					{
+						aggregatePromises = (a) => this.aggregatedFollowerConnections(a).bind(this)
+							.then(a => this.aggregatedLeaderConnections(a).bind(this))
+					};
 				}
 
 				const agents = res['rows'];
@@ -533,9 +532,9 @@ const updateAgentsConnectionStatus = (client, n_secs) => {
 const getHighMsgRateAgents = (client, msgRateLimit, updtRateLimit) => {
 	const sqlStringUpdtRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (updt_per_sec >  $1);`;
 	const sqlStringMsgRate = `SELECT id, uuid, updt_per_sec, msg_per_sec FROM public.agents WHERE (connection_status = 'online') and (msg_per_sec >  $1);`;
-	const updtInfractors = client.query(sqlStringUpdtRate, [updtRateLimit]).then(rv=>rv.rows);
-	const msgInfractors = client.query(sqlStringMsgRate, [msgRateLimit]).then(rv=>rv.rows);
-	return Promise.all([msgInfractors, updtInfractors ]).catch((e) => console.error(e));
+	const updtInfractors = client.query(sqlStringUpdtRate, [updtRateLimit]).then(rv => rv.rows);
+	const msgInfractors = client.query(sqlStringMsgRate, [msgRateLimit]).then(rv => rv.rows);
+	return Promise.all([msgInfractors, updtInfractors]).catch((e) => console.error(e));
 }
 
 
@@ -547,7 +546,7 @@ const getUncompletedAssignments_byWPId = (client, wpId, uncompletedAssgmStatus) 
 
 const searchAllRelatedUncompletedAssignments = (client, assId, uncompletedAssgmStatus) => {
 	return client.query('SELECT id FROM public.assignments WHERE work_process_id in (SELECT work_process_id FROM public.assignments WHERE id = $1) AND status IN ($2, $3, $4, $5, $6)',
-						 [assId, ...uncompletedAssgmStatus]).then((res) => res['rows']);
+		[assId, ...uncompletedAssgmStatus]).then((res) => res['rows']);
 }
 
 

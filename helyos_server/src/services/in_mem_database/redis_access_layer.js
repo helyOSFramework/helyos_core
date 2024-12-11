@@ -3,7 +3,7 @@ const REDIS_HOST = process.env.REDIS_HOST || '';
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'mypass';
 
-const {serializeNonStringValues, parseObjectValues} = require('../../modules/utils')
+const { serializeNonStringValues, parseObjectValues } = require('../../modules/utils')
 const { createClient } = require('redis');
 
 if (!REDIS_HOST) return;
@@ -170,7 +170,7 @@ function hGet(client, hash, field) {
 // Get all fields and values from a hash
 function hGetAll(client, hash) {
   return client.hGetAll(hash)
-  .then(object => parseObjectValues(object) )
+    .then(object => parseObjectValues(object))
     .catch(error => {
       console.error(`Error getting all fields from hash ${hash}:`, error);
       throw error;
@@ -194,9 +194,9 @@ async function getHashesByPattern(client, pattern) {
     return result;
 
   } catch (error) {
-    console.error('Error fetching hashes:',pattern,  error);
+    console.error('Error fetching hashes:', pattern, error);
     throw error;
-  } 
+  }
 }
 
 
@@ -245,13 +245,13 @@ function deleteHash(client, hash) {
 async function getAndDeleteHash(client, hash) {
   try {
     await ensureConnected();  // Ensure the client is connected
-    
+
     const pipeline = client.multi();
     pipeline.hGetAll(hash);  // Get all fields from the hash
     pipeline.del(hash);     // Delete the hash
-    
+
     const [getResult, delResult] = await pipeline.exec();  // Execute both commands atomically
-    
+
     return getResult[1];    // Return the result of hGetAll, which is the hash contents
   } catch (error) {
     console.error(`Error getting and deleting hash ${hash}:`, error);
@@ -284,7 +284,7 @@ async function getAndDeleteHashesByPattern(client, pattern) {
     if (!lockAcquired) {
       console.log(`Could not acquire Mem db lock ${pattern}, operation skipped.`);
       return {};
-    } 
+    }
 
     // Start a transaction for hash retrieval
     const multi = client.multi();
