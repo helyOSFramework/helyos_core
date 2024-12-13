@@ -36,6 +36,11 @@ const AGENT_STATUS = {
 
 
 //@Todo create Context Model Class
+const AGENT_CLASS = {
+    VEHICLE: "vehicle",
+    ASSISTANT: "assistant",
+    TOOL: "tool"
+}
 
 
 

@@ -69,10 +69,12 @@ const removeUser = (username) => !username ? Promise.resolve(null) :
                         throw new Error(`DELETE ACCOUNT RMBTMQ: ${e.response?.body?.reason}`);
                 });
 
-const add_rbmq_user_vhost = (username) => !username ? Promise.resolve(null) :
+const add_rbmq_user_vhost = (username, 
+                            permissions={"configure": '.*', "write": '.*', "read": '.*'}
+                            ) => !username ? Promise.resolve(null) :
         requestXHTTP
                 .put(`${API_PROTOCOL}://${RBMQ_HOST}:${RBMQ_API_PORT}/api/permissions/${RBMQ_VHOST}/${username}`)
-                .send({ "configure": ".*", "write": ".*", "read": ".*" })
+                .send({ "configure": permissions.configure, "write": permissions.write, "read": permissions.read })
                 .set({ 'content-type': 'application/json' }).ca(RBMQ_CERTIFICATE)
                 .auth(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD)
                 .then(() => ({ logType: 'info', message: `Set account permissions within RabbitMQ-vhost:${RBMQ_VHOST}` }))
