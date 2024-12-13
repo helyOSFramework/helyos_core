@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS public.ar_internal_metadata (
 );
 
 
+-- High-performance table: no keys or constraints are defined.
 CREATE TABLE public.events_queue(
     id bigserial,
     created_at	timestamp without time zone default now(),
@@ -43,3 +44,11 @@ CREATE TABLE public.events_queue(
     payload	text
 );
 
+CREATE TABLE public.helyos_config(
+    id bigserial PRIMARY KEY,
+    agents_ul_exchange character varying DEFAULT 'xchange_helyos.agents.ul',
+    agents_dl_exchange character varying DEFAULT 'xchange_helyos.agents.dl',
+    agents_mqtt_exchange character varying DEFAULT 'xchange_helyos.agents.mqtt',
+    agents_anonymous_exchange character varying DEFAULT 'xchange_helyos.agents.anonymous',
+    rbmq_vhost character varying
+);
