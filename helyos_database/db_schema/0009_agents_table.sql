@@ -62,8 +62,12 @@ CREATE TABLE IF NOT EXISTS public.agents (
     sensors_data_format character varying default 'helyos-native',
     geometry_data_format character varying default 'trucktrix-vehicle',
     data_format character varying default 'trucktrix-vehicle',
+    read_permissions character varying DEFAULT '.*',
+    write_permissions character varying DEFAULT '.*',
+    configure_permissions character varying DEFAULT '.*',
     
     UNIQUE(uuid),
+
     CONSTRAINT status_check CHECK (
     status IS NULL OR 
     status IN (
@@ -71,8 +75,14 @@ CREATE TABLE IF NOT EXISTS public.agents (
         'free',
         'ready',
         'busy'
-    )
-)
+    )),
+
+    CONSTRAINT agent_class_check CHECK (
+    agent_class IN (
+        'vehicle', 
+        'tool',
+        'assistant'
+    ))
 
 
 );
@@ -98,7 +108,7 @@ comment on column agents.sensors_data_format is '@ JSON data structure for the f
 
 
 
--- 2021-07-20 No foreign keys are defined in order to reduce the impact in INSERT operations.
+-- -- High-performance table: No foreign keys are defined in order to reduce the impact in INSERT operations.
 CREATE TABLE IF NOT EXISTS public.agent_poses (
     id BIGSERIAL PRIMARY KEY,
     tool_id bigint,

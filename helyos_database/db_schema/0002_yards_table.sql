@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS public.yards (
     alt double precision,
     data_format character varying default 'trucktrix-map',
     unit character varying default 'mm - mrad',
-    coordinate_frame character varying default 'local-UTM'
+    coordinate_frame character varying default 'local-UTM',
+
+    UNIQUE (uid)
 
     );
 

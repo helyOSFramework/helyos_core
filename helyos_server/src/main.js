@@ -79,7 +79,8 @@ async function connectToDB() {
         'change_agent_security',
         'change_agent_status',
         'agent_deletion',
-        'new_rabbitmq_account'
+        'new_rabbitmq_account',
+        'change_rabbitmq_permissions'
     ];
     await databaseServices.subscribeToDatabaseEvents(postgClient, dBEventsToSubscribe);
     console.log(" ============  Subscribed to DB events ==================");

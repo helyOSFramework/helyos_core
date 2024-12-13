@@ -77,7 +77,28 @@ $BODY$
         INSERT INTO public.events_queue (event_name, payload)
         VALUES ('change_agent_security', 
             (SELECT row_to_json(r.*)::text FROM (
-            SELECT  id, public_key, uuid, verify_signature, rbmq_username, allow_anonymous_checkin, yard_id, modified_at from public.agents where id = NEW.id)
+            SELECT  id, public_key, uuid, verify_signature, rbmq_username, allow_anonymous_checkin, yard_id, modified_at 
+            FROM public.agents WHERE id = NEW.id)
+            r)
+        );
+    END IF;
+
+
+
+    IF (OLD.read_permissions IS DISTINCT FROM NEW.read_permissions OR
+        OLD.write_permissions IS DISTINCT FROM NEW.write_permissions OR
+        OLD.configure_permissions IS DISTINCT FROM NEW.configure_permissions) THEN
+        PERFORM pg_notify('change_rabbitmq_permissions', 
+            (SELECT row_to_json(r.*)::varchar FROM (
+            SELECT  id, uuid, yard_id from public.agents where id = NEW.id)
+            r)
+        );
+        
+        INSERT INTO public.events_queue (event_name, payload)
+        VALUES ('change_rabbitmq_permissions', 
+            (SELECT row_to_json(r.*)::text FROM (
+            SELECT  id, uuid, uuid, yard_id, rbmq_username, read_permissions, write_permissions, configure_permissions 
+            FROM public.agents WHERE id = NEW.id)
             r)
         );
     END IF;

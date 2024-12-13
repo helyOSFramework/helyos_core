@@ -17,6 +17,7 @@ const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
+    AGENTS_UL_EXCHANGE,AGENTS_DL_EXCHANGE, RBMQ_VHOST,AGENT_MQTT_EXCHANGE, ANONYMOUS_EXCHANGE,
     AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE } = require('./services/message_broker/rabbitMQ_services.js');
 const { handleBrokerMessages } = require('./event_handlers/rabbitmq_event_subscriber.js');
 const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
@@ -50,7 +51,7 @@ const initWatchers = () => {
 * setInitialDatabaseData()
 * Pre-populate the database.
 */
-const setInitialDatabaseData = () => {
+const setInitialDatabaseData = async () => {
     // populate services data 
     if (readYML.registerManyMicroservices('/etc/helyos/config/microservices.yml')) {
         console.log(' ====== microservices.yml file processed =====')
@@ -69,11 +70,31 @@ const setInitialDatabaseData = () => {
     // populate agents
     try {
         agentPublicKeyFiles = fs.readdirSync('/etc/helyos/.ssl_keys/agent_public_keys');
-        return createOrUpdateAgents(agentPublicKeyFiles);
+        await createOrUpdateAgents(agentPublicKeyFiles);
 
     } catch (error) {
-        return Promise.resolve(null);
+        console.warn('storing agent public keys failed.', error);
     }
+
+    // Save environment variables
+    try {
+        const patch = {
+         'agents_ul_exchange': AGENTS_UL_EXCHANGE,
+         'agents_dl_exchange': AGENTS_DL_EXCHANGE,
+         'agents_mqtt_exchange': AGENT_MQTT_EXCHANGE,
+         'agents_anonymous_exchange': ANONYMOUS_EXCHANGE,
+         'rbmq_vhost': RBMQ_VHOST
+        }
+        config = await databaseServices.rbmq_config.get('rbmq_vhost', rbmqServices.RBMQ_VHOST, ['id']);
+        if (config.length) {
+             await databaseServices.rbmq_config.update_byId(config.id, patch);
+        } else {
+             await databaseServices.rbmq_config.insert(patch);
+        }
+     } catch (error) {
+         console.warn('storing environment variables failed.', error);
+         return null;
+     }
 
 }
 
