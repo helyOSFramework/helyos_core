@@ -89,7 +89,7 @@ const setInitialDatabaseData = async () => {
         if (config.length) {
              await databaseServices.rbmq_config.update_byId(config.id, patch);
         } else {
-             await databaseServices.rbmq_config.insert(config.id, patch);
+             await databaseServices.rbmq_config.insert(patch);
         }
      } catch (error) {
          console.warn('storing environment variables failed.', error);

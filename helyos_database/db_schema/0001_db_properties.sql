@@ -44,7 +44,7 @@ CREATE TABLE public.events_queue(
     payload	text
 );
 
-CREATE TABLE public.helyos_config(
+CREATE TABLE public.rbmq_config(
     id bigserial PRIMARY KEY,
     agents_ul_exchange character varying DEFAULT 'xchange_helyos.agents.ul',
     agents_dl_exchange character varying DEFAULT 'xchange_helyos.agents.dl',

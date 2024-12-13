@@ -82,6 +82,7 @@ grant select, insert, update, delete on table public.work_process_service_plan t
 grant select, insert, delete on table public.service_requests to role_admin; 
 grant select, insert, delete on table public.instant_actions to role_admin; 
 grant select, insert, update, delete on table public.mission_queue to role_admin;
+grant select on table public.rbmq_config to role_admin;
 
 
 
