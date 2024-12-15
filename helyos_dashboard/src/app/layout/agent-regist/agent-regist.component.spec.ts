@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { YardsComponent } from './agent-regist.component';
+import { AgentRegistComponent } from './agent-regist.component';
 
-describe('YardsComponent', () => {
-  let component: YardsComponent;
-  let fixture: ComponentFixture<YardsComponent>;
+describe('AgentRegistComponent', () => {
+  let component: AgentRegistComponent;
+  let fixture: ComponentFixture<AgentRegistComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [YardsComponent],
+      declarations: [AgentRegistComponent],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(YardsComponent);
+    fixture = TestBed.createComponent(AgentRegistComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
