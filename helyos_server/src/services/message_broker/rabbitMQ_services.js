@@ -39,7 +39,7 @@ const SUMMARY_REQUESTS_QUEUE = 'agent_data_requests';
 const AGENTS_UL_EXCHANGE = process.env.AGENTS_UL_EXCHANGE || 'xchange_helyos.agents.ul';
 const AGENTS_DL_EXCHANGE = process.env.AGENTS_DL_EXCHANGE || 'xchange_helyos.agents.dl';
 const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.agents.anonymous';
-const AGENT_MQTT_EXCHANGE = process.env.AGENT_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
+const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
 
 
 const sslOptions = RBMQ_SSL ? {
@@ -262,12 +262,12 @@ function createDebugQueues(agent) {
         dataChannel.assertQueue(`tap-${agent.name}`, { durable: false, maxLength: 10 });
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.*`);
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_UL_EXCHANGE, `*.${agent.uuid}.*`);
-        dataChannel.bindQueue(`tap-${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.*`);
+        dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.*`);
 
         dataChannel.assertQueue(`tap-cmd_to_${agent.name}`, { durable: false, maxLength: 10 });
-        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.assignment`);
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.assignment`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.assignment`);
-        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.instantActions`);
     });
 }
@@ -340,7 +340,7 @@ module.exports.YARD_VISUALIZATION_QUEUE = YARD_VISUALIZATION_QUEUE;
 module.exports.AGENTS_UL_EXCHANGE = AGENTS_UL_EXCHANGE;
 module.exports.AGENTS_DL_EXCHANGE = AGENTS_DL_EXCHANGE;
 module.exports.ANONYMOUS_EXCHANGE = ANONYMOUS_EXCHANGE;
-module.exports.AGENT_MQTT_EXCHANGE = AGENT_MQTT_EXCHANGE;
+module.exports.AGENTS_MQTT_EXCHANGE = AGENTS_MQTT_EXCHANGE;
 module.exports.RBMQ_VHOST = RBMQ_VHOST;
 module.exports.RBMQ_CERTIFICATE = RBMQ_CERTIFICATE;
 

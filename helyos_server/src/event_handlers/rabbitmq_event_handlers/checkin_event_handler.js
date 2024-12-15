@@ -3,13 +3,13 @@
 const rabbitMQServices = require('../../services/message_broker/rabbitMQ_services.js');
 const databaseServices = require('../../services/database/database_services.js');
 const memDBService = require('../../services/in_mem_database/mem_database_service');
+const { RBMQ_CERTIFICATE } = require('../../config.js');
 
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const { logData } = require('../../modules/systemlog.js');
 const { AGENT_STATUS } = require('../../modules/data_models.js');
-const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
-const RBMQ_CERTIFICATE = RBMQ_SSL? fs.readFileSync('/etc/helyos/.ssl_keys/ca_certificate.pem', 'utf-8'):null;
+
 let HELYOS_PUBLIC_KEY = '', HELYOS_PRIVATE_KEY = '';
 try {
      HELYOS_PRIVATE_KEY = fs.readFileSync('/etc/helyos/.ssl_keys/helyos_private.key');

@@ -17,7 +17,7 @@ const { MESSAGE_RATE_LIMIT, MESSAGE_UPDATE_LIMIT,
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, 
         AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
         AGENTS_UL_EXCHANGE,AGENTS_DL_EXCHANGE, RBMQ_VHOST,
-        AGENT_MQTT_EXCHANGE, ANONYMOUS_EXCHANGE,
+        AGENTS_MQTT_EXCHANGE, ANONYMOUS_EXCHANGE,
         AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, 
         YARD_VISUALIZATION_QUEUE, CREATE_RBMQ_ACCOUNTS } = config;
 
@@ -82,7 +82,7 @@ const setInitialDatabaseData = async () => {
         const patch = {
          'agents_ul_exchange': AGENTS_UL_EXCHANGE,
          'agents_dl_exchange': AGENTS_DL_EXCHANGE,
-         'agents_mqtt_exchange': AGENT_MQTT_EXCHANGE,
+         'agents_mqtt_exchange': AGENTS_MQTT_EXCHANGE,
          'agents_anonymous_exchange': ANONYMOUS_EXCHANGE,
          'rbmq_vhost': RBMQ_VHOST
         }

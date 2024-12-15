@@ -7,6 +7,10 @@ const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Ti
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 
 
+
+const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
+const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
+
 // RabbitMQ configurations
 const PREFETCH_COUNT = parseInt(process.env.PREFETCH_COUNT) || 100; // Number of messages to prefetch from the broker.
 const TTL_VISUAL_MSG = parseInt(process.env.TTL_VISUAL_MSG) || 2000; // Time to live for visualization messages in ms.
@@ -45,6 +49,12 @@ const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.age
 const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
 
 
+//REDIS configuration
+const REDIS_HOST = process.env.REDIS_HOST || '';
+const REDIS_PORT = process.env.REDIS_PORT || 6379;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
+
+
 // Export all variables
 module.exports = {
     // Agent Interactions
@@ -53,6 +63,8 @@ module.exports = {
     MESSAGE_UPDATE_LIMIT,
     AGENT_IDLE_TIME_OFFLINE,
     DB_BUFFER_TIME,
+
+    AGENT_REGISTRATION_TOKEN,
 
     // RabbitMQ Configurations
     PREFETCH_COUNT,
@@ -87,5 +99,10 @@ module.exports = {
     AGENTS_UL_EXCHANGE,
     AGENTS_DL_EXCHANGE,
     ANONYMOUS_EXCHANGE,
-    AGENTS_MQTT_EXCHANGE
+    AGENTS_MQTT_EXCHANGE, 
+
+    REDIS_HOST,
+    REDIS_PORT,
+    REDIS_PASSWORD
+
 };

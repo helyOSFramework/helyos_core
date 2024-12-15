@@ -1,7 +1,8 @@
 const databaseServices = require('../services/database/database_services.js');
 const memDBService = require('../services/in_mem_database/mem_database_service.js');
-const { AGENT_MQTT_EXCHANGE, AGENTS_DL_EXCHANGE, CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE,
-        AGENT_UPDATE_QUEUE, AGENT_STATE_QUEUE, AGENT_VISUALIZATION_QUEUE, verifyMessageSignature } = require('../services/message_broker/rabbitMQ_services.js');
+const { verifyMessageSignature } = require('../services/message_broker/rabbitMQ_services.js');
+
+
 const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handler');
 const {yardAutoUpdate} = require('./rabbitmq_event_handlers/yard_update_event_handler');
 const {agentCheckIn} = require('./rabbitmq_event_handlers/checkin_event_handler');
@@ -10,9 +11,16 @@ const { logData} = require('../modules/systemlog.js');
 const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_handler');
 const { deleteConnections } = require('../services/message_broker/rabbitMQ_access_layer.js');
 
-const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
-const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
-const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
+
+
+const  {AGENTS_MQTT_EXCHANGE, AGENTS_DL_EXCHANGE, 
+       CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, 
+       SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE,
+        AGENT_UPDATE_QUEUE, AGENT_STATE_QUEUE, 
+        AGENT_VISUALIZATION_QUEUE, AGENT_REGISTRATION_TOKEN
+    } = require('../config.js');
+
+    
 const {MISSION_STATUS } = require('../modules/data_models.js');
 
 /**
@@ -78,7 +86,7 @@ function identifyMessageSender(objMsg, routingKey) {
 
 async function validateMessageSender(inMemDB, registeredAgent, uuid, objMsg, msgProps, exchange) {
 
-            if ( registeredAgent.protocol === 'AMQP' && exchange === AGENT_MQTT_EXCHANGE ) {
+            if ( registeredAgent.protocol === 'AMQP' && exchange === AGENTS_MQTT_EXCHANGE ) {
                 throw ({msg:`Wrong protocol; agent is registered as AMQP; ${uuid}`, code: 'AGENT-400'});
             }
 
@@ -233,7 +241,7 @@ function handleBrokerMessages(channel, queueName, message)   {
             }
             
             logData.addLog('agent', checkinData, 'info', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
-            const replyExchange = exchange === AGENT_MQTT_EXCHANGE? AGENT_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
+            const replyExchange = exchange === AGENTS_MQTT_EXCHANGE? AGENTS_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
             return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
                     .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked in`))
                     .catch( err => {
@@ -288,20 +296,20 @@ function handleBrokerMessages(channel, queueName, message)   {
 
                     case AGENT_UPDATE_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, 0)
+                            agentAutoUpdate(objMsg.obj, uuid, 'realtime')
                             .then( () => channel.ack(message));
                         }
                         break;
 
                     case AGENT_VISUALIZATION_QUEUE:
                         if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
-                            agentAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
+                            agentAutoUpdate(objMsg.obj, uuid);
                         }
                         break;
 
 
                     case YARD_VISUALIZATION_QUEUE:
-                            yardAutoUpdate(objMsg.obj, uuid, DB_BUFFER_TIME);
+                            yardAutoUpdate(objMsg.obj, uuid);
                         break;    
 
                     default:

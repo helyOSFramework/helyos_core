@@ -1,7 +1,5 @@
 // Retrieve Redis connection details from environment variables
-const REDIS_HOST = process.env.REDIS_HOST || '';
-const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'mypass';
+const {REDIS_HOST, REDIS_PORT, REDIS_PASSWORD} = require('../../config');
 
 const { serializeNonStringValues, parseObjectValues } = require('../../modules/utils')
 const { createClient } = require('redis');
