@@ -6,7 +6,7 @@ const PGDATABASE = process.env.PGDATABASE;
 const PGPASSWORD = process.env.PGPASSWORD; // Not exported.
 
 if (!PGHOST || !PGPORT || !PGDATABASE) {
-    console.error('Error: PGHOST, PGPORT, and PGDATABASE must be defined.');
+    console.error('====> Error: PGHOST, PGPORT, and PGDATABASE must be defined.');
     process.exit(1);
 }
 
@@ -15,7 +15,7 @@ const RBMQ_PORT = process.env.RBMQ_PORT;
 const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
 
 if (!RBMQ_HOST) {
-    console.error('Error: RBMQ_HOST must be defined.');
+    console.error('====> Error: RBMQ_HOST must be defined.');
     process.exit(1);
 }
 
@@ -31,16 +31,42 @@ const postgraphileRolePassword = process.env.PGPASSWORD;
 // helyOS Scalability
 const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
 let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
-HELYOS_REPLICA = HELYOS_REPLICA === 'true';
+HELYOS_REPLICA = HELYOS_REPLICA.toLowerCase() === 'true';
 
 const REDIS_HOST = process.env.REDIS_HOST || '';
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
 
+const replicaOrMultiThread = HELYOS_REPLICA || (NUM_THREADS > 1)
+if (replicaOrMultiThread && !process.env.REDIS_HOST) {
+    const errorMessage = '====> Error: REDIS host not defined. Please define the REDIS host in your environment variables or set NUM_THREADS=1 and HELYOS_REPLICA=false.';
+    console.error(errorMessage);
+    process.exit(1);
+}
+
+
+let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || 'none';
+if (SOCKET_IO_ADAPTER !== 'redis') {
+    if (HELYOS_REPLICA) {
+        console.warn(`====> HELYOS_REPLICA is true; SOCKET_IO_ADAPTER will be set to "redis".`);
+        SOCKET_IO_ADAPTER = 'redis';
+
+    } else {
+        SOCKET_IO_ADAPTER = NUM_THREADS > 1 ? 'cluster' : 'none';
+        console.warn(`====> SOCKET_IO_ADAPTER set to ${SOCKET_IO_ADAPTER}. Threads: ${NUM_THREADS}`);
+    }
+}
+
+if (SOCKET_IO_ADAPTER === 'redis' && !REDIS_HOST) {
+    console.error(`====> Error: Socket.IO adapter is set to 'redis'. To utilize helyOS core replicas for horizontal scaling,` + 
+                  `you must connect the helyOS core to REDIS by providing a valid REDIS_HOST.`);
+    process.exit(1);
+}
+
 
 
 // Agent Interactions
-const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
+const CREATE_RBMQ_ACCOUNTS = (process.env.CREATE_RBMQ_ACCOUNTS || "True").toLowerCase() === 'true';
 const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
 const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || 20);
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
@@ -65,10 +91,10 @@ const RBMQ_ADMIN_PASSWORD = process.env.RBMQ_ADMIN_PASSWORD || 'guest';
 
 const RBMQ_USERNAME = process.env.RBMQ_USERNAME || RBMQ_ADMIN_USERNAME;
 const RBMQ_PASSWORD = process.env.RBMQ_PASSWORD || RBMQ_ADMIN_PASSWORD;
-const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
-const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False") === "True";
+const RBMQ_SSL = (process.env.RBMQ_SSL || "False").toLowerCase() === "true";
+const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False").toLowerCase() === "true";
 
-const TLS_REJECT_UNAUTHORIZED = (process.env.TLS_REJECT_UNAUTHORIZED || "True") === "True";
+const TLS_REJECT_UNAUTHORIZED = (process.env.TLS_REJECT_UNAUTHORIZED || "True").toLowerCase === "true";
 if (!TLS_REJECT_UNAUTHORIZED) { process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; }
 
 const API_PROTOCOL = RBMQ_API_SSL ? 'https' : 'http';
@@ -124,11 +150,12 @@ module.exports = {
 
     RBMQ_HOST,
     RBMQ_PORT,
+    RBMQ_VHOST,
+
     RBMQ_API_PORT,
     RBMQ_CNAME,
     RBMQ_ADMIN_USERNAME,
     RBMQ_ADMIN_PASSWORD,
-    RBMQ_VHOST,
 
     RBMQ_USERNAME,
     RBMQ_PASSWORD,

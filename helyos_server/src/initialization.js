@@ -22,18 +22,10 @@ const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE,
         YARD_VISUALIZATION_QUEUE, CREATE_RBMQ_ACCOUNTS } = config;
 
 const { handleBrokerMessages } = require('./event_handlers/rabbitmq_event_subscriber.js');
-const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
+const {NUM_THREADS, HELYOS_REPLICA} =  config;
 // Settings for horizontal scaling
-let USE_HELYOS_REPLICA = (process.env.USE_HELYOS_REPLICA || 'false') === 'true';
-USE_HELYOS_REPLICA = USE_HELYOS_REPLICA || (NUM_THREADS > 1)
+const replicaOrMultiThread = HELYOS_REPLICA || (NUM_THREADS > 1);
 
-if (USE_HELYOS_REPLICA && !process.env.REDIS_HOST) {
-    const errorMessage = 'REDIS host not defined. Please define the REDIS host in your environment variables or set NUM_THREADS=1 and USE_HELYOS_REPLICA=false.';
-
-    logData.addLog('helyos_core', null, 'error', errorMessage);
-    console.error(errorMessage);
-    process.exit(1);
-}
 
 // ----------------------------------------------------------------------------
 // Initialization of the back-end
@@ -141,7 +133,7 @@ helyOS needs to connect to rabbimq server as admin.
 This recursive routine checks if the set admin account is valid and try to create the admin account otherwise.
 */
 function initializeRabbitMQAccounts() {
-    if (CREATE_RBMQ_ACCOUNTS !== 'True') { return Promise.resolve(null) }
+    if (!CREATE_RBMQ_ACCOUNTS) { return Promise.resolve(null) }
     logData.addLog('helyos_core', null, 'warn', 'Trying connecting to RabbitMQ using admin account...');
     return rbmqServices.connect_as_admin_and_create_accounts()
         .catch(e => {
@@ -201,7 +193,7 @@ async function helyosConsumingMessages(dataChannels) {
     };
 
 
-    if (USE_HELYOS_REPLICA) {
+    if (replicaOrMultiThread) {
         await roleManager.tryToBecomeLeader(becomingLeader, becomingFollower);
         await roleManager.tryToBecomeBroadcaster(() => { }, () => { });
     } else {
