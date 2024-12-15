@@ -1,4 +1,44 @@
 
+// helyOS Integration
+const PGHOST = process.env.PGHOST;
+const PGPORT = process.env.PGPORT;
+const PGDATABASE = process.env.PGDATABASE;
+const PGPASSWORD = process.env.PGPASSWORD; // Not exported.
+
+if (!PGHOST || !PGPORT || !PGDATABASE) {
+    console.error('Error: PGHOST, PGPORT, and PGDATABASE must be defined.');
+    process.exit(1);
+}
+
+const RBMQ_HOST = process.env.RBMQ_HOST;
+const RBMQ_PORT = process.env.RBMQ_PORT;
+const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
+
+if (!RBMQ_HOST) {
+    console.error('Error: RBMQ_HOST must be defined.');
+    process.exit(1);
+}
+
+const DASHBOARD_PORT = 8080;
+const SOCKET_PORT = process.env.SOCKET_PORT || 5002;
+const GQLPORT = process.env.GQLPORT || 500;
+
+
+const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
+const postgraphileRolePassword = process.env.PGPASSWORD;
+
+
+// helyOS Scalability
+const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
+let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
+HELYOS_REPLICA = HELYOS_REPLICA === 'true';
+
+const REDIS_HOST = process.env.REDIS_HOST || '';
+const REDIS_PORT = process.env.REDIS_PORT || 6379;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
+
+
+
 // Agent Interactions
 const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
 const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
@@ -17,12 +57,11 @@ const PREFETCH_COUNT = parseInt(process.env.PREFETCH_COUNT) || 100; // Number of
 const TTL_VISUAL_MSG = parseInt(process.env.TTL_VISUAL_MSG) || 2000; // Time to live for visualization messages in ms.
 const TTL_STATE_MSG = parseInt(process.env.TTL_STATE_MSG) || 360000; // Time to live for state messages in ms.
 
-const RBMQ_HOST = process.env.RBMQ_HOST;
+
 const RBMQ_API_PORT = process.env.RBMQ_API_PORT || 15672;
 const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
 const RBMQ_ADMIN_USERNAME = process.env.RBMQ_ADMIN_USERNAME || 'guest';
 const RBMQ_ADMIN_PASSWORD = process.env.RBMQ_ADMIN_PASSWORD || 'guest';
-const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
 
 const RBMQ_USERNAME = process.env.RBMQ_USERNAME || RBMQ_ADMIN_USERNAME;
 const RBMQ_PASSWORD = process.env.RBMQ_PASSWORD || RBMQ_ADMIN_PASSWORD;
@@ -50,14 +89,23 @@ const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.age
 const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
 
 
-//REDIS configuration
-const REDIS_HOST = process.env.REDIS_HOST || '';
-const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
+
 
 
 // Export all variables
 module.exports = {
+    PGHOST,
+    PGPORT,
+    PGDATABASE,
+
+    SOCKET_PORT,
+    DASHBOARD_PORT,
+    GQLPORT,
+    JWT_SECRET,
+    postgraphileRolePassword,
+
+    NUM_THREADS,
+    HELYOS_REPLICA,
     // Agent Interactions
     CREATE_RBMQ_ACCOUNTS,
     MESSAGE_RATE_LIMIT,
@@ -75,6 +123,7 @@ module.exports = {
     TTL_STATE_MSG,
 
     RBMQ_HOST,
+    RBMQ_PORT,
     RBMQ_API_PORT,
     RBMQ_CNAME,
     RBMQ_ADMIN_USERNAME,
