@@ -6,15 +6,17 @@
 const databaseServices = require('../services/database/database_services.js');
 const agentComm = require('./communication/agent_communication');
 const { logData } = require('./systemlog');
-const { SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS,
-	UNCOMPLETED_SERVICE_STATUS } = require('./data_models');
+const { WAIT_AGENT_STATUS_PERIOD } = require('../config.js');
+
+const { SERVICE_STATUS, MISSION_STATUS, UNCOMPLETE_MISSION_STATUS, 
+		ON_ASSIGNMENT_FAILURE_ACTIONS, SERVICE_DOMAINS, 
+		UNCOMPLETED_SERVICE_STATUS } = require('./data_models');
+
 const { generateFullYardContext, generateMicroserviceDependencies } = require('./microservice_context');
 const { filterContext } = require('./microservice_context');
 const { v4: uuidv4 } = require('uuid');
-const WAIT_AGENT_STATUS_PERIOD = parseInt(process.env.WAIT_AGENT_STATUS_PERIOD || '20') * 1000;
 
-
-const CLASS_PATH_PLANNER = 'Path planner'
+const CLASS_PATH_PLANNER = SERVICE_DOMAINS.ASSIGNMENT_PLANNER;
 // ----------------------------------------------------------------------------
 // This section contains methods that map a work process to one or more service requests and then to assignments for robots.
 // It is responsible for orchestrating the flow of work processes by generating the necessary service requests based on the work process type definitions.
@@ -35,7 +37,7 @@ const CLASS_PATH_PLANNER = 'Path planner'
  * @param {array} agentIds
  */
 ensureCorrectDummyRequestFormat = (service, request, agentIds) => {
-	if (service.class === 'Assignment planner') {
+	if (service.class === SERVICE_DOMAINS.ASSIGNMENT_PLANNER) {
 		if (request.results &&
 			request.results[0] &&
 			(request.results[0].tool_id ||  // Deprecated

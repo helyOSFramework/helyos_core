@@ -3,6 +3,7 @@ const databaseServices = require('../../services/database/database_services.js')
 const MapResponseHandler = require('./microservice_map_result')
 const pathplannerResponseHandler = require('./microservice_assignment_result.js');
 const { logData } = require('../../modules/systemlog.js');
+const { SERVICE_DOMAINS } = require('../../modules/data_models.js');
 
 
 async function processMicroserviceResponse(partialServiceRequest){
@@ -19,11 +20,11 @@ async function processMicroserviceResponse(partialServiceRequest){
 	
 	let resultPromises = [];
 	switch (serviceClass){
-		case 'Storage server':
+		case SERVICE_DOMAINS.STORAGE_SERVER:
 			// databaseServices.yards.update_byId(yardId, data); 
 			break;
 
-		case 'Map server':
+		case SERVICE_DOMAINS.MAP_SERVER:
 			let resultArray = responseData.results ? responseData.results:[responseData.result];
 			const mapResult = resultArray[0];
 			const yardId = workProcess.yard_id;
@@ -35,7 +36,7 @@ async function processMicroserviceResponse(partialServiceRequest){
 			resultPromises.push(pathplannerResponseHandler.createAssignment(workProcess, responseData, serviceRequest));				
 			break;
 
-		case 'Assignment planner':
+		case SERVICE_DOMAINS.ASSIGNMENT_PLANNER:
 			resultPromises.push(pathplannerResponseHandler.createAssignment(workProcess, responseData, serviceRequest));				
 			break;
 

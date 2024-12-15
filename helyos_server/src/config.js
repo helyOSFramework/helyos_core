@@ -5,7 +5,8 @@ const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || 150);
 const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || 20);
 const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
-
+const WAIT_AGENT_STATUS_PERIOD = parseInt(process.env.WAIT_AGENT_STATUS_PERIOD || '20') * 1000;
+const ENCRYPT = process.env.ENCRYPT;
 
 
 const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
@@ -63,10 +64,12 @@ module.exports = {
     MESSAGE_UPDATE_LIMIT,
     AGENT_IDLE_TIME_OFFLINE,
     DB_BUFFER_TIME,
-
+    WAIT_AGENT_STATUS_PERIOD,
+    ENCRYPT,
     AGENT_REGISTRATION_TOKEN,
 
     // RabbitMQ Configurations
+    ENCRYPT,
     PREFETCH_COUNT,
     TTL_VISUAL_MSG,
     TTL_STATE_MSG,

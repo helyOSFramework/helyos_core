@@ -6,22 +6,15 @@ const amqp = require('amqplib');
 const fs = require('fs');
 const requestXHTTP = require('superagent');
 
-const RBMQ_HOST = process.env.RBMQ_HOST;
-const RBMQ_API_PORT = process.env.RBMQ_API_PORT || 15672;
-const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
-const RBMQ_ADMIN_USERNAME = process.env.RBMQ_ADMIN_USERNAME || 'guest';
-const RBMQ_ADMIN_PASSWORD = process.env.RBMQ_ADMIN_PASSWORD || 'guest';
-const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
+const  {RBMQ_HOST, RBMQ_API_PORT, 
+        RBMQ_CNAME, RBMQ_ADMIN_USERNAME, 
+        RBMQ_SSL, RBMQ_API_SSL,
+        RBMQ_ADMIN_PASSWORD, RBMQ_VHOST, 
+        TLS_REJECT_UNAUTHORIZED, API_PROTOCOL,
+        RBMQ_CERTIFICATE, ANONYMOUS_EXCHANGE
 
-const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
-const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False") === "True";
+     } = require('../../config.js');
 
-const TLS_REJECT_UNAUTHORIZED = (process.env.TLS_REJECT_UNAUTHORIZED || "True") === "True";
-if (!TLS_REJECT_UNAUTHORIZED) { process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; }
-
-const API_PROTOCOL = RBMQ_API_SSL ? 'https' : 'http';
-const RBMQ_CERTIFICATE = RBMQ_SSL ? fs.readFileSync('/etc/helyos/.ssl_keys/ca_certificate.pem') : null;
-const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.agents.anonymous';
 
 
 const guestCreate_RbmqAdmin = (username, password, tags) =>

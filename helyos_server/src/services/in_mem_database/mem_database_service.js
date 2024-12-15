@@ -6,9 +6,8 @@
 const { logData } = require("../../modules/systemlog");
 const { setDBTimeout } = require("../database/database_services");
 const redisAccessLayer = require('./redis_access_layer');
-const REDIS_HOST = redisAccessLayer.REDIS_HOST;
+const { REDIS_HOST, DB_BUFFER_TIME} = require('../../config.js')
 
-const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || 1000);
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
 const MAX_DELAY = 100;
 const STAT_ACCUM_PERIOD = 10000; // Set accummlation time to calculate msg rates.
