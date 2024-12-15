@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 const InMemDBService = require('./services/in_mem_database/mem_database_service');
-const redisAccessLayer = require('./services/in_mem_database/redis_access_layer');
 
 
 const ROLES = {

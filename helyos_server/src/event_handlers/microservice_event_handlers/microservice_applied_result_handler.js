@@ -12,7 +12,6 @@ async function processMicroserviceResponse(partialServiceRequest){
 	const services = await databaseServices.services.get('service_type', serviceRequest.service_type, ['class']);
 	const serviceClass = services[0].class;
 
-	const requestData = serviceRequest.request;
 	if (serviceRequest.result){
 		serviceRequest.response = serviceRequest.result; // temporary
 	}

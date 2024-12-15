@@ -1,16 +1,16 @@
-
+const config = require('./config.js');
 const rbmqServices = require('./services/message_broker/rabbitMQ_services.js');
-
-const PREFETCH_COUNT = parseInt(process.env.PREFETCH_COUNT) || 100; // Number of messages to prefetch from the broker.
-const TTL_VISUAL_MSG = parseInt(process.env.TTL_VISUAL_MSG) || 2000; // Time to live for visualization messages in ms.
-const TTL_STATE_MSG = parseInt(process.env.TTL_STATE_MSG) || 360000; // Time to live for state messages in ms.
 const { logData } = require('./modules/systemlog.js');
 
-const { AGENTS_UL_EXCHANGE, AGENTS_DL_EXCHANGE, ANONYMOUS_EXCHANGE, AGENT_MQTT_EXCHANGE } = require('./services/message_broker/rabbitMQ_services.js');
-const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
-    AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, YARD_VISUALIZATION_QUEUE } = require('./services/message_broker/rabbitMQ_services.js');
+const { PREFETCH_COUNT, TTL_VISUAL_MSG, TTL_STATE_MSG } =  config;
 
+const { AGENTS_UL_EXCHANGE, AGENTS_DL_EXCHANGE, 
+        ANONYMOUS_EXCHANGE, AGENT_MQTT_EXCHANGE } = config;
 
+const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, 
+        AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
+        AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, 
+        YARD_VISUALIZATION_QUEUE } = config;
 
 /*
 configureRabbitMQSchema()
