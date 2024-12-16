@@ -8,7 +8,7 @@ const { logData } = require('../../modules/systemlog.js');
 
 
 
-async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
+async function agentAutoUpdate(objMsg, uuid, mode='buffered') {
     // COMMENT: rabbitmq username must be the agent uuid.
     // check against the agent.rbmq_username for each received message is too expensive, unless we implement a in-memory table.
     // 02/06/2023: update, we need to poll data from the database anyway because the MQTT agents, we will need a in-memory database.
@@ -115,8 +115,7 @@ async function agentAutoUpdate(objMsg, uuid, bufferPeriod=0) {
 
     let statsLabel = 'buffered';
     let promises = [inMemDB.update('agents','uuid', agentUpdate, agentUpdate.last_message_time, statsLabel)];
-    if (bufferPeriod === 0) {
-        statsLabel = 'realtime';
+    if (mode === 'realtime') {
         promises.push(databaseServices.agents.updateByConditions({uuid}, agentUpdate)); 
     }
     return Promise.all(promises);

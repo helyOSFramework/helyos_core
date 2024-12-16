@@ -11,13 +11,6 @@ const { MISSION_STATUS, AGENT_STATUS } = require('../data_models.js');
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION
 const REFRESH_ONLINE_TIME_PERIOD = 5;
 
-let POSITION_MARGIN;
-if (process.env.POSITION_MARGIN)
-    POSITION_MARGIN = parseInt(process.env.POSITION_MARGIN)
-else
-    POSITION_MARGIN = 1;
-
-
 
 async function watchWhoIsOnline(maxTimeWithoutUpdate) {
     const roleManager = await roleManagerModule.getInstance();
@@ -342,7 +335,7 @@ function sendEncryptedMsgToAgent(agentId, message, reason = 'assignment') {
 
 
             if (agent.protocol === 'MQTT') {
-                exchange = rabbitMQServices.AGENT_MQTT_EXCHANGE;
+                exchange = rabbitMQServices.AGENTS_MQTT_EXCHANGE;
             }
             let sendPromise;
             switch (reason) {
@@ -386,7 +379,6 @@ module.exports.watchWhoIsOnline = watchWhoIsOnline;
 module.exports.watchMessageRates = watchMessageRates;
 
 module.exports.sendEncryptedMsgToAgent = sendEncryptedMsgToAgent;
-module.exports.POSITION_MARGIN = POSITION_MARGIN;
 module.exports.sendGetReadyForWorkProcessRequest = sendGetReadyForWorkProcessRequest;
 module.exports.waitAgentStatusForWorkProcess = waitAgentStatusForWorkProcess;
 module.exports.sendReleaseFromWorkProcessRequest = sendReleaseFromWorkProcessRequest;

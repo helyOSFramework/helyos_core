@@ -8,16 +8,10 @@ const redisAccessLayer = require('./in_mem_database/redis_access_layer.js');
 const http = require('http');
 const { logData } = require('../modules/systemlog.js');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
-const SOCKET_PORT = process.env.SOCKET_PORT || 5002
+const config = require('../config.js');
 
-// MULTI-INSTANCES ENVIRONMENT
-let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || 'cluster'
-const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
-if (SOCKET_IO_ADAPTER !== 'redis') {
-    SOCKET_IO_ADAPTER = NUM_THREADS > 1 ? 'cluster' : 'none';
-    console.warn(`====> socket socket io adtaper set to ${SOCKET_IO_ADAPTER}. Threads: ${NUM_THREADS}`)
-}
+const { JWT_SECRET, SOCKET_PORT } = config;
+const { SOCKET_IO_ADAPTER } = config;
 
 
 const conf = {

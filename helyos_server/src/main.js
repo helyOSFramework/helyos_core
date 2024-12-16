@@ -26,20 +26,14 @@
 // 1) IMPORTS 
 // ----------------------------------------------------------------------------
 const initialization = require('./initialization.js');
+const config = require('./config.js');
 
 // Simple HTTP server imports
 const http = require('http');
 const express = require('express');
-const path = require('path');
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
-const DASHBOARD_PORT = 8080;
-const SOCKET_PORT = process.env.SOCKET_PORT || 5002;
 const API_DOC_DIR = 'docs/';
-const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
 
-// Settings for horizontal scaling
-let HELYOS_REPLICA = process.env.HELYOS_REPLICA || 'false';
-HELYOS_REPLICA = HELYOS_REPLICA === 'true';
 
 // Test Settings: Override external services by `Nock` services (mocks).
 // See the file microservice_mocks.js for more details.
@@ -116,8 +110,9 @@ async function connectToRabbitMQ() {
 // 4) GraphQL server setup -  External App <-> Nodejs(GraphQL Lib) <-> Postgres
 // ----------------------------------------------------------------------------
 const { postgraphile } = require("postgraphile");
-const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
-const postgraphileRolePassword = process.env.PGPASSWORD;
+const { PGHOST, PGPORT,
+        JWT_SECRET, PGDATABASE,
+       postgraphileRolePassword } = config;
 
 
 const postGraphileOptions = {
@@ -143,7 +138,8 @@ const postGraphileOptions = {
 
 const setGraphQLServer = () => {
     return http.createServer(
-        postgraphile(`postgres://role_postgraphile:${postgraphileRolePassword}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`,
+        postgraphile(
+            `postgres://role_postgraphile:${postgraphileRolePassword}@${PGHOST}:${PGPORT}/${PGDATABASE}`,
             "public",
             postGraphileOptions));
 
@@ -169,6 +165,7 @@ const setDashboardServer = () => {
 // ---------------------------------------------------------------------------
 const webSocketServices = require('./services/socket_services.js');
 const inMemmoryServices = require('./services/in_mem_database/mem_database_service.js');
+const { DASHBOARD_PORT, SOCKET_PORT, GQLPORT } = config;
 
 async function start() {
     try {
@@ -187,8 +184,8 @@ async function start() {
         frontEndServer.listen(DASHBOARD_PORT, () => {
             console.log(`Dashboard server running on port ${DASHBOARD_PORT}`);
         });
-        graphqlServer.listen(process.env.GQLPORT, () => {
-            console.log(`GraphQL server running on port ${process.env.GQLPORT}`);
+        graphqlServer.listen(GQLPORT, () => {
+            console.log(`GraphQL server running on port ${GQLPORT}`);
         });
 
     } catch (error) {
@@ -234,6 +231,7 @@ async function end() {
 
 const cluster = require('cluster');
 const { setupPrimary } = require("@socket.io/cluster-adapter");
+const { NUM_THREADS } = config;
 
 if (cluster.isMaster && NUM_THREADS > 1) {
 

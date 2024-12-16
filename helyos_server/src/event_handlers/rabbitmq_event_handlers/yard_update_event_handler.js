@@ -7,7 +7,7 @@ const { logData } = require('../../modules/systemlog.js');
 
 
 
-async function yardAutoUpdate(objMsg, uuid, bufferPeriod=0) {
+async function yardAutoUpdate(objMsg, uuid) {
     
     // OBJECT UPDATE
     let objUpdate = {id: objMsg.body['id'], ...objMsg};

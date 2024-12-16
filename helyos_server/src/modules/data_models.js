@@ -16,6 +16,20 @@ const ON_ASSIGNMENT_FAILURE_ACTIONS = {
 
 
 /**
+ * Domains for the microservices.
+ * @enum {string}
+ * 
+ * - ASSIGNMENT_PLANNER: Create assignments for agents.
+ * - MAP_SERVER: Update map objects.
+ * - STORAGE_SERVER: Send data to cloud.
+ */
+const SERVICE_DOMAINS = {
+    ASSIGNMENT_PLANNER: 'Assignment planner',
+    MAP_SERVER: 'Map server',
+    STORAGE_SERVER: 'Storage server'
+}
+
+/**
  * Defines agent statuses.
  * @enum {string}
  * 
@@ -154,10 +168,13 @@ module.exports.AGENT_STATUS = AGENT_STATUS;
 module.exports.SERVICE_STATUS = SERVICE_STATUS;
 module.exports.MISSION_STATUS = MISSION_STATUS;
 module.exports.ASSIGNMENT_STATUS = ASSIGNMENT_STATUS;
+module.exports.SERVICE_DOMAINS = SERVICE_DOMAINS;
+
 module.exports.UNCOMPLETE_ASSIGNM_STATUSES = UNCOMPLETE_ASSIGNM_STATUSES;
 module.exports.UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH = UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH;
 module.exports.UNCOMPLETE_ASSIGNM_AFTER_DISPATCH = UNCOMPLETE_ASSIGNM_AFTER_DISPATCH;
 module.exports.UNCOMPLETE_MISSION_STATUS = UNCOMPLETE_MISSION_STATUS;
 module.exports.UNCOMPLETED_SERVICE_STATUS = UNCOMPLETED_SERVICE_STATUS;
+
 module.exports.MISSION_QUEUE_STATUS = MISSION_QUEUE_STATUS;
 module.exports.ON_ASSIGNMENT_FAILURE_ACTIONS = ON_ASSIGNMENT_FAILURE_ACTIONS;

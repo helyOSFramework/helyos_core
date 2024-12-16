@@ -1,3 +1,4 @@
+const config = require('../../config.js');
 const { logData } = require('../../modules/systemlog.js');
 // ----------------------------------------------------------------------------
 // RabbitMQ client setup
@@ -8,38 +9,21 @@ const fs = require('fs');
 const util = require('util');
 const rbmqAccessLayer = require('./rabbitMQ_access_layer.js');
 
-const RBMQ_HOST = process.env.RBMQ_HOST;
-const RBMQ_PORT = process.env.RBMQ_PORT;
-const RBMQ_API_PORT = process.env.RBMQ_API_PORT || 15672;
-const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
-const RBMQ_ADMIN_USERNAME = process.env.RBMQ_ADMIN_USERNAME || 'guest';
-const RBMQ_ADMIN_PASSWORD = process.env.RBMQ_ADMIN_PASSWORD || 'guest';
-const RBMQ_USERNAME = process.env.RBMQ_USERNAME || RBMQ_ADMIN_USERNAME;
-const RBMQ_PASSWORD = process.env.RBMQ_PASSWORD || RBMQ_ADMIN_PASSWORD;
+const  {RBMQ_HOST, RBMQ_PORT,
+    RBMQ_PROTOCOL, RBMQ_SSL,
+    RBMQ_USERNAME, RBMQ_PASSWORD,
+    RBMQ_CNAME, RBMQ_ADMIN_USERNAME, 
+    RBMQ_ADMIN_PASSWORD, RBMQ_VHOST, 
+    RBMQ_CERTIFICATE, ANONYMOUS_EXCHANGE,
+ } = config;
 
-const RBMQ_SSL = (process.env.RBMQ_SSL || "False") === "True";
-const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False") === "True";
-
-const TLS_REJECT_UNAUTHORIZED = (process.env.TLS_REJECT_UNAUTHORIZED || "True") === "True";
-if (!TLS_REJECT_UNAUTHORIZED) { process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; }
-
-const API_PROTOCOL = RBMQ_API_SSL ? 'https' : 'http';
-const RBMQ_PROTOCOL = RBMQ_SSL ? 'amqps' : 'amqp';
-const RBMQ_CERTIFICATE = RBMQ_SSL ? fs.readFileSync('/etc/helyos/.ssl_keys/ca_certificate.pem') : null;
-
-const CHECK_IN_QUEUE = process.env.CHECK_IN_QUEUE || 'agent_checkin_queue';
-const AGENT_UPDATE_QUEUE = process.env.AGENT_UPDATE_QUEUE || 'agent_update_queue';
-const AGENT_VISUALIZATION_QUEUE = process.env.AGENT_VISUALIZATION_QUEUE || 'agent_visualization_queue';
-const YARD_VISUALIZATION_QUEUE = process.env.YARD_VISUALIZATION_QUEUE || 'yard_visualization_queue';
-const RBMQ_VHOST = process.env.RBMQ_VHOST || '%2F';
-
-const AGENT_STATE_QUEUE = process.env.AGENT_STATE_QUEUE || 'agent_state_queue';
-const AGENT_MISSION_QUEUE = process.env.AGENT_MISSION_QUEUE || 'agent_mission_queue';
-const SUMMARY_REQUESTS_QUEUE = 'agent_data_requests';
-const AGENTS_UL_EXCHANGE = process.env.AGENTS_UL_EXCHANGE || 'xchange_helyos.agents.ul';
-const AGENTS_DL_EXCHANGE = process.env.AGENTS_DL_EXCHANGE || 'xchange_helyos.agents.dl';
-const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.agents.anonymous';
-const AGENT_MQTT_EXCHANGE = process.env.AGENT_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
+ const  {CHECK_IN_QUEUE, AGENT_UPDATE_QUEUE,
+    AGENT_VISUALIZATION_QUEUE, YARD_VISUALIZATION_QUEUE,
+    AGENT_STATE_QUEUE, AGENT_MISSION_QUEUE,
+    SUMMARY_REQUESTS_QUEUE, AGENTS_UL_EXCHANGE,
+    AGENTS_DL_EXCHANGE, AGENTS_MQTT_EXCHANGE, 
+    ENCRYPT
+ } = config;
 
 
 const sslOptions = RBMQ_SSL ? {
@@ -50,12 +34,6 @@ const sslOptions = RBMQ_SSL ? {
 
 
 
-const CREATE_RBMQ_ACCOUNTS = process.env.CREATE_RBMQ_ACCOUNTS || "True";
-const ANY_AGENT_RBMQ_USERNAME = process.env.ANY_AGENT_RBMQ_USERNAME || null;
-const ANY_AGENT_RBMQ_PASSWORD = process.env.ANY_AGENT_RBMQ_PASSWORD || null;
-
-
-const ENCRYPT = process.env.ENCRYPT;
 let HELYOS_PUBLIC_KEY = '', HELYOS_PRIVATE_KEY = '';
 try {
     HELYOS_PRIVATE_KEY = fs.readFileSync('/etc/helyos/.ssl_keys/helyos_private.key');
@@ -262,12 +240,12 @@ function createDebugQueues(agent) {
         dataChannel.assertQueue(`tap-${agent.name}`, { durable: false, maxLength: 10 });
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.*`);
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_UL_EXCHANGE, `*.${agent.uuid}.*`);
-        dataChannel.bindQueue(`tap-${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.*`);
+        dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.*`);
 
         dataChannel.assertQueue(`tap-cmd_to_${agent.name}`, { durable: false, maxLength: 10 });
-        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.assignment`);
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.assignment`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.assignment`);
-        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENT_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.instantActions`);
     });
 }
@@ -340,12 +318,10 @@ module.exports.YARD_VISUALIZATION_QUEUE = YARD_VISUALIZATION_QUEUE;
 module.exports.AGENTS_UL_EXCHANGE = AGENTS_UL_EXCHANGE;
 module.exports.AGENTS_DL_EXCHANGE = AGENTS_DL_EXCHANGE;
 module.exports.ANONYMOUS_EXCHANGE = ANONYMOUS_EXCHANGE;
-module.exports.AGENT_MQTT_EXCHANGE = AGENT_MQTT_EXCHANGE;
+module.exports.AGENTS_MQTT_EXCHANGE = AGENTS_MQTT_EXCHANGE;
 module.exports.RBMQ_VHOST = RBMQ_VHOST;
 module.exports.RBMQ_CERTIFICATE = RBMQ_CERTIFICATE;
 
 
-module.exports.ANY_AGENT_RBMQ_USERNAME = ANY_AGENT_RBMQ_USERNAME;
-module.exports.ANY_AGENT_RBMQ_PASSWORD = ANY_AGENT_RBMQ_PASSWORD;
 module.exports.MESSAGE_VERSION = MESSAGE_VERSION;
 module.exports.verifyMessageSignature = verifyMessageSignature;
