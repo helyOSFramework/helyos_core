@@ -1,54 +1,45 @@
- 
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
+SET standard_conforming_strings = ON;
+SELECT pg_catalog.set_config('search_path', '', FALSE);
+SET check_function_bodies = FALSE;
+SET client_min_messages = WARNING;
+SET row_security = OFF;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
-DROP EXTENSION  IF EXISTS pgcrypto;
-CREATE EXTENSION pgcrypto  WITH SCHEMA public;
-;
-
-
+DROP EXTENSION IF EXISTS pgcrypto;
+CREATE EXTENSION pgcrypto WITH SCHEMA public;
 
 CREATE TABLE IF NOT EXISTS public.schema_migrations (
-    id bigserial PRIMARY KEY,
-    version character varying NOT NULL,
-    UNIQUE(version)
+  id BIGSERIAL PRIMARY KEY,
+  version CHARACTER VARYING NOT NULL,
+  UNIQUE(version)
 );
-
-
 
 CREATE TABLE IF NOT EXISTS public.ar_internal_metadata (
-    id bigserial PRIMARY KEY,
-    key character varying NOT NULL,
-    value character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+  id BIGSERIAL PRIMARY KEY,
+  key CHARACTER VARYING NOT NULL,
+  value CHARACTER VARYING,
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
-
 
 -- High-performance table: no keys or constraints are defined.
-CREATE TABLE public.events_queue(
-    id bigserial,
-    created_at	timestamp without time zone default now(),
-    event_name character varying,
-    payload	text
+CREATE TABLE public.events_queue (
+  id BIGSERIAL,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+  event_name CHARACTER VARYING,
+  payload TEXT
 );
 
-CREATE TABLE public.rbmq_config(
-    id bigserial PRIMARY KEY,
-    agents_ul_exchange character varying DEFAULT 'xchange_helyos.agents.ul',
-    agents_dl_exchange character varying DEFAULT 'xchange_helyos.agents.dl',
-    agents_mqtt_exchange character varying DEFAULT 'xchange_helyos.agents.mqtt',
-    agents_anonymous_exchange character varying DEFAULT 'xchange_helyos.agents.anonymous',
-    rbmq_vhost character varying
+CREATE TABLE public.rbmq_config (
+  id BIGSERIAL PRIMARY KEY,
+  agents_ul_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.ul',
+  agents_dl_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.dl',
+  agents_mqtt_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.mqtt',
+  agents_anonymous_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.anonymous',
+  rbmq_vhost CHARACTER VARYING
 );
