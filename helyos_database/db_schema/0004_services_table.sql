@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS public.services (
   service_url CHARACTER VARYING,
   health_endpoint CHARACTER VARYING,
   licence_key CHARACTER VARYING,
+  ca_certification CHARACTER VARYING,
   config JSONB,
   class CHARACTER VARYING,
   is_dummy BOOLEAN DEFAULT FALSE,

@@ -6,6 +6,7 @@ const { verifyMessageSignature } = require('../services/message_broker/rabbitMQ_
 const {agentAutoUpdate} = require('./rabbitmq_event_handlers/update_event_handler');
 const {yardAutoUpdate} = require('./rabbitmq_event_handlers/yard_update_event_handler');
 const {agentCheckIn} = require('./rabbitmq_event_handlers/checkin_event_handler');
+const {agentCheckOut} = require('./rabbitmq_event_handlers/checkout_event_handler');
 const {updateState} = require('./rabbitmq_event_handlers/status_event_handler');
 const { logData} = require('../modules/systemlog.js');
 const {queryDataBase} = require('./rabbitmq_event_handlers/database_request_handler');
@@ -240,14 +241,28 @@ function handleBrokerMessages(channel, queueName, message)   {
                 }
             }
             
-            logData.addLog('agent', checkinData, 'info', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
             const replyExchange = exchange === AGENTS_MQTT_EXCHANGE? AGENTS_MQTT_EXCHANGE : AGENTS_DL_EXCHANGE;
-            return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
-                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked in`))
+
+
+            if (objMsg.obj.type === 'checkout'){
+                return agentCheckOut(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
+                    .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked out`))
                     .catch( err => {
-                        console.error('checkin:', err);
-                        logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
+                        logData.addLog('agent', objMsg.obj, 'error', `agent failed to check out ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                     });
+
+            }
+
+            if (objMsg.obj.type === 'checkin'){
+
+                logData.addLog('agent', checkinData, 'info', `agent trying to check in. UUID:${uuid} Anonymous:${isAnonymousConnection}`);
+                return agentCheckIn(uuid, objMsg.obj, msgProps, registeredAgent, replyExchange)
+                        .then((agent) =>  logData.addLog('agent', objMsg.obj, 'info', `${uuid} - agent checked in`))
+                        .catch( err => {
+                            console.error('checkin:', err);
+                            logData.addLog('agent', objMsg.obj, 'error', `agent failed to check in ${err.message} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
+                        });
+            }
         }
 
 
