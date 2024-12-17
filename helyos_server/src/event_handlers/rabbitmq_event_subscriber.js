@@ -62,7 +62,7 @@ const isAgentLeader = (leaderUUID, followerUUID) => {
 function identifyMessageSender(objMsg, routingKey) {
     // 1st option: search uuid in message. 2nd option: search uuid in the routing key
     let uuid = objMsg && objMsg.obj['uuid'];
-    if (!uuid && routingKey.startsWith('agent')) {
+    if (!uuid && ( routingKey.startsWith('agent') ||  routingKey.startsWith('yard')) ) {
         try {
             uuid = routingKey.split('.').reverse()[1];
             if (!uuid){
@@ -200,6 +200,10 @@ function handleBrokerMessages(channelOrQueue, message)   {
     }
 
 // IDENTIFY THE SENDER
+    if (routingKey.includes('yard')) {
+        console.log(objMsg, routingKey)
+    }
+
     const uuid = identifyMessageSender(objMsg, routingKey);
     const agentAccount = msgProps['userId'] || uuid;
     const isAnonymousConnection = msgProps['userId'] == 'anonymous';

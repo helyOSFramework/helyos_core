@@ -191,6 +191,8 @@ function connectAndOpenChannels(options={}) {
 
 
 function sendEncryptedMsg(queue, message, publicKey='', routingKey=null, exchange=null, correlationId=null) {
+
+    const _message = message === undefined? '':message;
     let encryptedMsg;
     switch (ENCRYPT) {
         case "agent":
@@ -199,33 +201,33 @@ function sendEncryptedMsg(queue, message, publicKey='', routingKey=null, exchang
                     key: publicKey,
                     padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
                 },
-                Buffer.from(message)
+                Buffer.from(_message)
             );
             
             break;
 
         case "helyos":
-            encryptedMsg = TODO_FUNCTION(HELYOS_SYM_KEY, message);
+            encryptedMsg = TODO_FUNCTION(HELYOS_SYM_KEY, _message);
             
             break;
 
         case "helyos-agent":
-            encryptedMsg = TODO_FUNCTION(AGENT_SYM_KEY, message);
+            encryptedMsg = TODO_FUNCTION(AGENT_SYM_KEY, _message);
             encryptedMsg = TODO_FUNCTION(HELYOS_SYM_KEY, encryptedMsg);
 
             break;
 
         case "none":
-            encryptedMsg = message;
+            encryptedMsg = _message;
             break;
     
         default:
-            encryptedMsg = message;
+            encryptedMsg = _message;
             break;
     }
 
 
-    getMainChannel()
+    return getMainChannel()
     .then( dataChannel => {
         const sign = crypto.createSign('SHA256');
         sign.update(encryptedMsg);

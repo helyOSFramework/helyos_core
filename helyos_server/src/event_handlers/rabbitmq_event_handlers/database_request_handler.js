@@ -64,7 +64,6 @@ async function queryDataBase(uuid, objMsg, msgProps) {
             case 'createMapObjects':       
                 response = await databaseServices.map_objects.insertMany(objMsg.body['data'])
                 .then( async (newIds) => {
-                    console.log(r);
                     const newObjects = await databaseServices.map_objects.list_in(newIds);
                     newObjects.forEach( obj => { inMemDB.update('map_objects', 'id', obj, new Date(), 'realtime'); });
                     return newIds;
@@ -74,10 +73,12 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 
             case 'updateMapObjects': 
                 const patches = objMsg.body['data'];    
-                patches.forEach( patch => {
+                await patches.forEach( async patch => {
                     inMemDB.update('map_objects', 'id', patch, new Date());
+                    await databaseServices.map_objects.update_byId(patch['id'], patch);
+                    console.log(patch)
                 });
-                response = "data saved";
+                response = "successful";
                 break;    
 
 
@@ -98,7 +99,7 @@ async function queryDataBase(uuid, objMsg, msgProps) {
             default:
                 break;
         }
-
+    
     message = JSON.stringify(response);
     
     } catch (error) {
