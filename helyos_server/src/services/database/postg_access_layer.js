@@ -336,7 +336,12 @@ class DatabaseLayer {
 
 		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
 
-		return _client.query(queryText, queryValues);
+		return _client.query(queryText, queryValues)
+		.then((res) => res['rows'].map(e => e.id))
+		.catch(e => {
+			console.error(e);
+			throw Error(e);
+		});
 
 	}
 
