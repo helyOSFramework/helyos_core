@@ -77,10 +77,11 @@ async function queryDataBase(uuid, objMsg, msgProps) {
                 
             case 'updateMapObjects': 
                 const patches = objMsg.body['data'];    
-                patches.forEach( patch => {
+                await patches.forEach( async patch => {
                     inMemDB.update('map_objects', 'id', patch, new Date());
+                    await databaseServices.map_objects.update_byId(patch['id'], patch);
                 });
-                response = "data saved";
+                response = "successful";
                 break;    
 
 
