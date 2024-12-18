@@ -31,6 +31,8 @@ const config = require('./config.js');
 // Simple HTTP server imports
 const http = require('http');
 const express = require('express');
+const fs = require('fs');
+
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
 const API_DOC_DIR = 'docs/';
 
@@ -152,9 +154,11 @@ const setGraphQLServer = () => {
 // ---------------------------------------------------------------------------
 
 const setDashboardServer = () => {
+    const pubKey = fs.readFileSync('/etc/helyos/.ssl_keys/helyos_public.key',{ encoding: 'utf8', flag: 'r' });
     const app = express();
     app.use('/api-docs', express.static(API_DOC_DIR));
     app.use('/dashboard', express.static(DASHBOARD_DIR));
+    app.get('/public-key', (req, res) => {res.type('pem').send(pubKey);});
     app.use('/', (req, res, next) => res.redirect('/dashboard'));
     return app;
 }
