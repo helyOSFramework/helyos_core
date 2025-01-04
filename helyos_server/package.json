@@ -12,7 +12,13 @@
   "license": "Modified Apache-2.0",
   "main": "src/main.js",
   "devDependencies": {
-    "jest": "^27.3.1"
+    "@types/amqplib": "^0.10.6",
+    "@types/express": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "@types/superagent": "^8.1.9",
+    "jest": "^27.3.1",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "@socket.io/cluster-adapter": "^0.2.2",
@@ -31,10 +37,12 @@
     "uuid": "^9.0.1"
   },
   "scripts": {
-    "start": "node src/main.js",
+    "start_ccd": "node src/main.js",
     "test": "bash src/test/test.sh",
     "make_map_api_doc": "redoc-cli bundle -o docs/map_api.html docs/helyos_map_services.json",
     "make_path_api_doc": "redoc-cli bundle -o docs/path_api.html docs/helyos_path_planner_services.json",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "build": "tsc",
+    "start": "node dist/index.js"
   }
 }
