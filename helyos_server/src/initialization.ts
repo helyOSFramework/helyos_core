@@ -1,16 +1,16 @@
 import util from 'util';
 import fs from 'fs';
 import config from './config';
-import databaseServices from './services/database/database_services.js';
-import rbmqServices from './services/message_broker/rabbitMQ_services.js';
-import { logData } from './modules/systemlog.js';
+import databaseServices from './services/database/database_services';
+import rbmqServices from './services/message_broker/rabbitMQ_services';
+import { logData } from './modules/systemlog';
 
-import agentComm from './modules/communication/agent_communication.js';
+import agentComm from './modules/communication/agent_communication';
 import microserviceWatcher from './event_handlers/microservice_event_watcher.js';
 import inMemDBFlusher from './event_handlers/in_mem_db_flusher.js';
 
-import {registerManyMicroservices, registerMissions } from './modules/read_config_yml.js';
-import {Roles, RoleAssigner} from './role_manager.js';
+import {registerManyMicroservices, registerMissions } from './modules/read_config_yml';
+import {Roles, RoleAssigner} from './role_manager';
 
 const { MESSAGE_RATE_LIMIT, MESSAGE_UPDATE_LIMIT,
         AGENT_IDLE_TIME_OFFLINE, DB_BUFFER_TIME } = config;
