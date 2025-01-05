@@ -50,7 +50,7 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                         }
                     })
                     .catch((err) => {
-                        logData.addLog('helyos_core', { wproc_id: workProcessId }, 'error', `work_processes_insertion ${err.message}`);
+                        logData.addLog('helyos_core', { wproc_id: workProcessId }, 'error', `work_processes_insertion ${err?.message}`);
                     });
             }
 
@@ -69,16 +69,16 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                     .then(() =>
                         prepareWPData.then(() =>
                             blMicroservice.prepareServicesPipelineForWorkProcess(payload).catch((err) => {
-                                logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err.message}`);
+                                logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err?.message}`);
                             })
                         )
                     )
                     .catch((err) => {
-                        logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err.message}`);
+                        logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err?.message}`);
                     });
             } else {
                 prepareWPData.catch((err) => {
-                    logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err.message}`);
+                    logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err?.message}`);
                 });
             }
             break;
@@ -100,7 +100,7 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                         )
                         .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload))
                         .catch((err) => {
-                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err.message}`);
+                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
                         });
                     break;
                 }
@@ -116,7 +116,7 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                                 .then(() => blAssignm.onWorkProcessEnd(payload.id, workProcessStatus))
                         )
                         .catch((err) => {
-                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err.message}`);
+                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
                         });
                     break;
                 }
@@ -135,7 +135,7 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                                 .then(() => blAssignm.onWorkProcessEnd(payload.id, workProcessStatus))
                         )
                         .catch((err) => {
-                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err.message}`);
+                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
                         });
                     break;
                 }
@@ -150,7 +150,7 @@ export function processWorkProcessEvents(channel: string, payload: Payload): voi
                                 .then(() => blAssignm.onWorkProcessEnd(payload.id, newStatus));
                         })
                         .catch((err) => {
-                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err.message}`);
+                            logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
                         });
                     break;
                 }
