@@ -4,7 +4,8 @@ import yaml from 'js-yaml';
 
 import databaseServices from '../services/database/database_services.js';
 import { logData } from './systemlog.js';
-const lookup = require('./utils.js').lookup;
+import {lookup} from './utils';
+
 const OVERWRITE_MISSIONS = false
 
 

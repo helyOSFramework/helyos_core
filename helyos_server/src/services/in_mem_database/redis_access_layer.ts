@@ -1,6 +1,6 @@
 import { createClient, RedisClientType } from 'redis';
 import config from '../../config';
-const { serializeNonStringValues, parseObjectValues } = require('../../modules/utils');
+import { serializeNonStringValues, parseObjectValues } from '../../modules/utils';
 
 const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } = config;
 
@@ -262,7 +262,7 @@ async function getAndDeleteHashesByPattern(client: RedisClient, pattern: string)
     for (let i = 0; i < responses.length; i++) {
       const hashData = responses[i];
       if (hashData && Object.keys(hashData).length > 0) {
-        result[keysToDelete[i]] = parseObjectValues(hashData);
+        result[keysToDelete[i]] = parseObjectValues(hashData as any);
       }
     }
 

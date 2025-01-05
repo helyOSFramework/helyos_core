@@ -154,7 +154,7 @@ class DatabaseLayer {
 			.then((res) => { return res['rows'] });
 	}
 
-	get_byId(id, items, useShortTimeClient = false) {
+	get_byId(id, items:string[]=[], useShortTimeClient = false) {
 		return this.get('id', id, items, null, useShortTimeClient)
 			.then((res) => { return res[0] });
 	}
@@ -448,7 +448,7 @@ class AgentDataLayer extends DatabaseLayer {
 	}
 
 
-	getUuids(ids = []) {
+	getUuids(ids: number[] = []) {
 		if (ids.length === 0) { return Promise.resolve([]) }
 		let valueMasksArray:string[] = [];
 		ids.forEach((id, idx) => valueMasksArray.push('$' + (idx + 1)));
@@ -569,13 +569,12 @@ const searchAllRelatedUncompletedAssignments = (client, assId, uncompletedAssgmS
 
 
 const wait_database_value = (dataLayerInstance, id, field, value, maxTries, debug = false) => {
-	const { log } = require('console');
 
 	function checkValue(dataLayerInstance, id, field, value) {
 		return dataLayerInstance.get_byId(id).then(resp => {
 			if (field == 'status' && debug) {
-				if (!resp) { log(`${value} <=> null`) }
-				else { log(`${value} <=> ${resp[field]}`) }
+				if (!resp) { console.log(`${value} <=> null`) }
+				else { console.log(`${value} <=> ${resp[field]}`) }
 			}
 
 			return (resp && (resp[field] == value))

@@ -10,7 +10,7 @@ import microserviceWatcher from './event_handlers/microservice_event_watcher.js'
 import inMemDBFlusher from './event_handlers/in_mem_db_flusher.js';
 
 import {registerManyMicroservices, registerMissions } from './modules/read_config_yml.js';
-import roleManagerModule from './role_manager.js';
+import {Roles, RoleAssigner} from './role_manager.js';
 
 const { MESSAGE_RATE_LIMIT, MESSAGE_UPDATE_LIMIT,
         AGENT_IDLE_TIME_OFFLINE, DB_BUFFER_TIME } = config;
@@ -152,7 +152,7 @@ export function initializeRabbitMQAccounts() {
 
 
 export async function helyosConsumingMessages(dataChannels) {
-    const roleManager = await roleManagerModule.getInstance();
+    const roleManager = await RoleAssigner.getInstance();
     const mainChannel = dataChannels[0];
     const secondaryChannel = dataChannels[1];
     console.log(`\n ================================================================` +
@@ -195,10 +195,10 @@ export async function helyosConsumingMessages(dataChannels) {
 
     if (replicaOrMultiThread) {
         await roleManager.tryToBecomeLeader(becomingLeader, becomingFollower);
-        await roleManager.tryToBecomeBroadcaster(() => { }, () => { });
+        await roleManager.tryToBecomeBroadcaster(async() => [], async() => []);
     } else {
         roleManager.amILeader = true;
-        roleManager.role = 'broadcaster';
+        roleManager.role = Roles.BROADCASTER;
         becomingLeader([]);
         becomingFollower([]);
     }

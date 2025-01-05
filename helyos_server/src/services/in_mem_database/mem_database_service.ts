@@ -664,4 +664,4 @@ async function disconnect() {
 
 
 
-export { inMemDB, DataRetriever, getInstance, disconnect }
+export { InMemDB, DataRetriever, getInstance, disconnect }

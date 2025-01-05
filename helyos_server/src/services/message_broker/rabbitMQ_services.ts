@@ -82,11 +82,11 @@ const createAccounts = () =>
         .createUser(RBMQ_USERNAME, RBMQ_PASSWORD, ['administrator', 'management'])
         .then(() => rbmqAccessLayer.addRbmqUserVhost(RBMQ_USERNAME))
         .then(() => rbmqAccessLayer.createUser('anonymous', 'anonymous', ['']))
-        .then((rv) => logData.addLog('helyos_core', null, rv?.logType, rv?.message))
+        .then((rv) => logData.addLog('helyos_core', null, rv!.logType as any, rv?.message))
         .then(() => rbmqAccessLayer.addRbmqUserVhost('anonymous'))
-        .then((rv) => logData.addLog('helyos_core', null, rv?.logType, rv?.message))
+        .then((rv) => logData.addLog('helyos_core', null, rv!.logType as any, rv!.message))
         .then(() => rbmqAccessLayer.updateGuestAccountPermissions('anonymous'))
-        .then((rv) => logData.addLog('helyos_core', null, rv?.logType, rv?.message))
+        .then((rv) => logData.addLog('helyos_core', null, rv!.logType as any, rv!.message))
         .then(() => logData.addLog('helyos_core', null, 'warn', 'RabbitmMQ helyOS core accounts are set.'))
         .catch((error) => {
             logData.addLog('helyos_core', null, 'error', `RMBTMQ ERROR: ${error.message}`);
@@ -108,9 +108,9 @@ const connect_as_guest_and_create_admin = () =>
     rbmqAccessLayer
         .connect(urlObj('guest', 'guest') as any, sslOptions)
         .then((conn) => rbmqAccessLayer.guestCreate_RbmqAdmin(RBMQ_ADMIN_USERNAME, RBMQ_ADMIN_PASSWORD, ['administrator', 'management']))
-        .then((rv) => logData.addLog('helyos_core', null, rv.logType, rv.message))
+        .then((rv) => logData.addLog('helyos_core', null, rv.logType as any, rv.message))
         .then((conn) => rbmqAccessLayer.guestAdd_RbmqAdminVhost(RBMQ_ADMIN_USERNAME))
-        .then((rv) => logData.addLog('helyos_core', null, rv.logType, rv.message))
+        .then((rv) => logData.addLog('helyos_core', null, rv.logType as any, rv.message))
         .catch((e) => logData.addLog('helyos_core', null, 'error', e.message));
 
 let mainChannelPromise: Promise<any>, secondaryChannelPromise: Promise<any>;
@@ -173,7 +173,7 @@ function connectAndOpenChannels(options:any = {}) {
         });
 }
 
-function sendEncryptedMsg(queue: string, message: string, publicKey = '',
+function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
                           routingKey:string = '', exchange:string = '', correlationId = null) {
     const _message = message === undefined ? '' : message;
     let encryptedMsg;
@@ -236,7 +236,7 @@ function sendEncryptedMsg(queue: string, message: string, publicKey = '',
             }
         })
         .catch((error) => {
-            logData.addLog('helyos', {}, 'error', `Error sending message to ${routingKey || queue}: ${error.message}`);
+            logData.addLog('helyos_core', {}, 'error', `Error sending message to ${routingKey || queue}: ${error.message}`);
         });
 }
 

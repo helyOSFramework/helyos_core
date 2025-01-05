@@ -3,7 +3,7 @@
 // Postgres client setup 
 // ----------------------------------------------------------------------------
 
-const { UNCOMPLETE_ASSIGNM_STATUSES, UNCOMPLETE_ASSIGNM_BEFORE_DISPATCH, UNCOMPLETE_ASSIGNM_AFTER_DISPATCH } = require('../../modules/data_models');
+import { UNCOMPLETE_ASSIGNM_STATUSES } from '../../modules/data_models';
 import { DatabaseLayer, AgentDataLayer, Client, 
 		searchAllRelatedUncompletedAssignments, getUncompletedAssignments_byWPId,
 	     getHighMsgRateAgents, updateAgentsConnectionStatus, 

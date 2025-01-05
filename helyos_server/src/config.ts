@@ -71,7 +71,7 @@ if (SOCKET_IO_ADAPTER === 'redis' && !REDIS_HOST) {
 const CREATE_RBMQ_ACCOUNTS = (process.env.CREATE_RBMQ_ACCOUNTS || "True").toLowerCase() === 'true';
 const MESSAGE_RATE_LIMIT = parseInt(process.env.MESSAGE_RATE_LIMIT || '150');
 const MESSAGE_UPDATE_LIMIT = parseInt(process.env.MESSAGE_UPDATE_LIMIT || '20');
-const AGENT_IDLE_TIME_OFFLINE = process.env.AGENT_IDLE_TIME_OFFLINE || 10; // Time of inactivity in seconds to consider an agent offline.
+const AGENT_IDLE_TIME_OFFLINE = parseInt(process.env.AGENT_IDLE_TIME_OFFLINE || '10'); // Time of inactivity in seconds to consider an agent offline.
 const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || '1000');
 const WAIT_AGENT_STATUS_PERIOD = parseInt(process.env.WAIT_AGENT_STATUS_PERIOD || '20') * 1000;
 const ENCRYPT = process.env.ENCRYPT;
