@@ -134,7 +134,7 @@ class DatabaseLayer {
 			.then((res) => { return res['rows'] });
 	}
 
-	get(key, value, items: string[] = [], orderBy = null, useShortTimeClient = false) {
+	get(key, value, items: string[] = [], orderBy:string | null = null, useShortTimeClient = false) {
 		let colNames;
 		let orderByStr;
 

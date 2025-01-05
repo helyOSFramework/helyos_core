@@ -23,7 +23,8 @@ const conf: Partial<ServerOptions> = {
 class WebSocketService {
     private static instance: WebSocketService | null = null;
     private _webSocketServer: http.Server;
-    private io: Server;
+    public io: Server;
+    socketIOAdapter: string;
 
     private constructor() {
         if (WebSocketService.instance) {
@@ -76,6 +77,7 @@ class WebSocketService {
     }
 
     private async initiateWebSocket(): Promise<void> {
+        this.socketIOAdapter = SOCKET_IO_ADAPTER;
         if (SOCKET_IO_ADAPTER === 'redis') {
             await redisAccessLayer.ensureConnected();
             const pubClient = redisAccessLayer.pubForSocketIOServer;
@@ -120,4 +122,4 @@ const unauthorizeClient = (socket: Socket): void => {
     socket.disconnect(true);
 }
 
-export { WebSocketService, unauthorizeClient };
+export { WebSocketService, unauthorizeClient, SOCKET_IO_ADAPTER };

@@ -54,7 +54,7 @@ if (MOCK_SERVICES === 'True') {
 // In a near future, we will use a message queue table to handle the database events.
 // ----------------------------------------------------------------------------
 const { handleDatabaseMessages } = require('./event_handlers/database_event_subscriber.js');
-const databaseServices = require('./services/database/database_services.js');
+import databaseServices from './services/database/database_services';
 
 
 async function connectToDB() {
@@ -90,7 +90,7 @@ async function connectToDB() {
 // ----------------------------------------------------------------------------
 // 3) RabbitMQ Client setup -  Agent -> RabbitMQ ->  Nodejs(Rbmq-client) -> Postgres 
 // ----------------------------------------------------------------------------
-const rabbitMQServices = require('./services/message_broker/rabbitMQ_services.js');
+import rabbitMQServices from './services/message_broker/rabbitMQ_services';
 const rabbitMQTopology = require('./rbmq_topology.js');
 
 
@@ -166,15 +166,15 @@ const setDashboardServer = () => {
 // ----------------------------------------------------------------------------
 // 6) START
 // ---------------------------------------------------------------------------
-const webSocketServices = require('./services/socket_services.js');
-const inMemmoryServices = require('./services/in_mem_database/mem_database_service.js');
-const { DASHBOARD_PORT, SOCKET_PORT, GQLPORT } = config;
+import { WebSocketService } from './services/socket_services';
+import * as inMemmoryServices from './services/in_mem_database/mem_database_service';
+const { DASHBOARD_PORT, SOCKET_PORT, GQLPORT, SOCKET_IO_ADAPTER } = config;
 
 async function start() {
     try {
         const postgClient = await connectToDB();
-        const websocketService = await webSocketServices.getInstance();
-        websocketService.io.listen(SOCKET_PORT);
+        const webSocketService = await WebSocketService.getInstance();
+        webSocketService.io.listen(SOCKET_PORT as number);
 
         let dataChannels = await connectToRabbitMQ();
         const frontEndServer = setDashboardServer();
@@ -182,7 +182,7 @@ async function start() {
 
         await initialization.helyosConsumingMessages(dataChannels);
         initialization.initWatchers();
-        await handleDatabaseMessages(postgClient, websocketService);
+        await handleDatabaseMessages(postgClient, webSocketService);
 
         frontEndServer.listen(DASHBOARD_PORT, () => {
             console.log(`Dashboard server running on port ${DASHBOARD_PORT}`);
@@ -232,14 +232,14 @@ async function end() {
 
 
 
-const cluster = require('cluster');
-const { setupPrimary } = require("@socket.io/cluster-adapter");
+import cluster from 'cluster';
+import { setupPrimary } from "@socket.io/cluster-adapter";
 const { NUM_THREADS } = config;
 
 if (cluster.isMaster && NUM_THREADS > 1) {
 
     console.log(`Master ${process.pid} is running`);
-    if (webSocketServices.SOCKET_IO_ADAPTER === 'cluster') {
+    if (SOCKET_IO_ADAPTER === 'cluster') {
         setupPrimary(); // Set up the socket_io connections between workers
     }
 

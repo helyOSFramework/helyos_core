@@ -76,7 +76,7 @@ async function connectAgents(leaderUUID, followerUUIDs, allowStatuses, connectio
 }
 
 
-const subscribeToDatabaseEvents = async (client, channelNames = []) => {
+const subscribeToDatabaseEvents = async (client, channelNames: any[] = []) => {
 
 	for (const channelName of channelNames) {
 		const queryText = `LISTEN ${channelName}`;
