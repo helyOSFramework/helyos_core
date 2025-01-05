@@ -457,7 +457,7 @@ class AgentDataLayer extends DatabaseLayer {
 			.then((res) => res['rows'].map(t => t.uuid));
 	}
 
-	getIds(uuids = []) {
+	getIds(uuids: any[] = []) {
 		if (uuids.length === 0) { return Promise.resolve([]) }
 		let valueMasksArray:string[] = [];
 		uuids.forEach((uuid, idx) => valueMasksArray.push('$' + (idx + 1)));

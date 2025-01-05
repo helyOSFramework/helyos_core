@@ -1,5 +1,5 @@
-import config from '../../config.js';
-import { logData } from '../../modules/systemlog.js';
+import config from '../../config';
+import { logData } from '../../modules/systemlog';
 import crypto from 'crypto';
 import fs from 'fs';
 import util from 'util';

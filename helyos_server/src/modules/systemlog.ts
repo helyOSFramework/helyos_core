@@ -36,7 +36,7 @@ interface AgentData {
 }
 
 type LogType = 'info' | 'warn' | 'error' | 'success';
-type LogOrigin = 'microservice' | 'helyos_core' | 'agent';
+type LogOrigin = 'microservice' | 'helyos_core' | 'agent' | 'work_process';
 
 /**
  * LogData gathers messages and inserts them with a single INSERT query to the database after a time period.

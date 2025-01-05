@@ -620,7 +620,7 @@ async function determineServiceRequestStatus(serviceRequest: PartialServiceReque
     return SERVICE_STATUS.READY_FOR_SERVICE;
 }
 
-module.exports = {
+export {
 	prepareServicesPipelineForWorkProcess,
 	updateRequestContext,
 	activateNextServicesInPipeline,
