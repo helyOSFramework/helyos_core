@@ -55,7 +55,7 @@ async function broadcastNotifications(channel: string, payload: any, bufferNotif
     if (channelsWithYardId.includes(channel)) {
         let room = payload['yard_id'] ? `${payload['yard_id']}` : 'all';
         if (!payload['yard_id']) {
-            console.error(channel, "does not have yard id");
+            console.warn(channel, "does not have yard id");
         }
         bufferNotifications.pushNotificationToBuffer(channel, payload, room);
     }

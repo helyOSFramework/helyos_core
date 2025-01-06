@@ -164,7 +164,7 @@ function parseLogData(
         }
 
         case 'helyos_core': {
-            const meta = metadata as Record<string, any>;
+            const meta = metadata as Record<string, any> || {};
             newLogInstance = {
                 origin,
                 wproc_id: meta.wproc_id || null,

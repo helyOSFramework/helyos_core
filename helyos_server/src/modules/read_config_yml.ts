@@ -2,8 +2,8 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
 
-import databaseServices from '../services/database/database_services.js';
-import { logData } from './systemlog.js';
+import databaseServices from '../services/database/database_services';
+import { logData } from './systemlog';
 import {lookup} from './utils';
 
 const OVERWRITE_MISSIONS = false

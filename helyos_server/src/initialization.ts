@@ -67,7 +67,7 @@ export const setInitialDatabaseData = async () => {
         await createOrUpdateAgents(agentPublicKeyFiles);
 
     } catch (error) {
-        console.warn('storing agent public keys failed.', error);
+        console.warn('storing agent public keys failed.');
     }
 
     // Save environment variables for RabbitMQ

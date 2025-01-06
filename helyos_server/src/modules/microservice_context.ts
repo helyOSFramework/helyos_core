@@ -14,7 +14,7 @@ interface MapData {
     origin: MapOrigin;
     map_data?: any;
     data_format?: string;
-    coordinate_unit?: string;
+    coordinate_frame?: string;
     map_objects?: any[];
 }
 
@@ -95,7 +95,7 @@ async function generateFullYardContext(yardId: number): Promise<Context> {
 
     context.map.id = yardId;
 
-    const yard = await databaseServices.yards.get_byId(yardId, ['lon', 'lat', 'alt', 'map_data', 'data_format', 'coordinate_unit']);
+    const yard = await databaseServices.yards.get_byId(yardId, ['lon', 'lat', 'alt', 'map_data', 'data_format', 'coordinate_frame']);
     context.map.origin = {
         long: yard.lon,
         lat: yard.lat,
@@ -103,7 +103,7 @@ async function generateFullYardContext(yardId: number): Promise<Context> {
     };
     context.map.map_data = yard.map_data;
     context.map.data_format = yard.data_format;
-    context.map.coordinate_unit = yard.coordinate_unit;
+    context.map.coordinate_frame = yard.coordinate_frame;
 
     const mapObjects = await databaseServices.map_objects.select({ yard_id: yardId, deleted_at: null });
     context.map.map_objects = mapObjects;
