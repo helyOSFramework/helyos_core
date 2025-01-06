@@ -326,5 +326,5 @@ export default {
     RBMQ_VHOST,
     RBMQ_CERTIFICATE,
     MESSAGE_VERSION,
-    verifyMessageSignature,
+    verifyMessageSignature
 };

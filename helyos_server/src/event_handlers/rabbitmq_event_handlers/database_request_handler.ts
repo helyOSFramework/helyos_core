@@ -131,4 +131,4 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
     return 0;
 }
 
-export default queryDataBase;
+export  {queryDataBase};

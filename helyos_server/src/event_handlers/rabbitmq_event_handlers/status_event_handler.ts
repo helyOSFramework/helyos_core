@@ -121,4 +121,4 @@ async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 
     }
 }
 
-export default updateState;
+export  {updateState};

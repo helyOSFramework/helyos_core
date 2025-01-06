@@ -6,8 +6,8 @@ import rbmqServices from './services/message_broker/rabbitMQ_services';
 import { logData } from './modules/systemlog';
 
 import agentComm from './modules/communication/agent_communication';
-import microserviceWatcher from './event_handlers/microservice_event_watcher.js';
-import inMemDBFlusher from './event_handlers/in_mem_db_flusher.js';
+import microserviceWatcher from './event_handlers/microservice_event_watcher';
+import inMemDBFlusher from './event_handlers/in_mem_db_flusher';
 
 import {registerManyMicroservices, registerMissions } from './modules/read_config_yml';
 import {Roles, RoleAssigner} from './role_manager';
