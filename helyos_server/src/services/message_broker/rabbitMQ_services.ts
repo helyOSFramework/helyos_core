@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import util from 'util';
 import rbmqAccessLayer from './rabbitMQ_access_layer';
+import { Channel } from './rabbitMQ_access_layer';
 
 const MESSAGE_VERSION = '2.0.0';
 
@@ -255,7 +256,7 @@ function createDebugQueues(agent: any) {
     });
 }
 
-async function assertOrSubstituteQueue(channel: any, queueName: string, exclusive: boolean, durable: boolean, args: any) {
+async function assertOrSubstituteQueue(channel: any, queueName: string, exclusive: boolean, durable: boolean, args?: any) {
     try {
         const queueInfo = await rbmqAccessLayer.getQueueInfo(queueName);
         const ttl = parseInt(queueInfo.arguments['x-message-ttl']);
@@ -292,12 +293,15 @@ const deleteConnections = rbmqAccessLayer.deleteConnections;
 const add_rbmq_user_vhost = rbmqAccessLayer.addRbmqUserVhost;
 const getQueueInfo = rbmqAccessLayer.getQueueInfo;
 
+
+export interface DataChannel extends Channel {};
 export default {
     create_rbmq_user,
     remove_rbmq_user,
     add_rbmq_user_vhost,
     deleteConnections,
     getQueueInfo,
+
 
     connect,
     disconnect,

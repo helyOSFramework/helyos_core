@@ -146,6 +146,8 @@ const getQueueInfo = (queueName: string): Promise<any> =>
 
 const connect = amqp.connect;
 
+export interface Channel extends amqp.Channel{};
+
 export default {
   updateGuestAccountPermissions,
   createUser,
