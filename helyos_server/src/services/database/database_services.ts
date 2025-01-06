@@ -50,11 +50,10 @@ Connects the leader agent with the specified followers, disconnects any follower
 and inserts new connections for desired followers.
 @param {string} leaderUUID - The UUID of the leader agent.
 @param {string[]} followerUUIDs - The UUIDs of the desired followers.
-@param {string[]} allowStatuses - The allowed statuses for the connection.
 @param {Object[]} [connection_geometries=[]] - The connection geometries for the connections.
 @returns {Promise} A promise that resolves when all connection creations are completed.
 */
-async function connectAgents(leaderUUID, followerUUIDs, allowStatuses, connection_geometries = []) {
+async function connectAgents(leaderUUID: string, followerUUIDs: string[] = [], connection_geometries = []) {
 
 	const leader = await agents.get('uuid', leaderUUID, ['id', 'uuid'], null, false, ['follower_connections']);
 	const currentFollowersIds = leader[0].follower_connections.map(e => parseInt(e.id));

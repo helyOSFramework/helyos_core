@@ -174,7 +174,7 @@ function connectAndOpenChannels(options:any = {}) {
 }
 
 function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
-                          routingKey:string = '', exchange:string = '', correlationId = null) {
+                          routingKey:string = '', exchange:string = '', correlationId: string | null = null) {
     const _message = message === undefined ? '' : message;
     let encryptedMsg;
     switch (ENCRYPT) {
