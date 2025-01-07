@@ -8,9 +8,9 @@
     "name": "Carlos Viol Barbosa",
     "url": "https://helyosframework.org/"
   },
-  "bin": "src/main.js",
+  "bin": "dist/main.js",
   "license": "Modified Apache-2.0",
-  "main": "src/main.js",
+  "main": "src/index.ts",
   "devDependencies": {
     "@types/amqplib": "^0.10.6",
     "@types/express": "^5.0.0",
@@ -37,7 +37,7 @@
     "uuid": "^9.0.1"
   },
   "scripts": {
-    "start_ccd": "node src/main.js",
+    "start_ccd": "node dist/index.js",
     "test": "bash src/test/test.sh",
     "make_map_api_doc": "redoc-cli bundle -o docs/map_api.html docs/helyos_map_services.json",
     "make_path_api_doc": "redoc-cli bundle -o docs/path_api.html docs/helyos_path_planner_services.json",

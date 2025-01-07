@@ -125,7 +125,7 @@ beforeAll(async () => {
         { source: path.join(__dirname, './settings/db_initial_data/'), target: '/etc/helyos/db_initial_data/' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_private.key'), target: '/etc/helyos/.ssl_keys/helyos_private.key' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_public.key'), target: '/etc/helyos/.ssl_keys/helyos_public.key' },
-        { source: path.join(__dirname, `./fixtures/mock${TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/src/microservice_mocks.js'}
+        { source: path.join(__dirname, `./fixtures/mock${TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/dist/microservice_mocks.js'}
       ])
       .withEnvironment({
         'PGUSER': 'helyos_db_admin',

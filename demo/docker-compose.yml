@@ -57,6 +57,7 @@ services:
             - ./settings/db_initial_data/:/etc/helyos/db_initial_data/
             - ./settings/rsa_keys/helyos_private.key:/etc/helyos/.ssl_keys/helyos_private.key:ro
             - ./settings/rsa_keys/helyos_public.key:/etc/helyos/.ssl_keys/helyos_public.key:ro
+            # - ../helyos_server:/usr/local/helyos_core/helyos_server
 
         environment:
             # Check the documentation for more details: https://helyos-manual.readthedocs.io/en/latest/2-helyos-configuration/getting-started.html#helyos-settings
