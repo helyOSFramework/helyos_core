@@ -61,7 +61,7 @@ interface AssignmentInput {
  * @param servResponse The service response containing assignment details.
  * @param serviceRequest The service request triggering the process.
  */
-export async function createAssignment( workProcess: WorkProcess, servResponse: ServiceResponse, serviceRequest: ServiceRequest): Promise<any> {
+export async function createAssignment(workProcess: WorkProcess, servResponse: ServiceResponse, serviceRequest: ServiceRequest): Promise<any> {
     const agentIds = workProcess.agent_ids;
     const serviceRequestId = serviceRequest ? serviceRequest.id : null;
 
@@ -79,7 +79,7 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
     }
     const start_stamp = workProcess.sched_start_at.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
-    let assigmentInputs: AssignmentInput[] = [];
+    let assignmentInputs: AssignmentInput[] = [];
     let instantActionsInput: InstantActionInput[] = [];
     let assignmentPlan: number[] = [];
     const dispatch_order = servResponse.dispatch_order;
@@ -88,7 +88,7 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
         const results = servResponse.results;
 
         for (const result of results) {
-            let agent_id = result.agent_id;
+            let agent_id = parseInt(result.agent_id as any);
 
             if (result.agent_uuid) {
                 agent_id = await databaseServices.agents
@@ -101,24 +101,18 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
                 : false;
 
             if (!hasAgent) {
-                logData.addLog( 'helyos_core',null,'error',
-                    `Assignment planner did not return a valid agent_id or agent_uuid in the result.`
-                );
-                throw new Error(
-                    `Assignment planner did not return a valid agent_id or agent_uuid in the result.`
-                );
+                logData.addLog('helyos_core', null, 'error', `Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
+                throw new Error(`Assignment planner did not return a valid agent_id or agent_uuid in the result.`);
             }
 
-            if (!agentIds.includes(parseInt(agent_id as unknown as string)) && !result.instant_action) {
-                logData.addLog( 'helyos_core',null,'error',
-                    `Assignment planner agent_id ${agent_id} was not included in the work_process ${workProcess.id} agent_ids.`
-                );
+            if (!agentIds.includes(agent_id!) && !result.instant_action) {
+                logData.addLog('helyos_core', null, 'error', `Assignment planner agent_id ${agent_id} was not included in the work_process ${workProcess.id} agent_ids.`);
             }
 
             if (result.instant_action) {
                 instantActionsInput.push({
                     yard_id: yardId,
-                    agent_id: agent_id as number,
+                    agent_id: agent_id!,
                     sender: `micoservice request: ${serviceRequest.id}`,
                     command: result.instant_action.command,
                     status: 'dispatched',
@@ -126,10 +120,10 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
             }
 
             if (result.assignment || result.result) {
-                assigmentInputs.push({
+                assignmentInputs.push({
                     yard_id: yardId,
                     work_process_id: workProcess.id,
-                    agent_id: agent_id as number,
+                    agent_id: agent_id!,
                     service_request_id: serviceRequestId,
                     status: ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH,
                     start_time_stamp: start_stamp,
@@ -145,7 +139,7 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
         }
     } else {
         const data = JSON.stringify(servResponse.result || servResponse);
-        assigmentInputs = agentIds.map((agentId) => ({
+        assignmentInputs = agentIds.map((agentId) => ({
             yard_id: yardId,
             work_process_id: workProcess.id,
             agent_id: agentId,
@@ -163,12 +157,12 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
     await Promise.all(instActPromises);
 
     // Create assignments
-    const insertPromises = assigmentInputs.map((input) =>
+    const insertPromises = assignmentInputs.map((input) =>
         databaseServices.assignments.insert(input)
     );
 
     // Handle assignment orchestration
-    let updatePromises: Promise<void>[] = [];
+    let updatePromises: Promise<any>[] = [];
     let assignment_orchestration = '';
     if (dispatch_order && dispatch_order.length) assignment_orchestration = 'dispatch_order_array';
     else if (assignmentPlan && assignmentPlan.length) assignment_orchestration = 'assignment_order_array';
@@ -176,11 +170,70 @@ export async function createAssignment( workProcess: WorkProcess, servResponse: 
 
     return Promise.all(insertPromises)
         .then((insertedIds) => {
-            // ... Process orchestration logic (e.g., dispatch_all_at_once, dispatch_order_array, assignment_order_array)
-            // Use similar logic to the original code for updating assignments
-            return Promise.all(updatePromises);
+            if (assignment_orchestration === 'dispatch_all_at_once') {
+                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, { status: ASSIGNMENT_STATUS.TO_DISPATCH }));
+            }
+
+            if (assignment_orchestration === 'dispatch_order_array') {
+                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, { status: ASSIGNMENT_STATUS.TO_DISPATCH }));
+                if (dispatch_order!.length === 1) dispatch_order!.push([]); // special case: there is no dependent assignments.
+                for (let order = dispatch_order!.length - 1; order > 0; order--) {
+                    const assgmtArrayIdxs = dispatch_order![order];
+                    const previousArrayIdxs = dispatch_order![order - 1];
+                    const assgmtDBIdxs = assgmtArrayIdxs.map(i => insertedIds[i]);
+                    const previousDBIdxs = previousArrayIdxs.map(i => insertedIds[i]);
+                    const statusPrecedent = (order - 1) === 0 ? ASSIGNMENT_STATUS.TO_DISPATCH : ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH;
+                    const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id, {
+                        'next_assignments': assgmtDBIdxs,
+                        'status': statusPrecedent
+                    }));
+                    const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id, { 'depend_on_assignments': previousDBIdxs }));
+                    updatePromises = updatePromises.concat([...updateDependentAssignments, ...updatePrecedentAssignments]);
+                }
+            }
+
+            if (assignment_orchestration === 'assignment_order_array') {
+                const dispatchGroup: { [key: number]: number[] } = {};
+                // Group assignments
+                assignmentPlan.forEach((order, index) => {
+                    if (!dispatchGroup[order]) dispatchGroup[order] = [insertedIds[index]];
+                    else dispatchGroup[order].push(insertedIds[index]);
+                });
+
+                assignmentPlan.forEach(order => {
+                    const ids = dispatchGroup[order];
+                    const nextIds = dispatchGroup[order + 1];
+                    const prevIds = dispatchGroup[order - 1];
+
+                    const nextAssignments = nextIds ? nextIds : [];
+                    const dependOnAssignments = prevIds ? prevIds : [];
+
+                    const updateDependencies = ids.map(id => databaseServices.assignments.update_byId(id, {
+                        'next_assignments': nextAssignments,
+                        'depend_on_assignments': dependOnAssignments
+                    }));
+                    updatePromises = updatePromises.concat([...updateDependencies]);
+                });
+
+                let dispatchTriggerPromises: Promise<void>[] = [];
+                if (dispatchGroup[1]) {
+                    dispatchTriggerPromises = dispatchGroup[1].map(id =>
+                        databaseServices.assignments.update_byId(id, { 'status': ASSIGNMENT_STATUS.TO_DISPATCH })
+                    );
+                }
+                updatePromises = [Promise.all(updatePromises).then(() => Promise.all(dispatchTriggerPromises))];
+            }
+
+            return Promise.all(updatePromises).then(() => {
+                const statusUpdatePromises = assignmentInputs.map((input) =>
+                    databaseServices.service_requests.update_byId(serviceRequest.id, { assignment_dispatched: true })
+                        .then(() => databaseServices.agents.update('id', input.agent_id, { status: AGENT_STATUS.BUSY }))
+                        .then(() => databaseServices.work_processes.updateByConditions(
+                            { 'id': workProcess.id, 'status__in': [MISSION_STATUS.DISPATCHED, MISSION_STATUS.CALCULATING, MISSION_STATUS.PREPARING] },
+                            { status: MISSION_STATUS.EXECUTING }))
+                );
+                return Promise.all(statusUpdatePromises);
+            });
         })
-        .catch((err) =>
-            logData.addLog('helyos_core', null, 'error', `createAssignment ${err.message}`)
-        );
+        .catch(err => logData.addLog('helyos_core', null, 'error', `createAssignment ${err.message}`));
 }

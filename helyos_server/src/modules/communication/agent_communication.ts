@@ -250,7 +250,7 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
                 const reportedWorkProcessId =
                     agentCurrentResources?.work_process_id || agentCurrentResources?.wp_id;
 
-                if (reportedWorkProcessId === wpId) {
+                if (reportedWorkProcessId == wpId) {
                     return true;
                 }
 

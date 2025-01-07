@@ -156,7 +156,7 @@ function filterContext(context: Context, filter: Filter): Context {
         filteredContext.agents = context.agents;
     } else if (filter.require_mission_agents_data) {
         filteredContext.agents = context.agents.filter(agent =>
-            filter.agent_ids!.some(id => id === agent.id)
+            filter.agent_ids!.some(id => id == agent.id)
         );
     }
 
