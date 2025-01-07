@@ -96,8 +96,6 @@ const RBMQ_PASSWORD = process.env.RBMQ_PASSWORD || RBMQ_ADMIN_PASSWORD;
 const RBMQ_SSL = (process.env.RBMQ_SSL || "False").toLowerCase() === "true";
 const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False").toLowerCase() === "true";
 
-const TLS_REJECT_UNAUTHORIZED = (process.env.TLS_REJECT_UNAUTHORIZED || "True").toLowerCase() === "true";
-if (!TLS_REJECT_UNAUTHORIZED) { process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; }
 
 const API_PROTOCOL = RBMQ_API_SSL ? 'https' : 'http';
 const RBMQ_PROTOCOL = RBMQ_SSL ? 'amqps' : 'amqp';
@@ -164,7 +162,6 @@ export default  {
     RBMQ_SSL,
     RBMQ_API_SSL,
 
-    TLS_REJECT_UNAUTHORIZED,
     API_PROTOCOL,
     RBMQ_PROTOCOL,
     RBMQ_CERTIFICATE,
