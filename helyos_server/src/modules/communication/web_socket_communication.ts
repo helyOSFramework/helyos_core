@@ -26,7 +26,7 @@ interface MapObject {
 }
 
 interface BufferPayload {
-    [room: string]: {
+    [room: string]: { // socket room is the yard ID or 'all'
         [channel: string]: any[] | null;
     };
 }
