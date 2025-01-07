@@ -6,15 +6,29 @@ WORKDIR /usr/src/app
 COPY helyos_dashboard/package.json /usr/src/app/package.json
 COPY helyos_dashboard/package-lock.json /usr/src/app/package-lock.json
 RUN npm set fetch-retry-maxtimeout 600000 && npm install --no-audit  --timeout=600000
+
 COPY helyos_dashboard/ /usr/src/app
 RUN npm run build --prod
 
 
+# Second stage
+FROM node:20 AS server_build
 
-# # Second stage
-FROM helyosframework/helyos_core_base:2.1.0-20241106
+# ------------------- BUILDING THE SERVER  -----------------------------
+WORKDIR /usr/local/helyos_core/helyos_server/
+ENV NODE_PATH=/usr/local/helyos_core/helyos_server/node_modules
+COPY helyos_server/package.json  /usr/local/helyos_core/helyos_server/package.json
+COPY helyos_server/package-lock.json  /usr/local/helyos_core/helyos_server/package-lock.json
+RUN npm set fetch-retry-maxtimeout 600000 && npm install --no-audit  --timeout=600000
 
-# ------------------- BUILDING THE SERVER -----------------------------
+COPY helyos_server/ /usr/local/helyos_core/helyos_server
+RUN npm run build
+
+
+# Third stage
+FROM helyosframework/helyos_core_base:2.1.0-20241106 AS binding_stage
+
+# ------------------- BINDING SERVER, DASHBOARD AND STARTING SCRIPTS -----------------------------
 
 
 # FOLDER STRUCTURE
@@ -40,8 +54,8 @@ COPY --chown=helyosnonroot  helyos_server/package-lock.json  /usr/local/helyos_c
 RUN npm ci --omit=dev --timeout=600000
 
 # HELYOS CORE SERVER FILES
-COPY --chown=helyosnonroot helyos_server/ /usr/local/helyos_core/helyos_server
 COPY --chown=helyosnonroot LICENSE.txt /usr/local/helyos_core/LICENSE.txt
+COPY --chown=helyosnonroot --from=server_build  /usr/local/helyos_core/helyos_server/dist/  /usr/local/helyos_core/helyos_server/dist/
 COPY --chown=helyosnonroot --from=dashboard_build /usr/src/app/dist/ /usr/local/helyos_core/helyos_dashboard/dist/
 
 # DATABASE
@@ -75,9 +89,10 @@ RUN chmod +x   /usr/local/helyos_core/bin/entrypoint.sh
 
 # CONVERT THE SOURCE CODE TO A SINGLE BINARY FILE AND DELETE THE SOURCE CODE
 # RUN npm install -g pkg
-# RUN pkg  --o /usr/local/helyos_core//helyos_server/helyos_core.app --targets node18-linuxstatic-x64 /usr/local/helyos_core/helyos_server/src/main.js 
+# RUN pkg  --o /usr/local/helyos_core//helyos_server/helyos_core.app --targets node18-linuxstatic-x64 /usr/local/helyos_core/helyos_server/dist/index.js 
 # RUN chmod +x /usr/local/helyos_core/helyos_server/helyos_core.app
 # RUN rm    -r /usr/local/helyos_core/helyos_server/src
+# RUN rm    -r /usr/local/helyos_core/helyos_server/dist
 
 
 # ------------------- START -----------------------
