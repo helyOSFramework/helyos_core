@@ -290,7 +290,7 @@ function removeDebugQueues(agent: any) {
 const create_rbmq_user = rbmqAccessLayer.createUser;
 const remove_rbmq_user = rbmqAccessLayer.removeUser;
 const deleteConnections = rbmqAccessLayer.deleteConnections;
-const add_rbmq_user_vhost = rbmqAccessLayer.addRbmqUserVhost;
+const setRBMQUserAtVhost = rbmqAccessLayer.addRbmqUserVhost;
 const getQueueInfo = rbmqAccessLayer.getQueueInfo;
 
 
@@ -298,7 +298,7 @@ export interface DataChannel extends Channel {};
 export default {
     create_rbmq_user,
     remove_rbmq_user,
-    add_rbmq_user_vhost,
+    setRBMQUserAtVhost,
     deleteConnections,
     getQueueInfo,
 

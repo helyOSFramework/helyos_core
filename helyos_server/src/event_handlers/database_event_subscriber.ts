@@ -17,6 +17,7 @@ import { processMicroserviceEvents } from './database_event_handlers/microservic
 import { createAgentRbmqAccount, removeAgentRbmqAccount } from './rabbitmq_event_handlers/checkin_event_handler';
 import { processRunListEvents } from './database_event_handlers/missionqueue_db_events_handler';
 import * as inMemServices from '../services/in_mem_database/mem_database_service';
+import RabbitMQServices from '../services/message_broker/rabbitMQ_services';
 
 
 interface DatabaseClient {
@@ -96,11 +97,22 @@ export async function handleDatabaseMessages(client: DatabaseClient, websocket: 
         switch (channel) {
             case 'new_agent_poses':
                 break;
+
             case 'change_agent_security':
                 inMemDB = await inMemServices.getInstance();
-                console.log('change_agent_security', payload['uuid']);
                 inMemDB.update('agents', 'uuid', payload, new Date(), 'buffered');
+                console.log('change_agent_security', payload['uuid']);
                 break;
+
+            case 'change_rabbitmq_permissions':
+                const permissions = {
+                    configure: payload['configure_permissions'],
+                    write: payload['write_permissions'],
+                    read: payload['read_permissions']
+                }
+                await RabbitMQServices.setRBMQUserAtVhost(payload['rbmq_username'], permissions)
+                break;
+
             case 'agent_deletion':
                 inMemDB = await inMemServices.getInstance();
                 inMemDB.delete('agents', 'uuid', payload['uuid']);
@@ -112,6 +124,7 @@ export async function handleDatabaseMessages(client: DatabaseClient, websocket: 
                     logData.addLog('agent', payload, 'warn', `Remove RabbitMQ account: ${error.message}`);
                 }
                 break;
+
             case 'new_rabbitmq_account':
                 try {
                     await createAgentRbmqAccount({ id: payload.agent_id }, payload['username'], payload['password']);
@@ -120,6 +133,7 @@ export async function handleDatabaseMessages(client: DatabaseClient, websocket: 
                     logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
                 }
                 break;
+
             default:
                 if (channel.includes('service_request')) {
                     processMicroserviceEvents(channel, payload);

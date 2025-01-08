@@ -209,7 +209,10 @@ WHEN (OLD.status IS DISTINCT FROM NEW.status OR OLD.connection_status IS DISTINC
       OLD.public_key IS DISTINCT FROM NEW.public_key OR
       OLD.verify_signature IS DISTINCT FROM NEW.verify_signature OR
       OLD.rbmq_username IS DISTINCT FROM NEW.rbmq_username OR
-      OLD.allow_anonymous_checkin IS DISTINCT FROM NEW.allow_anonymous_checkin
+      OLD.allow_anonymous_checkin IS DISTINCT FROM NEW.allow_anonymous_checkin OR
+      OLD.read_permissions IS DISTINCT FROM NEW.read_permissions OR
+      OLD.write_permissions IS DISTINCT FROM NEW.write_permissions OR
+      OLD.configure_permissions IS DISTINCT FROM NEW.configure_permissions
       )
 EXECUTE PROCEDURE public.notify_change_tool();
 
