@@ -244,8 +244,11 @@ class HelyOSClientApplication {
         return this.helyosService.serviceRequests.list({});
     }
 
-    getAgentRelatedLogs(uuid){
-        return this.helyosService.systemLogs.list({agentUuid: uuid});
+
+    async getAgentRelatedLogs(uuid) {
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        await sleep(1000);
+        return this.helyosService.systemLogs.list({agentUuid: uuid });
     }
 
     dumpLogsToFile(testNunber=1){

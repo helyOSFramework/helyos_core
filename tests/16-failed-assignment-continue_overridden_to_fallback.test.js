@@ -64,11 +64,14 @@ describe('16 Test Failed Assignment - Continue mission - Overridden Fallback mis
         expect(result).toEqual('succeeded');
     });
 
-    it('Agents are free', async () => {
-        const result = await helyosApplication.waitAgentStatus(1, 'free');
+    it('Agent that did not have any problem is free', async () => {
         const result2 = await helyosApplication.waitAgentStatus(2, 'free');
-        expect(result).toEqual('free');
         expect(result2).toEqual('free');
+    });
+
+    it('Agent that failed and run the fallback is free', async () => {
+        const result = await helyosApplication.waitAgentStatus(1, 'free');
+        expect(result).toEqual('free');
     });
 
     it('Check 2 x Reserve/ 3 x Release sent to the agent 1', async () => {

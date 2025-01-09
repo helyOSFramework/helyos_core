@@ -147,10 +147,13 @@ beforeAll(async () => {
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
         'AGENT_AUTO_REGISTER_TOKEN': '0001-0002-0003-0000-0004',
-        'MOCK_SERVICES': 'True',
         'RUN_MODE': 'production',
         'MESSAGE_RATE_LIMIT': '50',
-        'MESSAGE_UPDATE_LIMIT': '20'
+        'MESSAGE_UPDATE_LIMIT': '20',
+        // ESSENTIAL FOR TESTS
+        'MOCK_SERVICES': 'True',
+        'LOG_BUFFER_TIME': '0',
+
       })
       .withNetwork(network)
       // .withLogConsumer(stream => {

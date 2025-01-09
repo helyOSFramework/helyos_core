@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS public.agents (
     agent_class IN (
       'vehicle',
       'tool',
-      'assistant'
+      'assistant',
+      'charge_station'
     )
   )
 );

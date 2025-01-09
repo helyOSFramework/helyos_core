@@ -282,11 +282,16 @@ const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?:
     const agent = agents[0];
     const generatedPassword = password || uuidv4();
     const generatedUsername = username || agent.uuid;
-
+    const permissions = {
+        configure: agent['configure_permissions'],
+        write: agent['write_permissions'],
+        read: agent['read_permissions']
+    }
     const rbmqUsername = agent.rbmq_username || generatedUsername;
 
     await rabbitMQServices.create_rbmq_user(rbmqUsername, generatedPassword, []);
-    await rabbitMQServices.add_rbmq_user_vhost(rbmqUsername);
+    await rabbitMQServices.setRBMQUserAtVhost(rbmqUsername, permissions);
+
     rabbitMQServices.createDebugQueues(agent);
 
     const hashedPassword = encryptPassword(generatedPassword, agent.pubkey);

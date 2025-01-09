@@ -36,7 +36,7 @@ CREATE TABLE public.events_queue (
 );
 
 CREATE TABLE public.rbmq_config (
-  id BIGSERIAL PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   agents_ul_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.ul',
   agents_dl_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.dl',
   agents_mqtt_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.mqtt',
