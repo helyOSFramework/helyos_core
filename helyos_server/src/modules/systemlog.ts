@@ -1,5 +1,5 @@
 import databaseServices from '../services/database/database_services';
-
+const LOG_BUFFER_TIME = parseInt(process.env.LOG_BUFFER_TIME || '1000');
 const LOG_OUTPUT = process.env.LOG_OUTPUT || 'database';
 
 interface LogInstance {
@@ -57,7 +57,9 @@ class LogData {
         this.lastLogMsg = '';
         this.repeatedLog = 1;
         this.bufferTime = bufferTime;
-        this.interval = this._periodicallySaveLogs();
+        if (bufferTime > 0){
+            this.interval = this._periodicallySaveLogs();
+        }
     }
 
     private isLogRepeating(lastLog: LogInstance, newLog: LogInstance): boolean {
@@ -114,13 +116,20 @@ class LogData {
         } else if (newLogInstance) {
             console.log(newLogInstance);
         }
+
+        if (this.bufferTime === 0) {
+            const _logs = [...this.logs];
+            this.logs = [];
+            this.saveLogs(_logs)
+        }
     }
 
-    public async saveLogs(force: boolean = false): Promise<void> {
-        if (this.logs.length && (this.logs.length > 0 || force)) {
+
+
+    public async saveLogs(logs:any[]): Promise<void> {
+        if (logs.length && (logs.length > 0)) {
             try {
-                await databaseServices.sysLogs.insertMany(this.logs);
-                this.logs = [];
+                await databaseServices.sysLogs.insertMany(logs);
             } catch (err) {
                 console.error(err);
             }
@@ -129,7 +138,9 @@ class LogData {
 
     private _periodicallySaveLogs(): NodeJS.Timer {
         return setInterval(() => {
-            void this.saveLogs(true);
+            const _logs = [...this.logs];
+            this.logs = [];
+            this.saveLogs(_logs);
         }, this.bufferTime);
     }
 }
@@ -214,6 +225,6 @@ function parseLogData(
     return newLogInstance;
 }
 
-const logData = new LogData();
+const logData = new LogData(LOG_BUFFER_TIME);
 
 export { LogData, logData, parseLogData, LogInstance, LogType, LogOrigin };
