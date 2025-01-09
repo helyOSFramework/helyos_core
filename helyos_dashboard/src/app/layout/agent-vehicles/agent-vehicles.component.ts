@@ -10,7 +10,7 @@ import { AgentClass, H_Yard } from 'helyosjs-sdk/dist/helyos.models';
 })
 export class AgentVehiclesComponent implements OnInit {
   public tools: H_Agent[];
-  public selectedItem: any;
+  public selectedItem: H_Agent;
   public interconnections: H_AgentInterconnection[];
   public instantActionCommand: string;
   private rbmqAccountChange: boolean = false;
@@ -47,7 +47,6 @@ export class AgentVehiclesComponent implements OnInit {
       this.configureStrict = `.*`;
     
     })
-
   }
 
   list() {
