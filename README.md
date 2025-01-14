@@ -101,11 +101,11 @@ When a new version of `helyos_core` is released and the database schema has chan
 
 There are several migration strategies available. Here, we provide a basic one:
 
-1. Use the `helyos_database/db_commands/pre_migration.sh` script to backup the content of all tables and drop the original tables.
+1. Use the `helyos_database/migrations/pre_migrations.sql` script to backup the content of all tables and drop the original tables.
 2. Recreate all table structures using the new schema from the new `helyos core` version.
-3. Use the `helyos_database/db_commands/post_migration.sh` script to populate the new table structures using the backed-up data. Only tables and fields that match will be copied.
+3. Use the `helyos_database/migrations/post_migrations.sql` script to populate the new table structures using the backed-up data. Only tables and fields that match will be copied.
 
-You can customize the data transformation or parametrized data initialization in the `pre_migration.sh` and `post_migration.sh` scripts. If you are using the helyOS Core Docker image, map these files to your machine using the volume options in the `docker-compose` file.
+You can customize the data transformation or parametrized data initialization in the `pre_migrations.sql` and `post_migrations.sql` scripts. If you are using the helyOS Core Docker image, map these files to your machine using the volume options in the `docker-compose` file.
 
 
 To run this migration strategy, you can restart your application with the enviroment variable RUN_MODE="migration" or simply run the the following command 
