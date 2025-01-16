@@ -1,25 +1,19 @@
- 
-
-
-
-
 CREATE TABLE IF NOT EXISTS public.system_logs (
-    id BIGSERIAL PRIMARY KEY,
-    created_at timestamp(6) without time zone DEFAULT NOW(),
-    yard_id bigint,
-    wproc_id bigint,
-    agent_uuid character varying,
-    service_type  character varying,
-    event  character varying,
-    origin character varying,
-    log_type character varying,
-    collected  boolean,
-    msg character varying
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP(6) WITHOUT TIME ZONE DEFAULT NOW(),
+  yard_id BIGINT,
+  wproc_id BIGINT,
+  agent_uuid CHARACTER VARYING,
+  service_type CHARACTER VARYING,
+  event CHARACTER VARYING,
+  origin CHARACTER VARYING,
+  log_type CHARACTER VARYING,
+  collected BOOLEAN,
+  msg CHARACTER VARYING
 );
 
-comment on column system_logs.collected is '@ if log was sent to a log collector service';
-comment on column system_logs.msg is '@ log message.';
-comment on column system_logs.origin is '@ "microservice" | "agent" | "app" | "database"';
-comment on column system_logs.event is '@ "send to microservice" | "get from microservice" | "send to agent" | "get from agent" | "service unhealthy"';
-comment on column system_logs.log_type is '@ "error" | "warning" | "normal"';
-
+COMMENT ON COLUMN system_logs.collected IS '@ if log was sent to a log collector service';
+COMMENT ON COLUMN system_logs.msg IS '@ log message.';
+COMMENT ON COLUMN system_logs.origin IS '@ "microservice" | "agent" | "app" | "database"';
+COMMENT ON COLUMN system_logs.event IS '@ "send to microservice" | "get from microservice" | "send to agent" | "get from agent" | "service unhealthy"';
+COMMENT ON COLUMN system_logs.log_type IS '@ "error" | "warning" | "normal"';

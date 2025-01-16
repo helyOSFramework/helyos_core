@@ -269,7 +269,7 @@
                     <label for="protocol">Protocol AMQP</label>
                   </fieldset>
                 </div>
-
+  
                 <div class="row">
                   <fieldset class="form-group col-xl-6">
                     <label for="allowAnonymousCheckin">Registration</label>
@@ -285,49 +285,118 @@
                     </select>
                   </fieldset>
                 </div>
+  
+  
+                <div  style="margin-left: 12px;">
+                    <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
+                      <div class="col-xl-12">
+                        <p style="font-size: small">
+                          helyOS automatically creates a RabbitMQ account; the agent can perform the check-in using the
+                          <i>anonymous</i>* account. The new username and password will be sent to the agent. Please refrain from using this method in production. 
+                        </p>
+                        <p style="font-size: small">
+                          * (username, password) = (anonymous, anonymous). The agent must possess the
+                          AGENT_REGISTRATION_TOKEN.
+                        </p>
+                      </div>
+                    </div>
 
-                <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
-                  <div class="col-xl-12">
-                    <br />
-                    <p>
-                      The agent can perform the check-in using the
-                      <i>anonymous</i> account *, helyOS will automatically create a RabbitMQ account and send the
-                      username and password to the agent.
+                    <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
+                      <fieldset class="form-group col-xl-6">
+                        <label for="rbmqUsername">username *</label>
+                        <input
+                          id="rbmqUsername"
+                          class="form-control"
+                          [(ngModel)]="selectedItem.rbmqUsername"
+                          (ngModelChange)="rbmqAccountChange = true"
+                          name="rbmqUsername"
+                          placeholder="0000-0000-0000-0000" />
+                      </fieldset>
+  
+                      <fieldset class="form-group col-xl-6">
+                        <label for="rbmqPassword"> password </label>
+                        <input
+                          id="rbmqPassword"
+                          class="form-control"
+                          [(ngModel)]="rbmqPassword"
+                          (ngModelChange)="rbmqAccountChange = true"
+                          name="rbmqPassword"
+                          placeholder="*********" />
+                      </fieldset>
+                      <p style="font-size: small" class="col-xl-12">
+                        * helyOS will accept messages from this agent only if the username matches the uuid.
+                      </p>
+                    </div>
+                </div>
+  
+  
+                <div class="row">
+                  <fieldset class="form-group col-xl-6">
+                    <label for="permissionOption">Permissions</label>
+                    <select
+                      id="permissionOption"
+                      class="form-control form-select"
+                      [disabled]="selectedItem.protocol === 'MQTT'"
+                      [(ngModel)]="permissionOption"
+                      name="permissionOption"
+                      (ngModelChange)="changePermissions()">
+                      <option [ngValue]="'loose'">Free to send and receive messages</option>
+                      <option [ngValue]="'strict'">Only exchange messages with helyOS core</option>
+                      <option [ngValue]="'other'">Custom message permissions</option>
+                    </select>
+                  </fieldset>
+                </div>
+  
+                <div  style="margin-left: 12px;">
+                    <p  *ngIf="selectedItem.protocol === 'MQTT'" style="font-size: small;">
+                        Permission options are not available in the MQTT protocol.
                     </p>
-                    <p style="font-size: small">
-                      * (username, password) = (anonymous, anonymous). The agent must possess the
-                      AGENT_REGISTRATION_TOKEN.
-                    </p>
+  
+                  <div *ngIf="selectedItem.protocol !== 'MQTT'" >
+                      <div class="row">
+                        <fieldset class="form-group col-xl-12">
+                          <label for="readPermission">read</label>
+                          <input
+                            [readonly]="permissionOption!=='other'"
+                            id="readPermissions"
+                            class="form-control"
+                            [(ngModel)]="selectedItem.readPermissions"
+                            name="readPermissions"
+                            />
+                        </fieldset>
+                      </div>
+  
+                      <div class="row">
+                        <fieldset class="form-group col-xl-12">
+                          <label for="writePermission"> write </label>
+                          <input
+                            [readonly]="permissionOption!=='other'"
+                            id="writePermissions"
+                            class="form-control"
+                            [(ngModel)]="selectedItem.writePermissions"
+                            name="writePermissions"
+                            />
+                        </fieldset>
+                      </div>
+  
+                      <div class="row">
+                        <fieldset class="form-group col-xl-12">
+                          <label for="configurePermission"> configure </label>
+                          <input
+                            [readonly]="permissionOption!=='other'"
+                            id="configurePermissions"
+                            class="form-control"
+                            [(ngModel)]="selectedItem.configurePermissions"
+                            name="configurePermissions"
+                            />
+                        </fieldset>
+                      </div>
                   </div>
                 </div>
-
-                <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
-                  <fieldset class="form-group col-xl-6">
-                    <label for="rbmqUsername">username *</label>
-                    <input
-                      for="rbmqUsername"
-                      class="form-control"
-                      [(ngModel)]="selectedItem.rbmqUsername"
-                      (ngModelChange)="rbmqAccountChange = true"
-                      name="rbmqUsername"
-                      placeholder="0000-0000-0000-0000" />
-                  </fieldset>
-
-                  <fieldset class="form-group col-xl-6">
-                    <label for="rbmqPassword"> password </label>
-                    <input
-                      id="rbmqPassword"
-                      class="form-control"
-                      [(ngModel)]="rbmqPassword"
-                      (ngModelChange)="rbmqAccountChange = true"
-                      name="rbmqPassword"
-                      placeholder="*********" />
-                  </fieldset>
-                  <p style="font-size: small" class="col-xl-12">
-                    * helyOS will accept messages from this agent only if the username matches the uuid.
-                  </p>
-                </div>
+  
+  
               </div>
+  
 
               <h5>State Properties</h5>
               <div class="field-group">

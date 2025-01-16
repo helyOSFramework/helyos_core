@@ -68,7 +68,7 @@ if [ "$RUN_MODE" = "production" ]; then
         echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         echo "RUN NODEJS helyOS server"
         echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        node /usr/local/helyos_core/helyos_server/src/main.js &
+        node /usr/local/helyos_core/helyos_server/dist/index.js &
         NODE_PID=$!
     fi
 
@@ -82,7 +82,7 @@ if [ "$RUN_MODE" = "test" ]; then
     echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     echo "RUN NODEJS and TEST"
     echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    nohup node /usr/local/helyos_core/helyos_server/src/main.js
+    nohup node /usr/local/helyos_core/helyos_server/dist/index.js
     npm --prefix /usr/src/app run test
 fi
 

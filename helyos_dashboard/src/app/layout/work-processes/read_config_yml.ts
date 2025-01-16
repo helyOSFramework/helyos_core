@@ -81,7 +81,7 @@ const parseWorkProcess = (workprocessTypes: H_WorkProcessType[], workprocessPlan
     missions[wpTypeName] = mission;
 
     // parse wp_plans into mission steps
-    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId === wpType.id);
+    const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId == wpType.id);
     const formatedSteps = parseWorkProcessRecipeSteps(wpTypeRecipeSteps);
 
     if (formatedSteps.length > 0) {

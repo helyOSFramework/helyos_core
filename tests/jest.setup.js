@@ -125,7 +125,7 @@ beforeAll(async () => {
         { source: path.join(__dirname, './settings/db_initial_data/'), target: '/etc/helyos/db_initial_data/' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_private.key'), target: '/etc/helyos/.ssl_keys/helyos_private.key' },
         { source: path.join(__dirname, './settings/rsa_keys/helyos_public.key'), target: '/etc/helyos/.ssl_keys/helyos_public.key' },
-        { source: path.join(__dirname, `./fixtures/mock${TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/src/microservice_mocks.js'}
+        { source: path.join(__dirname, `./fixtures/mock${TEST_NUMBER}_microservice.js`), target: '/usr/local/helyos_core/helyos_server/dist/microservice_mocks.js'}
       ])
       .withEnvironment({
         'PGUSER': 'helyos_db_admin',
@@ -147,10 +147,13 @@ beforeAll(async () => {
         'RBMQ_ADMIN_USERNAME': 'helyos_rbmq_admin',
         'RBMQ_ADMIN_PASSWORD': 'helyos_secret',
         'AGENT_AUTO_REGISTER_TOKEN': '0001-0002-0003-0000-0004',
-        'MOCK_SERVICES': 'True',
         'RUN_MODE': 'production',
         'MESSAGE_RATE_LIMIT': '50',
-        'MESSAGE_UPDATE_LIMIT': '20'
+        'MESSAGE_UPDATE_LIMIT': '20',
+        // ESSENTIAL FOR TESTS
+        'MOCK_SERVICES': 'True',
+        'LOG_BUFFER_TIME': '0',
+
       })
       .withNetwork(network)
       // .withLogConsumer(stream => {
