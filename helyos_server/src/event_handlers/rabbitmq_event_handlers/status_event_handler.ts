@@ -112,11 +112,8 @@ async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 
             return updateAgentMission(objMsg.body.assignment, uuid);
         }
 
-    } catch (error) {
-        console.error(error);
-        databaseService.agents.update('uuid', uuid, { status: objMsg.body.status });
-        if (objMsg.body['wp_clearance'])
-            return updateAgentMission(objMsg.body['wp_clearance'], uuid);
+    } catch (error:any) {
+        logData.addLog('agent', { uuid }, 'info', `${uuid} published state "${objMsg.body?.status}": ${error.message}`);
         return;
     }
 }
