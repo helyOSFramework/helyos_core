@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { LoginComponent } from './login.component';
 import { LoginModule } from './login.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -15,6 +16,7 @@ describe('LoginComponent', () => {
         LoginModule,
         RouterTestingModule,
         BrowserAnimationsModule,
+        TranslateModule.forRoot(),
       ],
     }).compileComponents();
   }));

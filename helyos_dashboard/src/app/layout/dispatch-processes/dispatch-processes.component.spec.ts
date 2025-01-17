@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DispatchProcessesComponent } from './dispatch-processes.component';
+import { MockHelyosService } from 'src/app/mocks/helyos.service.mock';
+import { HelyosService } from 'src/app/services/helyos.service';
 
 describe('DispatchProcessesComponent', () => {
   let component: DispatchProcessesComponent;
@@ -9,6 +11,9 @@ describe('DispatchProcessesComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DispatchProcessesComponent],
+      providers: [
+        { provide: HelyosService, useClass: MockHelyosService }
+      ],
     }).compileComponents();
   }));
 

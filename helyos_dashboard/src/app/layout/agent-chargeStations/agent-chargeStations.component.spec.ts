@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AgentChargeStationsComponent } from './agent-chargeStations.component';
+import { MockHelyosService } from 'src/app/mocks/helyos.service.mock';
+import { HelyosService } from 'src/app/services/helyos.service';
 
 describe('YardsComponent', () => {
   let component: AgentChargeStationsComponent;
@@ -9,6 +11,9 @@ describe('YardsComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AgentChargeStationsComponent],
+      providers: [
+        { provide: HelyosService, useClass: MockHelyosService }
+      ],
     }).compileComponents();
   }));
 
