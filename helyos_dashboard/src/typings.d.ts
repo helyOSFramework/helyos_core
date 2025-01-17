@@ -4,5 +4,3 @@ declare const module: NodeModule;
 interface NodeModule {
   id: string;
 }
-
-declare const bootstrap: any;

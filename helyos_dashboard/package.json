@@ -54,6 +54,7 @@
     "@angular/cli": "^17.3.8",
     "@angular/compiler-cli": "^17.3.8",
     "@angular/language-service": "^17.3.8",
+    "@types/bootstrap": "^5.2.10",
     "@types/jasmine": "^5.1.4",
     "@types/jasminewd2": "^2.0.13",
     "@types/js-yaml": "^4.0.9",
