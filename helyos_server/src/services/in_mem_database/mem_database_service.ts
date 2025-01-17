@@ -3,12 +3,8 @@
 ** Copyright 2022,  Fraunhofer-Institut für Verkehrs- und Infrastruktursysteme IVI.
 */
 
-const {
-    logData,
-} = require("../../modules/systemlog");
-import databaseService from "../database/database_services";
-import {AgentDataLayer, DatabaseLayer} from "../database/database_services";
-
+import { logData } from "../../modules/systemlog";
+import databaseService, {AgentDataLayer} from "../database/database_services";
 import * as redisAccessLayer from './redis_access_layer';
 import config from '../../config';
 
@@ -219,7 +215,7 @@ class InMemDB {
                     dbService.update(indexName, keyId, data), //Loop?
                 ]);
             }
-            if (mode == 'buffered') {
+            if (mode === 'buffered') {
                 await this.hSetAsync(entityHash, data);
                 await this.updateBuffer(tableName, indexName, data, msgTimeStamp);
             }
@@ -236,7 +232,7 @@ class InMemDB {
                 await dbService.update(indexName, keyId, data); // Loop?
                 return true;
             }
-            if (mode == 'buffered') {
+            if (mode === 'buffered') {
                 if ((storeTimeStamp.getTime() - msgTimeStamp.getTime()) < MAX_DELAY) {
                     this.updateBuffer(tableName, indexName, data, storeTimeStamp);
                     return true;

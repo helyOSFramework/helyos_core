@@ -5,8 +5,8 @@
 import { UNCOMPLETE_ASSIGNM_STATUSES } from '../../modules/data_models';
 import { DatabaseLayer, AgentDataLayer, Client,
     searchAllRelatedUncompletedAssignments, getUncompletedAssignments_byWPId,
-	     getHighMsgRateAgents, updateAgentsConnectionStatus,
-		 setDBTimeout } from './postg_access_layer';
+    getHighMsgRateAgents, updateAgentsConnectionStatus,
+    setDBTimeout } from './postg_access_layer';
 
 // Singleton database clients
 const mainClient = new Client();
@@ -123,12 +123,12 @@ const databaseService = {
     subscribeToDatabaseEvents,
     updateAgentsConnectionStatus: (n_secs: number) => updateAgentsConnectionStatus(mainClient, n_secs),
     getHighMsgRateAgents: (msgRateLimit: number, updtRateLimit: number) =>
-	  getHighMsgRateAgents(mainClient, msgRateLimit, updtRateLimit),
+        getHighMsgRateAgents(mainClient, msgRateLimit, updtRateLimit),
     getUncompletedAssignments_byWPId: (wpId: number) =>
-	  getUncompletedAssignments_byWPId(mainClient, wpId, UNCOMPLETE_ASSIGNM_STATUSES),
+        getUncompletedAssignments_byWPId(mainClient, wpId, UNCOMPLETE_ASSIGNM_STATUSES),
     setDBTimeout: (n_secs: number) => setDBTimeout(shortTimeClient, n_secs),
     searchAllRelatedUncompletedAssignments: (assId: number) =>
-	  searchAllRelatedUncompletedAssignments(shortTimeClient, assId, UNCOMPLETE_ASSIGNM_STATUSES),
+        searchAllRelatedUncompletedAssignments(shortTimeClient, assId, UNCOMPLETE_ASSIGNM_STATUSES),
 };
 
 export {

@@ -4,6 +4,29 @@
     "projects/**/*"
   ],
   "overrides": [
+    
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "rules": {
+        // https://typescript-eslint.io/rules/
+        "@typescript-eslint/naming-convention": [
+          "warn",
+          {
+            "selector": "method",
+            "format": [
+              "camelCase"
+            ],
+            "leadingUnderscore": "allow"
+          }
+        ]
+      }
+    },
     {
       "files": [
         "*.ts"
@@ -43,15 +66,10 @@
             }
           },
           {
-            "selector": "method",
-            "format": [
-              "camelCase"
-            ]
-          },
-          {
             "selector": "enum",
             "format": [
-              "PascalCase"
+              "PascalCase",
+              "UPPER_CASE"
             ]
           },
           {
@@ -70,18 +88,12 @@
             "selector": "interface",
             "format": [
               "PascalCase"
-            ],
-            "prefix": [
-              "I"
             ]
           },
           {
             "selector": "typeAlias",
             "format": [
               "PascalCase"
-            ],
-            "prefix": [
-              "T"
             ]
           },
           {
@@ -96,7 +108,7 @@
         ],
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unused-vars": [
-          "error",
+          "warn",
           {
             "argsIgnorePattern": "^_",
             "varsIgnorePattern": "^_",
@@ -247,7 +259,10 @@
         ],
         "prefer-const": "error",
         "prefer-exponentiation-operator": "error",
-        "yoda": "error"
+        "yoda": "error",
+        "no-case-declarations": "warn",
+        "@typescript-eslint/no-empty-object-type": "warn",
+        "prefer-rest-params": "warn"
       }
     }
   ]

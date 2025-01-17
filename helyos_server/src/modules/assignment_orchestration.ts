@@ -16,6 +16,7 @@ import {
 } from './data_models';
 import { logData } from './systemlog';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Assignment {
     id: number;
     status: string;
@@ -26,6 +27,7 @@ interface Assignment {
     work_process_id: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface WorkProcess {
     id: number;
     agent_ids?: number[];

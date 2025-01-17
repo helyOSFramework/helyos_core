@@ -3,8 +3,7 @@ import { logData } from '../../modules/systemlog';
 import crypto from 'crypto';
 import fs from 'fs';
 import util from 'util';
-import rbmqAccessLayer from './rabbitMQ_access_layer';
-import { Channel } from './rabbitMQ_access_layer';
+import rbmqAccessLayer, { Channel } from './rabbitMQ_access_layer';
 
 const MESSAGE_VERSION = '2.0.0';
 
@@ -228,6 +227,7 @@ function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
                 message: encryptedMsg,
                 signature: signature.toString('hex'),
             });
+            // eslint-disable-next-line eqeqeq
             if (exchange == '') {
                 exchange = AGENTS_DL_EXCHANGE;
             }

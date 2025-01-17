@@ -1,6 +1,5 @@
 import config from './config';
-import rbmqServices from './services/message_broker/rabbitMQ_services';
-import {DataChannel} from './services/message_broker/rabbitMQ_services';
+import rbmqServices, {DataChannel} from './services/message_broker/rabbitMQ_services';
 import { logData } from './modules/systemlog';
 
 const {

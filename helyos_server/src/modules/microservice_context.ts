@@ -176,9 +176,10 @@ function filterContext(context: Context, filter: Filter): Context {
     if (filter.require_agents_data) {
         filteredContext.agents = context.agents;
     } else if (filter.require_mission_agents_data) {
-        filteredContext.agents = context.agents.filter(agent =>
-            filter.agent_ids!.some(id => id == agent.id)
-        );
+        filteredContext.agents = context.agents.filter(agent => {
+            // eslint-disable-next-line eqeqeq
+            return filter.agent_ids!.some(id => id == agent.id);
+        });
     }
 
     return filteredContext as Context;

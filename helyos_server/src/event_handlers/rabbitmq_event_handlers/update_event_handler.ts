@@ -1,6 +1,6 @@
 import databaseServices from '../../services/database/database_services';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
-import * as webSocketCommunicaton from '../../modules/communication/web_socket_communication';
+// import * as webSocketCommunicaton from '../../modules/communication/web_socket_communication';
 import { logData } from '../../modules/systemlog';
 
 interface Pose {

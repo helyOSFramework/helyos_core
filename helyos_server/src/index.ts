@@ -24,6 +24,7 @@
 // ----------------------------------------------------------------------------
 // 1) IMPORTS
 // ----------------------------------------------------------------------------
+/* eslint-disable @typescript-eslint/no-require-imports */
 import initialization from './initialization';
 import config from './config';
 
@@ -262,3 +263,4 @@ if (cluster.isMaster && NUM_THREADS > 1) {
 // # RUN npm run make_map_api_doc
 // # RUN npm run make_path_api_doc
 
+/* eslint-enable @typescript-eslint/no-require-imports */

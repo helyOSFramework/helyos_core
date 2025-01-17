@@ -15,14 +15,14 @@ const parseConditions = (tableName:string, conditions:any) => {
     const null_conditionsArray: string[] = [];
     const in_conditionsArray: string | string[] = [];
 
-    if (!conditions || Object.keys(conditions).length == 0) {
+    if (!conditions || Object.keys(conditions).length === 0) {
         return {};
     }
 
     const fromTableStatementsArray: string[] = [];
 
     const notNullConditions = {};
-    Object.keys(conditions).forEach((key, idx) => {
+    Object.keys(conditions).forEach((key, _idx) => {
         if (conditions[key] === null) {
             null_conditionsArray.push(` AND ${key} IS NULL `);
         } else {
@@ -146,7 +146,7 @@ class DatabaseLayer {
         let colNames;
         let orderByStr;
 
-        if (items === undefined || items.length == 0) {
+        if (items === undefined || items.length === 0) {
             colNames = '*';
         } else {
             colNames = items.join(',');
@@ -176,11 +176,11 @@ class DatabaseLayer {
     select(conditions, items: string[] = [], orderBy = '', useShortTimeClient = false) {
         let selColNames: any = [];
         let orderByStr;
-        if (!conditions || Object.keys(conditions).length == 0) {
+        if (!conditions || Object.keys(conditions).length === 0) {
             return this.list(useShortTimeClient);
         }
 
-        if (items === undefined || items.length == 0) {
+        if (items === undefined || items.length === 0) {
             selColNames = '*';
         } else {
             selColNames = items.join(',');
@@ -389,7 +389,7 @@ class DatabaseLayer {
     delete(conditions, useShortTimeClient = false) {
         const colNamesArray:string[] = []; const colValues:string[] = []; const valueMasksArray:string[] = [];
         const null_conditionsArray:string[] = [];
-        if (!conditions || Object.keys(conditions).length == 0) {
+        if (!conditions || Object.keys(conditions).length === 0) {
             return this.list(useShortTimeClient);
         }
 
@@ -495,7 +495,7 @@ class AgentDataLayer extends DatabaseLayer {
         const followerInterconnectionsFlag = nestedFields && nestedFields.includes('follower_connections');
         const leaderInterconnectionsFlag = nestedFields && nestedFields.includes('leader_connections');
 
-        if (items === undefined || items.length == 0) {
+        if (items === undefined || items.length === 0) {
             colNames = '*';
         } else {
             items = items.filter(i => (!['leader_interconnections', 'follower_connections'].includes(i)));
@@ -601,7 +601,7 @@ const wait_database_value = (dataLayerInstance, id, field, value, maxTries, debu
 
     function checkValue(dataLayerInstance, id, field, value) {
         return dataLayerInstance.get_byId(id).then(resp => {
-            if (field == 'status' && debug) {
+            if (field === 'status' && debug) {
                 if (!resp) {
                     console.log(`${value} <=> null`);
                 } else {
@@ -609,7 +609,7 @@ const wait_database_value = (dataLayerInstance, id, field, value, maxTries, debu
                 }
             }
 
-            return (resp && (resp[field] == value));
+            return (resp && (resp[field] === value));
         });
     }
 

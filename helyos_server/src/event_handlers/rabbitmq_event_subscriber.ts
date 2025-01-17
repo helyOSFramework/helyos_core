@@ -25,7 +25,7 @@ const {
 } = config;
 
 import { MISSION_STATUS } from '../modules/data_models';
-import { constrainedMemory } from 'process';
+// import { constrainedMemory } from 'process';
 
 interface ParsedMessage {
   obj: any;
@@ -257,7 +257,7 @@ async function handleBrokerMessages(channel: any, queueName: string, message: an
     }
 
     const uuid = identifyMessageSender(objMsg, routingKey);
-    const agentAccount = msgProps['userId'] || uuid;
+    // const agentAccount = msgProps['userId'] || uuid;
     const isAnonymousConnection = msgProps['userId'] === 'anonymous';
 
     (async () => {

@@ -36,6 +36,7 @@ interface Request {
     [key: string]: any;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Agent {
     id: string;
     uuid?: string;
@@ -144,16 +145,18 @@ function createServiceRequestsForWorkProcessType(processType: string, request: R
         .then((services) => {
             // Step 1 Organize registered microservices by type, we consider only the services enabled by the developer.
             const serviceByType: Record<string, any> = {};
-            services.forEach(s => serviceByType[s.service_type] = {
-                url: s.service_url,
-                timeout: s.result_timeout,
-                isDummy: s.is_dummy,
-                config: s.config,
-                class: s.class,
-                require_agents_data: s.require_agents_data,
-                require_mission_agents_data: s.require_mission_agents_data,
-                require_map_data: s.require_map_data,
-                require_map_objects: s.require_map_objects,
+            services.forEach(s => {
+                serviceByType[s.service_type] = {
+                    url: s.service_url,
+                    timeout: s.result_timeout,
+                    isDummy: s.is_dummy,
+                    config: s.config,
+                    class: s.class,
+                    require_agents_data: s.require_agents_data,
+                    require_mission_agents_data: s.require_mission_agents_data,
+                    require_map_data: s.require_map_data,
+                    require_map_objects: s.require_map_objects,
+                };
             });
 
             // Step 2 Get the definition (or recipe) of the work process type, which includes the types of microservices that is emplyed by this mission.
@@ -222,7 +225,7 @@ function createServiceRequestsForWorkProcessType(processType: string, request: R
                     // Step 4: Set depedencies between service requests.
 
                     // If there is only one service request, return it.
-                    if (servicePlanToRequestsMap.length == 1) {
+                    if (servicePlanToRequestsMap.length === 1) {
                         const serviceRequests = servicePlanToRequestsMap;
                         delete serviceRequests[0]['__request_order'];
                         delete serviceRequests[0]['__depends_on_steps'];
@@ -332,13 +335,13 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess: Partial
     const recipe = await databaseServices.work_process_type.get('name', workProcess['work_process_type_name']).then(r => r.length ? r[0] : {});
 
     // Behaviour upon failure
-    if (workProcess.on_assignment_failure == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
+    if (workProcess.on_assignment_failure === ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
         await databaseServices.work_processes.update_byId(workProcess.id, {
             on_assignment_failure: recipe.on_assignment_failure,
         });
     }
     // Mission after failure
-    if (workProcess.fallback_mission == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
+    if (workProcess.fallback_mission === ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
         await databaseServices.work_processes.update_byId(workProcess.id, {
             fallback_mission: recipe.fallback_mission,
         });
@@ -486,42 +489,44 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess: Partial
 **/
 async function wrapUpMicroserviceCall(partialServiceRequest: PartialServiceRequest): Promise<boolean> {
     if (partialServiceRequest.next_request_to_dispatch_uids &&
-	  partialServiceRequest.next_request_to_dispatch_uids.length) {
-	  return Promise.resolve(false);
+        partialServiceRequest.next_request_to_dispatch_uids.length) {
+        return Promise.resolve(false);
     }
     if (partialServiceRequest.status === SERVICE_STATUS.SKIPPED) {
-	  return Promise.resolve(false);
+        return Promise.resolve(false);
     }
 
     const uncompleteAssgms = await databaseServices.getUncompletedAssignments_byWPId(partialServiceRequest.work_process_id);
 
     if (partialServiceRequest.service_type === CLASS_PATH_PLANNER && partialServiceRequest.is_result_assignment) {
-	  return Promise.resolve(true); // Do nothing and wait for the assignment conclusion to mark the workprocess completed.
+        return Promise.resolve(true); // Do nothing and wait for the assignment conclusion to mark the workprocess completed.
     }
 
     if (uncompleteAssgms.length === 0) {
-	  const wproc = await databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status']);
-	  const isMissionStillUncompleted = UNCOMPLETE_MISSION_STATUS.includes(wproc.status);
+        const wproc = await databaseServices.work_processes.get_byId(partialServiceRequest.work_process_id, ['status']);
+        const isMissionStillUncompleted = UNCOMPLETE_MISSION_STATUS.includes(wproc.status);
 
-	  const uncompleteServices = await databaseServices.service_requests.select({
+        const uncompleteServices = await databaseServices.service_requests.select({
             work_process_id: wproc.id,
             status__in: UNCOMPLETED_SERVICE_STATUS,
-	  });
+        });
 
-	  if (isMissionStillUncompleted && !uncompleteServices.length) {
-            await databaseServices.work_processes.updateByConditions({
-		  id: partialServiceRequest.work_process_id,
-		  status__in: [
+        if (isMissionStillUncompleted && !uncompleteServices.length) {
+            const conditions = {
+                id: partialServiceRequest.work_process_id,
+                status__in: [
                     MISSION_STATUS.PREPARING,
                     MISSION_STATUS.CALCULATING,
                     MISSION_STATUS.EXECUTING,
-		  ],
-            }, {
+                ],
+            };
+            const patch = {
                 status: MISSION_STATUS.ASSIGNMENTS_COMPLETED,
-            });
-	  }
+            };
+            await databaseServices.work_processes.updateByConditions(conditions, patch);
+        }
     } else {
-	  return Promise.resolve(true); // Do nothing and wait for the assignment conclusion to mark the workprocess completed.
+        return Promise.resolve(true); // Do nothing and wait for the assignment conclusion to mark the workprocess completed.
     }
 
     return Promise.resolve(false);
@@ -539,13 +544,13 @@ async function wrapUpMicroserviceCall(partialServiceRequest: PartialServiceReque
 function checkIfServiceShouldRun(serviceResponses: ServiceResponse[], nextServRequest: NextServRequest): boolean {
     let runService = true;
     serviceResponses.forEach(serviceResponse => {
-	  const enabled_step = serviceResponse &&
-		serviceResponse.orchestration &&
-		serviceResponse.orchestration.allow_dependent_steps ? serviceResponse.orchestration.allow_dependent_steps : null;
+        const enabled_step = serviceResponse &&
+            serviceResponse.orchestration &&
+            serviceResponse.orchestration.allow_dependent_steps ? serviceResponse.orchestration.allow_dependent_steps : null;
 
-	  if (enabled_step !== null) {
+        if (enabled_step !== null) {
             runService = runService && enabled_step.includes(nextServRequest.step);
-	  }
+        }
     });
 
     return runService;
@@ -562,19 +567,17 @@ function checkIfServiceShouldRun(serviceResponses: ServiceResponse[], nextServRe
  */
 function updateRequestData(serviceResponses: ServiceResponse[], nextServRequest: NextServRequest): any {
     const newRequest = serviceResponses.filter(serviceResponse => {
-	  return (
-            serviceResponse &&
-		serviceResponse.orchestration &&
-		serviceResponse.orchestration.next_step_request &&
-		serviceResponse.orchestration.next_step_request[nextServRequest.step]
-	  );
+        return (
+            serviceResponse?.orchestration?.next_step_request &&
+            serviceResponse.orchestration.next_step_request[nextServRequest.step]
+        );
     });
 
     if (newRequest.length === 0) {
-	  return nextServRequest.request;
+        return nextServRequest.request;
     }
     if (newRequest.length > 1) {
-	  logData.addLog('microservice', {}, 'error', 'two microservices are trying to change the request data of successive microservice.');
+        logData.addLog('microservice', {}, 'error', 'two microservices are trying to change the request data of successive microservice.');
     }
 
     return newRequest[0].orchestration?.next_step_request?.[nextServRequest.step];

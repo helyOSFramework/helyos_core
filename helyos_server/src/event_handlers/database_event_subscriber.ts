@@ -24,6 +24,7 @@ interface DatabaseClient {
     query: (query: string) => Promise<{ rows: Array<{ [key: string]: any }> }>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface WebSocket {
     // Define any methods or properties you use from the WebSocket instance
 }
@@ -38,6 +39,8 @@ async function broadcastPriorityNotifications(channel: string, payload: any, buf
         case 'mission_queue_update':
         case 'work_processes_update':
             bufferNotifications.publishToFrontEnd(channel, payload, `${payload['yard_id']}`);
+            break;
+        default:
             break;
     }
 }

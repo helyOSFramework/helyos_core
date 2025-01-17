@@ -63,9 +63,9 @@ class LogData {
     }
 
     private isLogRepeating(lastLog: LogInstance, newLog: LogInstance): boolean {
-        return lastLog.event == newLog.event &&
+        return lastLog.event === newLog.event &&
             lastLog.log_type === newLog.log_type &&
-            lastLog.origin == newLog.origin &&
+            lastLog.origin === newLog.origin &&
             this.lastLogMsg === newLog.msg;
     }
 
@@ -220,6 +220,8 @@ function parseLogData(
             };
             break;
         }
+        default:
+            break;
     }
 
     return newLogInstance;

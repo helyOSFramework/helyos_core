@@ -25,7 +25,7 @@ function processMicroserviceEvents(channel: string, payload: any) {
 
         case 'service_requests_insertion':
             service_request_status = payload['status'];
-            if (service_request_status == SERVICE_STATUS.READY_FOR_SERVICE) {
+            if (service_request_status === SERVICE_STATUS.READY_FOR_SERVICE) {
                 service_request_id = payload['id'];
 
                 databaseServices.work_processes.get_byId(payload['work_process_id'], ['status'])

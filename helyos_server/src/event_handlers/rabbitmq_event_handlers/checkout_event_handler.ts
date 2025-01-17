@@ -3,7 +3,7 @@
 import rabbitMQServices from '../../services/message_broker/rabbitMQ_services';
 import databaseService from '../../services/database/database_services';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
-import { logData } from '../../modules/systemlog';
+// import { logData } from '../../modules/systemlog';
 import { AGENT_STATUS } from '../../modules/data_models';
 
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION;

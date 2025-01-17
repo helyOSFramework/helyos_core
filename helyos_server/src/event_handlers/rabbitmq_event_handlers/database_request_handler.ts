@@ -91,6 +91,8 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
                 };
                 response = await databaseService.map_objects.select(conditions);
                 break;
+            default:
+                break;
         }
 
         switch (objMsg.body['mutation']) {
