@@ -101,25 +101,26 @@ COST 100
 SECURITY DEFINER;
 ALTER FUNCTION public.notify_change_tool() OWNER TO role_admin;
 
-
-
-CREATE OR REPLACE FUNCTION public.notify_new_rabbitmq_account(
+DROP FUNCTION public.notify_new_rabbitmq_account(
   agent_id INT,
   username TEXT,
   password TEXT
-) RETURNS VOID AS
+);
+
+CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
+  agent_id INT,
+  username TEXT,
+  password TEXT
+) AS
 $BODY$
 BEGIN
   PERFORM pg_notify('new_rabbitmq_account', (json_build_object('agent_id', agent_id))::TEXT);
 
   INSERT INTO public.events_queue (event_name, payload)
   VALUES ('new_rabbitmq_account', json_build_object('username', username, 'password', password, 'agent_id', agent_id)::TEXT);
-  
-  RETURN;
 END; 
 $BODY$
 LANGUAGE plpgsql;
-
 
 
 -- Function that notifies the deletion of a tool
@@ -171,7 +172,7 @@ BEGIN
     RAISE EXCEPTION SQLSTATE '90004' USING MESSAGE = 'agent id not found';
   END IF;
 
-  PERFORM public.notify_new_rabbitmq_account(agent_id, username, password);
+  CALL public.notify_new_rabbitmq_account(agent_id, username, password);
 
   RETURN 0;
 END
