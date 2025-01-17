@@ -123,7 +123,7 @@ BEFORE UPDATE
 ON public.work_processes
 FOR EACH ROW
 WHEN (OLD.status = 'executing' OR OLD.status = 'calculating')
-EXECUTE PROCEDURE public.prevent_mission_running_update();
+EXECUTE FUNCTION public.prevent_mission_running_update();
 
 
 DROP TRIGGER IF EXISTS notify_work_processes_update ON public.work_processes;
@@ -131,7 +131,7 @@ CREATE TRIGGER notify_work_processes_update
 AFTER UPDATE
 ON public.work_processes
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_work_processes_update();
+EXECUTE FUNCTION public.notify_work_processes_update();
 
 
 DROP TRIGGER IF EXISTS trigger_work_processes_before_insertion ON public.work_processes;
@@ -140,7 +140,7 @@ BEFORE INSERT
 ON public.work_processes
 FOR EACH ROW
 WHEN (NEW.run_order IS NULL)
-EXECUTE PROCEDURE public.update_work_process_list_order();
+EXECUTE FUNCTION public.update_work_process_list_order();
 
 
 DROP TRIGGER IF EXISTS trigger_work_processes_insertion ON public.work_processes;
@@ -148,7 +148,7 @@ CREATE TRIGGER trigger_work_processes_insertion
 AFTER INSERT
 ON public.work_processes
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_work_processes_insertion();
+EXECUTE FUNCTION public.notify_work_processes_insertion();
 
 
 GRANT EXECUTE ON FUNCTION public.getWorkProcessActionData(work_process_id BIGINT) TO role_admin, role_application, role_postgraphile;

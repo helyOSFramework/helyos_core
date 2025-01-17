@@ -195,7 +195,7 @@ WHEN ( (OLD.status IS DISTINCT FROM NEW.status) OR ( NEW.status = 'busy'
                                                           OLD.z IS DISTINCT FROM NEW.z OR
                                                           OLD.assignment IS DISTINCT FROM NEW.assignment
                                                           )))
-EXECUTE PROCEDURE public.create_row_tool_sensors_history();
+EXECUTE FUNCTION public.create_row_tool_sensors_history();
 
 
 
@@ -215,7 +215,7 @@ WHEN (OLD.status IS DISTINCT FROM NEW.status OR OLD.connection_status IS DISTINC
       OLD.write_permissions IS DISTINCT FROM NEW.write_permissions OR
       OLD.configure_permissions IS DISTINCT FROM NEW.configure_permissions
       )
-EXECUTE PROCEDURE public.notify_change_tool();
+EXECUTE FUNCTION public.notify_change_tool();
 
 
 
@@ -225,7 +225,7 @@ CREATE TRIGGER delete_tool_trigger
 AFTER DELETE
 ON public.agents
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_deleted_tool();
+EXECUTE FUNCTION public.notify_deleted_tool();
 
 GRANT EXECUTE ON FUNCTION public.create_row_tool_sensors_history() TO role_admin, role_application, role_postgraphile;
 GRANT EXECUTE ON FUNCTION public.register_rabbitmq_account(agent_id INT,

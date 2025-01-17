@@ -71,7 +71,7 @@ CREATE TRIGGER notify_mission_queue_update
 AFTER UPDATE
 ON public.mission_queue
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_mission_queue_update();
+EXECUTE FUNCTION public.notify_mission_queue_update();
 
 
 DROP TRIGGER IF EXISTS trigger_mission_queue_insertion ON public.mission_queue;
@@ -79,4 +79,4 @@ CREATE TRIGGER trigger_mission_queue_insertion
 AFTER INSERT
 ON public.mission_queue
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_mission_queue_insertion();
+EXECUTE FUNCTION public.notify_mission_queue_insertion();

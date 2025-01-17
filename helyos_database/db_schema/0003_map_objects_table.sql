@@ -23,7 +23,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON map_objects
 FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
+EXECUTE FUNCTION trigger_set_timestamp();
 
 COMMENT ON COLUMN map_objects.type IS '@description map_object type: "crop", "road", "drivable", "guide-line", "obstacle"';
 COMMENT ON COLUMN map_objects.name IS '@description map_object name: "strawbery field - 02", "Load Gate A", etc.';

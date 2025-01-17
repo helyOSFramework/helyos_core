@@ -73,7 +73,7 @@ LANGUAGE plpgsql;
 CREATE TRIGGER set_timestamp_work_processes
 BEFORE UPDATE ON public.work_processes
 FOR EACH ROW
-EXECUTE PROCEDURE public.trigger_set_timestamp_work_processes();
+EXECUTE FUNCTION public.trigger_set_timestamp_work_processes();
 
 -- Breakdown work process in many services
 -- Name: work_processe_type; Type: TABLE; Schema: public; Owner: -
