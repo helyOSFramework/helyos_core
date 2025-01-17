@@ -65,7 +65,7 @@ CREATE TRIGGER notify_assignments_insertion
 AFTER INSERT
 ON public.assignments
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_assignments_insertion();
+EXECUTE FUNCTION public.notify_assignments_insertion();
 
 DROP TRIGGER IF EXISTS notify_assignments_updates ON public.assignments;
 CREATE TRIGGER notify_assignments_updates
@@ -73,4 +73,4 @@ AFTER UPDATE
 ON public.assignments
 FOR EACH ROW
 WHEN (OLD.status IS DISTINCT FROM NEW.status)
-EXECUTE PROCEDURE public.notify_assignments_updates();
+EXECUTE FUNCTION public.notify_assignments_updates();

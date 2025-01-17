@@ -93,18 +93,18 @@ AFTER UPDATE
 ON public.service_requests
 FOR EACH ROW
 WHEN (OLD.response IS DISTINCT FROM NEW.response AND NEW.next_request_to_dispatch_uid IS NOT NULL AND NEW.status = 'SUCCESS')
-EXECUTE PROCEDURE public.send_next_service('READY_TO_BE_SENT');
+EXECUTE FUNCTION public.send_next_service('READY_TO_BE_SENT');
 
 DROP TRIGGER IF EXISTS notify_service_requests_insertion ON public.service_requests;
 CREATE TRIGGER notify_service_requests_insertion
 AFTER INSERT
 ON public.service_requests
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_service_requests_insertion();
+EXECUTE FUNCTION public.notify_service_requests_insertion();
 
 DROP TRIGGER IF EXISTS notify_service_requests_updates ON public.service_requests;
 CREATE TRIGGER notify_service_requests_updates
 AFTER UPDATE
 ON public.service_requests
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_service_requests_updates();
+EXECUTE FUNCTION public.notify_service_requests_updates();

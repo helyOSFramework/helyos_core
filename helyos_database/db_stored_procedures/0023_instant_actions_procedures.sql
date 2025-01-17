@@ -31,4 +31,4 @@ DROP TRIGGER IF EXISTS trigger_new_instant_action_trigger ON public.instant_acti
 CREATE TRIGGER trigger_new_instant_action_trigger
 AFTER INSERT ON public.instant_actions
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_instant_actions_insertion();
+EXECUTE FUNCTION public.notify_instant_actions_insertion();

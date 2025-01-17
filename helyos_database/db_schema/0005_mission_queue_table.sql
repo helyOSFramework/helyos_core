@@ -35,4 +35,4 @@ LANGUAGE plpgsql;
 CREATE TRIGGER set_timestamp_mission_queue
 BEFORE UPDATE ON public.mission_queue
 FOR EACH ROW
-EXECUTE PROCEDURE public.trigger_set_timestamp_mission_queue();
+EXECUTE FUNCTION public.trigger_set_timestamp_mission_queue();

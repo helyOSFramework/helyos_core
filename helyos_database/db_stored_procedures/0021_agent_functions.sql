@@ -101,25 +101,26 @@ COST 100
 SECURITY DEFINER;
 ALTER FUNCTION public.notify_change_tool() OWNER TO role_admin;
 
-
-
-CREATE OR REPLACE FUNCTION public.notify_new_rabbitmq_account(
+DROP FUNCTION public.notify_new_rabbitmq_account(
   agent_id INT,
   username TEXT,
   password TEXT
-) RETURNS VOID AS
+);
+
+CREATE OR REPLACE PROCEDURE public.notify_new_rabbitmq_account(
+  agent_id INT,
+  username TEXT,
+  password TEXT
+) AS
 $BODY$
 BEGIN
   PERFORM pg_notify('new_rabbitmq_account', (json_build_object('agent_id', agent_id))::TEXT);
 
   INSERT INTO public.events_queue (event_name, payload)
   VALUES ('new_rabbitmq_account', json_build_object('username', username, 'password', password, 'agent_id', agent_id)::TEXT);
-  
-  RETURN;
 END; 
 $BODY$
 LANGUAGE plpgsql;
-
 
 
 -- Function that notifies the deletion of a tool
@@ -171,7 +172,7 @@ BEGIN
     RAISE EXCEPTION SQLSTATE '90004' USING MESSAGE = 'agent id not found';
   END IF;
 
-  PERFORM public.notify_new_rabbitmq_account(agent_id, username, password);
+  CALL public.notify_new_rabbitmq_account(agent_id, username, password);
 
   RETURN 0;
 END
@@ -194,7 +195,7 @@ WHEN ( (OLD.status IS DISTINCT FROM NEW.status) OR ( NEW.status = 'busy'
                                                           OLD.z IS DISTINCT FROM NEW.z OR
                                                           OLD.assignment IS DISTINCT FROM NEW.assignment
                                                           )))
-EXECUTE PROCEDURE public.create_row_tool_sensors_history();
+EXECUTE FUNCTION public.create_row_tool_sensors_history();
 
 
 
@@ -214,7 +215,7 @@ WHEN (OLD.status IS DISTINCT FROM NEW.status OR OLD.connection_status IS DISTINC
       OLD.write_permissions IS DISTINCT FROM NEW.write_permissions OR
       OLD.configure_permissions IS DISTINCT FROM NEW.configure_permissions
       )
-EXECUTE PROCEDURE public.notify_change_tool();
+EXECUTE FUNCTION public.notify_change_tool();
 
 
 
@@ -224,7 +225,7 @@ CREATE TRIGGER delete_tool_trigger
 AFTER DELETE
 ON public.agents
 FOR EACH ROW
-EXECUTE PROCEDURE public.notify_deleted_tool();
+EXECUTE FUNCTION public.notify_deleted_tool();
 
 GRANT EXECUTE ON FUNCTION public.create_row_tool_sensors_history() TO role_admin, role_application, role_postgraphile;
 GRANT EXECUTE ON FUNCTION public.register_rabbitmq_account(agent_id INT,
