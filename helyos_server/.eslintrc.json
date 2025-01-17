@@ -1,0 +1,254 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "projects/**/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "rules": {
+        // https://typescript-eslint.io/rules/
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "variable",
+            "format": [
+              "camelCase"
+            ],
+            "prefix": [
+              "_"
+            ],
+            "filter": {
+              "regex": "^_",
+              "match": true
+            }
+          },
+          {
+            "selector": "parameter",
+            "format": [
+              "camelCase"
+            ],
+            "prefix": [
+              "_"
+            ],
+            "filter": {
+              "regex": "^_",
+              "match": true
+            }
+          },
+          {
+            "selector": "method",
+            "format": [
+              "camelCase"
+            ]
+          },
+          {
+            "selector": "enum",
+            "format": [
+              "PascalCase"
+            ]
+          },
+          {
+            "selector": "enumMember",
+            "format": [
+              "UPPER_CASE"
+            ]
+          },
+          {
+            "selector": "class",
+            "format": [
+              "PascalCase"
+            ]
+          },
+          {
+            "selector": "interface",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "I"
+            ]
+          },
+          {
+            "selector": "typeAlias",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "T"
+            ]
+          },
+          {
+            "selector": "typeParameter",
+            "format": [
+              "PascalCase"
+            ],
+            "prefix": [
+              "T"
+            ]
+          }
+        ],
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        // https://eslint.org/docs/v8.x/rules/#deprecated
+        "array-element-newline": [
+          "error",
+          "consistent"
+        ],
+        "indent": [
+          "error",
+          4,
+          {
+            "SwitchCase": 1,
+            "VariableDeclarator": 1,
+            "outerIIFEBody": 1,
+            "MemberExpression": 1,
+            "FunctionDeclaration": {
+              "parameters": 1,
+              "body": 1
+            },
+            "FunctionExpression": {
+              "parameters": 1,
+              "body": 1
+            },
+            "ArrayExpression": 1,
+            "ObjectExpression": 1,
+            "ignoredNodes": [
+              "TemplateLiteral"
+            ],
+            "ignoreComments": false
+          }
+        ],
+        "comma-dangle": [
+          "error",
+          {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline",
+            "functions": "never"
+          }
+        ],
+        "object-property-newline": [
+          "error",
+          {
+            "allowAllPropertiesOnSameLine": false
+          }
+        ],
+        "object-curly-newline": [
+          "error",
+          {
+            "ObjectExpression": {
+              "multiline": true,
+              "minProperties": 1
+            },
+            "ObjectPattern": {
+              "multiline": true,
+              "minProperties": 1
+            },
+            "ExportDeclaration": {
+              "multiline": true,
+              "minProperties": 1
+            }
+          }
+        ],
+        "no-multiple-empty-lines": [
+          "error",
+          {
+            "max": 1,
+            "maxBOF": 0,
+            "maxEOF": 1
+          }
+        ],
+        "no-trailing-spaces": [
+          "error"
+        ],
+        "brace-style": [
+          "error",
+          "1tbs",
+          {
+            "allowSingleLine": false
+          }
+        ],
+        "semi": [
+          "error",
+          "always"
+        ],
+        // https://eslint.org/docs/v8.x/rules/#possible-problems
+        "array-callback-return": "error",
+        "no-class-assign": "error",
+        "no-cond-assign": "error",
+        "no-const-assign": "error",
+        "no-constant-condition": "error",
+        "no-debugger": "error",
+        "no-dupe-else-if": "error",
+        "no-dupe-keys": "error",
+        "no-duplicate-case": "error",
+        "no-duplicate-imports": "error",
+        "no-ex-assign": "error",
+        "no-fallthrough": "error",
+        "no-invalid-regexp": "error",
+        "no-loss-of-precision": "error",
+        "no-promise-executor-return": "error",
+        "no-self-assign": "error",
+        "no-self-compare": "error",
+        "no-sparse-arrays": "error",
+        "no-template-curly-in-string": "error",
+        "no-unexpected-multiline": "error",
+        "no-unreachable": "error",
+        "no-unreachable-loop": "error",
+        "no-unsafe-negation": "error",
+        "no-unsafe-optional-chaining": "error",
+        "no-unused-private-class-members": "error",
+        "use-isnan": "error",
+        "valid-typeof": "error",
+        // https://eslint.org/docs/v8.x/rules/#suggestions
+        "eqeqeq": [
+          "error",
+          "always",
+          {
+            "null": "ignore"
+          }
+        ],
+        "curly": [
+          "error",
+          "all"
+        ],
+        "default-case": "error",
+        "default-case-last": "error",
+        "default-param-last": "error",
+        "no-eval": "error",
+        "no-extra-boolean-cast": "error",
+        "no-implied-eval": "error",
+        "no-lonely-if": "error",
+        "no-multi-assign": "error",
+        "no-return-assign": [
+          "error",
+          "always"
+        ],
+        "no-unneeded-ternary": "error",
+        "no-var": "error",
+        "one-var": [
+          "error",
+          "never"
+        ],
+        "prefer-const": "error",
+        "prefer-exponentiation-operator": "error",
+        "yoda": "error"
+      }
+    }
+  ]
+}

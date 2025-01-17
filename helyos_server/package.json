@@ -17,6 +17,9 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.2",
     "@types/superagent": "^8.1.9",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^8.57.1",
     "jest": "^27.3.1",
     "typescript": "^5.7.2"
   },
@@ -43,6 +46,7 @@
     "make_path_api_doc": "redoc-cli bundle -o docs/path_api.html docs/helyos_path_planner_services.json",
     "test:watch": "npm run test -- --watch",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "lint": "eslint ."
   }
 }
