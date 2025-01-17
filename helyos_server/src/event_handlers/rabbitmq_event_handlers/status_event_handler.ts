@@ -32,11 +32,15 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
             return Promise.resolve(false);
         }
         if ([ASSIGNMENT_STATUS.SUCCEEDED, ASSIGNMENT_STATUS.COMPLETED, ASSIGNMENT_STATUS.FAILED].includes(currentAssm.status)) {
-            logData.addLog('agent', { uuid }, 'warn', `agent tried to change the status of an assignment that is already ${currentAssm.status}`);
+            logData.addLog('agent', {
+                uuid,
+            }, 'warn', `agent tried to change the status of an assignment that is already ${currentAssm.status}`);
             return Promise.resolve(false);
         }
         if ([ASSIGNMENT_STATUS.CANCELED, ASSIGNMENT_STATUS.ABORTED, ASSIGNMENT_STATUS.FAILED].includes(assmUpdate.status)) {
-            logData.addLog('agent', { uuid }, 'info', `agent has marked the assignment ${currentAssm.id} as ${assmUpdate.status}`);
+            logData.addLog('agent', {
+                uuid,
+            }, 'info', `agent has marked the assignment ${currentAssm.id} as ${assmUpdate.status}`);
             return databaseService.assignments.update_byId(currentAssm.id, assmUpdate).then(() => true);
         }
         return databaseService.assignments.updateByConditions({
@@ -47,8 +51,8 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
                 MISSION_STATUS.DISPATCHED,
                 MISSION_STATUS.CALCULATING,
                 MISSION_STATUS.CANCELING,
-                MISSION_STATUS.FAILED
-            ]
+                MISSION_STATUS.FAILED,
+            ],
         }, assmUpdate).then(() => true);
     }
 
@@ -61,8 +65,8 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
                 MISSION_STATUS.DISPATCHED,
                 MISSION_STATUS.CALCULATING,
                 MISSION_STATUS.CANCELING,
-                MISSION_STATUS.FAILED
-            ]
+                MISSION_STATUS.FAILED,
+            ],
         }, assmUpdate).then(() => true);
     }
 
@@ -70,34 +74,58 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
 };
 
 async function updateAgentMission(assignment: Assignment, uuid: string): Promise<void> {
-    if (!assignment) return;
+    if (!assignment) {
+        return;
+    }
     const assignment_status_obj = assignment['assignment_status'] ? assignment['assignment_status'] : assignment;
     const assignmentId = assignment_status_obj.id;
-    if (!assignmentId) return;
+    if (!assignmentId) {
+        return;
+    }
     const assignmentStatus = assignment_status_obj.status;
     const assignmentResult = assignment_status_obj.result;
 
-    const assmUpdate = { id: assignmentId, status: assignmentStatus, result: assignmentResult };
+    const assmUpdate = {
+        id: assignmentId,
+        status: assignmentStatus,
+        result: assignmentResult,
+    };
     const currentAssm = await databaseService.assignments.get_byId(assignmentId, ['id', 'status', 'work_process_id']);
-    if (!currentAssm) return;
+    if (!currentAssm) {
+        return;
+    }
 
     if (await evaluateAssignmentUpdate(currentAssm, assmUpdate, uuid)) {
         if (uuid) {
-            const updatedAssignment = { ...currentAssm, ...assmUpdate };
-            await databaseService.agents.updateByConditions({ uuid }, { assignment: updatedAssignment });
+            const updatedAssignment = {
+                ...currentAssm,
+                ...assmUpdate,
+            };
+            await databaseService.agents.updateByConditions({
+                uuid,
+            }, {
+                assignment: updatedAssignment,
+            });
         }
     }
 }
 
 async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 0): Promise<void> {
     try {
-        const agentUpdate: AgentUpdate = { uuid, status: objMsg.body.status, last_message_time: new Date() };
+        const agentUpdate: AgentUpdate = {
+            uuid,
+            status: objMsg.body.status,
+            last_message_time: new Date(),
+        };
         const inMemDB = await memDBService.getInstance();
 
         const agentInMem = await inMemDB.agents[uuid];
         if (!agentInMem || !agentInMem.id) {
             const ids = await databaseService.agents.getIds([uuid]);
-            inMemDB.update('agents', 'uuid', { uuid, id: ids[0] }, agentUpdate.last_message_time);
+            inMemDB.update('agents', 'uuid', {
+                uuid,
+                id: ids[0],
+            }, agentUpdate.last_message_time);
             console.log(`Database query: agent ${uuid} has ID = ${ids[0]}`);
         }
 
@@ -106,16 +134,22 @@ async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 
         }
 
         inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
-        await databaseService.agents.updateByConditions({ uuid }, agentUpdate);
+        await databaseService.agents.updateByConditions({
+            uuid,
+        }, agentUpdate);
 
         if (objMsg.body.assignment) {
             return updateAgentMission(objMsg.body.assignment, uuid);
         }
 
     } catch (error:any) {
-        logData.addLog('agent', { uuid }, 'info', `${uuid} published state "${objMsg.body?.status}": ${error.message}`);
+        logData.addLog('agent', {
+            uuid,
+        }, 'info', `${uuid} published state "${objMsg.body?.status}": ${error.message}`);
         return;
     }
 }
 
-export  {updateState};
+export  {
+    updateState,
+};

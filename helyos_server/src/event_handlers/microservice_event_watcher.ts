@@ -5,7 +5,6 @@ import { SERVICE_STATUS, ASSIGNMENT_STATUS } from '../modules/data_models';
 import { determineServiceRequestStatus } from '../modules/microservice_orchestration';
 import * as webServices from '../services/microservice_services';
 
-
 interface ServiceRequest {
     id: number;
     service_type: string;
@@ -26,7 +25,9 @@ interface Assignment {
 
 const waitForServicesResults = async (): Promise<void> => {
     try {
-        const pendingServices = await databaseServices.service_requests.select({ status: SERVICE_STATUS.PENDING });
+        const pendingServices = await databaseServices.service_requests.select({
+            status: SERVICE_STATUS.PENDING,
+        });
 
         const promises = pendingServices.map(async (serviceReq: ServiceRequest) => {
             try {
@@ -45,8 +46,16 @@ const waitForServicesResults = async (): Promise<void> => {
                         const timeoutResponse = '{"result":{}, "error": "timeout"}';
                         logData.addLog('microservice', serviceReq, 'error', `timeout to collect result: ${serviceReq.result_timeout}`);
                         return databaseServices.service_requests.updateByConditions(
-                            { id: serviceReq.id, status: SERVICE_STATUS.PENDING },
-                            { fetched: false, processed: false, response: timeoutResponse, status: SERVICE_STATUS.TIMEOUT }
+                            {
+                                id: serviceReq.id,
+                                status: SERVICE_STATUS.PENDING,
+                            },
+                            {
+                                fetched: false,
+                                processed: false,
+                                response: timeoutResponse,
+                                status: SERVICE_STATUS.TIMEOUT,
+                            }
                         );
                     }
                 } else {
@@ -62,7 +71,7 @@ const waitForServicesResults = async (): Promise<void> => {
                     fetched: false,
                     processed: true,
                     response: servResponse,
-                    status: SERVICE_STATUS.FAILED
+                    status: SERVICE_STATUS.FAILED,
                 });
             }
         });
@@ -75,17 +84,31 @@ const waitForServicesResults = async (): Promise<void> => {
 
 const sendRequestToCancelServices = async (): Promise<void> => {
     try {
-        const runningServices = await databaseServices.service_requests.select({ status: SERVICE_STATUS.CANCELED, processed: false });
+        const runningServices = await databaseServices.service_requests.select({
+            status: SERVICE_STATUS.CANCELED,
+            processed: false,
+        });
 
         const promises = runningServices.map(async (serviceReq: ServiceRequest) => {
             try {
                 const accessData = await extServCommunication.getExtServiceAccessData(serviceReq.service_type);
                 await webServices.cancelService(accessData.url, accessData.apiKey, serviceReq.service_queue_id);
-                const canceledResponse = { status: 'canceled', result: {} };
+                const canceledResponse = {
+                    status: 'canceled',
+                    result: {},
+                };
                 logData.addLog('microservice', serviceReq, 'info', `Canceling signal sent to microservice`);
                 await databaseServices.service_requests.updateByConditions(
-                    { id: serviceReq.id, processed: false, status: SERVICE_STATUS.CANCELED },
-                    { fetched: true, processed: true, response: canceledResponse }
+                    {
+                        id: serviceReq.id,
+                        processed: false,
+                        status: SERVICE_STATUS.CANCELED,
+                    },
+                    {
+                        fetched: true,
+                        processed: true,
+                        response: canceledResponse,
+                    }
                 );
             } catch (e) {
                 const msg = `database not accessible: service request type=${serviceReq.service_type}: ${e}`;
@@ -95,7 +118,7 @@ const sendRequestToCancelServices = async (): Promise<void> => {
                     fetched: false,
                     processed: true,
                     response: servResponse,
-                    status: SERVICE_STATUS.FAILED
+                    status: SERVICE_STATUS.FAILED,
                 });
             }
         });
@@ -108,13 +131,21 @@ const sendRequestToCancelServices = async (): Promise<void> => {
 
 const waitForServicesDependencies = async (conditions: object = {}): Promise<void> => {
     try {
-        const allAwaitingServices = await databaseServices.service_requests.select({ status: 'wait_dependencies', ...conditions });
+        const allAwaitingServices = await databaseServices.service_requests.select({
+            status: 'wait_dependencies',
+            ...conditions,
+        });
 
         const promises = allAwaitingServices.map(async (waitingServReq: ServiceRequest) => {
             if (SERVICE_STATUS.READY_FOR_SERVICE === await determineServiceRequestStatus(waitingServReq as any)) {
                 await databaseServices.service_requests.updateByConditions(
-                    { id: waitingServReq.id, status: SERVICE_STATUS.WAIT_DEPENDENCIES },
-                    { status: SERVICE_STATUS.READY_FOR_SERVICE }
+                    {
+                        id: waitingServReq.id,
+                        status: SERVICE_STATUS.WAIT_DEPENDENCIES,
+                    },
+                    {
+                        status: SERVICE_STATUS.READY_FOR_SERVICE,
+                    }
                 );
             }
         });
@@ -127,11 +158,16 @@ const waitForServicesDependencies = async (conditions: object = {}): Promise<voi
 
 const waitForAssigmentsDependencies = async (): Promise<void> => {
     try {
-        const allAwaitingAssignments = await databaseServices.assignments.select({ status: ASSIGNMENT_STATUS.WAIT_DEPENDENCIES });
+        const allAwaitingAssignments = await databaseServices.assignments.select({
+            status: ASSIGNMENT_STATUS.WAIT_DEPENDENCIES,
+        });
 
         const promises = allAwaitingAssignments.map(async (assignment: Assignment) => {
             const completedAssignments = await databaseServices.assignments.select(
-                { work_process_id: assignment.work_process_id, status: 'completed' },
+                {
+                    work_process_id: assignment.work_process_id,
+                    status: 'completed',
+                },
                 ['id']
             );
 
@@ -140,8 +176,13 @@ const waitForAssigmentsDependencies = async (): Promise<void> => {
 
             if (remainingDependencies.length === 0) {
                 await databaseServices.assignments.updateByConditions(
-                    { id: assignment.id, status: SERVICE_STATUS.WAIT_DEPENDENCIES },
-                    { status: 'to_dispatch' }
+                    {
+                        id: assignment.id,
+                        status: SERVICE_STATUS.WAIT_DEPENDENCIES,
+                    },
+                    {
+                        status: 'to_dispatch',
+                    }
                 );
             }
         });
@@ -161,8 +202,10 @@ function initWatcher(): void {
         waitForServicesDependencies().catch(error => console.error('Error in waitForServicesDependencies:', error));
 
         waitForAssigmentsDependencies().catch(error => console.error('Error in waitForAssigmentsDependencies:', error));
-        // waitForStartTimeToProcessWorkProcess(); @TODO
+    // waitForStartTimeToProcessWorkProcess(); @TODO
     }, 1000);
 }
 
-export default { initWatcher };
+export default {
+    initWatcher,
+};

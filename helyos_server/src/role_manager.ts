@@ -56,9 +56,9 @@ class RoleAssigner {
             const result =
                 this.role === Roles.WORKER
                     ? await this.redisClient.set(this.LEADER_KEY, this.NODE_ID, {
-                          NX: true,
-                          PX: this.KEY_TTL,
-                      })
+                        NX: true,
+                        PX: this.KEY_TTL,
+                    })
                     : null;
 
             if (result) {
@@ -122,9 +122,9 @@ class RoleAssigner {
             const result =
                 this.role === Roles.WORKER
                     ? await this.redisClient.set(this.BROADCASTER_KEY, this.NODE_ID, {
-                          NX: true,
-                          PX: this.KEY_TTL,
-                      })
+                        NX: true,
+                        PX: this.KEY_TTL,
+                    })
                     : null;
 
             if (result) {
@@ -178,5 +178,7 @@ class RoleAssigner {
     }
 }
 
-export { RoleAssigner, Roles };
+export {
+    RoleAssigner, Roles,
+};
 export default RoleAssigner;

@@ -25,4 +25,6 @@ function initWatcher(DB_BUFFER_TIME: number): void {
     }, DB_BUFFER_TIME);
 }
 
-export default { initWatcher };
+export default {
+    initWatcher,
+};

@@ -105,14 +105,37 @@ async function generateFullYardContext(yardId: number): Promise<Context> {
     context.map.data_format = yard.data_format;
     context.map.coordinate_frame = yard.coordinate_frame;
 
-    const mapObjects = await databaseServices.map_objects.select({ yard_id: yardId, deleted_at: null });
+    const mapObjects = await databaseServices.map_objects.select({
+        yard_id: yardId,
+        deleted_at: null,
+    });
     context.map.map_objects = mapObjects;
 
     const agentFields = [
-        'id', 'uuid', 'agent_class', 'agent_type', 'connection_status', 'reference_point', 'coordinate_frame',
-        'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
-        'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z', 'unit',
-        'orientations', 'sensors', 'resources',
+        'id',
+        'uuid',
+        'agent_class',
+        'agent_type',
+        'connection_status',
+        'reference_point',
+        'coordinate_frame',
+        'geometry',
+        'name',
+        'message_channel',
+        'public_key',
+        'is_actuator',
+        'data_format',
+        'yard_id',
+        'protocol',
+        'operation_types',
+        'factsheet',
+        'x',
+        'y',
+        'z',
+        'unit',
+        'orientations',
+        'sensors',
+        'resources',
     ];
     const agents = await databaseServices.agents.get('yard_id', yardId, agentFields, null, false, ['follower_connections']);
 
@@ -143,12 +166,10 @@ function filterContext(context: Context, filter: Filter): Context {
     if (filter.require_map_objects) {
         if (filter.require_map_objects.length === 0) {
             filteredContext.map!.map_objects = [];
-        } else {
-            if (!filter.require_map_objects.includes('__all__')) {
+        } else if (!filter.require_map_objects.includes('__all__')) {
                 filteredContext.map!.map_objects = context.map.map_objects!.filter(mapObj =>
                     filter.require_map_objects!.includes(mapObj.type)
                 );
-            }
         }
     }
 

@@ -3,7 +3,9 @@
  */
 const camelize = (text: string): string => {
     return text.replace(/^([A-Z])|[\s-_]+(\w)/g, (match: string, p1: string, p2: string) => {
-        if (p2) return p2.toUpperCase();
+        if (p2) {
+            return p2.toUpperCase();
+        }
         return p1.toLowerCase();
     });
 };
@@ -89,7 +91,7 @@ const snakecasize = (text: string): string => {
 /**
  * Converts a camel case string to snake case.
  */
-const camelToSnakeCase = (str: string): string => 
+const camelToSnakeCase = (str: string): string =>
     str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
 /**
@@ -113,17 +115,19 @@ const lookup = (obj: Record<string, any>, k: string): any => {
         if (typeof obj !== "object" || obj === null) {
             return null;
         }
-        
+
         if (Object.prototype.hasOwnProperty.call(obj, k)) {
             return obj[k];
         }
-        
+
         let result: any = null;
         for (const value of Object.values(obj)) {
             result = lookup(value, k);
-            if (result !== null) break;
+            if (result !== null) {
+                break;
+            }
         }
-        
+
         return result;
     } catch (error) {
         console.error(error);
@@ -147,7 +151,7 @@ function topologicalIndexing(requestList: Request[] = []): IndexedRequest[] {
     const requestListIndexed: IndexedRequest[] = requestList.map(s => ({
         order: 1,
         step: s.step,
-        depends_on: s.depends_on
+        depends_on: s.depends_on,
     }));
 
     const incrementDependentIndexes = (request: IndexedRequest, _requestListIndexed: IndexedRequest[]): number => {
@@ -201,5 +205,6 @@ function topologicalIndexing(requestList: Request[] = []): IndexedRequest[] {
 //   const result = topologicalIndexing(complexInput);
 // console.log(result);
 
-
-export {camelize, camelizeAttributes, snakeCaseAttributes, topologicalIndexing, lookup, serializeNonStringValues, parseObjectValues, snakecasize};
+export {
+    camelize, camelizeAttributes, snakeCaseAttributes, topologicalIndexing, lookup, serializeNonStringValues, parseObjectValues, snakecasize,
+};

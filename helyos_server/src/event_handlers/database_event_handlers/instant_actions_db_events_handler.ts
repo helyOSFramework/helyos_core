@@ -22,7 +22,9 @@ interface InstantActionPayload {
 export async function processInstantActionEvents(channel: string, payload: InstantActionPayload): Promise<void> {
     switch (channel) {
         case 'instant_actions_insertion': {
-            let { agent_id: agentId, agent_uuid: agentUuid } = payload;
+            let {
+                agent_id: agentId, agent_uuid: agentUuid,
+            } = payload;
 
             if (agentId && !agentUuid) {
                 const uuids = await databaseServices.agents.getUuids([agentId]);
@@ -38,7 +40,11 @@ export async function processInstantActionEvents(channel: string, payload: Insta
                 await agentComm.sendCustomInstantActionToAgent(agentId, payload.command || '');
             }
 
-            const log = { agent_id: agentId, agent_uuid: agentUuid, sender: payload.sender };
+            const log = {
+                agent_id: agentId,
+                agent_uuid: agentUuid,
+                sender: payload.sender,
+            };
             logData.addLog('agent', log, 'info', `Send custom instant action to agent`);
 
             break;

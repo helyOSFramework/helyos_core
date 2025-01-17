@@ -22,9 +22,9 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
     if (inMemDB.agents_stats[uuid]) {
         inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
     }
-    
-    let replyTo = msgProps.replyTo ? msgProps.replyTo : uuid;
-    let response, message;
+
+    const replyTo = msgProps.replyTo ? msgProps.replyTo : uuid;
+    let response; let message;
     try {
         switch (objMsg.body['query']) {
             case 'allAgents':
@@ -54,13 +54,17 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
                 break;
 
             case 'allExecutingMissions':
-                response = await databaseService.work_processes.select({status: 'executing'});
-                break;            
-            
+                response = await databaseService.work_processes.select({
+                    status: 'executing',
+                });
+                break;
+
             case 'allAssignmentsByMissionId':
                 if (objMsg.body['conditions']){
                     const ms_id = objMsg.body.conditions.work_process_id || objMsg.body.conditions.mission_id;
-                    response = await databaseService.assignments.select({work_process_id: ms_id});
+                    response = await databaseService.assignments.select({
+                        work_process_id: ms_id,
+                    });
                 } else {
                     throw Error('Please include work_process_id (mission_id) in conditions. For example: {"work_process_id" : 1 }');
                 }
@@ -69,61 +73,74 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
             case 'allAssignmentsByWorkProcessId':
                 if (objMsg.body['conditions']){
                     const wp_id = objMsg.body.conditions.work_process_id || objMsg.body.conditions.mission_id;
-                    response = await databaseService.assignments.select({work_process_id: wp_id});
+                    response = await databaseService.assignments.select({
+                        work_process_id: wp_id,
+                    });
                 } else {
                     throw Error('Please include work_process_id (mission_id) in "conditions|. For example: {"work_process_id" : 1 }');
                 }
                 break;
 
             case 'allMapObjects':
-                let conditions = objMsg.body['conditions'] || {deleted_at: null};
-                conditions = {deleted_at: null, ...conditions};
+                let conditions = objMsg.body['conditions'] || {
+                    deleted_at: null,
+                };
+                conditions = {
+                    deleted_at: null,
+                    ...conditions,
+                };
                 response = await databaseService.map_objects.select(conditions);
-                break;             
+                break;
         }
 
         switch (objMsg.body['mutation']) {
 
-            case 'createMapObjects':       
+            case 'createMapObjects':
                 response = await databaseService.map_objects.insertMany(objMsg.body['data'])
-                .then(async (newIds) => {
-                    const newObjects = await databaseService.map_objects.list_in('id',newIds);
-                    newObjects.forEach(obj => { inMemDB.update('map_objects', 'id', obj, new Date()); });
-                    return newIds;
-                });
-                break;    
+                    .then(async (newIds) => {
+                        const newObjects = await databaseService.map_objects.list_in('id',newIds);
+                        newObjects.forEach(obj => {
+                            inMemDB.update('map_objects', 'id', obj, new Date());
+                        });
+                        return newIds;
+                    });
+                break;
 
-            case 'updateMapObjects': 
-                const patches = objMsg.body['data']? objMsg.body['data']:[];    
+            case 'updateMapObjects':
+                const patches = objMsg.body['data']? objMsg.body['data']:[];
                 await Promise.all(patches.map(async patch => {
                     inMemDB.update('map_objects', 'id', patch, new Date());
                     await databaseService.map_objects.update_byId(patch['id'], patch);
                 }));
                 response = "successful";
-                break;    
+                break;
 
-            case 'deleteMapObjects':       
+            case 'deleteMapObjects':
                 response = await databaseService.map_objects.delete(objMsg.body['condition'])
-                .then((r) => {
-                    console.log(r);
-                });
-                break;    
+                    .then((r) => {
+                        console.log(r);
+                    });
+                break;
 
-            case 'deleteMapObjectByIds':       
+            case 'deleteMapObjectByIds':
                 response = await databaseService.map_objects.deleteByIds(objMsg.body['condition']['ids'])
-                .then((r) => {
-                    objMsg.body['condition']['ids'].forEach(id => { inMemDB.delete('map_objects', 'id', id); });
-                });
-                break;   
+                    .then((r) => {
+                        objMsg.body['condition']['ids'].forEach(id => {
+                            inMemDB.delete('map_objects', 'id', id);
+                        });
+                    });
+                break;
 
             default:
                 break;
         }
 
         message = JSON.stringify(response);
-    
+
     } catch (error) {
-        response = {"error": JSON.stringify(error, Object.getOwnPropertyNames(error))};    
+        response = {
+            "error": JSON.stringify(error, Object.getOwnPropertyNames(error)),
+        };
         message = JSON.stringify(response);
     }
 
@@ -131,4 +148,6 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
     return 0;
 }
 
-export  {queryDataBase};
+export  {
+    queryDataBase,
+};

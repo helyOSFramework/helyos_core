@@ -6,15 +6,15 @@ import * as memDBService from '../../services/in_mem_database/mem_database_servi
 import { logData } from '../../modules/systemlog';
 import { AGENT_STATUS } from '../../modules/data_models';
 
-
-
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION;
 
 async function agentCheckOut(uuid: string, data: any, msgProps: any, registeredAgent: any, replyExchange: any): Promise<any> {
     return processAgentCheckOut(uuid)
         .then((agent) => {
             let replyTo = msgProps.replyTo ? msgProps.replyTo : agent.message_channel;
-            if (replyTo) replyTo = replyTo.replace(/\//g, '.');
+            if (replyTo) {
+                replyTo = replyTo.replace(/\//g, '.');
+            }
 
             try {
                 const message = JSON.stringify({
@@ -65,8 +65,6 @@ async function agentCheckOut(uuid: string, data: any, msgProps: any, registeredA
         });
 }
 
-
-
 async function processAgentCheckOut( uuid: string): Promise<any> {
     // 1 - PARSE INPUT
 
@@ -77,23 +75,31 @@ async function processAgentCheckOut( uuid: string): Promise<any> {
     }
 
     // 3 - CHECK-OUT
-    const agentUpdate = { uuid: uuid, yard_id: null, last_message_time: new Date() };
+    const agentUpdate = {
+        uuid: uuid,
+        yard_id: null,
+        last_message_time: new Date(),
+    };
 
     const inMemDB = await memDBService.getInstance();
     inMemDB.update('agents', 'uuid', agentUpdate, agentUpdate.last_message_time, 'buffered');
     inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
 
-    await databaseService.agents.updateByConditions({ uuid }, agentUpdate);
+    await databaseService.agents.updateByConditions({
+        uuid,
+    }, agentUpdate);
     const agents = await databaseService.agents.get('uuid', uuid, [
-                                'id',
-                                'uuid',
-                                'message_channel',
-                                'rbmq_username',
-                                'rbmq_encrypted_password',
-                                'yard_id',
-                                'public_key',
-                        ]);
+        'id',
+        'uuid',
+        'message_channel',
+        'rbmq_username',
+        'rbmq_encrypted_password',
+        'yard_id',
+        'public_key',
+    ]);
     return agents[0];
 }
 
-export { agentCheckOut };
+export {
+    agentCheckOut,
+};

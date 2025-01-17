@@ -1,6 +1,5 @@
 import fs from 'fs';
 
-
 // helyOS Integration
 const PGHOST = process.env.PGHOST;
 const PGPORT = process.env.PGPORT;
@@ -25,10 +24,8 @@ const DASHBOARD_PORT = 8080;
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002;
 const GQLPORT = process.env.GQLPORT || 500;
 
-
 const JWT_SECRET = process.env.JWT_SECRET || process.env.PGPASSWORD;
 const postgraphileRolePassword = process.env.PGPASSWORD;
-
 
 // helyOS Scalability
 const NUM_THREADS = parseInt(process.env.NUM_THREADS || '1');
@@ -39,13 +36,12 @@ const REDIS_HOST = process.env.REDIS_HOST || '';
 const REDIS_PORT = process.env.REDIS_PORT || 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
 
-const replicaOrMultiThread = HELYOS_REPLICA || (NUM_THREADS > 1)
+const replicaOrMultiThread = HELYOS_REPLICA || (NUM_THREADS > 1);
 if (replicaOrMultiThread && !process.env.REDIS_HOST) {
     const errorMessage = '====> Error: REDIS host not defined. Please define the REDIS host in your environment variables or set NUM_THREADS=1 and HELYOS_REPLICA=false.';
     console.error(errorMessage);
     process.exit(1);
 }
-
 
 let SOCKET_IO_ADAPTER = process.env.SOCKET_IO_ADAPTER || 'none';
 if (SOCKET_IO_ADAPTER !== 'redis') {
@@ -60,12 +56,10 @@ if (SOCKET_IO_ADAPTER !== 'redis') {
 }
 
 if (SOCKET_IO_ADAPTER === 'redis' && !REDIS_HOST) {
-    console.error(`====> Error: Socket.IO adapter is set to 'redis'. To utilize helyOS core replicas for horizontal scaling,` + 
+    console.error(`====> Error: Socket.IO adapter is set to 'redis'. To utilize helyOS core replicas for horizontal scaling,` +
                   `you must connect the helyOS core to REDIS by providing a valid REDIS_HOST.`);
     process.exit(1);
 }
-
-
 
 // Agent Interactions
 const CREATE_RBMQ_ACCOUNTS = (process.env.CREATE_RBMQ_ACCOUNTS || "True").toLowerCase() === 'true';
@@ -76,7 +70,6 @@ const DB_BUFFER_TIME = parseInt(process.env.DB_BUFFER_TIME || '1000');
 const WAIT_AGENT_STATUS_PERIOD = parseInt(process.env.WAIT_AGENT_STATUS_PERIOD || '20') * 1000;
 const ENCRYPT = process.env.ENCRYPT;
 
-
 const AGENT_AUTO_REGISTER_TOKEN = process.env.AGENT_AUTO_REGISTER_TOKEN;
 const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_AUTO_REGISTER_TOKEN;
 
@@ -84,7 +77,6 @@ const AGENT_REGISTRATION_TOKEN = process.env.AGENT_REGISTRATION_TOKEN || AGENT_A
 const PREFETCH_COUNT = parseInt(process.env.PREFETCH_COUNT|| '100'); // Number of messages to prefetch from the broker.
 const TTL_VISUAL_MSG = parseInt(process.env.TTL_VISUAL_MSG || '2000'); // Time to live for visualization messages in ms.
 const TTL_STATE_MSG = parseInt(process.env.TTL_STATE_MSG || '360000'); // Time to live for state messages in ms.
-
 
 const RBMQ_API_PORT = process.env.RBMQ_API_PORT || 15672;
 const RBMQ_CNAME = process.env.RBMQ_CNAME || RBMQ_HOST;
@@ -95,7 +87,6 @@ const RBMQ_USERNAME = process.env.RBMQ_USERNAME || RBMQ_ADMIN_USERNAME;
 const RBMQ_PASSWORD = process.env.RBMQ_PASSWORD || RBMQ_ADMIN_PASSWORD;
 const RBMQ_SSL = (process.env.RBMQ_SSL || "False").toLowerCase() === "true";
 const RBMQ_API_SSL = (process.env.RBMQ_API_SSL || process.env.RBMQ_SSL || "False").toLowerCase() === "true";
-
 
 const API_PROTOCOL = RBMQ_API_SSL ? 'https' : 'http';
 const RBMQ_PROTOCOL = RBMQ_SSL ? 'amqps' : 'amqp';
@@ -112,11 +103,7 @@ const SUMMARY_REQUESTS_QUEUE = 'agent_data_requests';
 const AGENTS_UL_EXCHANGE = process.env.AGENTS_UL_EXCHANGE || 'xchange_helyos.agents.ul';
 const AGENTS_DL_EXCHANGE = process.env.AGENTS_DL_EXCHANGE || 'xchange_helyos.agents.dl';
 const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.agents.anonymous';
-const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
-
-
-
-
+const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic'
 
 // Export all variables
 export default  {
@@ -177,10 +164,10 @@ export default  {
     AGENTS_UL_EXCHANGE,
     AGENTS_DL_EXCHANGE,
     ANONYMOUS_EXCHANGE,
-    AGENTS_MQTT_EXCHANGE, 
+    AGENTS_MQTT_EXCHANGE,
 
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_PASSWORD
+    REDIS_PASSWORD,
 
 };

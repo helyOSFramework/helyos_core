@@ -1,17 +1,23 @@
 /* This Source Code is subject to the terms of a modified Apache License Version 2.0.
-** If a copy of the license was not distributed with this file, You can obtain one at http://github.com/helyosframework/helyos_core/. 
+** If a copy of the license was not distributed with this file, You can obtain one at http://github.com/helyosframework/helyos_core/.
 ** Copyright 2022,  Fraunhofer-Institut für Verkehrs- und Infrastruktursysteme IVI.
 */
 
-const { logData } = require("../../modules/systemlog");
+const {
+    logData,
+} = require("../../modules/systemlog");
 import databaseService from "../database/database_services";
 import {AgentDataLayer, DatabaseLayer} from "../database/database_services";
 
 import * as redisAccessLayer from './redis_access_layer';
 import config from '../../config';
 
-const {setDBTimeout} = databaseService;
-const { REDIS_HOST, DB_BUFFER_TIME} = config;
+const {
+    setDBTimeout,
+} = databaseService;
+const {
+    REDIS_HOST, DB_BUFFER_TIME,
+} = config;
 
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
 const MAX_DELAY = 100;
@@ -20,7 +26,6 @@ const STAT_ACCUM_PERIOD = 10000; // Set accummlation time to calculate msg rates
 let MAX_PENDING_UPDATES = LONG_TIMEOUT / DB_BUFFER_TIME;
 MAX_PENDING_UPDATES = MAX_PENDING_UPDATES > 5 ? MAX_PENDING_UPDATES : 5;
 const SHORT_TIMEOUT = DB_BUFFER_TIME / 2;
-
 
 interface RedisClients {
     subscriber: redisAccessLayer.RedisClient;
@@ -32,22 +37,22 @@ interface DatabaseService extends AgentDataLayer {}
 /**
  * In-memory database class for storing and manipulating data.
  * This class is used to store and manipulate data in memory.
- * 
+ *
  *  The input parameters are:
  * - longTimeout: The long timeout period (in milliseconds) for the database update.
  * - shortTimeout: The short timeout period (in milliseconds) for the database update.
  * - limitWaitingFlushes: The upper limit for the number of pending updates that triggers the long timeout.
- * 
- * shortTimeout and longTimeout are used to dynamically adjust the update timeout (this.updateTimeout) based on the number of pending promisses updates. 
- * 
- * If the number of pending promisses is higher than MAX_PENDING_UPDATES, the update timeout is reduced to shortTimeout. 
+ *
+ * shortTimeout and longTimeout are used to dynamically adjust the update timeout (this.updateTimeout) based on the number of pending promisses updates.
+ *
+ * If the number of pending promisses is higher than MAX_PENDING_UPDATES, the update timeout is reduced to shortTimeout.
  * If the number of pending promisses keeps increasing to higher then 2 x MAX_PENDING_UPDATES, the system will additionally block new updates.
  * The smaller timeout causes the the database update promises to expire which will reduce the number of pending promisses, decresing the system load.
  * Therefore, we are accepting to lose some updates in order to avoid the system to be blocked.
- * 
+ *
  * If the number of pending promisses is small, the update timeout is increased to longTimeout.
- * 
- * 
+ *
+ *
  */
 class InMemDB {
     static instance: InMemDB | null = null;
@@ -77,13 +82,13 @@ class InMemDB {
 
     /**
      * Constructor for the InMemDB class.
-     * 
+     *
      * @param {number} longTimeout - The long timeout period (in milliseconds) for the database update.
      * @param {number} shortTimeout - The short timeout period (in milliseconds) for the database update.
      * @param {number} limitWaitingFlushes - The upper limit for the number of pending updates that triggers the long timeout.
-     * 
+     *
      * @returns {InMemDB} An instance of the InMemDB class.
-     * 
+     *
      */
     constructor(connectedRedisClients: RedisClients, longTimeout = 3000, shortTimeout = 500, limitWaitingFlushes = 10) {
         if (InMemDB.instance) {
@@ -107,7 +112,7 @@ class InMemDB {
         this.pendingPromises = 0;
         this.lostUpdates = 0;
 
-        this.timeoutCounterStartTime = new Date();;
+        this.timeoutCounterStartTime = new Date();
         this.updateTimeout = this.longTimeout;
         this.lastFlushTime = new Date();
         InMemDB.instance = this;
@@ -122,7 +127,6 @@ class InMemDB {
         }
 
     }
-
 
     async get(tableName: string, indexValue: string, indexName = ''): Promise<any> {
         if (REDIS_HOST) {
@@ -139,7 +143,6 @@ class InMemDB {
         }
         return this[tableName] || null;
     }
-
 
     /**
      * Inserts data into the specified table.
@@ -158,15 +161,12 @@ class InMemDB {
         return data;
     }
 
-
     async countMessages(tableStatsName: string, keyId: string, counter: string): Promise<void> {
         if (REDIS_HOST) {
             const statHash = `${tableStatsName}:${keyId}`;
             await this.hIncrBy(statHash, `accum_${counter}`, 1);
-        } else {
-            if (this[tableStatsName][keyId]) {
-                this[tableStatsName][keyId][counter].countMessage();
-            }
+        } else if (this[tableStatsName][keyId]) {
+            this[tableStatsName][keyId][counter].countMessage();
         }
     }
 
@@ -179,17 +179,27 @@ class InMemDB {
      * @returns {Promise} A promise that resolves with a status code.
      */
     async update(tableName: string, indexName: string, data: any, storeTimeStamp: Date | null, mode = 'buffered',
-                 msgTimeStamp: Date | null = null, dbService:  DatabaseService | null = null): Promise<boolean> {
+        msgTimeStamp: Date | null = null, dbService:  DatabaseService | null = null): Promise<boolean> {
 
-        if (!storeTimeStamp) storeTimeStamp = new Date(0);         
-        if (!msgTimeStamp) msgTimeStamp = storeTimeStamp;
+        if (!storeTimeStamp) {
+            storeTimeStamp = new Date(0);
+        }
+        if (!msgTimeStamp) {
+            msgTimeStamp = storeTimeStamp;
+        }
         const keyId = data[indexName];
         const table = this[tableName];
         const tableStats = this[`${tableName}_stats`];
 
         // Initialize local inMem register
-        if (!data.last_message_time) Object.assign(data, { 'last_message_time': storeTimeStamp });
-        table[keyId] = table[keyId] ? table[keyId] : { 'last_message_time': storeTimeStamp };
+        if (!data.last_message_time) {
+            Object.assign(data, {
+                'last_message_time': storeTimeStamp,
+            });
+        }
+        table[keyId] = table[keyId] ? table[keyId] : {
+            'last_message_time': storeTimeStamp,
+        };
         Object.assign(table[keyId], data);
 
         // Instance local statistics
@@ -197,18 +207,16 @@ class InMemDB {
             tableStats[keyId] = {
                 msgPerSecond: new UpdateStats(),
                 updtPerSecond: new UpdateStats(),
-                errorPerSecond: new UpdateStats(10)
+                errorPerSecond: new UpdateStats(10),
             };
         }
-
-
 
         if (REDIS_HOST) {
             const entityHash = `${tableName}:${keyId}`;
             if (mode === 'realtime' && dbService) {
                 this.countMessages(`${tableName}_stats`, keyId, 'updtPerSecond');
                 await Promise.all([this.hSetAsync(entityHash, data),
-                dbService.update(indexName, keyId, data) //Loop?
+                    dbService.update(indexName, keyId, data), //Loop?
                 ]);
             }
             if (mode == 'buffered') {
@@ -231,18 +239,15 @@ class InMemDB {
             if (mode == 'buffered') {
                 if ((storeTimeStamp.getTime() - msgTimeStamp.getTime()) < MAX_DELAY) {
                     this.updateBuffer(tableName, indexName, data, storeTimeStamp);
-                    return true
+                    return true;
                 }
                 return false;
             }
 
         }
 
-
-
         return false;
     }
-
 
     /**
      * Deletes data from the specified table.
@@ -270,7 +275,6 @@ class InMemDB {
         }
 
     }
-
 
     /**
      * Flushes the specified table to the database.
@@ -306,19 +310,21 @@ class InMemDB {
                 this.startTime = now;
             }
         } else {
-            bufferedData = { ...this[tableBufferName] }; //Get &
+            bufferedData = {
+                ...this[tableBufferName],
+            }; //Get &
             this[tableBufferName] = {};                //Delete
             statData = this[tableStatsName];
         }
         // Nothing to do if buffer is empty
-        if (Object.keys(bufferedData).length === 0) { return null };
-
-
+        if (Object.keys(bufferedData).length === 0) {
+            return null;
+        }
 
         const promiseArray = Object.keys(bufferedData) // Objects to be updated in the postgres database
             .map(async key => {
 
-                let msgPerSecond, updtPerSecond;
+                let msgPerSecond; let updtPerSecond;
                 // Parse the stats local key and remote hash
                 const bufferKeys = key.split(':');
                 const keyId = bufferKeys.length > 1 ? bufferKeys[1] : bufferKeys[0];
@@ -361,7 +367,9 @@ class InMemDB {
                     const failedIndexes = r.filter(e => e && e.error && !e.error.message.includes('constraint'));
 
                     failedDataTypeError.forEach(e => {
-                        logData.addLog('helyos_core', { uuid: e.failedIndex }, 'error', `Update failed on ${tableName} / ${e.failedIndex} ${e.error.message}`);
+                        logData.addLog('helyos_core', {
+                            uuid: e.failedIndex,
+                        }, 'error', `Update failed on ${tableName} / ${e.failedIndex} ${e.error.message}`);
                         console.log(e.error.message);
                     });
 
@@ -378,10 +386,8 @@ class InMemDB {
                 logData.addLog('helyos_core', null, 'error', `Database update timeout error: ${e.message}`);
             });
 
-
         return this.dispatchUpdatePromise(promiseTrigger, objArray.length);
     }
-
 
     /**
     * Updates data in the specified table based on the provided timestamp.
@@ -411,8 +417,6 @@ class InMemDB {
 
     }
 
-
-
     dispatchUpdatePromise(promiseTrigger: () => Promise<any>, numberUpdates = 1): Promise<void> {
         if (this.pendingPromises > 2 * this.limitWaitingFlushes) {
             this.lostUpdates += numberUpdates;
@@ -425,13 +429,15 @@ class InMemDB {
 
     }
 
-
     getHistoricalCountRateAverage(tableName: string, index: string, minSample = 10): { avgMsgPerSecond: number, avgUpdtPerSecond: number } {
         const tableStatsName = `${tableName}_stats`;
         let avgMsgPerSecond = 0; let avgUpdtPerSecond = 0;
 
         if (!this[tableStatsName] || !this[tableStatsName][index] || !this[tableStatsName][index]['updtPerSecond']) {
-            return { avgMsgPerSecond, avgUpdtPerSecond };
+            return {
+                avgMsgPerSecond,
+                avgUpdtPerSecond,
+            };
         }
 
         const msgPerSecondH = this[tableStatsName][index]['msgPerSecond'].countsPerSecondHistory;
@@ -445,9 +451,11 @@ class InMemDB {
             const sum = this[tableStatsName][index]['updtPerSecond'].countsPerSecondMovingAcumm;
             avgUpdtPerSecond = (sum / updtPerSecondH.length);
         }
-        return { avgMsgPerSecond, avgUpdtPerSecond };
+        return {
+            avgMsgPerSecond,
+            avgUpdtPerSecond,
+        };
     }
-
 
     _catch_update_errors(n = 1) {
         if (this.lostUpdates === 0) {
@@ -457,16 +465,16 @@ class InMemDB {
         this.lostUpdates += n;
         const now = new Date();
         if (now.getTime()  - this.timeoutCounterStartTime!.getTime()  > 10000) {
-            if (this.updateTimeout === this.shortTimeout || this.lostUpdates > 5)
+            if (this.updateTimeout === this.shortTimeout || this.lostUpdates > 5) {
                 logData.addLog('helyos_core', null, 'warn', `Too many updates pushed to the database. The timeout was reduced to ${this.shortTimeout} milliseconds to avoid the system blockage.`);
+            }
             logData.addLog('helyos_core', null, 'error',
                 `${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout / 1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`);
-            console.warn(`${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout / 1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`)
+            console.warn(`${this.lostUpdates} database updates canceled. Pending promises:${this.pendingPromises}. Timeout: ${this.updateTimeout / 1000} secs. Try to increase the buffer time, DB_BUFFER_TIME.`);
             this.lostUpdates = 0;
             this.timeoutCounterStartTime = new Date();
         }
     }
-
 
     async _dynamicallyChooseTimeout() {
         if (this.pendingPromises > this.limitWaitingFlushes) {
@@ -494,8 +502,8 @@ class InMemDB {
  * - If the data is not in the in-memory database, it is retrieved from the database.
  * - If the last database reloading is older than {reloadPeriod} seconds, the data is reloaded from the database.
  * - If the data is not in the database, null is returned.
- * 
- * 
+ *
+ *
  * @param {InMemDB} inMemDB - The in-memory database object.
  * @param {DatabaseService} dbTableService - The database service object.
  * @param {string} tableName - The name of the database table.
@@ -516,37 +524,40 @@ class DataRetriever {
         this.dbServices = dbServices;
         this.inMemDB = inMemDB;
         this.requiredFields = [...requiredFields];
-        if (this.requiredFields.indexOf('modified_at') === -1) this.requiredFields.push('modified_at');
+        if (this.requiredFields.indexOf('modified_at') === -1) {
+            this.requiredFields.push('modified_at');
+        }
         this.reloadPeriod = reloadPeriod;
         this.tableName = tableName;
         DataRetriever.instance = this;
     }
 
-    static getInstance(inMemDB: InMemDB, dbServices: any, 
-                        tableName: string, requiredFields: string[], reloadPeriod = 2000): DataRetriever {
+    static getInstance(inMemDB: InMemDB, dbServices: any,
+        tableName: string, requiredFields: string[], reloadPeriod = 2000): DataRetriever {
         if (!DataRetriever.instance) {
             DataRetriever.instance = new DataRetriever(inMemDB, dbServices, tableName, requiredFields, reloadPeriod);
         }
         return DataRetriever.instance;
     }
 
-
     getData(index: string, indexName = 'uuid', reload = false): Promise<any> {
 
-        if (this.startTimePerId[index] === undefined) { this.startTimePerId[index] = new Date(); }
+        if (this.startTimePerId[index] === undefined) {
+            this.startTimePerId[index] = new Date();
+        }
         const now = new Date();
         const deltaTime = (now.getTime() - this.startTimePerId[index].getTime());
 
         let _reload:  'IN_MEM'  | 'POSTGRES' | null = null;
-        if (deltaTime > this.reloadPeriod) { 
+        if (deltaTime > this.reloadPeriod) {
             _reload = "POSTGRES";
-         };
+        }
 
         // COMMENT: When is the directly retrieve from external In mem database necessary?
         // if (deltaTime > ? ) { _reload = "IN_MEM"};
         // if (_reload === "IN_MEM") {
         //     this.startTimePerId[index] = new Date();
-        // } 
+        // }
 
         if (_reload === "POSTGRES") {
             this.startTimePerId[index] = new Date();
@@ -579,24 +590,21 @@ class DataRetriever {
             }
         }
 
-
         if (_reload === "POSTGRES") {
             return this.dbServices[this.tableName].get(indexName, index, this.requiredFields)
                 .then((r) => {
                     if (r.length) {
                         this.inMemDB.update(this.tableName, indexName, r[0], new Date(), 'realtime', null, this.dbServices[this.tableName]);
                         return r[0];
-                    } else return null;
+                    } else {
+                        return null;
+                    }
                 });
         }
 
-
     }
 
-
-
 }
-
 
 // Helper class for calculating the average count rate.
 class UpdateStats {
@@ -633,24 +641,28 @@ class UpdateStats {
     }
 }
 
-
-
 // Singleton instance of the in-memory database.
 let inMemDB;
 async function getInstance() {
     if (!inMemDB) {
-        console.log('====> Creating In Memory Database Service instance')
+        console.log('====> Creating In Memory Database Service instance');
 
         let redisClients;
         if (REDIS_HOST) {
             await redisAccessLayer.ensureConnected();
-            redisClients = { 'subscriber': redisAccessLayer.subClient, 'publisher': redisAccessLayer.pubClient };
+            redisClients = {
+                'subscriber': redisAccessLayer.subClient,
+                'publisher': redisAccessLayer.pubClient,
+            };
         } else {
-            redisClients = { 'subscriber': null, 'publisher': null };
+            redisClients = {
+                'subscriber': null,
+                'publisher': null,
+            };
         }
         inMemDB = new InMemDB(redisClients, LONG_TIMEOUT, SHORT_TIMEOUT, MAX_PENDING_UPDATES);
 
-        console.log('====> In Memory Database Service created')
+        console.log('====> In Memory Database Service created');
     }
     return inMemDB;
 }
@@ -662,6 +674,6 @@ async function disconnect() {
     }
 }
 
-
-
-export { InMemDB, DataRetriever, getInstance, disconnect }
+export {
+    InMemDB, DataRetriever, getInstance, disconnect,
+};

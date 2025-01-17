@@ -20,7 +20,9 @@ try {
 
 // Helpers
 const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION;
-const { RBMQ_CERTIFICATE } = config;
+const {
+    RBMQ_CERTIFICATE,
+} = config;
 
 const isYardUIdRegistered = async (uid: string): Promise<number> => {
     const result = await databaseService.yards.get('uid', uid, ['id']);
@@ -76,7 +78,9 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
         const agent = await processAgentCheckIn(uuid, data, msgProps, registeredAgent);
 
         let replyTo: string | null | undefined = msgProps.replyTo ? msgProps.replyTo : agent.message_channel;
-        if (replyTo) replyTo = replyTo.replace(/\//g, '.');
+        if (replyTo) {
+            replyTo = replyTo.replace(/\//g, '.');
+        }
 
         const yard = await databaseService.yards.get_byId(agent.yard_id!, ['id', 'lat', 'lon', 'alt', 'map_data']);
 
@@ -95,7 +99,11 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
                 agentId: agent.id,
                 yard_uid: yard.uid,
                 map: {
-                    origin: { lat: yard.lat, lon: yard.lon, alt: yard.alt },
+                    origin: {
+                        lat: yard.lat,
+                        lon: yard.lon,
+                        alt: yard.alt,
+                    },
                     map_objects: mapObjects,
                     id: yard.id,
                     uid: yard.uid,
@@ -145,18 +153,21 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
     }
 }
 
-
 async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgProps: MsgProps, registeredAgent: Agent | null): Promise<Agent> {
     // 1 - PARSE INPUT
-    const checkinData = data.body; 
+    const checkinData = data.body;
     const checkingYard = checkinData.yard_id || checkinData.yard_uid; // Compatibility for agent versions < 2.0
     const isAnonymous = msgProps.userId === 'anonymous';
 
     // 2 - VALIDATIONS
     if (!registeredAgent) {
-        // If the agent is not registered, create a new record with a temporary name and update it
+    // If the agent is not registered, create a new record with a temporary name and update it
         await databaseService.agents
-            .insert({ uuid, name: 'agent-', connection_status: 'online' })
+            .insert({
+                uuid,
+                name: 'agent-',
+                connection_status: 'online',
+            })
             .then((agentId) =>
                 databaseService.agents.update_byId(agentId, {
                     name: `agent-${agentId}`,
@@ -166,27 +177,39 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     }
 
     if (!checkingYard) {
-        // Throw an error if no yard UID is provided
-        logData.addLog('agent', { uuid }, 'error', 'Agent failed to check in; yard UID is missing');
-        throw { msg: 'Agent failed to check in; yard UID is missing', code: 'YARD-400' };
+    // Throw an error if no yard UID is provided
+        logData.addLog('agent', {
+            uuid,
+        }, 'error', 'Agent failed to check in; yard UID is missing');
+        throw {
+            msg: 'Agent failed to check in; yard UID is missing',
+            code: 'YARD-400',
+        };
     }
 
     const yardId = await isYardUIdRegistered(checkingYard.toString());
     if (!yardId) {
-        // Throw an error if the specified yard is not registered
+    // Throw an error if the specified yard is not registered
         console.log('=========================================');
         console.log('Yard was not registered;');
         console.log('=========================================');
-        throw { msg: `Yard was not registered; ${checkinData.yard_uid}`, code: 'YARD-404' };
+        throw {
+            msg: `Yard was not registered; ${checkinData.yard_uid}`,
+            code: 'YARD-404',
+        };
     }
 
     // 3 - CHECK-IN
-    const agentUpdate: AgentUpdate = { uuid }; // Create an update object for the agent
+    const agentUpdate: AgentUpdate = {
+        uuid,
+    }; // Create an update object for the agent
     agentUpdate.last_message_time = new Date();
 
     if (isAnonymous) {
-        // If the agent is anonymous, create a RabbitMQ account for it
-        const credentials = await createAgentRbmqAccount({ uuid });
+    // If the agent is anonymous, create a RabbitMQ account for it
+        const credentials = await createAgentRbmqAccount({
+            uuid,
+        });
         agentUpdate.id = credentials.id;
         agentUpdate.rbmq_username = credentials.rbmq_username;
         agentUpdate.rbmq_encrypted_password = credentials.rbmq_encrypted_password;
@@ -198,8 +221,10 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     agentUpdate.message_channel = uuid;
 
     if ('public_key' in checkinData) {
-        // Update the public key if provided
-        logData.addLog('agent', { uuid }, 'info', 'Agent public key updated');
+    // Update the public key if provided
+        logData.addLog('agent', {
+            uuid,
+        }, 'info', 'Agent public key updated');
         agentUpdate.public_key = checkinData.public_key;
     }
 
@@ -210,7 +235,7 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     }
 
     if ('pose' in checkinData) {
-        // Update agent pose information if provided
+    // Update agent pose information if provided
         agentUpdate.x = checkinData.pose?.x;
         agentUpdate.y = checkinData.pose?.y;
         agentUpdate.z = checkinData.pose?.z;
@@ -258,7 +283,9 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
 
     // Update the database with agent information and fetch the updated record
     return databaseService.agents
-        .updateByConditions({ uuid }, agentUpdate)
+        .updateByConditions({
+            uuid,
+        }, agentUpdate)
         .then(() =>
             databaseService.agents.get('uuid', uuid, [
                 'id',
@@ -273,9 +300,6 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
         .then((agents) => agents[0]);
 }
 
-
-
-
 const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?: string } = {},
     username = '', password = ''): Promise<Agent> => {
     const agents = await databaseService.agents.select(agentIdentification);
@@ -285,8 +309,8 @@ const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?:
     const permissions = {
         configure: agent['configure_permissions'],
         write: agent['write_permissions'],
-        read: agent['read_permissions']
-    }
+        read: agent['read_permissions'],
+    };
     const rbmqUsername = agent.rbmq_username || generatedUsername;
 
     await rabbitMQServices.create_rbmq_user(rbmqUsername, generatedPassword, []);
@@ -310,14 +334,11 @@ const removeAgentRbmqAccount = async (agentData: Agent): Promise<number> => {
     return 0;
 };
 
-
-
 const encryptPassword = (passwd: string, pubkey?: string): string => {
     // Implement proper encryption logic here.
     return passwd;
 };
 
-
-
-
-export { agentCheckIn, createAgentRbmqAccount, removeAgentRbmqAccount };
+export {
+    agentCheckIn, createAgentRbmqAccount, removeAgentRbmqAccount,
+};

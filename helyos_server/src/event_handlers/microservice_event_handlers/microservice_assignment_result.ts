@@ -67,7 +67,9 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
 
     logData.addLog(
         'helyos_core',
-        { wproc_id: workProcess.id },
+        {
+            wproc_id: workProcess.id,
+        },
         'info',
         `Create WP-${workProcess.id} assignment(s) using the response of ${serviceRequest.service_url}`
     );
@@ -80,8 +82,8 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
     const start_stamp = workProcess.sched_start_at.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 
     let assignmentInputs: AssignmentInput[] = [];
-    let instantActionsInput: InstantActionInput[] = [];
-    let assignmentPlan: number[] = [];
+    const instantActionsInput: InstantActionInput[] = [];
+    const assignmentPlan: number[] = [];
     const dispatch_order = servResponse.dispatch_order;
 
     if (servResponse.results) {
@@ -164,19 +166,29 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
     // Handle assignment orchestration
     let updatePromises: Promise<any>[] = [];
     let assignment_orchestration = '';
-    if (dispatch_order && dispatch_order.length) assignment_orchestration = 'dispatch_order_array';
-    else if (assignmentPlan && assignmentPlan.length) assignment_orchestration = 'assignment_order_array';
-    else assignment_orchestration = 'dispatch_all_at_once';
+    if (dispatch_order && dispatch_order.length) {
+        assignment_orchestration = 'dispatch_order_array';
+    } else if (assignmentPlan && assignmentPlan.length) {
+        assignment_orchestration = 'assignment_order_array';
+    } else {
+        assignment_orchestration = 'dispatch_all_at_once';
+    }
 
     return Promise.all(insertPromises)
         .then((insertedIds) => {
             if (assignment_orchestration === 'dispatch_all_at_once') {
-                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, { status: ASSIGNMENT_STATUS.TO_DISPATCH }));
+                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, {
+                    status: ASSIGNMENT_STATUS.TO_DISPATCH,
+                }));
             }
 
             if (assignment_orchestration === 'dispatch_order_array') {
-                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, { status: ASSIGNMENT_STATUS.TO_DISPATCH }));
-                if (dispatch_order!.length === 1) dispatch_order!.push([]); // special case: there is no dependent assignments.
+                updatePromises = insertedIds.map(id => databaseServices.assignments.update_byId(id, {
+                    status: ASSIGNMENT_STATUS.TO_DISPATCH,
+                }));
+                if (dispatch_order!.length === 1) {
+dispatch_order!.push([]);
+                } // special case: there is no dependent assignments.
                 for (let order = dispatch_order!.length - 1; order > 0; order--) {
                     const assgmtArrayIdxs = dispatch_order![order];
                     const previousArrayIdxs = dispatch_order![order - 1];
@@ -185,9 +197,11 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
                     const statusPrecedent = (order - 1) === 0 ? ASSIGNMENT_STATUS.TO_DISPATCH : ASSIGNMENT_STATUS.NOT_READY_TO_DISPATCH;
                     const updatePrecedentAssignments = previousDBIdxs.map(id => databaseServices.assignments.update_byId(id, {
                         'next_assignments': assgmtDBIdxs,
-                        'status': statusPrecedent
+                        'status': statusPrecedent,
                     }));
-                    const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id, { 'depend_on_assignments': previousDBIdxs }));
+                    const updateDependentAssignments = assgmtDBIdxs.map(id => databaseServices.assignments.update_byId(id, {
+                        'depend_on_assignments': previousDBIdxs,
+                    }));
                     updatePromises = updatePromises.concat([...updateDependentAssignments, ...updatePrecedentAssignments]);
                 }
             }
@@ -196,8 +210,11 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
                 const dispatchGroup: { [key: number]: number[] } = {};
                 // Group assignments
                 assignmentPlan.forEach((order, index) => {
-                    if (!dispatchGroup[order]) dispatchGroup[order] = [insertedIds[index]];
-                    else dispatchGroup[order].push(insertedIds[index]);
+                    if (!dispatchGroup[order]) {
+                        dispatchGroup[order] = [insertedIds[index]];
+                    } else {
+                        dispatchGroup[order].push(insertedIds[index]);
+                    }
                 });
 
                 assignmentPlan.forEach(order => {
@@ -210,7 +227,7 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
 
                     const updateDependencies = ids.map(id => databaseServices.assignments.update_byId(id, {
                         'next_assignments': nextAssignments,
-                        'depend_on_assignments': dependOnAssignments
+                        'depend_on_assignments': dependOnAssignments,
                     }));
                     updatePromises = updatePromises.concat([...updateDependencies]);
                 });
@@ -218,7 +235,9 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
                 let dispatchTriggerPromises: Promise<void>[] = [];
                 if (dispatchGroup[1]) {
                     dispatchTriggerPromises = dispatchGroup[1].map(id =>
-                        databaseServices.assignments.update_byId(id, { 'status': ASSIGNMENT_STATUS.TO_DISPATCH })
+                        databaseServices.assignments.update_byId(id, {
+                            'status': ASSIGNMENT_STATUS.TO_DISPATCH,
+                        })
                     );
                 }
                 updatePromises = [Promise.all(updatePromises).then(() => Promise.all(dispatchTriggerPromises))];
@@ -226,11 +245,20 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
 
             return Promise.all(updatePromises).then(() => {
                 const statusUpdatePromises = assignmentInputs.map((input) =>
-                    databaseServices.service_requests.update_byId(serviceRequest.id, { assignment_dispatched: true })
-                        .then(() => databaseServices.agents.update('id', input.agent_id, { status: AGENT_STATUS.BUSY }))
+                    databaseServices.service_requests.update_byId(serviceRequest.id, {
+                        assignment_dispatched: true,
+                    })
+                        .then(() => databaseServices.agents.update('id', input.agent_id, {
+                            status: AGENT_STATUS.BUSY,
+                        }))
                         .then(() => databaseServices.work_processes.updateByConditions(
-                            { 'id': workProcess.id, 'status__in': [MISSION_STATUS.DISPATCHED, MISSION_STATUS.CALCULATING, MISSION_STATUS.PREPARING] },
-                            { status: MISSION_STATUS.EXECUTING }))
+                            {
+                                'id': workProcess.id,
+                                'status__in': [MISSION_STATUS.DISPATCHED, MISSION_STATUS.CALCULATING, MISSION_STATUS.PREPARING],
+                            },
+                            {
+                                status: MISSION_STATUS.EXECUTING,
+                            }))
                 );
                 return Promise.all(statusUpdatePromises);
             });

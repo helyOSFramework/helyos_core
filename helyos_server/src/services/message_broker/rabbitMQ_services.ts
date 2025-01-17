@@ -39,9 +39,9 @@ const {
 
 const sslOptions = RBMQ_SSL
     ? {
-            ca: [RBMQ_CERTIFICATE],
-            servername: RBMQ_CNAME,
-        }
+        ca: [RBMQ_CERTIFICATE],
+        servername: RBMQ_CNAME,
+    }
     : {};
 
 let HELYOS_PUBLIC_KEY: Buffer | string = '';
@@ -114,7 +114,7 @@ const connect_as_guest_and_create_admin = () =>
         .then((rv) => logData.addLog('helyos_core', null, rv.logType as any, rv.message))
         .catch((e) => logData.addLog('helyos_core', null, 'error', e.message));
 
-let mainChannelPromise: Promise<any>, secondaryChannelPromise: Promise<any>;
+let mainChannelPromise: Promise<any>; let secondaryChannelPromise: Promise<any>;
 
 function getMainChannel(options: any = {}) {
     if (mainChannelPromise && !options.connect) {
@@ -144,7 +144,11 @@ function connectAndOpenChannels(options:any = {}) {
                 console.error('====================RABITMQ CONNECTION LOST =============');
                 console.error(err);
                 console.error('=========================================================');
-                connectAndOpenChannels({ subscribe: true, connect: true, recoverCallback: options.recoverCallback });
+                connectAndOpenChannels({
+                    subscribe: true,
+                    connect: true,
+                    recoverCallback: options.recoverCallback,
+                });
             });
 
             mainChannelPromise = conn
@@ -170,12 +174,15 @@ function connectAndOpenChannels(options:any = {}) {
         .catch((e) => {
             console.warn('\nWaiting AMQP server...\n\n');
             const promiseSetTimeout = util.promisify(setTimeout);
-            return promiseSetTimeout(3000).then(() => connectAndOpenChannels({ subscribe: false, connect: true }));
+            return promiseSetTimeout(3000).then(() => connectAndOpenChannels({
+                subscribe: false,
+                connect: true,
+            }));
         });
 }
 
 function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
-                          routingKey:string = '', exchange:string = '', correlationId: string | null = null) {
+    routingKey:string = '', exchange:string = '', correlationId: string | null = null) {
     const _message = message === undefined ? '' : message;
     let encryptedMsg;
     switch (ENCRYPT) {
@@ -217,7 +224,10 @@ function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
                 padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
                 saltLength: crypto.constants.RSA_PSS_SALTLEN_MAX_SIGN,
             });
-            const stringified = JSON.stringify({ message: encryptedMsg, signature: signature.toString('hex') });
+            const stringified = JSON.stringify({
+                message: encryptedMsg,
+                signature: signature.toString('hex'),
+            });
             if (exchange == '') {
                 exchange = AGENTS_DL_EXCHANGE;
             }
@@ -242,13 +252,22 @@ function sendEncryptedMsg(queue: string | null, message: string, publicKey = '',
 }
 
 function createDebugQueues(agent: any) {
-    getMainChannel({ subscribe: false, connect: false }).then((dataChannel) => {
-        dataChannel.assertQueue(`tap-${agent.name}`, { durable: false, maxLength: 10 });
+    getMainChannel({
+        subscribe: false,
+        connect: false,
+    }).then((dataChannel) => {
+        dataChannel.assertQueue(`tap-${agent.name}`, {
+            durable: false,
+            maxLength: 10,
+        });
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.*`);
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_UL_EXCHANGE, `*.${agent.uuid}.*`);
         dataChannel.bindQueue(`tap-${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.*`);
 
-        dataChannel.assertQueue(`tap-cmd_to_${agent.name}`, { durable: false, maxLength: 10 });
+        dataChannel.assertQueue(`tap-cmd_to_${agent.name}`, {
+            durable: false,
+            maxLength: 10,
+        });
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.assignment`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.assignment`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
@@ -268,24 +287,34 @@ async function assertOrSubstituteQueue(channel: any, queueName: string, exclusiv
             logData.addLog('helyos_core', null, 'warn', `Queue ${queueName} message-time-to-live was changed to ${args['x-message-ttl']}.`);
         }
 
-        await channel.assertQueue(queueName, { exclusive: exclusive, durable: durable, arguments: args });
+        await channel.assertQueue(queueName, {
+            exclusive: exclusive,
+            durable: durable,
+            arguments: args,
+        });
         logData.addLog('helyos_core', null, 'info', `Queue ${queueName} was asserted.`);
         return true;
     } catch (error) {
         console.log(`Queue ${queueName} not found. Creating...`);
-        await channel.assertQueue(queueName, { exclusive: exclusive, durable: durable, arguments: args });
+        await channel.assertQueue(queueName, {
+            exclusive: exclusive,
+            durable: durable,
+            arguments: args,
+        });
         logData.addLog('helyos_core', null, 'info', `Queue ${queueName} was created.`);
         return false;
     }
 }
 
 function removeDebugQueues(agent: any) {
-    getMainChannel({ subscribe: false, connect: false }).then((dataChannel) => {
+    getMainChannel({
+        subscribe: false,
+        connect: false,
+    }).then((dataChannel) => {
         dataChannel.deleteQueue(`tap-${agent.name}`);
         dataChannel.deleteQueue(`tap-cmd_to_${agent.name}`);
     });
 }
-
 
 const create_rbmq_user = rbmqAccessLayer.createUser;
 const remove_rbmq_user = rbmqAccessLayer.removeUser;
@@ -293,15 +322,13 @@ const deleteConnections = rbmqAccessLayer.deleteConnections;
 const setRBMQUserAtVhost = rbmqAccessLayer.addRbmqUserVhost;
 const getQueueInfo = rbmqAccessLayer.getQueueInfo;
 
-
-export interface DataChannel extends Channel {};
+export interface DataChannel extends Channel {}
 export default {
     create_rbmq_user,
     remove_rbmq_user,
     setRBMQUserAtVhost,
     deleteConnections,
     getQueueInfo,
-
 
     connect,
     disconnect,
@@ -326,5 +353,5 @@ export default {
     RBMQ_VHOST,
     RBMQ_CERTIFICATE,
     MESSAGE_VERSION,
-    verifyMessageSignature
+    verifyMessageSignature,
 };

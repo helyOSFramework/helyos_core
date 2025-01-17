@@ -85,14 +85,14 @@ class LogData {
     ): void {
         const now = new Date();
         const formattedDate = now.toISOString();
-        
+
         const colorLog = (type: LogType, message: string): void => {
             const colors = {
                 info: '\x1b[0m',    // Default
                 success: '\x1b[32m', // Green
                 warn: '\x1b[33m',    // Yellow
                 error: '\x1b[31m',   // Red
-                reset: '\x1b[0m'     // Reset
+                reset: '\x1b[0m',     // Reset
             };
 
             const color = colors[type] || colors.reset;
@@ -100,7 +100,9 @@ class LogData {
         };
 
         colorLog(logType, `${formattedDate}: ${logMsg}`);
-        if (stdOutOnly) return;
+        if (stdOutOnly) {
+            return;
+        }
 
         const newLogInstance = parseLogData(origin, metadata, logType, logMsg);
         if (LOG_OUTPUT === 'database' && newLogInstance) {
@@ -120,11 +122,9 @@ class LogData {
         if (this.bufferTime === 0) {
             const _logs = [...this.logs];
             this.logs = [];
-            this.saveLogs(_logs)
+            this.saveLogs(_logs);
         }
     }
-
-
 
     public async saveLogs(logs:any[]): Promise<void> {
         if (logs.length && (logs.length > 0)) {
@@ -153,7 +153,7 @@ function parseLogData(
 ): LogInstance | null {
     let newLogInstance: LogInstance | null = null;
     let wprocId: number | null = null;
-    
+
     const finalLogMsg = typeof logMsg !== 'string' ? JSON.stringify(logMsg) : logMsg;
 
     switch (origin) {
@@ -169,7 +169,7 @@ function parseLogData(
                 service_type: serviceType,
                 agent_uuid: null,
                 log_type: logType,
-                msg: serviceUrl ? `${serviceUrl}- ${finalLogMsg}` : finalLogMsg
+                msg: serviceUrl ? `${serviceUrl}- ${finalLogMsg}` : finalLogMsg,
             };
             break;
         }
@@ -182,7 +182,7 @@ function parseLogData(
                 service_type: '',
                 agent_uuid: null,
                 log_type: logType,
-                msg: finalLogMsg
+                msg: finalLogMsg,
             };
             break;
         }
@@ -216,7 +216,7 @@ function parseLogData(
                 wproc_id: wprocId,
                 agent_uuid: hacData.uuid || null,
                 log_type: logType,
-                msg: agentName ? `${agentName}- ${finalLogMsg}` : finalLogMsg
+                msg: agentName ? `${agentName}- ${finalLogMsg}` : finalLogMsg,
             };
             break;
         }
@@ -227,4 +227,6 @@ function parseLogData(
 
 const logData = new LogData(LOG_BUFFER_TIME);
 
-export { LogData, logData, parseLogData, LogInstance, LogType, LogOrigin };
+export {
+    LogData, logData, parseLogData, LogInstance, LogType, LogOrigin,
+};

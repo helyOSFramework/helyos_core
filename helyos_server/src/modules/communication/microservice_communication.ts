@@ -41,14 +41,17 @@ const processMicroserviceRequest = async (servRequestId: number): Promise<void> 
 
             useRequestDataAsResponse = accessData.isDummy;
             const servResponse = useRequestDataAsResponse
-                ? { requestId: null, ...servRequest.request }
+                ? {
+                    requestId: null,
+                    ...servRequest.request,
+                }
                 : await webServices.sendRequestToService(
-                      accessData.url,
-                      accessData.apiKey,
-                      servRequest.request,
-                      servRequest.context,
-                      servRequest.config
-                  );
+                    accessData.url,
+                    accessData.apiKey,
+                    servRequest.request,
+                    servRequest.context,
+                    servRequest.config
+                );
 
             if (!servResponse) {
                 const e = 'Microservice response is empty';
@@ -62,8 +65,15 @@ const processMicroserviceRequest = async (servRequestId: number): Promise<void> 
 
             logData.addLog('microservice', servRequest, 'success', 'Request dispatched');
             const numUpdates = await databaseServices.service_requests.updateByConditions(
-                { id: servRequestId, status: SERVICE_STATUS.DISPATCHING_SERVICE },
-                { service_queue_id: jobQueueId, status: defaultStatus, dispatched_at: service_dispatched_at }
+                {
+                    id: servRequestId,
+                    status: SERVICE_STATUS.DISPATCHING_SERVICE,
+                },
+                {
+                    service_queue_id: jobQueueId,
+                    status: defaultStatus,
+                    dispatched_at: service_dispatched_at,
+                }
             );
 
             const _status = numUpdates === 0 ? SERVICE_STATUS.CANCELED : defaultStatus;
@@ -153,11 +163,21 @@ const saveServiceResponse = async (
     const now = new Date();
     let status = defaultStatus || SERVICE_STATUS.FAILED;
 
-    if (servResponse.result && Object.keys(servResponse.result).length > 0) status = SERVICE_STATUS.READY;
-    if (servResponse.results && servResponse.results.length > 0) status = SERVICE_STATUS.READY;
-    if (servResponse.status === SERVICE_STATUS.CANCELED) status = SERVICE_STATUS.CANCELED;
-    if (servResponse.status === SERVICE_STATUS.FAILED) status = SERVICE_STATUS.FAILED;
-    if (servResponse.status === SERVICE_STATUS.READY) status = SERVICE_STATUS.READY;
+    if (servResponse.result && Object.keys(servResponse.result).length > 0) {
+        status = SERVICE_STATUS.READY;
+    }
+    if (servResponse.results && servResponse.results.length > 0) {
+        status = SERVICE_STATUS.READY;
+    }
+    if (servResponse.status === SERVICE_STATUS.CANCELED) {
+        status = SERVICE_STATUS.CANCELED;
+    }
+    if (servResponse.status === SERVICE_STATUS.FAILED) {
+        status = SERVICE_STATUS.FAILED;
+    }
+    if (servResponse.status === SERVICE_STATUS.READY) {
+        status = SERVICE_STATUS.READY;
+    }
 
     const processed = status !== SERVICE_STATUS.PENDING;
 
@@ -182,4 +202,6 @@ const saveServiceResponse = async (
     return status;
 };
 
-export { processMicroserviceRequest, getExtServiceAccessData, saveServiceResponse };
+export {
+    processMicroserviceRequest, getExtServiceAccessData, saveServiceResponse,
+};

@@ -1,5 +1,5 @@
 // A process is started by the insertion of a work process (see "mission_queue_insertion" notification).
-// This triggers the building of a pipeline of services; the pipeline is just an ordered list of service requests 
+// This triggers the building of a pipeline of services; the pipeline is just an ordered list of service requests
 // (see service_requests table in the Postgres schema).
 // Each service request is dispatched as soon as its status changes to "ready_for_service" (see "ready_for_service" notification).
 
@@ -27,15 +27,22 @@ export async function processRunListEvents(channel: string, payload: Payload): P
             if (status === MISSION_QUEUE_STATUS.RUN) {
                 try {
                     const missionList = await databaseServices.work_processes.select(
-                        { mission_queue_id: queueId, status: 'draft' },
+                        {
+                            mission_queue_id: queueId,
+                            status: 'draft',
+                        },
                         [],
                         'run_order ASC'
                     );
 
                     if (missionList.length) {
                         const nextMission = missionList[0];
-                        await databaseServices.mission_queue.update_byId(queueId, { status: MISSION_QUEUE_STATUS.RUNNING });
-                        await databaseServices.work_processes.update_byId(nextMission.id, { status: MISSION_STATUS.DISPATCHED });
+                        await databaseServices.mission_queue.update_byId(queueId, {
+                            status: MISSION_QUEUE_STATUS.RUNNING,
+                        });
+                        await databaseServices.work_processes.update_byId(nextMission.id, {
+                            status: MISSION_STATUS.DISPATCHED,
+                        });
                     }
                 } catch (err: any) {
                     logData.addLog('helyos_core', payload, 'error', `mission_queue_insertion ${err?.message}`);
@@ -48,15 +55,22 @@ export async function processRunListEvents(channel: string, payload: Payload): P
             if (status === MISSION_QUEUE_STATUS.RUN) {
                 try {
                     const missionList = await databaseServices.work_processes.select(
-                        { mission_queue_id: queueId, status: 'draft' },
+                        {
+                            mission_queue_id: queueId,
+                            status: 'draft',
+                        },
                         [],
                         'run_order ASC'
                     );
 
                     if (missionList.length) {
                         const nextMission = missionList[0];
-                        await databaseServices.mission_queue.update_byId(queueId, { status: MISSION_QUEUE_STATUS.RUNNING });
-                        await databaseServices.work_processes.update_byId(nextMission.id, { status: MISSION_STATUS.DISPATCHED });
+                        await databaseServices.mission_queue.update_byId(queueId, {
+                            status: MISSION_QUEUE_STATUS.RUNNING,
+                        });
+                        await databaseServices.work_processes.update_byId(nextMission.id, {
+                            status: MISSION_STATUS.DISPATCHED,
+                        });
                     }
                 } catch (err: any) {
                     logData.addLog('helyos_core', payload, 'error', `mission_queue_update ${err?.message}`);
@@ -66,15 +80,22 @@ export async function processRunListEvents(channel: string, payload: Payload): P
             if (status === MISSION_QUEUE_STATUS.CANCEL) {
                 try {
                     const missionList = await databaseServices.work_processes.select(
-                        { mission_queue_id: queueId, status: MISSION_STATUS.EXECUTING },
+                        {
+                            mission_queue_id: queueId,
+                            status: MISSION_STATUS.EXECUTING,
+                        },
                         [],
                         'run_order ASC'
                     );
 
                     if (missionList.length) {
-                        await databaseServices.mission_queue.update_byId(queueId, { status: MISSION_QUEUE_STATUS.STOPPED });
+                        await databaseServices.mission_queue.update_byId(queueId, {
+                            status: MISSION_QUEUE_STATUS.STOPPED,
+                        });
                         for (const mission of missionList) {
-                            await databaseServices.work_processes.update_byId(mission.id, { status: MISSION_STATUS.CANCELING });
+                            await databaseServices.work_processes.update_byId(mission.id, {
+                                status: MISSION_STATUS.CANCELING,
+                            });
                         }
                     }
                 } catch (err: any) {

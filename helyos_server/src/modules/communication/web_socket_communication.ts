@@ -48,7 +48,9 @@ class BufferNotifications {
         this.bufferPayload = {};
         this.eventDispatchBuffer = setInterval(async () => {
             const roleManager = await RoleManager.getInstance();
-            if (roleManager.role !== 'broadcaster') return;
+            if (roleManager.role !== 'broadcaster') {
+                return;
+            }
             const inMemDB = await memDBService.getInstance();
             await this._get_latest_updated_data(inMemDB);
             return this._dispatch();
@@ -61,7 +63,9 @@ class BufferNotifications {
     }
 
     private async _get_latest_updated_data(inMemDB: memDBService.InMemDB): Promise<void> {
-        if (!inMemDB) return;
+        if (!inMemDB) {
+            return;
+        }
 
         const inMemAgents: { [key: string]: Agent } = await inMemDB.list('agents');
         const inMemBufferedAgents: { [key: string]: Agent } = await inMemDB.list('agents_buffer');
@@ -70,22 +74,40 @@ class BufferNotifications {
 
         for (const key in inMemAgents) {
             if (inMemAgents[key].id == null) {
-                logData.addLog('agent', { uuid: key }, 'error', `MemDB error, id not registered`);
+                logData.addLog('agent', {
+                    uuid: key,
+                }, 'error', `MemDB error, id not registered`);
                 console.log(key, 'MemDB error, id not registered');
                 continue;
             }
 
             let agent = inMemBufferedAgents[key];
             if (!agent) {
-                const { id, uuid, x, y, z, orientations, sensors, last_message_time, yard_id } = inMemAgents[key];
-                agent = { id, uuid, x, y, z, orientations, sensors, last_message_time, yard_id };
+                const {
+                    id, uuid, x, y, z, orientations, sensors, last_message_time, yard_id,
+                } = inMemAgents[key];
+                agent = {
+                    id,
+                    uuid,
+                    x,
+                    y,
+                    z,
+                    orientations,
+                    sensors,
+                    last_message_time,
+                    yard_id,
+                };
             }
             if (!agent.yard_id) {
                 agent.yard_id = inMemAgents[key].yard_id;
             }
 
             agent.msg_per_sec = inMemAgents[key].msg_per_sec;
-            const webSocketNotification = { agent_id: inMemAgents[key].id, tool_id: inMemAgents[key].id, ...agent };
+            const webSocketNotification = {
+                agent_id: inMemAgents[key].id,
+                tool_id: inMemAgents[key].id,
+                ...agent,
+            };
             this.pushNotificationToBuffer('new_agent_poses', webSocketNotification, `${agent.yard_id}`);
         }
 
@@ -130,7 +152,7 @@ class BufferNotifications {
 
 /**
  * Retrieves the BufferNotifications singleton instance.
- * 
+ *
  * @returns {Promise<BufferNotifications>} - The singleton instance.
  */
 let bufferNotifications: BufferNotifications | null = null;
@@ -149,4 +171,6 @@ async function getInstance(): Promise<BufferNotifications> {
     return bufferNotifications;
 }
 
-export { BufferNotifications, getInstance };
+export {
+    BufferNotifications, getInstance,
+};

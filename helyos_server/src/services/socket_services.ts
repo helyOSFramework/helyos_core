@@ -11,14 +11,18 @@ import config from '../config';
 // Socket.io server setup
 // ----------------------------------------------------------------------------
 
-const { JWT_SECRET, SOCKET_PORT } = config;
-const { SOCKET_IO_ADAPTER } = config;
+const {
+    JWT_SECRET, SOCKET_PORT,
+} = config;
+const {
+    SOCKET_IO_ADAPTER,
+} = config;
 
 const conf: Partial<ServerOptions> = {
-        path: '',
-        serveClient: false,
+    path: '',
+    serveClient: false,
 
-    };
+};
 
 class WebSocketService {
     private static instance: WebSocketService | null = null;
@@ -90,9 +94,9 @@ class WebSocketService {
     }
 
     public dispatchAllBufferedMessages(bufferPayload: { [room: string]: { [channel: string]: any } }): void {
-        for (let room in bufferPayload) {
+        for (const room in bufferPayload) {
             const roomChannels = bufferPayload[room];
-            for (let channel in roomChannels) {
+            for (const channel in roomChannels) {
                 this.sendUpdatesToFrontEnd(channel, roomChannels[channel], room);
                 roomChannels[channel] = null;
             }
@@ -104,12 +108,16 @@ class WebSocketService {
             console.warn("socket.io is not defined, start the websocket server", msg);
             return;
         }
-        if (!msg) return;
+        if (!msg) {
+            return;
+        }
         try {
-            if (room !== 'all') this.io.to(room).emit(channel, msg);
+            if (room !== 'all') {
+                this.io.to(room).emit(channel, msg);
+            }
             this.io.to('all').emit(channel, msg);
         } catch (e) {
-            console.error("error message from Postgress to Front-end", e)
+            console.error("error message from Postgress to Front-end", e);
         }
     }
 }
@@ -120,6 +128,8 @@ const unauthorizeClient = (socket: Socket): void => {
         `Client application tried to connect to websocket ${socket.id} with invalid token`);
     socket.emit('unauthorized', 'Invalid token');
     socket.disconnect(true);
-}
+};
 
-export { WebSocketService, unauthorizeClient, SOCKET_IO_ADAPTER };
+export {
+    WebSocketService, unauthorizeClient, SOCKET_IO_ADAPTER,
+};

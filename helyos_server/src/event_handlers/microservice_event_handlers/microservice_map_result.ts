@@ -39,10 +39,21 @@ interface YardData {
  */
 const insertManyMapObjectsAsync = async (yardId: number, mapObjects: MapObject[]): Promise<void[]> => {
     const responsePromises = mapObjects.map((mapObj) => {
-        // Filter only valid properties
-        const { data_format, type, metadata, data, name } = mapObj;
-        const _mapObj = { data_format, type, metadata, data, name };
-        return databaseServices.map_objects.insert({ ..._mapObj, yard_id: yardId });
+    // Filter only valid properties
+        const {
+            data_format, type, metadata, data, name,
+        } = mapObj;
+        const _mapObj = {
+            data_format,
+            type,
+            metadata,
+            data,
+            name,
+        };
+        return databaseServices.map_objects.insert({
+            ..._mapObj,
+            yard_id: yardId,
+        });
     });
 
     return Promise.all(responsePromises);
@@ -65,12 +76,16 @@ async function updateMap(yardId: number, yardData: YardData): Promise<any> {
 
     if (mapObjects.length > 0) {
         responsePromises.push(
-            databaseServices.map_objects.update('yard_id', yardId, { deleted_at: new Date() })
+            databaseServices.map_objects.update('yard_id', yardId, {
+                deleted_at: new Date(),
+            })
                 .then(() => insertManyMapObjectsAsync(yardId, mapObjects))
                 .catch((e) =>
                     logData.addLog(
                         'microservice',
-                        { yardId },
+                        {
+                            yardId,
+                        },
                         'error',
                         `updating map objects: ${JSON.stringify(e)}`
                     )
@@ -90,7 +105,9 @@ async function updateMap(yardId: number, yardData: YardData): Promise<any> {
                 .catch((e) =>
                     logData.addLog(
                         'microservice',
-                        { yardId },
+                        {
+                            yardId,
+                        },
                         'error',
                         `updating map origin: ${JSON.stringify(e)}`
                     )
@@ -101,11 +118,16 @@ async function updateMap(yardId: number, yardData: YardData): Promise<any> {
     if (mapData) {
         responsePromises.push(
             databaseServices.yards
-                .update_byId(yardId, { map_data: mapData, source: 'microservice' })
+                .update_byId(yardId, {
+                    map_data: mapData,
+                    source: 'microservice',
+                })
                 .catch((e) =>
                     logData.addLog(
                         'microservice',
-                        { yardId },
+                        {
+                            yardId,
+                        },
                         'error',
                         `updating map_data: ${JSON.stringify(e)}`
                     )
@@ -124,6 +146,6 @@ async function mapCreate(yardData: YardData): Promise <void> {
     console.log('Yard creation by microservices is not implemented...');
 }
 
-
-
-export { updateMap, mapCreate };
+export {
+    updateMap, mapCreate,
+};

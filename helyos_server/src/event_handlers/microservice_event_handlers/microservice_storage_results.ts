@@ -12,11 +12,13 @@ interface MapObject {
 }
 
 function updateMap(mapObject: MapObject): Promise<any> {
-	return databaseService.yards.update_byId(mapObject.id, mapObject);
+    return databaseService.yards.update_byId(mapObject.id, mapObject);
 }
 
 function mapCreate(mapObject: MapObject): void {
-	// Add your implementation here
+    // Add your implementation here
 }
 
-export { mapCreate, updateMap };
+export {
+    mapCreate, updateMap,
+};

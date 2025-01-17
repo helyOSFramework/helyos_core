@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 // Any mission is started by the insertion of a work process (see "work_processes_insertion" notification).
-// This triggers the building of a pipeline of microservices; the pipeline is just an ordered list of service requests 
+// This triggers the building of a pipeline of microservices; the pipeline is just an ordered list of service requests
 // (see service_requests table in the Postgres schema).
 // Each service request is dispatched as soon its status changes to "ready_for_service" (see "ready_for_service" notification).
 // The controlling of each service status is performed by the external_service_watchers.js procedures.
@@ -18,7 +18,6 @@ import { createAgentRbmqAccount, removeAgentRbmqAccount } from './rabbitmq_event
 import { processRunListEvents } from './database_event_handlers/missionqueue_db_events_handler';
 import * as inMemServices from '../services/in_mem_database/mem_database_service';
 import RabbitMQServices from '../services/message_broker/rabbitMQ_services';
-
 
 interface DatabaseClient {
     on: (event: string, listener: (msg: any) => void) => void;
@@ -50,11 +49,11 @@ async function broadcastNotifications(channel: string, payload: any, bufferNotif
         'mission_queue_insertion',
         'service_requests_update',
         'service_requests_insertion',
-        'work_processes_insertion'
+        'work_processes_insertion',
     ];
 
     if (channelsWithYardId.includes(channel)) {
-        let room = payload['yard_id'] ? `${payload['yard_id']}` : 'all';
+        const room = payload['yard_id'] ? `${payload['yard_id']}` : 'all';
         if (!payload['yard_id']) {
             console.warn(channel, "does not have yard id");
         }
@@ -108,9 +107,9 @@ export async function handleDatabaseMessages(client: DatabaseClient, websocket: 
                 const permissions = {
                     configure: payload['configure_permissions'],
                     write: payload['write_permissions'],
-                    read: payload['read_permissions']
-                }
-                await RabbitMQServices.setRBMQUserAtVhost(payload['rbmq_username'], permissions)
+                    read: payload['read_permissions'],
+                };
+                await RabbitMQServices.setRBMQUserAtVhost(payload['rbmq_username'], permissions);
                 break;
 
             case 'agent_deletion':
@@ -127,8 +126,12 @@ export async function handleDatabaseMessages(client: DatabaseClient, websocket: 
 
             case 'new_rabbitmq_account':
                 try {
-                    await createAgentRbmqAccount({ id: payload.agent_id }, payload['username'], payload['password']);
-                    logData.addLog('agent', { id: payload.agent_id }, 'info', `create/update rabbitmq account`);
+                    await createAgentRbmqAccount({
+                        id: payload.agent_id,
+                    }, payload['username'], payload['password']);
+                    logData.addLog('agent', {
+                        id: payload.agent_id,
+                    }, 'info', `create/update rabbitmq account`);
                 } catch (error: any) {
                     logData.addLog('agent', payload, 'error', `Create RabbitMQ account: ${error.message}`);
                 }

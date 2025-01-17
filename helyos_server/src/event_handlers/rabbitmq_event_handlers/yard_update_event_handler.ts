@@ -12,7 +12,10 @@ interface ObjMsg {
 async function yardAutoUpdate(objMsg: ObjMsg, uuid: string): Promise<void> {
     const inMemDB = await memDBService.getInstance();
     try {
-        let objUpdate = { id: objMsg.body.id, ...objMsg };
+        const objUpdate = {
+            id: objMsg.body.id,
+            ...objMsg,
+        };
         objUpdate['last_message_time'] = new Date();
 
         if (objMsg.body && objMsg.body.map_object) {
@@ -26,8 +29,12 @@ async function yardAutoUpdate(objMsg: ObjMsg, uuid: string): Promise<void> {
         }
 
     } catch (error:any) {
-        logData.addLog('agent', { uuid }, 'error', `Error in updating map object: ${error.message}`);
+        logData.addLog('agent', {
+            uuid,
+        }, 'error', `Error in updating map object: ${error.message}`);
     }
 }
 
-export { yardAutoUpdate };
+export {
+    yardAutoUpdate,
+};

@@ -6,25 +6,28 @@ import databaseServices from '../services/database/database_services';
 import { logData } from './systemlog';
 import {lookup} from './utils';
 
-const OVERWRITE_MISSIONS = false
-
+const OVERWRITE_MISSIONS = false;
 
 /**
  * registerManyMicroservices(servicesYmlPath)
  * Parse the microservice.yml file and populate the database.
- * 
+ *
  * @param {string} servicesYmlPath
  * @returns {boolean}
  */
 export const registerManyMicroservices = (servicesYmlPath) => {
     try {
-        const rawdata = fs.readFileSync(servicesYmlPath, { encoding: 'utf-8' })
+        const rawdata = fs.readFileSync(servicesYmlPath, {
+            encoding: 'utf-8',
+        });
         const services = yaml.load(rawdata);
 
         // this loop contains assync code
         flattenServicesData(services).forEach((service:any, idx) => {
             // create or update service
-            databaseServices.services.select({ name: service['name'] })
+            databaseServices.services.select({
+                name: service['name'],
+            })
                 .then((oldServices) => {
                     if (oldServices.length === 0) {
                         return databaseServices.services.insert(service);
@@ -33,7 +36,7 @@ export const registerManyMicroservices = (servicesYmlPath) => {
                         return databaseServices.services.update_byId(servId, service);
                     }
                 })
-                // errors are individualy handled. 
+            // errors are individualy handled.
                 .catch((error) => {
                     console.error(error);
                     logData.addLog('helyos_core', null, 'error', `Parsing microservice YML file: ${service.name}`);
@@ -47,10 +50,10 @@ export const registerManyMicroservices = (servicesYmlPath) => {
         return null;
     }
 
-}
+};
 
 /**
- * registerMissions(missionsYmlPath) 
+ * registerMissions(missionsYmlPath)
  * Parse the missions.yml files and populate the database.
  *
  * @param {string} missionsYmlPath
@@ -58,13 +61,17 @@ export const registerManyMicroservices = (servicesYmlPath) => {
  */
 export const registerMissions = (missionsYmlPath) => {
     try {
-        const rawdata = fs.readFileSync(missionsYmlPath, { encoding: 'utf-8' })
+        const rawdata = fs.readFileSync(missionsYmlPath, {
+            encoding: 'utf-8',
+        });
         const missions = yaml.load(rawdata);
 
         // this loop contains assync code.
         flattenMissionsData(missions).forEach((wprocess:any, idx) => {
             // create or update work process
-            databaseServices.work_process_type.select({ name: wprocess['name'] })
+            databaseServices.work_process_type.select({
+                name: wprocess['name'],
+            })
                 .then((oldWprocesses) => {
                     if (oldWprocesses.length === 0) {
                         return databaseServices.work_process_type.insert(wprocess);
@@ -73,12 +80,12 @@ export const registerMissions = (missionsYmlPath) => {
                             const wprocId = oldWprocesses[0].id;
                             return databaseServices.work_process_type.update_byId(wprocId, wprocess).then(() => wprocId);
                         }
-                        return Promise.resolve(null)
+                        return Promise.resolve(null);
                     }
                 })
-                // update the mission recipe of the work process
+            // update the mission recipe of the work process
                 .then((wprocId) => saveWorkProcessServicePlans(wprocess['name'], wprocId, missions))
-                // errors are individualy handled. 
+            // errors are individualy handled.
                 .catch((error) => {
                     const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
                     logData.addLog('helyos_core', null, 'error', `Parsing mission YML file: ${wprocess.name} ${errorStr}`);
@@ -93,8 +100,7 @@ export const registerMissions = (missionsYmlPath) => {
         return null;
     }
 
-}
-
+};
 
 /**
  * saveWorkProcessServicePlans()
@@ -129,16 +135,18 @@ const saveWorkProcessServicePlans = (
 
     // use lookup to find the missions object in the input json
     const missions = lookup(jsonObj, "missions");
-    if (!missions[workProcessType]["recipe"]) { return null }
+    if (!missions[workProcessType]["recipe"]) {
+        return null;
+    }
 
     // recipe steps array for the given work process type
     const recipeSteps = missions[workProcessType]["recipe"]["steps"];
 
     // loop through the recipe steps array
-    const promiseSequence: Promise<any>[] = []
+    const promiseSequence: Promise<any>[] = [];
     promiseSequence.push(databaseServices.work_process_service_plan.remove('work_process_type_id', workProcessTypeId));
     for (const [index, step] of recipeSteps.entries()) {
-        // initialize arrays to store the column names and values
+    // initialize arrays to store the column names and values
         const colNames2 = ["work_process_type_id"];
         const colValues2 = [workProcessTypeId];
 
@@ -176,14 +184,13 @@ const saveWorkProcessServicePlans = (
     return Promise.all(promiseSequence);
 };
 
-
 /*
 flattenMissionsData()
 function which returns list of flat jsons with missions data.
 */
 const flattenMissionsData = (jsonObj) => {
     try {
-        // define a mapping object from yml keys to database column names
+    // define a mapping object from yml keys to database column names
         const ymlToWorkProcessTypeTableMap = {
             description: "description",
             maxagents: "num_max_agents",
@@ -191,7 +198,7 @@ const flattenMissionsData = (jsonObj) => {
             settings: "settings",
             extra_params: "extra_params",
             on_assignment_failure: "on_assignment_failure",
-            fallback_mission: "fallback_mission"
+            fallback_mission: "fallback_mission",
         };
 
         // use lookup to find the missions object in the input json
@@ -230,7 +237,7 @@ const flattenMissionsData = (jsonObj) => {
         // return the mission list array
         return missionList;
     } catch (error) {
-        // handle any errors and log them to the console
+    // handle any errors and log them to the console
         console.error(error);
         return [];
     }
@@ -242,7 +249,7 @@ function which returns list of flat jsons with service data.
 */
 const flattenServicesData = (jsonObj) => {
     try {
-        // define a mapping object from yml keys to database column names
+    // define a mapping object from yml keys to database column names
         const ymlToServicesTableMap = {
             domain: "class",
             type: "service_type",
@@ -259,8 +266,8 @@ const flattenServicesData = (jsonObj) => {
                 all_agents_data: "require_agents_data",
                 mission_agents_data: "require_mission_agents_data",
                 require_map_objects: "require_map_objects",
-                map_data: "require_map_data"
-            }
+                map_data: "require_map_data",
+            },
         };
 
         // use lookup to find the services object in the input json
@@ -273,7 +280,6 @@ const flattenServicesData = (jsonObj) => {
             // initialize arrays to store the column names and values
             const colNames = ["name"];
             const colValues: any[] = [key];
-
 
             // loop through the key-value pairs of each service object
             for (const [key2, value2] of Object.entries(value as any)) {
@@ -316,10 +322,9 @@ const flattenServicesData = (jsonObj) => {
         // return the service list array
         return serviceList;
     } catch (error) {
-        // handle any errors and log them to the console
+    // handle any errors and log them to the console
         console.error(error);
         return [];
     }
 };
-
 

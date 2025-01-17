@@ -8,7 +8,7 @@ import * as memDBService from '../../services/in_mem_database/mem_database_servi
 
 import { logData } from '../systemlog';
 import { MISSION_STATUS, AGENT_STATUS } from '../data_models';
-const MESSAGE_VERSION  = rabbitMQServices.MESSAGE_VERSION
+const MESSAGE_VERSION  = rabbitMQServices.MESSAGE_VERSION;
 const REFRESH_ONLINE_TIME_PERIOD = 5;
 
 type Assignment = {
@@ -70,9 +70,14 @@ async function watchMessageRates(msgRateLimit: number, updtRateLimit: number): P
             for (const agent of updtInfractors) {
                 const commandStr = JSON.stringify({
                     action: 'REDUCE_UPDATE_RATE',
-                    parameters: { rate: agent.updt_per_sec, limit: updtRateLimit },
+                    parameters: {
+                        rate: agent.updt_per_sec,
+                        limit: updtRateLimit,
+                    },
                 });
-                logData.addLog('agent', { uuid: agent.uuid }, 'error',
+                logData.addLog('agent', {
+                    uuid: agent.uuid,
+                }, 'error',
                     `Agent disconnected: high number of database updates per second. MESSAGE_UPDATE_LIMIT=${updtRateLimit} Hz. ` +
                     `Please check the publish rate for the routes agent.${agent.uuid}.update, agent.${agent.uuid}.state, and agent.${agent.uuid}.database_req.`);
                 await kickOutInfractorAgent(agent, commandStr);
@@ -81,9 +86,14 @@ async function watchMessageRates(msgRateLimit: number, updtRateLimit: number): P
             for (const agent of msgInfractors) {
                 const commandStr = JSON.stringify({
                     action: 'REDUCE_MSG_RATE',
-                    parameters: { rate: agent.msg_per_sec, limit: msgRateLimit },
+                    parameters: {
+                        rate: agent.msg_per_sec,
+                        limit: msgRateLimit,
+                    },
                 });
-                logData.addLog('agent', { uuid: agent.uuid }, 'error',
+                logData.addLog('agent', {
+                    uuid: agent.uuid,
+                }, 'error',
                     `Agent disconnected: high number of messages per second: ${agent.msg_per_sec}. MESSAGE_RATE_LIMIT=${msgRateLimit} Hz.`);
                 await kickOutInfractorAgent(agent, commandStr);
             }
@@ -139,7 +149,9 @@ async function cancelAssignmentInAgent(assignment: Assignment): Promise<void> {
     };
 
     await sendEncryptedMsgToAgent(assignment.agent_id, JSON.stringify(assignmentObj), 'instantActions');
-    logData.addLog('agent', { uuid: uuids[0] }, 'info', `Sending cancel signal to agent for the work process ${assignment.work_process_id}`);
+    logData.addLog('agent', {
+        uuid: uuids[0],
+    }, 'info', `Sending cancel signal to agent for the work process ${assignment.work_process_id}`);
 }
 
 async function sendCustomInstantActionToAgent(agentId: number, commandStr: string): Promise<void> {
@@ -173,18 +185,15 @@ async function sendReduceMsgRateInstantAction(agent: Agent, commandStr: string):
     await sendEncryptedMsgToAgent(agent.id, JSON.stringify(assignmentObj), 'instantActions');
 }
 
-
-
 /**
  * sendGetReadyForWorkProcessRequest
  * @param {number[]} agentIdList The list of agents to be reserved for the work process
  * @param {number} wpId Work process id.
- * @returns 
+ * @returns
  * @description
  * This function sends an instant action to the agents to reserve them for a work process.
  * Agent does whatever it needs to get ready for a mission and then updates status ("READY").
  */
-
 
 async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: number, operationTypesRequired: string[] = []): Promise<void[]> {
     const agents = await databaseServices.agents.list_in('id', agentIdList);
@@ -204,7 +213,9 @@ async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: nu
     }
 
     return Promise.all(agents.map(agent => {
-        logData.addLog('agent', { uuid: agent.uuid }, 'info', `Sending reserve signal to agent ${agent.id} for the work process ${wpId}`);
+        logData.addLog('agent', {
+            uuid: agent.uuid,
+        }, 'info', `Sending reserve signal to agent ${agent.id} for the work process ${wpId}`);
         return sendEncryptedMsgToAgent(agent.id, msgs[agent.id], 'reserve');
     }));
 }
@@ -223,9 +234,10 @@ async function sendReleaseFromWorkProcessRequest(agentId: number, wpId: number):
         _version: MESSAGE_VERSION,
     });
     await sendEncryptedMsgToAgent(agentId, msg, 'release');
-    logData.addLog('agent', { uuid: uuids[0] }, 'info', `Sending release signal to agent ${agentId} for the work process ${wpId}`);
+    logData.addLog('agent', {
+        uuid: uuids[0],
+    }, 'info', `Sending release signal to agent ${agentId} for the work process ${wpId}`);
 }
-
 
 function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: string | null,timeout: number = 20000): Promise<boolean[]> {
     const timeStep = 1000;
@@ -238,7 +250,9 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
     const checkAgentClearance = (id: number): Promise<boolean | { error: string } | null> =>
         databaseServices.agents.get_byId(id).then((agent) => {
             if (!agent) {
-                return { error: `The agent id ${id} could not be found in the database.` };
+                return {
+                    error: `The agent id ${id} could not be found in the database.`,
+                };
             }
 
             if (agent.status && agent.status.toLowerCase() === status.toLowerCase()) {
@@ -258,7 +272,9 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
                     ? `Agent ${agent.id} is not ready for the work process wp_id:${wpId}, but to wp_id:${reportedWorkProcessId}`
                     : `Agent ${agent.id} reported "ready" but the work process id is missing. Expected: { status:"ready", resources:{work_process_id: ${wpId}} }`;
 
-                logData.addLog('agent', { uuid: agent.uuid }, 'warn', warnMessage);
+                logData.addLog('agent', {
+                    uuid: agent.uuid,
+                }, 'warn', warnMessage);
                 return null;
             }
 
@@ -277,13 +293,13 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
             const promiseArray = agentIds.map((agentId) => checkAgentClearance(agentId));
 
             const promises = databaseServices.work_processes.get_byId(wpId!, ['status'])
-                            .then((wp) => {
-                                if (wp && [MISSION_STATUS.CANCELED, MISSION_STATUS.FAILED].includes(wp.status)) {
-                                    return ['WORK_PROCESS_TERMINATED'];
-                                }
+                .then((wp) => {
+                    if (wp && [MISSION_STATUS.CANCELED, MISSION_STATUS.FAILED].includes(wp.status)) {
+                        return ['WORK_PROCESS_TERMINATED'];
+                    }
 
-                                return Promise.all(promiseArray) as Promise<any[]>;
-                            });
+                    return Promise.all(promiseArray) as Promise<any[]>;
+                });
 
             promises.then((values: any[]) => {
                 if (values.includes('WORK_PROCESS_TERMINATED')) {
@@ -351,8 +367,6 @@ function sendEncryptedMsgToAgent(agentId: number, message: string, reason: strin
     });
 }
 
-
-
 export default {
     watchWhoIsOnline,
     watchMessageRates,
@@ -362,5 +376,5 @@ export default {
     sendReleaseFromWorkProcessRequest,
     sendCustomInstantActionToAgent,
     sendAssignmentToExecuteInAgent,
-    cancelAssignmentInAgent
-  };
+    cancelAssignmentInAgent,
+};
