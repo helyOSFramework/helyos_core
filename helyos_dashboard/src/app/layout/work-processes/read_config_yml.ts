@@ -81,6 +81,8 @@ const parseWorkProcess = (workprocessTypes: H_WorkProcessType[], workprocessPlan
     missions[wpTypeName] = mission;
 
     // parse wp_plans into mission steps
+    // ignore because of multiple types. id: string | number
+    // eslint-disable-next-line eqeqeq
     const wpTypeRecipeSteps = workprocessPlans.filter(e => e.workProcessTypeId == wpType.id);
     const formatedSteps = parseWorkProcessRecipeSteps(wpTypeRecipeSteps);
 

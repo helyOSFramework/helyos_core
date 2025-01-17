@@ -8,8 +8,9 @@
 <p>
   Assistant agents are specialized agents that support other actuator agents in completing their assignments.
   <br />
-  They  provide computational intelligence, data processing, and decision-making capabilities that enhance the overall functionality of the system. 
-  For example, an assistant can manage the traffic by issuing commands to control the agents velocities.
+  They provide computational intelligence, data processing, and decision-making capabilities that enhance the overall
+  functionality of the system. For example, an assistant can manage the traffic by issuing commands to control the
+  agents velocities.
 </p>
 
 <div class="card mb-3">
@@ -168,7 +169,7 @@
                       placeholder="Add here a short description..." />
                   </fieldset>
                 </div>
-  
+
                 <div class="row">
                   <fieldset class="form-group col-xl-12">
                     <label for="publicKey"> Public key (PEM) </label>
@@ -269,7 +270,7 @@
                     <label for="protocol">Protocol AMQP</label>
                   </fieldset>
                 </div>
-  
+
                 <div class="row">
                   <fieldset class="form-group col-xl-6">
                     <label for="allowAnonymousCheckin">Registration</label>
@@ -285,51 +286,50 @@
                     </select>
                   </fieldset>
                 </div>
-  
-  
-                <div  style="margin-left: 12px;">
-                    <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
-                      <div class="col-xl-12">
-                        <p style="font-size: small">
-                          helyOS automatically creates a RabbitMQ account; the agent can perform the check-in using the
-                          <i>anonymous</i>* account. The new username and password will be sent to the agent. Please refrain from using this method in production. 
-                        </p>
-                        <p style="font-size: small">
-                          * (username, password) = (anonymous, anonymous). The agent must possess the
-                          AGENT_REGISTRATION_TOKEN.
-                        </p>
-                      </div>
-                    </div>
 
-                    <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
-                      <fieldset class="form-group col-xl-6">
-                        <label for="rbmqUsername">username *</label>
-                        <input
-                          id="rbmqUsername"
-                          class="form-control"
-                          [(ngModel)]="selectedItem.rbmqUsername"
-                          (ngModelChange)="rbmqAccountChange = true"
-                          name="rbmqUsername"
-                          placeholder="0000-0000-0000-0000" />
-                      </fieldset>
-  
-                      <fieldset class="form-group col-xl-6">
-                        <label for="rbmqPassword"> password </label>
-                        <input
-                          id="rbmqPassword"
-                          class="form-control"
-                          [(ngModel)]="rbmqPassword"
-                          (ngModelChange)="rbmqAccountChange = true"
-                          name="rbmqPassword"
-                          placeholder="*********" />
-                      </fieldset>
-                      <p style="font-size: small" class="col-xl-12">
-                        * helyOS will accept messages from this agent only if the username matches the uuid.
+                <div style="margin-left: 12px">
+                  <div class="row" *ngIf="selectedItem.allowAnonymousCheckin">
+                    <div class="col-xl-12">
+                      <p style="font-size: small">
+                        helyOS automatically creates a RabbitMQ account; the agent can perform the check-in using the
+                        <i>anonymous</i>* account. The new username and password will be sent to the agent. Please
+                        refrain from using this method in production.
+                      </p>
+                      <p style="font-size: small">
+                        * (username, password) = (anonymous, anonymous). The agent must possess the
+                        AGENT_REGISTRATION_TOKEN.
                       </p>
                     </div>
+                  </div>
+
+                  <div class="row" *ngIf="!selectedItem.allowAnonymousCheckin">
+                    <fieldset class="form-group col-xl-6">
+                      <label for="rbmqUsername">username *</label>
+                      <input
+                        id="rbmqUsername"
+                        class="form-control"
+                        [(ngModel)]="selectedItem.rbmqUsername"
+                        (ngModelChange)="rbmqAccountChange = true"
+                        name="rbmqUsername"
+                        placeholder="0000-0000-0000-0000" />
+                    </fieldset>
+
+                    <fieldset class="form-group col-xl-6">
+                      <label for="rbmqPassword"> password </label>
+                      <input
+                        id="rbmqPassword"
+                        class="form-control"
+                        [(ngModel)]="rbmqPassword"
+                        (ngModelChange)="rbmqAccountChange = true"
+                        name="rbmqPassword"
+                        placeholder="*********" />
+                    </fieldset>
+                    <p style="font-size: small" class="col-xl-12">
+                      * helyOS will accept messages from this agent only if the username matches the uuid.
+                    </p>
+                  </div>
                 </div>
-  
-  
+
                 <div class="row">
                   <fieldset class="form-group col-xl-6">
                     <label for="permissionOption">Permissions</label>
@@ -346,57 +346,51 @@
                     </select>
                   </fieldset>
                 </div>
-  
-                <div  style="margin-left: 12px;">
-                    <p  *ngIf="selectedItem.protocol === 'MQTT'" style="font-size: small;">
-                        Permission options are not available in the MQTT protocol.
-                    </p>
-  
-                  <div *ngIf="selectedItem.protocol !== 'MQTT'" >
-                      <div class="row">
-                        <fieldset class="form-group col-xl-12">
-                          <label for="readPermission">read</label>
-                          <input
-                            [readonly]="permissionOption!=='other'"
-                            id="readPermissions"
-                            class="form-control"
-                            [(ngModel)]="selectedItem.readPermissions"
-                            name="readPermissions"
-                            />
-                        </fieldset>
-                      </div>
-  
-                      <div class="row">
-                        <fieldset class="form-group col-xl-12">
-                          <label for="writePermission"> write </label>
-                          <input
-                            [readonly]="permissionOption!=='other'"
-                            id="writePermissions"
-                            class="form-control"
-                            [(ngModel)]="selectedItem.writePermissions"
-                            name="writePermissions"
-                            />
-                        </fieldset>
-                      </div>
-  
-                      <div class="row">
-                        <fieldset class="form-group col-xl-12">
-                          <label for="configurePermission"> configure </label>
-                          <input
-                            [readonly]="permissionOption!=='other'"
-                            id="configurePermissions"
-                            class="form-control"
-                            [(ngModel)]="selectedItem.configurePermissions"
-                            name="configurePermissions"
-                            />
-                        </fieldset>
-                      </div>
+
+                <div style="margin-left: 12px">
+                  <p *ngIf="selectedItem.protocol === 'MQTT'" style="font-size: small">
+                    Permission options are not available in the MQTT protocol.
+                  </p>
+
+                  <div *ngIf="selectedItem.protocol !== 'MQTT'">
+                    <div class="row">
+                      <fieldset class="form-group col-xl-12">
+                        <label for="readPermission">read</label>
+                        <input
+                          [readonly]="permissionOption !== 'other'"
+                          id="readPermissions"
+                          class="form-control"
+                          [(ngModel)]="selectedItem.readPermissions"
+                          name="readPermissions" />
+                      </fieldset>
+                    </div>
+
+                    <div class="row">
+                      <fieldset class="form-group col-xl-12">
+                        <label for="writePermission"> write </label>
+                        <input
+                          [readonly]="permissionOption !== 'other'"
+                          id="writePermissions"
+                          class="form-control"
+                          [(ngModel)]="selectedItem.writePermissions"
+                          name="writePermissions" />
+                      </fieldset>
+                    </div>
+
+                    <div class="row">
+                      <fieldset class="form-group col-xl-12">
+                        <label for="configurePermission"> configure </label>
+                        <input
+                          [readonly]="permissionOption !== 'other'"
+                          id="configurePermissions"
+                          class="form-control"
+                          [(ngModel)]="selectedItem.configurePermissions"
+                          name="configurePermissions" />
+                      </fieldset>
+                    </div>
                   </div>
                 </div>
-  
-  
               </div>
-  
 
               <h5>State Properties</h5>
               <div class="field-group">

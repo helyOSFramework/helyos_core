@@ -33,19 +33,18 @@ export class AgentToolsComponent implements OnInit {
 
   ngOnInit() {
     this.loadConfigurations()
-    .then(() => this.list());
+      .then(() => this.list());
   }
-
 
   loadConfigurations() {
     return this.helyosService.methods.RBMQConfig.list()
-    .then(rv => {
-      const config =rv[0];
-      this.readStrict = `${config.agentsDlExchange}|${config.agentsAnonymousExchange}|${config.agentsMqttExchange}`;
-      this.writeStrict = `${config.agentsUlExchange}|${config.agentsAnonymousExchange}|${config.agentsMqttExchange}`;
-      this.configureStrict = `.*`;
-    
-    })
+      .then(rv => {
+        const config =rv[0];
+        this.readStrict = `${config.agentsDlExchange}|${config.agentsAnonymousExchange}|${config.agentsMqttExchange}`;
+        this.writeStrict = `${config.agentsUlExchange}|${config.agentsAnonymousExchange}|${config.agentsMqttExchange}`;
+        this.configureStrict = `.*`;
+
+      });
   }
 
   list() {
@@ -126,9 +125,9 @@ export class AgentToolsComponent implements OnInit {
         this.selectedItem.wpClearance = JSON.stringify(r.wpClearance, null, 2);
         this.rbmqPassword = '';
         this.saveStateMsg = '';
-        this.readPermissions =  this.selectedItem.readPermissions; 
+        this.readPermissions =  this.selectedItem.readPermissions;
         this.writePermissions = this.selectedItem.writePermissions;
-        this.configurePermissions = this.selectedItem.configurePermissions; 
+        this.configurePermissions = this.selectedItem.configurePermissions;
         this.setPermissionOption();
         const id = r.id;
         const leaderId = typeof id === 'string' ? Number(id) : id;
@@ -319,8 +318,6 @@ export class AgentToolsComponent implements OnInit {
     }
   }
 
-
-
   changePermissions() {
     switch (this.permissionOption) {
       case 'loose':
@@ -328,27 +325,29 @@ export class AgentToolsComponent implements OnInit {
         this.selectedItem.writePermissions = '.*';
         this.selectedItem.configurePermissions = '.*';
         break;
-      
+
       case 'strict':
         this.selectedItem.readPermissions =  this.readStrict;
         this.selectedItem.writePermissions =  this.writeStrict;
         this.selectedItem.configurePermissions =  this.configureStrict;
         break;
-      
+
       case 'other':
         this.selectedItem.readPermissions = this.readPermissions;
         this.selectedItem.writePermissions = this.writePermissions;
         this.selectedItem.configurePermissions = this.configurePermissions;
         break;
-    
+
       default:
         break;
     }
   }
 
   setPermissionOption() {
-    const { configurePermissions, readPermissions, writePermissions } = this.selectedItem;
-  
+    const {
+      configurePermissions, readPermissions, writePermissions,
+    } = this.selectedItem;
+
     if (configurePermissions === '.*' && readPermissions === '.*' && writePermissions === '.*') {
       this.permissionOption = 'loose';
     } else if (
@@ -361,7 +360,6 @@ export class AgentToolsComponent implements OnInit {
       this.permissionOption = 'other';
     }
   }
-
 
   openDocs() {
     window.open('https://helyos-manual.readthedocs.io/en/latest/2-helyos-configuration/admin-dashboard.html#register-agents-view', '_blank');
