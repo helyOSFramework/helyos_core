@@ -338,9 +338,10 @@ class InMemDB {
                     bufferedData[key].updt_per_sec = updtPerSecond;
                 }
 
-                // State information is exclusively saved by state_event_handler module
+                // Information is exclusively saved by state_event_handler or checkin_event_handler module
                 delete bufferedData[key]['status'];
                 delete bufferedData[key]['resources'];
+                delete bufferedData[key]['yard_id'];
 
                 // Delete properties that are relevant only for agents:
                 if (tableName !== 'agents') {
