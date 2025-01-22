@@ -1,13 +1,13 @@
 import { WorkProcessesModule } from './work-processes.module';
 
 describe('WorkProcessesModule', () => {
-  let WorkProcessesModule: WorkProcessesModule;
+  let workProcessesModule: WorkProcessesModule;
 
   beforeEach(() => {
-    WorkProcessesModule = new WorkProcessesModule();
+    workProcessesModule = new WorkProcessesModule();
   });
 
   it('should create an instance', () => {
-    expect(WorkProcessesModule).toBeTruthy();
+    expect(workProcessesModule).toBeTruthy();
   });
 });

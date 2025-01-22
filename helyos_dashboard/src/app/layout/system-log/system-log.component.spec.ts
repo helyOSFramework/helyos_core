@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SystemLogComponent } from './system-log.component';
+import { FormsModule } from '@angular/forms';
 
 describe('SystemLogComponent', () => {
   let component: SystemLogComponent;
@@ -9,6 +10,7 @@ describe('SystemLogComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SystemLogComponent],
+      imports: [FormsModule],
     }).compileComponents();
   }));
 

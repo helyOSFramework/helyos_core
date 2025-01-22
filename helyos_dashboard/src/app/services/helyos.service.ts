@@ -36,7 +36,7 @@ export class HelyosService {
       }
     }
 
-    console.log(this.methods);
+    // console.log(this.methods);
   }
 
   instantiateService(gqlPort = null, socketPort = null) {

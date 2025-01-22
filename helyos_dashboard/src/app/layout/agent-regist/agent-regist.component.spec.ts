@@ -1,19 +1,24 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { YardsComponent } from './agent-regist.component';
+import { AgentRegistComponent } from './agent-regist.component';
+import { MockHelyosService } from 'src/app/mocks/helyos.service.mock';
+import { HelyosService } from 'src/app/services/helyos.service';
 
-describe('YardsComponent', () => {
-  let component: YardsComponent;
-  let fixture: ComponentFixture<YardsComponent>;
+describe('AgentRegistComponent', () => {
+  let component: AgentRegistComponent;
+  let fixture: ComponentFixture<AgentRegistComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [YardsComponent],
+      declarations: [AgentRegistComponent],
+      providers: [
+        { provide: HelyosService, useClass: MockHelyosService }
+      ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(YardsComponent);
+    fixture = TestBed.createComponent(AgentRegistComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

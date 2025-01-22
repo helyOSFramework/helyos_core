@@ -9,7 +9,6 @@
     ]
   },
   "files": [
-    "test.ts",
     "src/polyfills.ts"
   ],
   "include": [
