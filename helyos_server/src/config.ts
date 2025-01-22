@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+const SERVER_PATH_BASE = process.env.SERVER_PATH_BASE || '';
 
 // helyOS Integration
 const PGHOST = process.env.PGHOST;
@@ -120,6 +121,8 @@ const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos
 
 // Export all variables
 export default  {
+    SERVER_PATH_BASE,
+    
     PGHOST,
     PGPORT,
     PGDATABASE,

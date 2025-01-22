@@ -46,7 +46,10 @@ if (MOCK_SERVICES === 'True') {
     require('./microservice_mocks.js').overrideMapServerCalls();
 }
 
-
+const { PGHOST, PGPORT,
+    JWT_SECRET, PGDATABASE,
+   postgraphileRolePassword, 
+   SERVER_PATH_BASE } = config;
 
 // ----------------------------------------------------------------------------
 // 2) Postgres postgClient setup - Database Triggers Events using PG_NOTIFY
@@ -111,13 +114,11 @@ async function connectToRabbitMQ() {
 // ----------------------------------------------------------------------------
 // 4) GraphQL server setup -  External App <-> Nodejs(GraphQL Lib) <-> Postgres
 // ----------------------------------------------------------------------------
-const { postgraphile } = require("postgraphile");
-const { PGHOST, PGPORT,
-        JWT_SECRET, PGDATABASE,
-       postgraphileRolePassword } = config;
+import { postgraphile, PostGraphileOptions } from "postgraphile";
 
 
-const postGraphileOptions = {
+const pathPrefix = SERVER_PATH_BASE ? `/${SERVER_PATH_BASE}` : ''; 
+const postGraphileOptions: PostGraphileOptions = {
     watchPg: false,
     graphiql: true,
     enhanceGraphiql: true,
@@ -128,6 +129,8 @@ const postGraphileOptions = {
     jwtPgTypeIdentifier: "public.jwt_token",
     enableCors: true,
     disableQueryLog: true,
+    graphqlRoute: `${pathPrefix}/graphql`, 
+    graphiqlRoute: `${pathPrefix}/graphiql`,
     // showErrorStack: "json",
     // dynamicJson: true,
     // ignoreRBAC: false,
@@ -155,10 +158,14 @@ const setGraphQLServer = () => {
 const setDashboardServer = () => {
     const pubKey = fs.readFileSync('/etc/helyos/.ssl_keys/helyos_public.key',{ encoding: 'utf8', flag: 'r' });
     const app = express();
-    app.use('/api-docs', express.static(API_DOC_DIR));
-    app.use('/dashboard', express.static(DASHBOARD_DIR));
-    app.get('/public-key', (req, res) => {res.type('pem').send(pubKey);});
-    app.use('/', (req, res, next) => res.redirect('/dashboard'));
+    const pathPrefix = SERVER_PATH_BASE ? `/${SERVER_PATH_BASE}` : ''; 
+
+    // Use the pathPrefix for the routes
+    app.use(`${pathPrefix}/api-docs`, express.static(API_DOC_DIR));
+    app.use(`${pathPrefix}/dashboard`, express.static(DASHBOARD_DIR));
+    app.get(`${pathPrefix}/public-key`, (req, res) => { res.type('pem').send(pubKey); });
+    app.use(`${pathPrefix}/`, (req, res, next) => res.redirect(`${pathPrefix}/dashboard`));
+
     return app;
 }
 
