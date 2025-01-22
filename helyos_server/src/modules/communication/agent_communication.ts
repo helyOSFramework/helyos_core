@@ -2,7 +2,7 @@
 // It also contains functions to send instant actions to agents, such as reserving, releasing and cancel agents for work processes.
 
 import rabbitMQServices from '../../services/message_broker/rabbitMQ_services';
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import roleManagerModule from '../../role_manager';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
 
@@ -33,6 +33,7 @@ type Agent = {
 };
 
 async function watchWhoIsOnline(maxTimeWithoutUpdate: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const roleManager = await roleManagerModule.getInstance();
 
     setInterval(() => {
@@ -43,6 +44,7 @@ async function watchWhoIsOnline(maxTimeWithoutUpdate: number): Promise<void> {
 }
 
 async function watchMessageRates(msgRateLimit: number, updtRateLimit: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const roleManager = await roleManagerModule.getInstance();
     const inMemDB = await memDBService.getInstance();
 
@@ -92,6 +94,7 @@ async function watchMessageRates(msgRateLimit: number, updtRateLimit: number): P
 }
 
 async function sendAssignmentToExecuteInAgent(assignment: Assignment): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const uuids = await databaseServices.agents.getUuids([assignment.agent_id]);
     const assignmentObj = {
         type: 'assignment_execution',
@@ -113,6 +116,7 @@ async function sendAssignmentToExecuteInAgent(assignment: Assignment): Promise<v
 }
 
 async function cancelAssignmentInAgent(assignment: Assignment): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const uuids = await databaseServices.agents.getUuids([assignment.agent_id]);
     const assignmentObj = {
         type: 'assignment_cancel',
@@ -143,6 +147,7 @@ async function cancelAssignmentInAgent(assignment: Assignment): Promise<void> {
 }
 
 async function sendCustomInstantActionToAgent(agentId: number, commandStr: string): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance(); 
     const uuids = await databaseServices.agents.getUuids([agentId]);
 
     if (!agentId) {
@@ -187,6 +192,7 @@ async function sendReduceMsgRateInstantAction(agent: Agent, commandStr: string):
 
 
 async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: number, operationTypesRequired: string[] = []): Promise<void[]> {
+    const databaseServices = await DatabaseService.getInstance(); 
     const agents = await databaseServices.agents.list_in('id', agentIdList);
     const msgs: Record<number, string> = {};
 
@@ -210,6 +216,7 @@ async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: nu
 }
 
 async function sendReleaseFromWorkProcessRequest(agentId: number, wpId: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const uuids = await databaseServices.agents.getUuids([agentId]);
 
     const msg = JSON.stringify({
@@ -236,7 +243,9 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
     }
 
     const checkAgentClearance = (id: number): Promise<boolean | { error: string } | null> =>
-        databaseServices.agents.get_byId(id).then((agent) => {
+          DatabaseService.getInstance()
+         .then(databaseServices => databaseServices.agents.get_byId(id))
+         .then((agent) => {
             if (!agent) {
                 return { error: `The agent id ${id} could not be found in the database.` };
             }
@@ -276,14 +285,15 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
             console.log(`Waiting for agent status ${status}. Time: ${elapsedTime}`);
             const promiseArray = agentIds.map((agentId) => checkAgentClearance(agentId));
 
-            const promises = databaseServices.work_processes.get_byId(wpId!, ['status'])
-                            .then((wp) => {
+            const promises = DatabaseService.getInstance()
+                        .then(databaseServices => databaseServices.work_processes.get_byId(wpId!, ['status']))
+                        .then((wp) => {
                                 if (wp && [MISSION_STATUS.CANCELED, MISSION_STATUS.FAILED].includes(wp.status)) {
                                     return ['WORK_PROCESS_TERMINATED'];
                                 }
 
                                 return Promise.all(promiseArray) as Promise<any[]>;
-                            });
+                        });
 
             promises.then((values: any[]) => {
                 if (values.includes('WORK_PROCESS_TERMINATED')) {
@@ -316,7 +326,8 @@ function waitAgentStatusForWorkProcess(agentIds: number[],status: string, wpId: 
     });
 }
 
-function sendEncryptedMsgToAgent(agentId: number, message: string, reason: string = 'assignment'): Promise<void> {
+async function sendEncryptedMsgToAgent(agentId: number, message: string, reason: string = 'assignment'): Promise<void> {
+    const databaseServices =  await DatabaseService.getInstance();
     return databaseServices.agents.get_byId(agentId).then((agent) => {
         if (!agent) {
             logData.addLog('helyos_core', null, 'error', `Msg ${reason} Agent ${agentId} not found in database`);

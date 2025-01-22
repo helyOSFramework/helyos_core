@@ -1,4 +1,4 @@
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
 import * as webSocketCommunicaton from '../../modules/communication/web_socket_communication';
 import { logData } from '../../modules/systemlog';
@@ -54,6 +54,7 @@ interface AgentUpdate {
 }
 
 async function agentAutoUpdate(objMsg: ObjMsg, uuid: string, mode: string = 'buffered'): Promise<any[]> {
+    const databaseServices = await DatabaseService.getInstance();
     const inMemDB = await memDBService.getInstance();
 
     let agentUpdate: AgentUpdate = { uuid, last_message_time: new Date() };
@@ -149,6 +150,8 @@ async function agentAutoUpdate(objMsg: ObjMsg, uuid: string, mode: string = 'buf
 }
 
 async function connectFollowersToLeader(leaderUUID: string, followerUUIDs: string[]): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
+
     try {
         const newConnectionIds = await databaseServices.connectAgents(leaderUUID, followerUUIDs);
         logData.addLog('agent', { uuid: leaderUUID }, 'info', `Followers connected to this agent # : ${newConnectionIds.length ? newConnectionIds : 'None'}`);

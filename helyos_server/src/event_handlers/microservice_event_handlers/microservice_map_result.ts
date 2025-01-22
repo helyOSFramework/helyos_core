@@ -1,5 +1,5 @@
 // Services imports
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import * as utils from '../../modules/utils';
 import { logData } from '../../modules/systemlog';
 
@@ -38,6 +38,7 @@ interface YardData {
  * @returns A promise that resolves when all map objects are inserted.
  */
 const insertManyMapObjectsAsync = async (yardId: number, mapObjects: MapObject[]): Promise<void[]> => {
+    const databaseServices = await DatabaseService.getInstance();
     const responsePromises = mapObjects.map((mapObj) => {
         // Filter only valid properties
         const { data_format, type, metadata, data, name } = mapObj;
@@ -55,6 +56,7 @@ const insertManyMapObjectsAsync = async (yardId: number, mapObjects: MapObject[]
  * @returns A promise that resolves when all updates are complete.
  */
 async function updateMap(yardId: number, yardData: YardData): Promise<any> {
+    const databaseServices = await DatabaseService.getInstance();
     let mapObjects = yardData.map_objects || yardData.mapObjects || [];
     mapObjects = mapObjects.map((mapObj) => utils.snakeCaseAttributes(mapObj) as MapObject);
 

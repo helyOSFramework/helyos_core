@@ -1,4 +1,4 @@
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 
 /**
  * Interface Definitions
@@ -18,7 +18,7 @@ interface MapData {
     map_objects?: any[];
 }
 
-interface Agent {
+class AgentCtxDTO {
     id: number;
     uuid: string;
     agent_class: string;
@@ -50,11 +50,22 @@ interface Agent {
         z: number;
         orientations: any;
     };
+
+    constructor(agent: AgentCtxDTO) {
+        Object.assign(this, agent);
+        this.pose = {
+            x: agent.x,
+            y: agent.y,
+            z: agent.z,
+            orientations: agent.orientations,
+        };
+    }
+    
 }
 
 interface Context {
     map: MapData;
-    agents: Agent[];
+    agents: AgentCtxDTO[];
 }
 
 interface Filter {
@@ -88,6 +99,7 @@ interface DependencyResult {
  * Gathers all data relative to the yard.
  */
 async function generateFullYardContext(yardId: number): Promise<Context> {
+    const databaseServices = await DatabaseService.getInstance();
     const context: Context = {
         map: {} as MapData,
         agents: [],
@@ -116,16 +128,9 @@ async function generateFullYardContext(yardId: number): Promise<Context> {
     ];
     const agents = await databaseServices.agents.get('yard_id', yardId, agentFields, null, false, ['follower_connections']);
 
-    agents.forEach((agent: Agent) => {
-        agent.pose = {
-            x: agent.x,
-            y: agent.y,
-            z: agent.z,
-            orientations: agent.orientations,
-        };
-    });
+    const agentCtx = agents.map(a => new AgentCtxDTO(a));
 
-    context.agents = agents;
+    context.agents = agentCtx;
 
     return context;
 }
@@ -167,6 +172,7 @@ function filterContext(context: Context, filter: Filter): Context {
  * Generate dependencies for microservices.
  */
 async function generateMicroserviceDependencies(servReqUids: string[]): Promise<DependencyResult[]> {
+    const databaseServices = await DatabaseService.getInstance();
     const serviceRequests = await databaseServices.service_requests.list_in('request_uid', servReqUids);
 
     const dependencies = serviceRequests.map((serviceRequest: ServiceRequest) => {

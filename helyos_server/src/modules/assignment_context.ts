@@ -1,4 +1,4 @@
-import databaseServices  from '../services/database/database_services';
+import * as DatabaseService  from '../services/database/database_services';
 
 interface Assignment {
     id: number;
@@ -23,6 +23,7 @@ interface AssignmentDependency {
 export async function generateAssignmentDependencies(
     assignment: Assignment
 ): Promise<AssignmentDependency[]> {
+    const databaseServices = await DatabaseService.getInstance();
     const assignmentIds = assignment.depend_on_assignments;
     
     const assignments = await databaseServices.assignments.list_in('id', assignmentIds);

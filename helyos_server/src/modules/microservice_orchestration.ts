@@ -3,7 +3,7 @@
 ** Copyright 2022,  Fraunhofer-Institut für Verkehrs- und Infrastruktursysteme IVI.
 */
 
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 import agentComm from './communication/agent_communication';
 import { logData } from './systemlog';
 import config from '../config';
@@ -128,8 +128,9 @@ function ensureCorrectDummyRequestFormat(service: Service, request: Request, age
  * @returns {Promise<any[]>}
  */
 function createServiceRequestsForWorkProcessType(processType: string, request: Request, agentIds: string[], wproc_id: number): Promise<any[]> {
-    let _request = { ...request }
-    return databaseServices.services.select({ 'enabled': true })
+    let _request = { ...request };
+    return DatabaseService.getInstance()
+    .then( databaseServices => databaseServices.services.select({ 'enabled': true })
         .then((services) => {
             // Step 1 Organize registered microservices by type, we consider only the services enabled by the developer.
             const serviceByType: Record<string, any> = {};
@@ -267,11 +268,11 @@ function createServiceRequestsForWorkProcessType(processType: string, request: R
                     console.error("creating service requests: parsing data", e);
                     throw new Error(e);
                 });
-        })
-        .catch(e => {
-            console.error("creating service requests: collecting data", e);
-            throw new Error(e);
-        });
+        }))
+    .catch(e => {
+        console.error("creating service requests: collecting data", e);
+        throw new Error(e);
+    });
 
 }
 
@@ -283,6 +284,7 @@ function createServiceRequestsForWorkProcessType(processType: string, request: R
  * @returns {Promise<void>}
  */
 async function prepareServicesPipelineForWorkProcess(partialWorkProcess: PartialWorkProcess): Promise<any> {
+    const databaseServices = await DatabaseService.getInstance();
     const workProcess = await databaseServices.work_processes.get_byId(partialWorkProcess.id);
     if (!workProcess.work_process_type_name) {
         logData.addLog('microservice', { work_process_id: workProcess.id }, 'error', `work process type not found`);
@@ -428,6 +430,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess: Partial
  * @returns {Promise<boolean>}
 **/
 async function wrapUpMicroserviceCall(partialServiceRequest: PartialServiceRequest): Promise<boolean> {
+    const databaseServices = await DatabaseService.getInstance();
 	if (partialServiceRequest.next_request_to_dispatch_uids &&
 	  partialServiceRequest.next_request_to_dispatch_uids.length) {
 	  return Promise.resolve(false);
@@ -529,6 +532,8 @@ function updateRequestData(serviceResponses: ServiceResponse[], nextServRequest:
  * @param partialServiceRequest Partial service request
  */
 async function activateNextServicesInPipeline(partialServiceRequest: PartialServiceRequest): Promise<number> {
+    const databaseServices = await DatabaseService.getInstance();
+
     if (!partialServiceRequest.next_request_to_dispatch_uids?.length) {
         return 0;
     }
@@ -559,6 +564,8 @@ async function activateNextServicesInPipeline(partialServiceRequest: PartialServ
  * @param servRequestId Service request ID
  */
 async function updateRequestContext(servRequestId: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
+
     const serviceRequest = await databaseServices.service_requests.get_byId(servRequestId);
     const workProcess = await databaseServices.work_processes.get_byId(serviceRequest.work_process_id, ['yard_id']);
     const fullYardContext = await generateFullYardContext(workProcess.yard_id);
@@ -585,6 +592,8 @@ async function updateRequestContext(servRequestId: number): Promise<void> {
  * @returns Status of the service request
  */
 async function determineServiceRequestStatus(serviceRequest: PartialServiceRequest): Promise<string> {
+    const databaseServices = await DatabaseService.getInstance();
+
     const completedWpRequests = await databaseServices.service_requests.select(
         { work_process_id: serviceRequest.work_process_id, status: SERVICE_STATUS.READY },
         ['id', 'request_uid']

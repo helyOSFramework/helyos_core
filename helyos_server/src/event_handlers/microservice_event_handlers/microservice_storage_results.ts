@@ -1,4 +1,4 @@
-import databaseService from '../../services/database/database_services';
+import * as DatabaseService  from '../../services/database/database_services';
 
 // Services imports
 
@@ -12,7 +12,8 @@ interface MapObject {
 }
 
 function updateMap(mapObject: MapObject): Promise<any> {
-	return databaseService.yards.update_byId(mapObject.id, mapObject);
+	return DatabaseService.getInstance()
+		   .then(databaseServices => databaseServices.yards.update_byId(mapObject.id, mapObject));
 }
 
 function mapCreate(mapObject: MapObject): void {

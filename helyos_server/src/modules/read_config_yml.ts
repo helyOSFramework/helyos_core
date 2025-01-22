@@ -2,7 +2,7 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
 
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 import { logData } from './systemlog';
 import {lookup} from './utils';
 
@@ -16,29 +16,31 @@ const OVERWRITE_MISSIONS = false
  * @param {string} servicesYmlPath
  * @returns {boolean}
  */
-export const registerManyMicroservices = (servicesYmlPath) => {
+export const registerManyMicroservices = async (servicesYmlPath) => {
+    const databaseServices = await DatabaseService.getInstance();
+
     try {
         const rawdata = fs.readFileSync(servicesYmlPath, { encoding: 'utf-8' })
         const services = yaml.load(rawdata);
 
-        // this loop contains assync code
-        flattenServicesData(services).forEach((service:any, idx) => {
-            // create or update service
-            databaseServices.services.select({ name: service['name'] })
-                .then((oldServices) => {
-                    if (oldServices.length === 0) {
-                        return databaseServices.services.insert(service);
-                    } else {
-                        const servId = oldServices[0].id;
-                        return databaseServices.services.update_byId(servId, service);
-                    }
-                })
-                // errors are individualy handled. 
-                .catch((error) => {
-                    console.error(error);
-                    logData.addLog('helyos_core', null, 'error', `Parsing microservice YML file: ${service.name}`);
-                });
-        });
+        const flattenedServiceData = flattenServicesData(services);
+        for(const service of flattenedServiceData) {
+
+            try {
+                const oldServices = await databaseServices.services.select({ name: service['name'] });
+                if (oldServices.length === 0) {
+                    await databaseServices.services.insert(service);
+                } else {
+                    const servId = oldServices[0].id;
+                    await databaseServices.services.update_byId(servId, service);
+                }
+
+            } catch (error) {
+                console.error(error);
+                logData.addLog('helyos_core', null, 'error', `Parsing microservice YML file: ${service.name}`);
+            }
+        }
+
         return true;
     } catch (error) {
         console.error('non-critical error', error);
@@ -56,39 +58,39 @@ export const registerManyMicroservices = (servicesYmlPath) => {
  * @param {string} missionsYmlPath
  * @returns {boolean}
  */
-export const registerMissions = (missionsYmlPath) => {
+export const registerMissions =  async (missionsYmlPath) => {
+    const databaseServices = await DatabaseService.getInstance();
     try {
         const rawdata = fs.readFileSync(missionsYmlPath, { encoding: 'utf-8' })
         const missions = yaml.load(rawdata);
 
-        // this loop contains assync code.
-        flattenMissionsData(missions).forEach((wprocess:any, idx) => {
-            // create or update work process
-            databaseServices.work_process_type.select({ name: wprocess['name'] })
-                .then((oldWprocesses) => {
+        const flattenedMissions = flattenMissionsData(missions);
+        for (const wprocess of flattenedMissions) {
+                try {
+                    // create or update work process
+                    const oldWprocesses = await databaseServices.work_process_type.select({ name: wprocess['name'] });
+                    let wprocId = null;
+        
                     if (oldWprocesses.length === 0) {
-                        return databaseServices.work_process_type.insert(wprocess);
-                    } else {
-                        if (OVERWRITE_MISSIONS) {
-                            const wprocId = oldWprocesses[0].id;
-                            return databaseServices.work_process_type.update_byId(wprocId, wprocess).then(() => wprocId);
-                        }
-                        return Promise.resolve(null)
+                        wprocId = await databaseServices.work_process_type.insert(wprocess);
+                    } else if (OVERWRITE_MISSIONS) {
+                        wprocId = oldWprocesses[0].id;
+                        await databaseServices.work_process_type.update_byId(wprocId, wprocess);
                     }
-                })
-                // update the mission recipe of the work process
-                .then((wprocId) => saveWorkProcessServicePlans(wprocess['name'], wprocId, missions))
-                // errors are individualy handled. 
-                .catch((error) => {
+        
+                    // update the mission recipe of the work process
+                    await saveWorkProcessServicePlans(wprocess['name'], wprocId, missions);
+        
+                } catch (error) {
                     const errorStr = JSON.stringify(error, Object.getOwnPropertyNames(error));
                     logData.addLog('helyos_core', null, 'error', `Parsing mission YML file: ${wprocess.name} ${errorStr}`);
-                });
-        });
+                }
+        }
 
         return true;
     } catch (error) {
-        console.error('non-critical error', error);
-        logData.addLog('helyos_core', null, 'error', `Parsing mission YML file: ${error}`);
+        console.warn('Non-critical error', error);
+        logData.addLog('helyos_core', null, 'error', `missions.yml input error: ${error}`);
 
         return null;
     }
@@ -135,45 +137,47 @@ const saveWorkProcessServicePlans = (
     const recipeSteps = missions[workProcessType]["recipe"]["steps"];
 
     // loop through the recipe steps array
-    const promiseSequence: Promise<any>[] = []
-    promiseSequence.push(databaseServices.work_process_service_plan.remove('work_process_type_id', workProcessTypeId));
-    for (const [index, step] of recipeSteps.entries()) {
-        // initialize arrays to store the column names and values
-        const colNames2 = ["work_process_type_id"];
-        const colValues2 = [workProcessTypeId];
+    return DatabaseService.getInstance().then(databaseServices => {
+            const promiseSequence: Promise<any>[] = []
+            promiseSequence.push(databaseServices.work_process_service_plan.remove('work_process_type_id', workProcessTypeId));
+            for (const [index, step] of recipeSteps.entries()) {
+                // initialize arrays to store the column names and values
+                const colNames2 = ["work_process_type_id"];
+                const colValues2 = [workProcessTypeId];
 
-        // loop through the key-value pairs of each step object
-        for (const [key2, value2] of Object.entries(step)) {
-            // check if the key is in the mapping object
-            if (Object.keys(ymlToWorkProcessServicePlanTableMap).indexOf(key2) > -1) {
-                // push the corresponding column name and value to the arrays
-                colNames2.push(ymlToWorkProcessServicePlanTableMap[key2]);
-                colValues2.push(value2);
+                // loop through the key-value pairs of each step object
+                for (const [key2, value2] of Object.entries(step)) {
+                    // check if the key is in the mapping object
+                    if (Object.keys(ymlToWorkProcessServicePlanTableMap).indexOf(key2) > -1) {
+                        // push the corresponding column name and value to the arrays
+                        colNames2.push(ymlToWorkProcessServicePlanTableMap[key2]);
+                        colValues2.push(value2);
+                    }
+                }
+
+                // check if the depends_on_steps column is missing
+                const dependsOnStepsIndex = colNames2.indexOf("depends_on_steps");
+
+                if (dependsOnStepsIndex === -1) {
+                    // add the depends_on_steps column with a default value of an empty array
+                    colNames2.push("depends_on_steps");
+                    colValues2.push("[]");
+                }
+
+                // initialize an empty object to store the flattened step
+                const patchFlat = {};
+
+                // loop through the column names and assign them to the flattened step object with their values
+                for (const [index, val] of colNames2.entries()) {
+                    patchFlat[val] = colValues2[index];
+                }
+
+                // insert value to work_process_service_plan table
+                promiseSequence.push(databaseServices.work_process_service_plan.insert(patchFlat));
             }
-        }
 
-        // check if the depends_on_steps column is missing
-        const dependsOnStepsIndex = colNames2.indexOf("depends_on_steps");
-
-        if (dependsOnStepsIndex === -1) {
-            // add the depends_on_steps column with a default value of an empty array
-            colNames2.push("depends_on_steps");
-            colValues2.push("[]");
-        }
-
-        // initialize an empty object to store the flattened step
-        const patchFlat = {};
-
-        // loop through the column names and assign them to the flattened step object with their values
-        for (const [index, val] of colNames2.entries()) {
-            patchFlat[val] = colValues2[index];
-        }
-
-        // insert value to work_process_service_plan table
-        promiseSequence.push(databaseServices.work_process_service_plan.insert(patchFlat));
-    }
-
-    return Promise.all(promiseSequence);
+            return Promise.all(promiseSequence);
+    });
 };
 
 

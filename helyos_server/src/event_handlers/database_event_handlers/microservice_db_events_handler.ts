@@ -1,7 +1,7 @@
 
 import * as blMicroservice from '../../modules/microservice_orchestration';
 import * as microResp from '../microservice_event_handlers/microservice_applied_result_handler.js';
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import * as extServiceCommunication from '../../modules/communication/microservice_communication';
 import { SERVICE_STATUS, MISSION_STATUS } from '../../modules/data_models';
 import { logData } from '../../modules/systemlog';
@@ -16,7 +16,8 @@ import { logData } from '../../modules/systemlog';
 
 
 // Callbacks to database changes
-function processMicroserviceEvents(channel: string, payload: any) {
+async function processMicroserviceEvents(channel: string, payload: any) {
+    const databaseServices = await DatabaseService.getInstance();
     let service_request_id: number, service_request_status: string;
 
     switch (channel) {

@@ -54,10 +54,10 @@ if (MOCK_SERVICES === 'True') {
 // In a near future, we will use a message queue table to handle the database events.
 // ----------------------------------------------------------------------------
 const { handleDatabaseMessages } = require('./event_handlers/database_event_subscriber.js');
-import databaseServices from './services/database/database_services';
-
+import * as DatabaseService from './services/database/database_services';
 
 async function connectToDB() {
+    const databaseServices = await DatabaseService.getInstance();
     const postgClient = databaseServices.pgNotifications;
     console.log("============  Client connected with DB ==================");
     await initialization.setInitialDatabaseData();
@@ -220,9 +220,7 @@ async function end() {
         console.log('Disconnected from RabbitMQ.');
         await inMemmoryServices.disconnect();
         console.log('Disconnected from REDIS.');
-        await databaseServices.disconnectFromDB([databaseServices.client,
-        databaseServices.shortTimeClient,
-        databaseServices.pgNotifications]);
+        await DatabaseService.disconnectFromDB();
         console.log('Disconnected from all database services.');
 
     } catch (error) {

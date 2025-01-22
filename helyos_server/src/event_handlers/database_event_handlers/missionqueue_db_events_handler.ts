@@ -3,7 +3,7 @@
 // (see service_requests table in the Postgres schema).
 // Each service request is dispatched as soon as its status changes to "ready_for_service" (see "ready_for_service" notification).
 
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import { MISSION_QUEUE_STATUS, MISSION_STATUS } from '../../modules/data_models';
 import { logData } from '../../modules/systemlog';
 
@@ -19,6 +19,7 @@ interface Payload {
  * @param payload The payload containing event data.
  */
 export async function processRunListEvents(channel: string, payload: Payload): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const queueId = payload.id;
     const status = payload.status;
 

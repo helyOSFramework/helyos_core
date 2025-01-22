@@ -9,7 +9,7 @@
 
 import * as blAssignm from '../../modules/assignment_orchestration';
 import * as blMicroservice from '../../modules/microservice_orchestration';
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import { MISSION_STATUS, ASSIGNMENT_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS } from '../../modules/data_models';
 import { logData } from '../../modules/systemlog';
 
@@ -26,7 +26,8 @@ interface Payload {
  * @param channel The channel name from the database notification.
  * @param payload The payload containing event data.
  */
-export function processWorkProcessEvents(channel: string, payload: Payload): void {
+export async function processWorkProcessEvents(channel: string, payload: Payload) {
+    const databaseServices = await DatabaseService.getInstance();
     let workProcessId: number;
     let workProcessStatus: string;
 

@@ -4,13 +4,12 @@
 */
 
 const { logData } = require("../../modules/systemlog");
-import databaseService from "../database/database_services";
+import * as DatabaseService  from "../database/database_services";
 import {AgentDataLayer, DatabaseLayer} from "../database/database_services";
 
 import * as redisAccessLayer from './redis_access_layer';
 import config from '../../config';
 
-const {setDBTimeout} = databaseService;
 const { REDIS_HOST, DB_BUFFER_TIME} = config;
 
 const LONG_TIMEOUT = 2000; // Maximum time for the database update
@@ -470,17 +469,19 @@ class InMemDB {
 
 
     async _dynamicallyChooseTimeout() {
+        const databaseServices = await DatabaseService.getInstance();
+        
         if (this.pendingPromises > this.limitWaitingFlushes) {
             if (this.updateTimeout === this.longTimeout) {
                 this.updateTimeout = this.shortTimeout;
-                return setDBTimeout(this.updateTimeout);
+                return databaseServices.setDBTimeout(this.updateTimeout);
             }
         }
 
         if (this.pendingPromises < Math.round(this.limitWaitingFlushes / 2)) {
             if (this.updateTimeout === this.shortTimeout) {
                 this.updateTimeout = this.longTimeout;
-                return setDBTimeout(this.updateTimeout);
+                return databaseServices.setDBTimeout(this.updateTimeout);
             }
         }
         return null;

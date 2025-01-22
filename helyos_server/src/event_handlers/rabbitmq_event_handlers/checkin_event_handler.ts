@@ -1,6 +1,6 @@
 // Services imports
 import rabbitMQServices from '../../services/message_broker/rabbitMQ_services';
-import databaseService from '../../services/database/database_services';
+import * as DatabaseService  from '../../services/database/database_services';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
 import config from '../../config';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,7 +23,8 @@ const MESSAGE_VERSION = rabbitMQServices.MESSAGE_VERSION;
 const { RBMQ_CERTIFICATE } = config;
 
 const isYardUIdRegistered = async (uid: string): Promise<number> => {
-    const result = await databaseService.yards.get('uid', uid, ['id']);
+    const databaseServices = await DatabaseService.getInstance();
+    const result = await databaseServices.yards.get('uid', uid, ['id']);
     return result && result.length ? result[0].id : 0;
 };
 
@@ -72,15 +73,17 @@ interface AgentUpdate {
 
 // Functions
 async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: MsgProps,registeredAgent: Agent | null,replyExchange: string): Promise<Agent> {
+    const databaseServices = await DatabaseService.getInstance();
+
     try {
         const agent = await processAgentCheckIn(uuid, data, msgProps, registeredAgent);
 
         let replyTo: string | null | undefined = msgProps.replyTo ? msgProps.replyTo : agent.message_channel;
         if (replyTo) replyTo = replyTo.replace(/\//g, '.');
 
-        const yard = await databaseService.yards.get_byId(agent.yard_id!, ['id', 'lat', 'lon', 'alt', 'map_data']);
+        const yard = await databaseServices.yards.get_byId(agent.yard_id!, ['id', 'lat', 'lon', 'alt', 'map_data']);
 
-        const mapObjects = await databaseService.map_objects.get('yard_id', yard.id).then((mapObjects) =>
+        const mapObjects = await databaseServices.map_objects.get('yard_id', yard.id).then((mapObjects) =>
             mapObjects.map((obj: any) => ({
                 type: obj.type,
                 metadata: obj.metadata,
@@ -147,6 +150,8 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
 
 
 async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgProps: MsgProps, registeredAgent: Agent | null): Promise<Agent> {
+    const databaseServices = await DatabaseService.getInstance();
+
     // 1 - PARSE INPUT
     const checkinData = data.body; 
     const checkingYard = checkinData.yard_id || checkinData.yard_uid; // Compatibility for agent versions < 2.0
@@ -155,10 +160,10 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     // 2 - VALIDATIONS
     if (!registeredAgent) {
         // If the agent is not registered, create a new record with a temporary name and update it
-        await databaseService.agents
+        await databaseServices.agents
             .insert({ uuid, name: 'agent-', connection_status: 'online' })
             .then((agentId) =>
-                databaseService.agents.update_byId(agentId, {
+                databaseServices.agents.update_byId(agentId, {
                     name: `agent-${agentId}`,
                     code: `agent-${agentId}`,
                 })
@@ -257,10 +262,10 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
 
     // Update the database with agent information and fetch the updated record
-    return databaseService.agents
+    return databaseServices.agents
         .updateByConditions({ uuid }, agentUpdate)
         .then(() =>
-            databaseService.agents.get('uuid', uuid, [
+            databaseServices.agents.get('uuid', uuid, [
                 'id',
                 'uuid',
                 'message_channel',
@@ -278,7 +283,9 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
 
 const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?: string } = {},
     username = '', password = ''): Promise<Agent> => {
-    const agents = await databaseService.agents.select(agentIdentification);
+    const databaseServices = await DatabaseService.getInstance();
+
+    const agents = await databaseServices.agents.select(agentIdentification);
     const agent = agents[0];
     const generatedPassword = password || uuidv4();
     const generatedUsername = username || agent.uuid;
