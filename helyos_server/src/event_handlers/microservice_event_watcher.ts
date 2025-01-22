@@ -1,5 +1,5 @@
 import * as extServCommunication from '../modules/communication/microservice_communication';
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 import { logData } from '../modules/systemlog';
 import { SERVICE_STATUS, ASSIGNMENT_STATUS } from '../modules/data_models';
 import { determineServiceRequestStatus } from '../modules/microservice_orchestration';
@@ -26,6 +26,7 @@ interface Assignment {
 
 const waitForServicesResults = async (): Promise<void> => {
     try {
+        const databaseServices = await DatabaseService.getInstance();
         const pendingServices = await databaseServices.service_requests.select({ status: SERVICE_STATUS.PENDING });
 
         const promises = pendingServices.map(async (serviceReq: ServiceRequest) => {
@@ -75,6 +76,7 @@ const waitForServicesResults = async (): Promise<void> => {
 
 const sendRequestToCancelServices = async (): Promise<void> => {
     try {
+        const databaseServices = await DatabaseService.getInstance();
         const runningServices = await databaseServices.service_requests.select({ status: SERVICE_STATUS.CANCELED, processed: false });
 
         const promises = runningServices.map(async (serviceReq: ServiceRequest) => {
@@ -108,6 +110,7 @@ const sendRequestToCancelServices = async (): Promise<void> => {
 
 const waitForServicesDependencies = async (conditions: object = {}): Promise<void> => {
     try {
+        const databaseServices = await DatabaseService.getInstance();
         const allAwaitingServices = await databaseServices.service_requests.select({ status: 'wait_dependencies', ...conditions });
 
         const promises = allAwaitingServices.map(async (waitingServReq: ServiceRequest) => {
@@ -127,6 +130,7 @@ const waitForServicesDependencies = async (conditions: object = {}): Promise<voi
 
 const waitForAssigmentsDependencies = async (): Promise<void> => {
     try {
+        const databaseServices = await DatabaseService.getInstance();
         const allAwaitingAssignments = await databaseServices.assignments.select({ status: ASSIGNMENT_STATUS.WAIT_DEPENDENCIES });
 
         const promises = allAwaitingAssignments.map(async (assignment: Assignment) => {

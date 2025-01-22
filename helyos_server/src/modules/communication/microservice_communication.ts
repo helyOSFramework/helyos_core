@@ -1,4 +1,4 @@
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import * as webServices from '../../services/microservice_services';
 import { logData } from '../systemlog';
 import { SERVICE_STATUS } from '../data_models';
@@ -13,6 +13,7 @@ import { SERVICE_STATUS } from '../data_models';
  * @returns {Promise<void>}
  */
 const processMicroserviceRequest = async (servRequestId: number): Promise<void> => {
+    const databaseServices = await DatabaseService.getInstance();
     try {
         const servRequests = await databaseServices.service_requests.select({
             id: servRequestId,
@@ -119,6 +120,7 @@ const processMicroserviceRequest = async (servRequestId: number): Promise<void> 
 const getExtServiceAccessData = async (
     serviceType: string
 ): Promise<{ url: string; apiKey: string; config: any; isDummy: boolean }> => {
+    const databaseServices = await DatabaseService.getInstance();
     const services = await databaseServices.services.select({
         service_type: serviceType,
         enabled: true,
@@ -150,6 +152,7 @@ const saveServiceResponse = async (
     servResponse: any,
     defaultStatus: string
 ): Promise<string> => {
+    const databaseServices = await DatabaseService.getInstance();
     const now = new Date();
     let status = defaultStatus || SERVICE_STATUS.FAILED;
 

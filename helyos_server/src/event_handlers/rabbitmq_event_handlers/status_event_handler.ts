@@ -1,4 +1,4 @@
-import databaseService from '../../services/database/database_services';
+import * as DatabaseService  from '../../services/database/database_services';
 import { logData } from '../../modules/systemlog';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
 import { MISSION_STATUS, ASSIGNMENT_STATUS } from '../../modules/data_models';
@@ -26,7 +26,9 @@ interface AgentUpdate {
     resources?: any;
 }
 
-const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignment, uuid: string): Promise<boolean> => {
+const evaluateAssignmentUpdate = async (currentAssm: Assignment, assmUpdate: Assignment, uuid: string): Promise<boolean> => {
+    const databaseServices = await DatabaseService.getInstance();
+    
     if (currentAssm.status !== assmUpdate.status) {
         if (currentAssm.status === ASSIGNMENT_STATUS.COMPLETED && assmUpdate.status === ASSIGNMENT_STATUS.SUCCEEDED) {
             return Promise.resolve(false);
@@ -37,9 +39,9 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
         }
         if ([ASSIGNMENT_STATUS.CANCELED, ASSIGNMENT_STATUS.ABORTED, ASSIGNMENT_STATUS.FAILED].includes(assmUpdate.status)) {
             logData.addLog('agent', { uuid }, 'info', `agent has marked the assignment ${currentAssm.id} as ${assmUpdate.status}`);
-            return databaseService.assignments.update_byId(currentAssm.id, assmUpdate).then(() => true);
+            return databaseServices.assignments.update_byId(currentAssm.id, assmUpdate).then(() => true);
         }
-        return databaseService.assignments.updateByConditions({
+        return databaseServices.assignments.updateByConditions({
             'assignments.id': currentAssm.id,
             'work_processes.id': currentAssm.work_process_id,
             'work_processes.status__in': [
@@ -53,7 +55,7 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
     }
 
     if (assmUpdate.status === ASSIGNMENT_STATUS.ACTIVE || assmUpdate.status === ASSIGNMENT_STATUS.EXECUTING) {
-        return databaseService.assignments.updateByConditions({
+        return databaseServices.assignments.updateByConditions({
             'assignments.id': currentAssm.id,
             'work_processes.id': currentAssm.work_process_id,
             'work_processes.status__in': [
@@ -70,6 +72,8 @@ const evaluateAssignmentUpdate = (currentAssm: Assignment, assmUpdate: Assignmen
 };
 
 async function updateAgentMission(assignment: Assignment, uuid: string): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
+
     if (!assignment) return;
     const assignment_status_obj = assignment['assignment_status'] ? assignment['assignment_status'] : assignment;
     const assignmentId = assignment_status_obj.id;
@@ -78,25 +82,27 @@ async function updateAgentMission(assignment: Assignment, uuid: string): Promise
     const assignmentResult = assignment_status_obj.result;
 
     const assmUpdate = { id: assignmentId, status: assignmentStatus, result: assignmentResult };
-    const currentAssm = await databaseService.assignments.get_byId(assignmentId, ['id', 'status', 'work_process_id']);
+    const currentAssm = await databaseServices.assignments.get_byId(assignmentId, ['id', 'status', 'work_process_id']);
     if (!currentAssm) return;
 
     if (await evaluateAssignmentUpdate(currentAssm, assmUpdate, uuid)) {
         if (uuid) {
             const updatedAssignment = { ...currentAssm, ...assmUpdate };
-            await databaseService.agents.updateByConditions({ uuid }, { assignment: updatedAssignment });
+            await databaseServices.agents.updateByConditions({ uuid }, { assignment: updatedAssignment });
         }
     }
 }
 
 async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 0): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
+
     try {
         const agentUpdate: AgentUpdate = { uuid, status: objMsg.body.status, last_message_time: new Date() };
         const inMemDB = await memDBService.getInstance();
 
         const agentInMem = await inMemDB.agents[uuid];
         if (!agentInMem || !agentInMem.id) {
-            const ids = await databaseService.agents.getIds([uuid]);
+            const ids = await databaseServices.agents.getIds([uuid]);
             inMemDB.update('agents', 'uuid', { uuid, id: ids[0] }, agentUpdate.last_message_time);
             console.log(`Database query: agent ${uuid} has ID = ${ids[0]}`);
         }
@@ -106,7 +112,7 @@ async function updateState(objMsg: ObjMsg, uuid: string, bufferPeriod: number = 
         }
 
         inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
-        await databaseService.agents.updateByConditions({ uuid }, agentUpdate);
+        await databaseServices.agents.updateByConditions({ uuid }, agentUpdate);
 
         if (objMsg.body.assignment) {
             return updateAgentMission(objMsg.body.assignment, uuid);

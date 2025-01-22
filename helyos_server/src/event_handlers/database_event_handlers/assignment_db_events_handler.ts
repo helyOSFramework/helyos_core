@@ -6,7 +6,7 @@
 // The assignments are sent to the agents.
 
 import * as blAssignm from '../../modules/assignment_orchestration';
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import agentComm from '../../modules/communication/agent_communication';
 
 import { logData } from '../../modules/systemlog';
@@ -40,6 +40,8 @@ async function wrapUpAssignment(assignment: Assignment): Promise<void> {
 
 // Subscribe to database changes
 async function processAssignmentEvents(channel: string, payload: Assignment): Promise<void> {
+  const databaseServices = await DatabaseService.getInstance();
+  
   let assignment_status: ASSIGNMENT_STATUS | undefined = payload.status as ASSIGNMENT_STATUS;
 
   switch (channel) {

@@ -1,5 +1,5 @@
 // Services imports
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import * as MapResponseHandler from './microservice_map_result';
 import * as pathplannerResponseHandler from './microservice_assignment_result';
 import { logData } from '../../modules/systemlog';
@@ -31,6 +31,7 @@ interface WorkProcess {
  * @returns A promise that resolves when all tasks based on the response are completed.
  */
 export async function processMicroserviceResponse(partialServiceRequest: PartialServiceRequest): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const serviceRequest: ServiceRequest = await databaseServices.service_requests.get_byId(partialServiceRequest.id);
     const workProcess: WorkProcess = await databaseServices.work_processes.get_byId(serviceRequest.work_process_id);
     const services = await databaseServices.services.get('service_type', serviceRequest.service_type, ['class']);

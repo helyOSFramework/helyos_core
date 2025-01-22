@@ -2,7 +2,7 @@
 // Postgres notification pipeline setup: Postgres -> Node.js -> (Front-end socket, Message Broker, or External Service)
 // ----------------------------------------------------------------------------
 
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 import agentComm from '../../modules/communication/agent_communication';
 import { logData } from '../../modules/systemlog';
 
@@ -20,6 +20,7 @@ interface InstantActionPayload {
  * @param payload The payload containing event data.
  */
 export async function processInstantActionEvents(channel: string, payload: InstantActionPayload): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     switch (channel) {
         case 'instant_actions_insertion': {
             let { agent_id: agentId, agent_uuid: agentUuid } = payload;

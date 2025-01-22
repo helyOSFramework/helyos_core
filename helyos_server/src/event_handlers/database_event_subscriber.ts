@@ -55,9 +55,10 @@ async function broadcastNotifications(channel: string, payload: any, bufferNotif
 
     if (channelsWithYardId.includes(channel)) {
         let room = payload['yard_id'] ? `${payload['yard_id']}` : 'all';
-        if (!payload['yard_id']) {
-            console.warn(channel, "does not have yard id");
-        }
+        // if (!payload['yard_id']) { COMMENT: Should yard_id be included in service_request only for brodcast purpose? 
+        //     console.warn(channel, "does not have yard id");
+        //  service_requests_update does not have yard id
+        // }
         bufferNotifications.pushNotificationToBuffer(channel, payload, room);
     }
 }

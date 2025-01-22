@@ -1,4 +1,4 @@
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 import * as memDBService from '../services/in_mem_database/mem_database_service';
 import RabbitMQServices  from '../services/message_broker/rabbitMQ_services';
 
@@ -89,6 +89,7 @@ function parseMessage(message: Buffer): ParsedMessage {
                                     
 
   const isAgentLeader = async (leaderUUID: string, followerUUID: string): Promise<boolean> => {
+    const databaseServices = await DatabaseService.getInstance();
     const leader = await databaseServices.agents.get('uuid', leaderUUID,['id', 'uuid'],null, false, ['follower_connections']);
   
     if (leader.length === 0) {
@@ -120,6 +121,8 @@ function identifyMessageSender(objMsg: ParsedMessage, routingKey: string): strin
 
 
 async function validateMessageSender(inMemDB: any,registeredAgent: RegisteredAgent,uuid: string,objMsg: ParsedMessage, msgProps: MessageProperties,exchange: string): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
+
     if (registeredAgent.protocol === 'AMQP' && exchange === AGENTS_MQTT_EXCHANGE) {
       throw { msg: `Wrong protocol; agent is registered as AMQP; ${uuid}`, code: 'AGENT-400' };
     }
@@ -239,6 +242,7 @@ async function handleBrokerMessages(channel: any, queueName: string, message: an
   const isAnonymousConnection = msgProps['userId'] === 'anonymous';
 
   (async () => {
+    const databaseServices = await DatabaseService.getInstance();
     const inMemDB = await memDBService.getInstance();
     const agentDataRetriever = memDBService.DataRetriever.getInstance(inMemDB, databaseServices, 'agents', SECURITY_FIELDS);
 

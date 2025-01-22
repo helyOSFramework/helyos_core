@@ -1,7 +1,7 @@
 // Services imports
 import { AGENT_STATUS, ASSIGNMENT_STATUS, MISSION_STATUS } from '../../modules/data_models';
 import { logData } from '../../modules/systemlog';
-import databaseServices from '../../services/database/database_services';
+import * as DatabaseService from '../../services/database/database_services';
 
 // Type Definitions
 interface WorkProcess {
@@ -62,6 +62,7 @@ interface AssignmentInput {
  * @param serviceRequest The service request triggering the process.
  */
 export async function createAssignment(workProcess: WorkProcess, servResponse: ServiceResponse, serviceRequest: ServiceRequest): Promise<any> {
+    const databaseServices = await DatabaseService.getInstance();
     const agentIds = workProcess.agent_ids;
     const serviceRequestId = serviceRequest ? serviceRequest.id : null;
 

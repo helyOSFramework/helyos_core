@@ -3,7 +3,7 @@
 ** Copyright 2022,  Fraunhofer-Institut für Verkehrs- und Infrastruktursysteme IVI.
 */
 
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 import { generateAssignmentDependencies } from './assignment_context';
 import  AgentCommunication  from './communication/agent_communication';
 import { 
@@ -44,6 +44,7 @@ interface PartialAssignment {
 // ----------------------------------------------------------------------------
 
 async function activateNextAssignmentInPipeline(partialAssignment: PartialAssignment): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const finishedAssignment = await databaseServices.assignments.get_byId(partialAssignment.id);
     const nextAssignments = await databaseServices.assignments.list_in('id', finishedAssignment.next_assignments);
     
@@ -62,6 +63,7 @@ async function activateNextAssignmentInPipeline(partialAssignment: PartialAssign
 
 
 async function updateAssignmentContext(assignmentId: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const assignment = await databaseServices.assignments.get_byId(assignmentId);
     const dependencies = await generateAssignmentDependencies(assignment);
 
@@ -78,6 +80,7 @@ async function updateAssignmentContext(assignmentId: number): Promise<void> {
 
 
 async function cancelWorkProcessAssignments(id: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     await databaseServices.assignments.updateByConditions(
         {
             work_process_id: id,
@@ -104,6 +107,7 @@ async function cancelWorkProcessAssignments(id: number): Promise<void> {
 
 
 async function cancelRequestsToMicroservicesByWPId(id: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const n = await databaseServices.service_requests.updateByConditions(
         {
             work_process_id: id,
@@ -123,6 +127,7 @@ async function cancelRequestsToMicroservicesByWPId(id: number): Promise<void> {
 
 
 async function dispatchAssignmentToAgent(partialAssignment: PartialAssignment): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     try {
         const assignment = await databaseServices.assignments.get_byId(partialAssignment.id);
         await AgentCommunication.sendAssignmentToExecuteInAgent(assignment);
@@ -135,6 +140,7 @@ async function dispatchAssignmentToAgent(partialAssignment: PartialAssignment): 
 }
 
 async function cancelAssignmentByAgent(partialAssignment: PartialAssignment): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const assignment = await databaseServices.assignments.get_byId(partialAssignment.id);
     await AgentCommunication.cancelAssignmentInAgent(assignment);
 }
@@ -145,6 +151,7 @@ async function cancelAssignmentByAgent(partialAssignment: PartialAssignment): Pr
  * @param reason - The reason for work process end
  */
 async function onWorkProcessEnd(workProcessId: number, reason: string): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     if (reason !== 'assignments_completed') {
         logData.addLog('helyos_core', { wproc_id: workProcessId }, 'warn' , 'Work process ending: ' + reason);
     }
@@ -202,6 +209,7 @@ async function onWorkProcessEnd(workProcessId: number, reason: string): Promise<
 }
 
 async function assignmentUpdatesMissionStatus(id: number, wprocId: number): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance();
     const remainingServiceRequests = await databaseServices.service_requests.select(
         {
             work_process_id: wprocId,

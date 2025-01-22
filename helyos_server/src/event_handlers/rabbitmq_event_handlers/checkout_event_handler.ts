@@ -1,7 +1,7 @@
 // Services imports
 
 import rabbitMQServices from '../../services/message_broker/rabbitMQ_services';
-import databaseService from '../../services/database/database_services';
+import * as DatabaseService  from '../../services/database/database_services';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
 import { logData } from '../../modules/systemlog';
 import { AGENT_STATUS } from '../../modules/data_models';
@@ -68,10 +68,12 @@ async function agentCheckOut(uuid: string, data: any, msgProps: any, registeredA
 
 
 async function processAgentCheckOut( uuid: string): Promise<any> {
+    const databaseServices = await DatabaseService.getInstance();
+    
     // 1 - PARSE INPUT
 
     // 2 - VALIDATIONS
-    const agentStatus = (await databaseService.agents.get('uuid', uuid, ['status']))[0]?.status;
+    const agentStatus = (await databaseServices.agents.get('uuid', uuid, ['status']))[0]?.status;
     if ([AGENT_STATUS.BUSY, AGENT_STATUS.READY].includes(agentStatus)) {
         throw new Error(`Agent ${uuid} cannot check out. Status ${agentStatus}.`);
     }
@@ -83,8 +85,8 @@ async function processAgentCheckOut( uuid: string): Promise<any> {
     inMemDB.update('agents', 'uuid', agentUpdate, agentUpdate.last_message_time, 'buffered');
     inMemDB.countMessages('agents_stats', uuid, 'updtPerSecond');
 
-    await databaseService.agents.updateByConditions({ uuid }, agentUpdate);
-    const agents = await databaseService.agents.get('uuid', uuid, [
+    await databaseServices.agents.updateByConditions({ uuid }, agentUpdate);
+    const agents = await databaseServices.agents.get('uuid', uuid, [
                                 'id',
                                 'uuid',
                                 'message_channel',

@@ -1,4 +1,4 @@
-import databaseServices from '../services/database/database_services';
+import * as DatabaseService from '../services/database/database_services';
 const LOG_BUFFER_TIME = parseInt(process.env.LOG_BUFFER_TIME || '1000');
 const LOG_OUTPUT = process.env.LOG_OUTPUT || 'database';
 
@@ -127,6 +127,7 @@ class LogData {
 
 
     public async saveLogs(logs:any[]): Promise<void> {
+        const databaseServices = await DatabaseService.getInstance();
         if (logs.length && (logs.length > 0)) {
             try {
                 await databaseServices.sysLogs.insertMany(logs);
