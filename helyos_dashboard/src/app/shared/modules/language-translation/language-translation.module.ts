@@ -11,7 +11,8 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 // ngx-translate - required for AOT compilation
 export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http);
+  const baseHref = document.getElementsByTagName('base')[0].href;
+  return new TranslateHttpLoader(http, `${baseHref}assets/i18n/`);
 }
 
 @NgModule({

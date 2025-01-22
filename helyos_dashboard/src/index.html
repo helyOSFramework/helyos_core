@@ -3,7 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <title>HCT Dashboard</title>
-    <base href="/" />
+    
+    <script>
+      (function() {
+        const path = window.location.pathname;
+        // Adjust the logic as needed to extract the base path
+        const basePath = path.substring(0, path.lastIndexOf('/') + 1) || '/';
+        const base = document.createElement('base');
+        base.href = basePath;
+        document.head.appendChild(base);
+      })();
+    </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />

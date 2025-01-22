@@ -7,6 +7,14 @@
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
+        <a *ngIf = "nameSpace"
+          class="nav-link mt-1"
+          href="javascript:void(0)"
+          style="padding: 0.375rem 1rem !important; border-color: #999">
+          ns: {{ nameSpace }}
+        </a>
+      </li>
+      <li class="nav-item">
         <a
           class="nav-link mt-1"
           href="javascript:void(0)"
