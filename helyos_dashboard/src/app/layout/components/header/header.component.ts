@@ -13,7 +13,9 @@ export class HeaderComponent implements OnInit {
   public pushRightClass: string;
   public version: string = environment.version;
   public nameSpace: string = '';
-
+  public rbmqHost: string = '';
+  public vhost: string = '';
+  
   constructor(private translate: TranslateService, public router: Router, private helyosService: HelyosService) {
     this.nameSpace = helyosService.nameSpace;
     this.router.events.subscribe((val) => {
@@ -25,6 +27,11 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.pushRightClass = 'push-right';
+    this.helyosService.methods.RBMQConfig.list({})
+    .then( rv => {
+      this.rbmqHost = rv && rv.length? rv[0].rbmqHost: '';
+      this.vhost = rv && rv.length? rv[0].rbmqVhost: '';
+    });
   }
 
   isToggled(): boolean {

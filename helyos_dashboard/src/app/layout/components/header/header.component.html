@@ -9,11 +9,23 @@
       <li class="nav-item">
         <a *ngIf = "nameSpace"
           class="nav-link mt-1"
+          title="name space"
           href="javascript:void(0)"
           style="padding: 0.375rem 1rem !important; border-color: #999">
-          ns: {{ nameSpace }}
+          ns: <i>{{ nameSpace }}</i>
         </a>
       </li>
+
+      <li class="nav-item">
+        <a *ngIf = "rbmqHost"
+          class="nav-link mt-1"
+          title="RabbitMQ - Virtual Host"
+          href="javascript:void(0)"
+          style="padding: 0.375rem 1rem !important; border-color: #999">
+          RBMQ-VH: <i>{{ rbmqHost }} - {{ vhost }}</i>
+        </a>
+      </li>   
+
       <li class="nav-item">
         <a
           class="nav-link mt-1"
@@ -23,7 +35,7 @@
         </a>
       </li>
       &nbsp;
-      <li class="nav-item">
+  <!--       <li class="nav-item">
         <a
           (click)="rltAndLtr()"
           class="nav-link mt-1"
@@ -34,7 +46,7 @@
       </li>
       &nbsp;
 
-      <!-- <li class="nav-item dropdown" ngbDropdown>
+    <li class="nav-item dropdown" ngbDropdown>
                 <a class="nav-link" href="javascript:void(0)" ngbDropdownToggle>
                     <i class="fa-solid fa-bell"></i> <span class="sr-only">(current)</span>
                 </a>

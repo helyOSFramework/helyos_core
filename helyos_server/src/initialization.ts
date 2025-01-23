@@ -17,7 +17,7 @@ const { MESSAGE_RATE_LIMIT, MESSAGE_UPDATE_LIMIT,
 
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, 
         AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
-        AGENTS_UL_EXCHANGE,AGENTS_DL_EXCHANGE, RBMQ_VHOST,
+        AGENTS_UL_EXCHANGE,AGENTS_DL_EXCHANGE, RBMQ_VHOST, RBMQ_HOST,
         AGENTS_MQTT_EXCHANGE, ANONYMOUS_EXCHANGE,
         AGENT_STATE_QUEUE, SUMMARY_REQUESTS_QUEUE, 
         YARD_VISUALIZATION_QUEUE, CREATE_RBMQ_ACCOUNTS } = config;
@@ -78,7 +78,8 @@ export const setInitialDatabaseData = async () => {
          'agents_dl_exchange': AGENTS_DL_EXCHANGE,
          'agents_mqtt_exchange': AGENTS_MQTT_EXCHANGE,
          'agents_anonymous_exchange': ANONYMOUS_EXCHANGE,
-         'rbmq_vhost': RBMQ_VHOST
+         'rbmq_vhost': RBMQ_VHOST,
+         'rbmq_host': RBMQ_HOST,
         }
         const rbmq_config = await databaseServices.rbmq_config.get('rbmq_vhost', RBMQ_VHOST, ['id']);
         if (rbmq_config.length) {

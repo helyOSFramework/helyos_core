@@ -41,5 +41,6 @@ CREATE TABLE public.rbmq_config (
   agents_dl_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.dl',
   agents_mqtt_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.mqtt',
   agents_anonymous_exchange CHARACTER VARYING DEFAULT 'xchange_helyos.agents.anonymous',
-  rbmq_vhost CHARACTER VARYING
+  rbmq_host CHARACTER VARYING DEFAULT '',
+  rbmq_vhost CHARACTER VARYING DEFAULT ''
 );
