@@ -12,10 +12,11 @@ import config from '../config';
 // ----------------------------------------------------------------------------
 
 const { JWT_SECRET, SOCKET_PORT } = config;
-const { SOCKET_IO_ADAPTER } = config;
+const { SOCKET_IO_ADAPTER, SERVER_PATH_BASE } = config;
 
+const socketPath = SERVER_PATH_BASE? `/${SERVER_PATH_BASE}/socket.io` : '/socket.io';
 const conf: Partial<ServerOptions> = {
-        path: '',
+        path: socketPath,
         serveClient: false,
 
     };
@@ -33,7 +34,7 @@ class WebSocketService {
 
         console.log("######## Creating socket io service...");
         this._webSocketServer = http.createServer();
-        this.io = new Server(this._webSocketServer,conf);
+        this.io = new Server(this._webSocketServer, conf);
 
         this.io.sockets.on('connection', function (socket:Socket) {
             let clientToken: string | string[] | null = null;
