@@ -125,12 +125,11 @@ class DatabaseLayer {
 	list_in(key:string, listArgs: any[], orderBy:string = '', useShortTimeClient = false) {
 		if (!listArgs || listArgs.length === 0) { return Promise.resolve([]); }
 		let orderByStr = orderBy ? `ORDER BY ${orderBy}` : '';
-		let values = listArgs.map(e => `'${e}'`);
-		values.join(', ');
-
+		const valuesPlaceholders = listArgs.map((_, index) => `$${index + 1}`).join(', ');
+		const values = listArgs;
 		const _client = useShortTimeClient ? this.shortTimeClient : this.client;
 
-		return _client!.query("SELECT * FROM " + this.table + " WHERE " + key + " IN  (" + values + ")" + orderByStr)
+		return _client!.query("SELECT * FROM " + this.table + " WHERE " + key + ` IN  (${valuesPlaceholders})` + orderByStr, values)
 			.then((res) => { return res['rows'] });
 	}
 
