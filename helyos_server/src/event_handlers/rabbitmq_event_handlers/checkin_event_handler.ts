@@ -67,21 +67,34 @@ interface Agent {
     has_rbmq_account?: boolean;
 }
 
+
+interface AgentCredentials {
+    id: number;
+    uuid: string;
+    rbmq_username: string;
+    rbmq_encrypted_password: string;
+    rbmq_password: string;
+    public_key?: string;
+    message_channel?: string;
+    yard_id?: number;
+    has_rbmq_account?: boolean;
+}
+
 interface AgentUpdate {
     [key: string]: any;
 }
 
 // Functions
-async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: MsgProps,registeredAgent: Agent | null,replyExchange: string): Promise<Agent> {
+async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: MsgProps,registeredAgent: AgentCredentials | null,replyExchange: string): Promise<AgentCredentials> {
     const databaseServices = await DatabaseService.getInstance();
 
     try {
-        const agent = await processAgentCheckIn(uuid, data, msgProps, registeredAgent);
+        const processedAgent = await processAgentCheckIn(uuid, data, msgProps, registeredAgent);
 
-        let replyTo: string | null | undefined = msgProps.replyTo ? msgProps.replyTo : agent.message_channel;
+        let replyTo: string | null | undefined = msgProps.replyTo ? msgProps.replyTo : processedAgent.message_channel;
         if (replyTo) replyTo = replyTo.replace(/\//g, '.');
 
-        const yard = await databaseServices.yards.get_byId(agent.yard_id!, ['id', 'lat', 'lon', 'alt', 'map_data']);
+        const yard = await databaseServices.yards.get_byId(processedAgent.yard_id!, ['id', 'lat', 'lon', 'alt', 'map_data']);
 
         const mapObjects = await databaseServices.map_objects.get('yard_id', yard.id).then((mapObjects) =>
             mapObjects.map((obj: any) => ({
@@ -93,9 +106,9 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
 
         const message = JSON.stringify({
             type: 'checkin',
-            uuid: agent.uuid,
+            uuid: processedAgent.uuid,
             body: {
-                agentId: agent.id,
+                agentId: processedAgent.id,
                 yard_uid: yard.uid,
                 map: {
                     origin: { lat: yard.lat, lon: yard.lon, alt: yard.alt },
@@ -104,9 +117,9 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
                     uid: yard.uid,
                 },
                 message: 'check-in successful',
-                rbmq_username: agent.rbmq_username,
-                rbmq_encrypted_password: agent.rbmq_encrypted_password,
-                rbmq_password: agent.rbmq_encrypted_password,
+                rbmq_username: processedAgent.rbmq_username,
+                rbmq_encrypted_password: processedAgent.rbmq_encrypted_password,
+                rbmq_password: processedAgent.rbmq_password,
                 ca_certificate: RBMQ_CERTIFICATE,
                 helyos_public_key: HELYOS_PUBLIC_KEY,
                 password_encrypted: false,
@@ -116,15 +129,15 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
         });
 
         console.log('================== checkin response message to =======================');
-        console.log(`${uuid} => ${agent.uuid}`);
+        console.log(`${uuid} => ${processedAgent.uuid}`);
         console.log('======================================================================');
 
-        const publicKey = agent.public_key || registeredAgent?.public_key;
+        const publicKey = processedAgent.public_key || registeredAgent?.public_key;
 
         rabbitMQServices.sendEncryptedMsg(replyTo as string, message, publicKey);
         rabbitMQServices.sendEncryptedMsg(null, message, publicKey, replyTo, replyExchange);
 
-        return agent;
+        return processedAgent;
     } catch (error) {
         console.error('Error in agentCheckIn:', error);
 
@@ -149,7 +162,7 @@ async function agentCheckIn(uuid: string,data: {body:CheckInData}, msgProps: Msg
 }
 
 
-async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgProps: MsgProps, registeredAgent: Agent | null): Promise<Agent> {
+async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgProps: MsgProps, registeredAgent: Agent | null): Promise<AgentCredentials> {
     const databaseServices = await DatabaseService.getInstance();
 
     // 1 - PARSE INPUT
@@ -189,6 +202,8 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
     const agentUpdate: AgentUpdate = { uuid }; // Create an update object for the agent
     agentUpdate.last_message_time = new Date();
 
+
+    let rbmq_password = '';
     if (isAnonymous) {
         // If the agent is anonymous, create a RabbitMQ account for it
         const credentials = await createAgentRbmqAccount({ uuid });
@@ -196,6 +211,7 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
         agentUpdate.rbmq_username = credentials.rbmq_username;
         agentUpdate.rbmq_encrypted_password = credentials.rbmq_encrypted_password;
         agentUpdate.has_rbmq_account = credentials.has_rbmq_account;
+        rbmq_password = credentials.rbmq_password;
     }
 
     agentUpdate.yard_id = yardId;
@@ -275,14 +291,14 @@ async function processAgentCheckIn(uuid: string, data: {body: CheckInData}, msgP
                 'public_key',
             ])
         )
-        .then((agents) => agents[0]);
+        .then((agents) => ({'rbmq_password': rbmq_password, ...agents[0]}));
 }
 
 
 
 
 const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?: string } = {},
-    username = '', password = ''): Promise<Agent> => {
+    username = '', password = ''): Promise<AgentCredentials> => {
     const databaseServices = await DatabaseService.getInstance();
 
     const agents = await databaseServices.agents.select(agentIdentification);
@@ -301,12 +317,12 @@ const createAgentRbmqAccount = async (agentIdentification: { id?: string; uuid?:
 
     rabbitMQServices.createDebugQueues(agent);
 
-    const hashedPassword = encryptPassword(generatedPassword, agent.pubkey);
     return {
         id: agent.id,
         uuid: agent.uuid,
         rbmq_username: rbmqUsername,
-        rbmq_encrypted_password: hashedPassword,
+        rbmq_password: generatedPassword,
+        rbmq_encrypted_password: encryptPassword(generatedPassword, agent.pubkey),
         has_rbmq_account: true,
     };
 };
@@ -321,7 +337,7 @@ const removeAgentRbmqAccount = async (agentData: Agent): Promise<number> => {
 
 const encryptPassword = (passwd: string, pubkey?: string): string => {
     // Implement proper encryption logic here.
-    return passwd;
+    return 'not-implemented';
 };
 
 
