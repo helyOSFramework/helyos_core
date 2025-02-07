@@ -112,7 +112,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql STRICT SECURITY DEFINER;
 
-COMMENT ON FUNCTION public.admin_get_user_authtoken(TEXT) IS 'Creates a JWT token that will securely identify a person and give them certain permissions. This token expires in 7 days.';
+COMMENT ON FUNCTION public.admin_get_user_authtoken(TEXT) IS 'Creates a JWT token that will securely identify a person and give them certain permissions. This token expires in 365 days.';
 
 
 
