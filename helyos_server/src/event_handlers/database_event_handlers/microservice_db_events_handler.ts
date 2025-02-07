@@ -1,5 +1,5 @@
 
-import * as blMicroservice from '../../modules/microservice_orchestration';
+import * as MicrosrvOrchestrator from '../../modules/microservice_orchestration';
 import * as microResp from '../microservice_event_handlers/microservice_applied_result_handler.js';
 import * as DatabaseService from '../../services/database/database_services';
 import * as extServiceCommunication from '../../modules/communication/microservice_communication';
@@ -60,7 +60,7 @@ async function processMicroserviceEvents(channel: string, payload: any) {
                         id: service_request_id, status: SERVICE_STATUS.READY_FOR_SERVICE
                     },
                         { status: SERVICE_STATUS.DISPATCHING_SERVICE })
-                        .then(() => blMicroservice.updateRequestContext(service_request_id))
+                        .then(() => MicrosrvOrchestrator.updateRequestContext(service_request_id))
                         .then(() => extServiceCommunication.processMicroserviceRequest(service_request_id)) // Current service status: ready_for_service => pending
                         .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err?.message}`));
 
@@ -69,22 +69,22 @@ async function processMicroserviceEvents(channel: string, payload: any) {
                 case SERVICE_STATUS.READY:
                     if (payload['is_result_assignment'] && !payload['assignment_dispatched']) {
                         microResp.processMicroserviceResponse(payload)
-                            .then(() => blMicroservice.wrapUpMicroserviceCall(payload))
-                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                            .then(() => MicrosrvOrchestrator.wrapUpMicroserviceCall(payload))
+                            .then(() => MicrosrvOrchestrator.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
                             .catch(err => {
                                 databaseServices.service_requests.update_byId(payload['id'], { status: SERVICE_STATUS.FAILED });
                                 logData.addLog('microservice', payload, 'error', err.message);
                             });
                     } else {
-                        blMicroservice.wrapUpMicroserviceCall(payload)
-                            .then(() => blMicroservice.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
+                        MicrosrvOrchestrator.wrapUpMicroserviceCall(payload)
+                            .then(() => MicrosrvOrchestrator.activateNextServicesInPipeline(payload)) // Next service status: not_ready_for_service => wait_dependencies or ready_for_service
                             .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err?.message}`));
                     }
 
                     break;
 
                 case SERVICE_STATUS.SKIPPED:
-                    blMicroservice.wrapUpMicroserviceCall(payload)
+                    MicrosrvOrchestrator.wrapUpMicroserviceCall(payload)
                         .catch(err => logData.addLog('microservice', payload, 'error', `service_requests_update ${err?.message}`));
                     break;
 

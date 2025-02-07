@@ -6,7 +6,7 @@
     "nock": "^13.5.4",
     "path": "^0.12.7",
     "superagent": "^8.1.2",
-    "testcontainers": "^10.13.1"
+    "testcontainers": "^10.18.0"
   },
   "scripts": {
     "test": "jest  --verbose",

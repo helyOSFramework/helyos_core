@@ -7,8 +7,8 @@
 // (see service_requests table in the Postgres schema).
 // Each service request is dispatched as soon as its status changes to "ready_for_service" (see "ready_for_service" notification).
 
-import * as blAssignm from '../../modules/assignment_orchestration';
-import * as blMicroservice from '../../modules/microservice_orchestration';
+import * as AssmOrchestrator from '../../modules/assignment_orchestration';
+import * as MicrosrvOrchestrator from '../../modules/microservice_orchestration';
 import * as DatabaseService from '../../services/database/database_services';
 import { MISSION_STATUS, ASSIGNMENT_STATUS, ON_ASSIGNMENT_FAILURE_ACTIONS } from '../../modules/data_models';
 import { logData } from '../../modules/systemlog';
@@ -69,7 +69,7 @@ export async function processWorkProcessEvents(channel: string, payload: Payload
                     .update_byId(payload.id, { status: MISSION_STATUS.PREPARING })
                     .then(() =>
                         prepareWPData.then(() =>
-                            blMicroservice.prepareServicesPipelineForWorkProcess(payload).catch((err) => {
+                            MicrosrvOrchestrator.prepareServicesPipelineForWorkProcess(payload).catch((err) => {
                                 logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_insertion ${err?.message}`);
                             })
                         )
@@ -99,7 +99,7 @@ export async function processWorkProcessEvents(channel: string, payload: Payload
                             { id: payload.id, status: MISSION_STATUS.DISPATCHED },
                             { status: MISSION_STATUS.DISPATCHED }
                         )
-                        .then(() => blMicroservice.prepareServicesPipelineForWorkProcess(payload))
+                        .then(() => MicrosrvOrchestrator.prepareServicesPipelineForWorkProcess(payload))
                         .catch((err) => {
                             logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
                         });
@@ -111,10 +111,10 @@ export async function processWorkProcessEvents(channel: string, payload: Payload
                     databaseServices.work_processes
                         .updateByConditions({ id: payload.id, status: MISSION_STATUS.CANCELING }, { status: MISSION_STATUS.CANCELED })
                         .then(() =>
-                            blAssignm
+                            AssmOrchestrator
                                 .cancelRequestsToMicroservicesByWPId(payload.id)
-                                .then(() => blAssignm.cancelWorkProcessAssignments(payload.id))
-                                .then(() => blAssignm.onWorkProcessEnd(payload.id, workProcessStatus))
+                                .then(() => AssmOrchestrator.cancelWorkProcessAssignments(payload.id))
+                                .then(() => AssmOrchestrator.onWorkProcessEnd(payload.id, workProcessStatus))
                         )
                         .catch((err) => {
                             logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
@@ -130,10 +130,10 @@ export async function processWorkProcessEvents(channel: string, payload: Payload
                             { status: MISSION_STATUS.FAILED }
                         )
                         .then(() =>
-                            blAssignm
+                            AssmOrchestrator
                                 .cancelRequestsToMicroservicesByWPId(payload.id)
-                                .then(() => blAssignm.cancelWorkProcessAssignments(payload.id))
-                                .then(() => blAssignm.onWorkProcessEnd(payload.id, workProcessStatus))
+                                .then(() => AssmOrchestrator.cancelWorkProcessAssignments(payload.id))
+                                .then(() => AssmOrchestrator.onWorkProcessEnd(payload.id, workProcessStatus))
                         )
                         .catch((err) => {
                             logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
@@ -148,7 +148,7 @@ export async function processWorkProcessEvents(channel: string, payload: Payload
                             const newStatus = result.length ? MISSION_STATUS.CANCELED : MISSION_STATUS.SUCCEEDED;
                             return databaseServices.work_processes
                                 .update_byId(payload.id, { status: newStatus })
-                                .then(() => blAssignm.onWorkProcessEnd(payload.id, newStatus));
+                                .then(() => AssmOrchestrator.onWorkProcessEnd(payload.id, newStatus));
                         })
                         .catch((err) => {
                             logData.addLog('helyos_core', { wproc_id: payload.id }, 'error', `work_processes_update ${err?.message}`);
