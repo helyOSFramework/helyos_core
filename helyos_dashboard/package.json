@@ -5,7 +5,7 @@
   "license": "Modified Apache-2.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --serve-path /framo",
+    "start": "ng serve --serve-path /",
     "build:dev": "ng build --configuration development",
     "build": "ng build --configuration production",
     "gitbuild": "ng build --configuration production --base-href **/dist/",
@@ -37,7 +37,7 @@
     "bootstrap": "^5.3.2",
     "cheap-ruler": "^3.0.2",
     "core-js": "^3.38.0",
-    "helyosjs-sdk": "2.4.0",
+    "helyosjs-sdk": "2.4.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "rxjs": "^7.4.1",
