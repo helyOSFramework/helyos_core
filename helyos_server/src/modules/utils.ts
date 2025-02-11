@@ -17,9 +17,11 @@ const isISODate = (value: string): boolean => {
 };
 
 /**
- * Parses a given value to an integer.
+ * Parses a given value to an integer and returns null in case of an error."
  */
 function parseToInteger(value: any): number | null  {
+    if (value === undefined || value === null ) return null;
+
     const parsedInteger = parseInt(value, 10);
     return isNaN(parsedInteger) ? null : parsedInteger;
 }
