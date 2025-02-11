@@ -5,6 +5,7 @@ import rabbitMQServices from '../../services/message_broker/rabbitMQ_services';
 import * as DatabaseService from '../../services/database/database_services';
 import roleManagerModule from '../../role_manager';
 import * as memDBService from '../../services/in_mem_database/mem_database_service';
+import { parseToInteger } from '../../modules/utils';
 
 import { logData } from '../systemlog';
 import { MISSION_STATUS, AGENT_STATUS } from '../data_models';
@@ -31,6 +32,8 @@ type Agent = {
     resources?: any;
     wp_clearance?: any;
 };
+
+
 
 async function watchWhoIsOnline(maxTimeWithoutUpdate: number): Promise<void> {
     const databaseServices = await DatabaseService.getInstance();
@@ -100,9 +103,9 @@ async function sendAssignmentToExecuteInAgent(assignment: Assignment): Promise<v
         type: 'assignment_execution',
         uuid: uuids[0],
         metadata: {
-            id: assignment.id,
-            yard_id: assignment.yard_id,
-            work_process_id: assignment.work_process_id,
+            id: parseToInteger(assignment.id),
+            yard_id: parseToInteger(assignment.yard_id),
+            work_process_id: parseToInteger(assignment.work_process_id),
             status: assignment.status,
             start_time_stamp: assignment.start_time_stamp,
             context: assignment.context,
@@ -122,20 +125,20 @@ async function cancelAssignmentInAgent(assignment: Assignment): Promise<void> {
         type: 'assignment_cancel',
         uuid: uuids[0],
         metadata: {
-            id: assignment.id,
-            yard_id: assignment.yard_id,
-            work_process_id: assignment.work_process_id,
+            id: parseToInteger(assignment.id),
+            yard_id: parseToInteger(assignment.yard_id),
+            work_process_id: parseToInteger(assignment.work_process_id),
             status: assignment.status,
             start_time_stamp: assignment.start_time_stamp,
             context: assignment.context,
         },
         body: {
-            assignment_id: assignment.id,
+            assignment_id: parseToInteger(assignment.id),
             data: {
                 metadata: {
                     type: 'assignment_cancel',
                     custom_meta: assignment.data.metadata,
-                    assignment_id: assignment.id,
+                    assignment_id: parseToInteger(assignment.id),
                 },
             },
         },
@@ -191,7 +194,7 @@ async function sendReduceMsgRateInstantAction(agent: Agent, commandStr: string):
  */
 
 
-async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: number, operationTypesRequired: string[] = []): Promise<void[]> {
+async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: number | string, operationTypesRequired: string[] = []): Promise<void[]> {
     const databaseServices = await DatabaseService.getInstance(); 
     const agents = await databaseServices.agents.list_in('id', agentIdList);
     const msgs: Record<number, string> = {};
@@ -202,7 +205,7 @@ async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: nu
             uuid: agent.uuid,
             body: {
                 operation_types_required: operationTypesRequired,
-                work_process_id: wpId,
+                work_process_id: parseToInteger(wpId),
                 reserved: true,
             },
             _version: MESSAGE_VERSION,
@@ -215,7 +218,7 @@ async function sendGetReadyForWorkProcessRequest(agentIdList: number[], wpId: nu
     }));
 }
 
-async function sendReleaseFromWorkProcessRequest(agentId: number, wpId: number): Promise<void> {
+async function sendReleaseFromWorkProcessRequest(agentId: number, wpId: number | string): Promise<void> {
     const databaseServices = await DatabaseService.getInstance();
     const uuids = await databaseServices.agents.getUuids([agentId]);
 
@@ -223,7 +226,7 @@ async function sendReleaseFromWorkProcessRequest(agentId: number, wpId: number):
         type: 'release_from_mission',
         uuid: uuids[0],
         body: {
-            work_process_id: wpId,
+            work_process_id: parseToInteger(wpId),
             operation_types_required: [],
             reserved: false,
         },
