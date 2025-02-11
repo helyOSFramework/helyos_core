@@ -5,7 +5,7 @@
 // The microservices produces one or more assignments.
 // The assignments are sent to the agents.
 
-import * as blAssignm from '../../modules/assignment_orchestration';
+import * as AssmOrchestrator from '../../modules/assignment_orchestration';
 import * as DatabaseService from '../../services/database/database_services';
 import agentComm from '../../modules/communication/agent_communication';
 
@@ -34,8 +34,8 @@ type WorkProcess = {
 };
 
 async function wrapUpAssignment(assignment: Assignment): Promise<void> {
-  await blAssignm.assignmentUpdatesMissionStatus(assignment.id, assignment.work_process_id);
-  await blAssignm.activateNextAssignmentInPipeline(assignment);
+  await AssmOrchestrator.assignmentUpdatesMissionStatus(assignment.id, assignment.work_process_id);
+  await AssmOrchestrator.activateNextAssignmentInPipeline(assignment);
 }
 
 // Subscribe to database changes
@@ -48,8 +48,8 @@ async function processAssignmentEvents(channel: string, payload: Assignment): Pr
     case 'assignments_status_update':
       if (assignment_status === ASSIGNMENT_STATUS.TO_DISPATCH) {
         try {
-          await blAssignm.updateAssignmentContext(payload.id);
-          await blAssignm.dispatchAssignmentToAgent(payload);
+          await AssmOrchestrator.updateAssignmentContext(payload.id);
+          await AssmOrchestrator.dispatchAssignmentToAgent(payload);
           await databaseServices.assignments.update('id', payload.id, {
             status: ASSIGNMENT_STATUS.EXECUTING,
             start_time_stamp: new Date(),
@@ -61,7 +61,7 @@ async function processAssignmentEvents(channel: string, payload: Assignment): Pr
 
       if (assignment_status === ASSIGNMENT_STATUS.CANCELING || assignment_status === 'cancelling' as any) {
         try {
-          await blAssignm.cancelAssignmentByAgent(payload);
+          await AssmOrchestrator.cancelAssignmentByAgent(payload);
           await databaseServices.assignments.update('id', payload.id, {
             status: ASSIGNMENT_STATUS.CANCELED,
           });
@@ -174,7 +174,7 @@ async function processAssignmentEvents(channel: string, payload: Assignment): Pr
     case 'assignments_insertion':
       if (assignment_status === ASSIGNMENT_STATUS.TO_DISPATCH) {
         try {
-          await blAssignm.dispatchAssignmentToAgent(payload);
+          await AssmOrchestrator.dispatchAssignmentToAgent(payload);
           await databaseServices.assignments.update('id', payload.id, {
             status: ASSIGNMENT_STATUS.EXECUTING,
           });
