@@ -33,8 +33,9 @@ import http from 'http';
 import express from 'express';
 import fs from 'fs';
 
+// WORKDIR = /helyos_server/
 const DASHBOARD_DIR = '../helyos_dashboard/dist/';
-const API_DOC_DIR = 'docs/';
+const API_DOC_DIR = 'dist/docs/';
 
 
 // Test Settings: Override external services by `Nock` services (mocks).
