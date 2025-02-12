@@ -23,6 +23,7 @@ RUN npm set fetch-retry-maxtimeout 600000 && npm install --no-audit  --timeout=6
 
 COPY helyos_server/ /usr/local/helyos_core/helyos_server
 RUN npm run build
+COPY helyos_server/docs /usr/local/helyos_core/helyos_server/dist/docs
 
 
 # Third stage

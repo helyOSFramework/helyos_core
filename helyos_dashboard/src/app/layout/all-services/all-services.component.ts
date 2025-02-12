@@ -13,8 +13,10 @@ export class AllServicesComponent implements OnInit {
   public selectedItem: H_Service;
   public showDescription: boolean = false;
   public requireMapObjectsInput: string;
+  private docPath: string;
 
   constructor(private helyosService: HelyosService) {
+    this.docPath = helyosService.nameSpace ?  `/${helyosService.nameSpace}/api-docs`: '/api-docs' ;
 
   }
 
@@ -86,11 +88,11 @@ export class AllServicesComponent implements OnInit {
   }
 
   openMapAPIDoc() {
-    window.open('/api-docs/map_api.html', '_blank');
+    window.open(`${this.docPath}/map_api.html`, '_blank');
   }
 
   openPPAPIDoc() {
-    window.open('/api-docs/path_api.html', '_blank');
+    window.open(`${this.docPath}/path_api.html`, '_blank');
   }
 
   toggleEnable(item) {
