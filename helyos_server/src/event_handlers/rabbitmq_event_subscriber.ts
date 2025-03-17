@@ -27,6 +27,7 @@ const {
     
 import { MISSION_STATUS } from '../modules/data_models';
 import { constrainedMemory } from 'process';
+import { requestMission } from './rabbitmq_event_handlers/mission_request_handler';
 
 interface ParsedMessage {
   obj: any;
@@ -308,10 +309,7 @@ async function handleBrokerMessages(channel: any, queueName: string, message: an
 
         case AGENT_MISSION_QUEUE:
           if (objMsg.obj.body) {
-            const newWProc = { status: MISSION_STATUS.DISPATCHED };
-            databaseServices.work_processes.insert({ ...objMsg.obj.body, ...newWProc })
-              .then((wpId) => logData.addLog('agent', { ...objMsg.obj.body, work_process_id: wpId }, 'info', `agent created a mission: ${wpId}`))
-              .catch((e) => logData.addLog('agent', objMsg.obj, 'error', `agent create mission=${e}`));
+            requestMission(uuid, objMsg.obj, msgProps);
           } else {
             logData.addLog('agent', objMsg.obj, 'error', `agent create mission: input data not found`);
           }
