@@ -322,16 +322,26 @@ async function handleBrokerMessages(channel: any, queueName: string, message: an
               .catch((e) => {
                 const msg = e.message ? e.message : e;
                 logData.addLog('agent', objMsg.obj, 'error', `agent state update: ${msg}`);
+                channel.nack(message, false, false);
               });
           } else {
             logData.addLog('agent', {}, 'error', "state update message does not contain agent status.");
+            channel.nack(message, false, false);
           }
           break;
 
         case AGENT_UPDATE_QUEUE:
           if (['agent_update', 'agent_sensors'].includes(objMsg.obj.type)) {
             agentAutoUpdate(objMsg.obj, uuid, 'realtime')
-              .then(() => channel.ack(message));
+              .then(() => channel.ack(message))
+              .catch((e) => {
+                const msg = e.message ? e.message : e;
+                logData.addLog('agent', objMsg.obj, 'error', `agent auto update: ${msg}`);
+                channel.nack(message, false, false);
+              });
+          } else {
+            logData.addLog('agent', {}, 'error', `agent update message has an invalid type: ${objMsg.obj.type}`);
+            channel.nack(message, false, false); 
           }
           break;
 
