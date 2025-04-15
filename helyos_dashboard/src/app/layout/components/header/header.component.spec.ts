@@ -4,6 +4,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LayoutModule } from '../../layout.module';
 
 import { HeaderComponent } from './header.component';
+import { MockHelyosService } from 'src/app/mocks/helyos.service.mock';
+import { HelyosService } from 'src/app/services/helyos.service';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -15,6 +17,9 @@ describe('HeaderComponent', () => {
         LayoutModule,
         RouterTestingModule,
         TranslateModule.forRoot(),
+      ],
+      providers: [
+        { provide: HelyosService, useClass: MockHelyosService }
       ],
     }).compileComponents();
   }));
