@@ -228,7 +228,6 @@ export async function createAssignment(workProcess: WorkProcess, servResponse: S
             return Promise.all(updatePromises).then(() => {
                 const statusUpdatePromises = assignmentInputs.map((input) =>
                     databaseServices.service_requests.update_byId(serviceRequest.id, { assignment_dispatched: true })
-                        .then(() => databaseServices.agents.update('id', input.agent_id, { status: AGENT_STATUS.BUSY }))
                         .then(() => databaseServices.work_processes.updateByConditions(
                             { 'id': workProcess.id, 'status__in': [MISSION_STATUS.DISPATCHED, MISSION_STATUS.CALCULATING, MISSION_STATUS.PREPARING] },
                             { status: MISSION_STATUS.EXECUTING }))
