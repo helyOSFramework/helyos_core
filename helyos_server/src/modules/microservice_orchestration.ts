@@ -311,7 +311,7 @@ async function prepareServicesPipelineForWorkProcess(partialWorkProcess: Partial
     const recipe = await databaseServices.work_process_type.get('name', workProcess['work_process_type_name']).then(r => r.length ? r[0] : {});
 
     // Behaviour upon failure
-    if (workProcess.on_assignment_failure == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT) {
+    if (workProcess.on_assignment_failure == ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT || workProcess.on_assignment_failure == null) {
         await databaseServices.work_processes.update_byId(workProcess.id, { on_assignment_failure: recipe.on_assignment_failure });
     }
     // Mission after failure
