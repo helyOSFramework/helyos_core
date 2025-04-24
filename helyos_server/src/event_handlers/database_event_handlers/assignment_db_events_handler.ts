@@ -109,7 +109,7 @@ async function processAssignmentEvents(channel: string, payload: Assignment): Pr
           const assignmentFallbackMission = payload.fallback_mission;
 
           const onAssignmentFailure =
-            assignmentFailureAction && assignmentFailureAction !== ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT
+            assignmentFailureAction && (assignmentFailureAction !== ON_ASSIGNMENT_FAILURE_ACTIONS.DEFAULT)
               ? assignmentFailureAction
               : defaultFailureAction;
 

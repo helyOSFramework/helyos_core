@@ -110,7 +110,16 @@ async function queryDataBase(uuid: string, objMsg: ObjMsg, msgProps: MsgProps): 
                 let conditions = objMsg.body['conditions'] || {deleted_at: null};
                 conditions = {deleted_at: null, ...conditions};
                 response = await databaseServices.map_objects.select(conditions);
-                break;             
+                break;            
+                
+            case 'missionsById':
+                if (objMsg.body['conditions']){
+                    const ms_id = objMsg.body.conditions.id || objMsg.body.conditions.mission_id;
+                    response = await databaseServices.work_processes.get_byId(ms_id);
+                } else {
+                    throw Error('Please include work_process_id (mission_id) in conditions. For example: {"id" : 1 }');
+                }
+                break;            
         }
 
         switch (objMsg.body['mutation']) {
