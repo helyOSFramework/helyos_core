@@ -64,6 +64,7 @@ export class DispatchServicesComponent implements OnInit {
           'agents': context.agents,
         }, null, 3);
         this.selectedItemDepsContext = JSON.stringify({
+          'orchestration': context.orchestration,
           'dependencies': context.dependencies,
         }, null, 3);
       } catch (error) {
