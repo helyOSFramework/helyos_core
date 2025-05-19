@@ -90,4 +90,39 @@ export class DispatchServicesComponent implements OnInit {
     return `${Math.round((d1.getTime() - d2.getTime()) / 1000)} secs`;
   }
 
+  private async downloadItem(itemId: string, type: 'request' | 'response') {
+    try {
+      const r = await this.helyosService.methods.servciceRequests.get(itemId);
+      this.selectedItem = r;
+  
+      const data = type === 'request' 
+        ? {
+            request: JSON.parse(this.selectedItem.request),
+            context: JSON.parse(this.selectedItem.context),
+            config: JSON.parse(this.selectedItem.config),
+          }
+        : JSON.parse(this.selectedItem.response);
+  
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `service_${type}_${this.selectedItem.id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading item:', error);
+    }
+  }
+  
+  downloadRequest(itemId: string) {
+    this.downloadItem(itemId, 'request');
+  }
+  
+  downloadResponse(itemId: string) {
+    this.downloadItem(itemId, 'response');
+  }
 }
