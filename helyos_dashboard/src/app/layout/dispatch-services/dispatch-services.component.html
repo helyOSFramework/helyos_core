@@ -53,6 +53,8 @@
           <th>Processed</th>
           <th>Fetched</th>
           <th>Status</th>
+          <th>Request</th>
+          <th>Response</th>
         </tr>
       </thead>
       <tbody>
@@ -73,6 +75,16 @@
           <td>{{ item.processed }}</td>
           <td>{{ item.fetched }}</td>
           <td>{{ item.status }}</td>
+          <td>
+            <button (click)="downloadRequest(item.id)" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-download"></i> 
+            </button>
+          </td>
+          <td>
+            <button (click)="downloadResponse(item.id)" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-download"></i> 
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
