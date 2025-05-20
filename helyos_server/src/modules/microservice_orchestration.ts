@@ -594,6 +594,20 @@ async function updateRequestContext(servRequestId: number): Promise<void> {
 async function determineServiceRequestStatus(serviceRequest: PartialServiceRequest): Promise<string> {
     const databaseServices = await DatabaseService.getInstance();
 
+    // if this request has any dependent previous requests that were skipped, skip this request as well
+    const skippedWpRequests = await databaseServices.service_requests.select(
+        { work_process_id: serviceRequest.work_process_id, status: SERVICE_STATUS.SKIPPED },
+        ['id', 'request_uid']
+    );
+
+    const skippedWpRequestUids = skippedWpRequests.map(r => r.request_uid);
+    const skippedDependencies = serviceRequest.depend_on_requests?.filter(el => skippedWpRequestUids.includes(el)) || [];
+
+    if (skippedDependencies.length > 0) {
+        return SERVICE_STATUS.SKIPPED;
+    }
+
+    // stay in 'WAIT_DEPENDENCIES' status if there is any dependent previous request that is not finished yet
     const completedWpRequests = await databaseServices.service_requests.select(
         { work_process_id: serviceRequest.work_process_id, status: SERVICE_STATUS.READY },
         ['id', 'request_uid']
@@ -606,6 +620,7 @@ async function determineServiceRequestStatus(serviceRequest: PartialServiceReque
         return SERVICE_STATUS.WAIT_DEPENDENCIES;
     }
 
+    // skip this request if there is any response of a dependent previous request whose list of allowed next steps does not include this request
     const dependencies = await generateMicroserviceDependencies(serviceRequest.depend_on_requests || []);
     const dependenciesResponses = dependencies.map(d => d.response);
     const shouldServiceRun = checkIfServiceShouldRun(dependenciesResponses, serviceRequest as NextServRequest);
