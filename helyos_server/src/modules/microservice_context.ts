@@ -122,7 +122,7 @@ async function generateFullYardContext(yardId: number): Promise<Context> {
 
     const agentFields = [
         'id', 'uuid', 'agent_class', 'agent_type', 'connection_status', 'reference_point', 'coordinate_frame',
-        'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format',
+        'geometry', 'name', 'message_channel', 'public_key', 'is_actuator', 'data_format','status',
         'yard_id', 'protocol', 'operation_types', 'factsheet', 'x', 'y', 'z', 'unit',
         'orientations', 'sensors', 'resources',
     ];
