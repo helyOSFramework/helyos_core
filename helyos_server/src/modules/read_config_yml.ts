@@ -6,6 +6,7 @@ import * as DatabaseService from '../services/database/database_services';
 import { logData } from './systemlog';
 import {lookup} from './utils';
 
+const OVERWRITE_MICROSERVICES = false
 const OVERWRITE_MISSIONS = false
 
 
@@ -30,7 +31,7 @@ export const registerManyMicroservices = async (servicesYmlPath) => {
                 const oldServices = await databaseServices.services.select({ name: service['name'] });
                 if (oldServices.length === 0) {
                     await databaseServices.services.insert(service);
-                } else {
+                } else if (OVERWRITE_MICROSERVICES) {
                     const servId = oldServices[0].id;
                     await databaseServices.services.update_byId(servId, service);
                 }
