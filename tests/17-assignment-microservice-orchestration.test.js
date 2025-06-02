@@ -38,14 +38,19 @@ describe('17 Test microservice switching and dispatch after assignment',   () =>
     });
 
 
+    it(' Microservice B2 is skipped', async () => {
+        const result =  await helyosApplication.waitMicroserviceStatus(2, 'skipped');
+        expect(result).toEqual('skipped');
+    });
+
     it(' Microservice B is ready', async () => {
-        const result =  await helyosApplication.waitMicroserviceStatus(2, 'ready');
+        const result =  await helyosApplication.waitMicroserviceStatus(3, 'ready');
         expect(result).toEqual('ready');
     });
 
 
-    it(' Microservice B2 is skipped', async () => {
-        const result =  await helyosApplication.waitMicroserviceStatus(3, 'skipped');
+    it(' Microservice C is skipped', async () => {
+        const result =  await helyosApplication.waitMicroserviceStatus(4, 'skipped');
         expect(result).toEqual('skipped');
     });
 

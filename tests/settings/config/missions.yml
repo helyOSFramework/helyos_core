@@ -131,6 +131,14 @@ missions:
           service_config: "{}"
 
 
+        - step: "B_SKIPPED"
+          service_type: "map"
+          request_order: 2
+          apply_result: false
+          service_config: "{}"
+          dependencies: '["A"]'
+
+
         - step: "B"
           service_type: "drive"
           request_order: 2
@@ -139,13 +147,12 @@ missions:
           dependencies: '["A"]'
 
 
-
-        - step: "B_SKIPPED"
-          service_type: "map"
+        - step: "C_SKIPPED"
+          service_type: "drive"
           request_order: 3
           apply_result: true
           service_config: "{}"
-          dependencies: '["A"]'
+          dependencies: '["B_SKIPPED"]'
 
 
 
