@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS public.agents (
   orientation FLOAT,
   orientations FLOAT[],
   coordinate_frame CHARACTER VARYING DEFAULT 'local-UTM',
-  reference_point CHARACTER VARYING DEFAULT 'front-axle-center',
+  reference_point CHARACTER VARYING DEFAULT 'front_axle_center',
   status CHARACTER VARYING,
   state CHARACTER VARYING,
   sensors JSONB,
