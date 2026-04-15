@@ -255,7 +255,7 @@ function createDebugQueues(agent: any) {
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.instantActions`);
 
-        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.stream`); // TODO: maybe remove?
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.stream`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_STREAM_DL_EXCHANGE, `*.${agent.uuid}.stream`);
     });
 }

@@ -353,6 +353,10 @@ async function sendEncryptedMsgToAgent(agentId: number, message: string, reason:
 
         let exchange = rabbitMQServices.AGENTS_DL_EXCHANGE;
 
+        if (reason === 'stream') {
+            exchange = rabbitMQServices.AGENTS_STREAM_DL_EXCHANGE;
+        }
+
         if (agent.protocol === 'MQTT') {
             exchange = rabbitMQServices.AGENTS_MQTT_EXCHANGE;
         }
@@ -366,7 +370,6 @@ async function sendEncryptedMsgToAgent(agentId: number, message: string, reason:
                 routingKey = `agent.${agent.uuid}.order`;
                 break;
             case 'stream':
-                exchange = rabbitMQServices.AGENTS_STREAM_DL_EXCHANGE;
                 routingKey = `agent.${agent.uuid}.stream`;
                 break;
             case 'instantActions':
