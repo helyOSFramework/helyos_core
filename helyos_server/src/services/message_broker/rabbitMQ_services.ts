@@ -33,6 +33,7 @@ const {
     SUMMARY_REQUESTS_QUEUE,
     AGENTS_UL_EXCHANGE,
     AGENTS_DL_EXCHANGE,
+    AGENTS_STREAM_DL_EXCHANGE,
     AGENTS_MQTT_EXCHANGE,
     ENCRYPT,
 } = config;
@@ -253,6 +254,9 @@ function createDebugQueues(agent: any) {
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.assignment`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.instantActions`);
         dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_DL_EXCHANGE, `*.${agent.uuid}.instantActions`);
+
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_MQTT_EXCHANGE, `*.${agent.uuid}.stream`); // TODO: maybe remove?
+        dataChannel.bindQueue(`tap-cmd_to_${agent.name}`, AGENTS_STREAM_DL_EXCHANGE, `*.${agent.uuid}.stream`);
     });
 }
 
@@ -321,6 +325,7 @@ export default {
     YARD_VISUALIZATION_QUEUE,
     AGENTS_UL_EXCHANGE,
     AGENTS_DL_EXCHANGE,
+    AGENTS_STREAM_DL_EXCHANGE,
     ANONYMOUS_EXCHANGE,
     AGENTS_MQTT_EXCHANGE,
     RBMQ_VHOST,

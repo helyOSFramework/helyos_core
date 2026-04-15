@@ -181,6 +181,20 @@ async function sendReduceMsgRateInstantAction(agent: Agent, commandStr: string):
     await sendEncryptedMsgToAgent(agent.id, JSON.stringify(assignmentObj), 'instantActions');
 }
 
+async function sendStreamMsgToAgent(agentId: number, payload: string): Promise<void> {
+    const databaseServices = await DatabaseService.getInstance(); 
+    const uuids = await databaseServices.agents.getUuids([agentId]);
+
+    const assignmentObj = {
+        uuid: uuids[0],
+        metadata: {},
+        body: payload,
+        _version: MESSAGE_VERSION,
+    };
+
+    await sendEncryptedMsgToAgent(agentId, JSON.stringify(assignmentObj), 'stream');
+}
+
 
 
 /**
@@ -351,6 +365,10 @@ async function sendEncryptedMsgToAgent(agentId: number, message: string, reason:
             case 'order':
                 routingKey = `agent.${agent.uuid}.order`;
                 break;
+            case 'stream':
+                exchange = rabbitMQServices.AGENTS_STREAM_DL_EXCHANGE;
+                routingKey = `agent.${agent.uuid}.stream`;
+                break;
             case 'instantActions':
             case 'reserve':
             case 'release':
@@ -375,6 +393,7 @@ export default {
     waitAgentStatusForWorkProcess,
     sendReleaseFromWorkProcessRequest,
     sendCustomInstantActionToAgent,
+    sendStreamMsgToAgent,
     sendAssignmentToExecuteInAgent,
     cancelAssignmentInAgent
   };

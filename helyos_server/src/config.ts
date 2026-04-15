@@ -112,6 +112,7 @@ const AGENT_MISSION_QUEUE = process.env.AGENT_MISSION_QUEUE || 'agent_mission_qu
 const SUMMARY_REQUESTS_QUEUE = 'agent_data_requests';
 const AGENTS_UL_EXCHANGE = process.env.AGENTS_UL_EXCHANGE || 'xchange_helyos.agents.ul';
 const AGENTS_DL_EXCHANGE = process.env.AGENTS_DL_EXCHANGE || 'xchange_helyos.agents.dl';
+const AGENTS_STREAM_DL_EXCHANGE = process.env.AGENTS_STREAM_DL_EXCHANGE || 'xchange_helyos.agents.stream.dl';
 const ANONYMOUS_EXCHANGE = process.env.ANONYMOUS_EXCHANGE || 'xchange_helyos.agents.anonymous';
 const AGENTS_MQTT_EXCHANGE = process.env.AGENTS_MQTT_EXCHANGE || 'xchange_helyos.agents.mqtt'; //amq.topic' 
 
@@ -179,6 +180,7 @@ export default  {
     SUMMARY_REQUESTS_QUEUE,
     AGENTS_UL_EXCHANGE,
     AGENTS_DL_EXCHANGE,
+    AGENTS_STREAM_DL_EXCHANGE,
     ANONYMOUS_EXCHANGE,
     AGENTS_MQTT_EXCHANGE, 
 
