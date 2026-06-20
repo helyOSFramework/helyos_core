@@ -22,7 +22,8 @@ class RabbitMQClient {
         this.AGENT_STATE_KEY = `agent.${this.UUID}.state`;
         this.connection = null; 
         this.channel = null;
-        this.vehicleInstantActions= [];
+        this.vehicleInstantActions = [];
+        this.vehicleStreamMessages = [];
     }
 
     async login(username, password) {
@@ -40,6 +41,16 @@ class RabbitMQClient {
                     const messageString = msg.content.toString();
                     const parsedMessage = parse_any_helyos_agent_message(messageString);
                     this.vehicleInstantActions.push(parsedMessage);
+                }
+            });
+
+            const streamQueue = await this.channel.assertQueue('', { exclusive: true });
+            await this.channel.bindQueue(streamQueue.queue, 'xchange_helyos.agents.stream.dl', `agent.${VEHICLE_UUID}.stream`);
+            this.channel.consume(streamQueue.queue, (msg)=> {
+                if (msg !== null) {
+                    const messageString = msg.content.toString();
+                    const parsedMessage = parse_any_helyos_agent_message(messageString);
+                    this.vehicleStreamMessages.push(parsedMessage);
                 }
             });
 
@@ -103,6 +114,20 @@ class RabbitMQClient {
             console.error('Failed to send mission request:', error);
             throw error;
         }
+    }
+
+    async waitForStreamMessage(expectedBody, timeout = 10000) {
+        const start = Date.now();
+        while (Date.now() - start < timeout) {
+            const message = this.vehicleStreamMessages.find((entry) => {
+                return entry && entry.body === expectedBody;
+            });
+            if (message) {
+                return message;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        throw new Error(`Timed out waiting for stream message with body: ${expectedBody}`);
     }
 
     async close() {
