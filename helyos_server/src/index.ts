@@ -116,6 +116,7 @@ async function connectToRabbitMQ() {
 // 4) GraphQL server setup -  External App <-> Nodejs(GraphQL Lib) <-> Postgres
 // ----------------------------------------------------------------------------
 import { postgraphile, PostGraphileOptions } from "postgraphile";
+import sendAgentStreamMessagePlugin from './graphql/plugins/send_agent_stream_message';
 
 
 const pathPrefix = SERVER_PATH_BASE ? `/${SERVER_PATH_BASE}` : ''; 
@@ -132,6 +133,7 @@ const postGraphileOptions: PostGraphileOptions = {
     disableQueryLog: true,
     graphqlRoute: `${pathPrefix}/graphql`, 
     graphiqlRoute: `${pathPrefix}/graphiql`,
+    appendPlugins: [sendAgentStreamMessagePlugin],
     // showErrorStack: "json",
     // dynamicJson: true,
     // ignoreRBAC: false,

@@ -6,7 +6,8 @@ import { logData } from './modules/systemlog';
 const { PREFETCH_COUNT, TTL_VISUAL_MSG, TTL_STATE_MSG } = config;
 
 const { AGENTS_UL_EXCHANGE, AGENTS_DL_EXCHANGE, 
-        ANONYMOUS_EXCHANGE, AGENTS_MQTT_EXCHANGE } = config;
+        AGENTS_STREAM_DL_EXCHANGE, ANONYMOUS_EXCHANGE, 
+        AGENTS_MQTT_EXCHANGE } = config;
 
 const { CHECK_IN_QUEUE, AGENT_MISSION_QUEUE, 
         AGENT_VISUALIZATION_QUEUE, AGENT_UPDATE_QUEUE,
@@ -30,6 +31,9 @@ async function configureRabbitMQSchema(dataChannels: DataChannel[]): Promise<Dat
     await mainChannel.assertExchange(ANONYMOUS_EXCHANGE, 'topic', { durable: true });
     await rbmqServices.assertOrSubstituteQueue(mainChannel, CHECK_IN_QUEUE, false, true);
     await mainChannel.bindQueue(CHECK_IN_QUEUE, ANONYMOUS_EXCHANGE, "*.*.checkin");
+
+    // SET EXCHANGE "STREAM DOWN LINK (Stream DL) TO STREAM MESSAGES TO AGENT"
+    await mainChannel.assertExchange(AGENTS_STREAM_DL_EXCHANGE, 'topic', { durable: true })
 
     // SET EXCHANGE "DOWN LINK" (DL) TO SEND MESSAGES TO AGENT 
     await mainChannel.assertExchange(AGENTS_DL_EXCHANGE, 'topic', { durable: true });

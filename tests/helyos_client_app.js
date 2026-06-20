@@ -1,5 +1,6 @@
 const { HelyosServices } = require('helyosjs-sdk');
-const HOST_NAME = process.env.HOST_NAME || 'localhost';
+const superagent = require('superagent');
+const HOST_NAME = process.env.HOSTNAME || process.env.HOST_NAME || 'localhost';
 const GRAPHQL_PORT = process.env.GRAPHQL_PORT || 5000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 5002
 const fs = require('fs');
@@ -149,6 +150,34 @@ class HelyOSClientApplication {
             data: { },        // this data format depends on the microservice.
             status: 'dispatched',            // status = 'draft' will save the mission but no dispatch it.
         });
+    }
+
+    async sendAgentStreamMessage(agentId, body) {
+        const query = `
+            mutation SendAgentStreamMessage($input: SendAgentStreamMessageInput!) {
+                sendAgentStreamMessage(input: $input) {
+                    success
+                    clientMutationId
+                }
+            }
+        `;
+
+        const response = await superagent
+            .post(`http://${HOST_NAME}:${GRAPHQL_PORT}/graphql`)
+            .set('Authorization', `Bearer ${this.helyosService.token}`)
+            .set('Content-Type', 'application/json')
+            .send({
+                query,
+                variables: {
+                    input: {
+                        clientMutationId: 'test-stream-message',
+                        agentId,
+                        body,
+                    },
+                },
+            });
+
+        return response.body.data.sendAgentStreamMessage;
     }
 
     createMissionForQueue(missionType = 'driving', queueId = null, runOrder = 1,) {
